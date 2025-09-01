@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\Object\UI\PopUpUI.cpp" />
+    <ClCompile Include="Src\Scene\PauseScene\KeyConfigScene.cpp" />
+    <ClCompile Include="Src\Scene\PauseScene\ExplainScene.cpp" />
+    <ClCompile Include="Src\Scene\PauseScene.cpp" />
+    <ClCompile Include="Src\Object\UI\IconUI.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
+    <ClCompile Include="Src\Object\UI\OrderUI.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\Furnitures.cpp" />
+    <ClCompile Include="Src\Common\Easing.cpp" />
+    <ClCompile Include="Src\Object\Score.cpp" />
+    <ClCompile Include="Src\Object\UI\GaugeUI.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\FollowingObject.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\RackObject.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\ItemObject.cpp" />
+    <ClCompile Include="Src\Manager\Generic\Input.cpp" />
+    <ClCompile Include="Src\FpsControl.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\IceDispenser.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\DustBox.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\CupLidRack.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\Machine.cpp" />
+    <ClCompile Include="Src\Object\Common\Cube.cpp" />
+    <ClCompile Include="Src\Object\Common\Sphere.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\OrderCustomerManager.cpp" />
+    <ClCompile Include="Src\Object\Customer\CustomerManager.cpp" />
+    <ClCompile Include="Src\Object\Customer\IceCustomer.cpp" />
+    <ClCompile Include="Src\Object\Customer\CustomerBase.cpp" />
+    <ClCompile Include="Src\Object\Customer\HotCustomer.cpp" />
+    <ClCompile Include="Src\Common\DebugDrawFormat.cpp" />
+    <ClCompile Include="Src\Object\Order\Order.cpp" />
+    <ClCompile Include="Src\Object\Order\OrderManager.cpp" />
+    <ClCompile Include="Src\Libs\ImGuiWrapper.cpp" />
+    <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Src\Libs\ImGui\imgui.cpp" />
+    <ClCompile Include="Src\Libs\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="Src\Libs\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Src\Libs\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Src\Libs\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\ScoreManager.cpp" />
+    <ClCompile Include="Src\Renderer\ModelMaterial.cpp" />
+    <ClCompile Include="Src\Renderer\ModelRenderer.cpp" />
+    <ClCompile Include="Src\Renderer\PixelMaterial.cpp" />
+    <ClCompile Include="Src\Renderer\PixelRenderer.cpp" />
+    <ClCompile Include="Src\Scene\ResultScene.cpp" />
+    <ClCompile Include="Src\Scene\MovieScene.cpp" />
+    <ClCompile Include="Src\Scene\SelectScene.cpp" />
+    <ClCompile Include="Src\Object\ActorBase.cpp" />
+    <ClCompile Include="Src\Application.cpp" />
+    <ClCompile Include="Src\Common\Fader.cpp" />
+    <ClCompile Include="Src\Common\Quaternion.cpp" />
+    <ClCompile Include="Src\Common\Vector2.cpp" />
+    <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Manager\Generic\Camera.cpp" />
+    <ClCompile Include="Src\Manager\Generic\InputManager.cpp" />
+    <ClCompile Include="Src\Manager\Generic\Resource.cpp" />
+    <ClCompile Include="Src\Manager\Generic\ResourceManager.cpp" />
+    <ClCompile Include="Src\Manager\Generic\SceneManager.cpp" />
+    <ClCompile Include="Src\Object\Common\AnimationController.cpp" />
+    <ClCompile Include="Src\Object\Common\Capsule.cpp" />
+    <ClCompile Include="Src\Object\Common\Collider.cpp" />
+    <ClCompile Include="Src\Object\Common\Transform.cpp" />
+    <ClCompile Include="Src\Object\Player.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageManager.cpp" />
+    <ClCompile Include="Src\Scene\GameScene.cpp" />
+    <ClCompile Include="Src\Scene\SceneBase.cpp" />
+    <ClCompile Include="Src\Scene\TitleScene.cpp" />
+    <ClCompile Include="Src\Utility\AsoUtility.cpp" />
+    <ClCompile Include="Src\Scene\TutorialScene.cpp" />
+    <ClCompile Include="Src\Utility\StringUtility.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObjectLibrary.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageObject\Table.cpp" />
+    <ClCompile Include="Src\Object\UI\UIBase.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\Timer.cpp" />
+    <ClCompile Include="Src\Object\UI\UIManager.cpp" />
+    <ClCompile Include="Src\Object\TutorialText.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Object\UI\PopUpUI.h" />
+    <ClInclude Include="Src\Scene\PauseScene\KeyConfigScene.h" />
+    <ClInclude Include="Src\Scene\PauseScene\ExplainScene.h" />
+    <ClInclude Include="Src\Scene\PauseScene.h" />
+    <ClInclude Include="Src\Object\UI\IconUI.h" />
+    <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
+    <ClInclude Include="Src\Object\UI\OrderUI.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\Furnitures.h" />
+    <ClInclude Include="Src\Common\Easing.h" />
+    <ClInclude Include="Src\Object\Score.h" />
+    <ClInclude Include="Src\Object\UI\GaugeUI.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\FollowingObject.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\RackObject.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\ItemObject.h" />
+    <ClInclude Include="Src\Manager\Generic\Input.h" />
+    <ClInclude Include="Src\FpsControl.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\IceDispenser.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\DustBox.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\CupLidRack.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\Machine.h" />
+    <ClInclude Include="Src\Object\Common\Cube.h" />
+    <ClInclude Include="Src\Object\Common\Sphere.h" />
+    <ClInclude Include="Src\Libs\nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\byte_container_with_subtype.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\abi_macros.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\hash.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\json_custom_base_class.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\call_std\begin.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\call_std\end.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\identity_tag.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\std_fs.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\string_concat.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\string_escape.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\string_utils.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\json.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\json_fwd.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\ordered_map.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\thirdparty\hedley\hedley.hpp" />
+    <ClInclude Include="Src\Libs\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="Src\Manager\GameSystem\OrderCustomerManager.h" />
+    <ClInclude Include="Src\Object\Customer\CustomerManager.h" />
+    <ClInclude Include="Src\Object\Customer\IceCustomer.h" />
+    <ClInclude Include="Src\Object\Customer\CustomerBase.h" />
+    <ClInclude Include="Src\Object\Customer\HotCustomer.h" />
+    <ClInclude Include="Src\Common\DebugDrawFormat.h" />
+    <ClInclude Include="Src\Object\Order\Order.h" />
+    <ClInclude Include="Src\Object\Order\OrderManager.h" />
+    <ClInclude Include="Src\Libs\ImGuiWrapper.h" />
+    <ClInclude Include="Src\Libs\ImGui\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="Src\Libs\ImGui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Src\Libs\ImGui\imconfig.h" />
+    <ClInclude Include="Src\Libs\ImGui\imgui.h" />
+    <ClInclude Include="Src\Libs\ImGui\imgui_internal.h" />
+    <ClInclude Include="Src\Libs\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Src\Libs\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Src\Libs\ImGui\imstb_truetype.h" />
+    <ClInclude Include="Src\Manager\GameSystem\ScoreManager.h" />
+    <ClInclude Include="Src\Renderer\ModelMaterial.h" />
+    <ClInclude Include="Src\Renderer\ModelRenderer.h" />
+    <ClInclude Include="Src\Renderer\PixelMaterial.h" />
+    <ClInclude Include="Src\Renderer\PixelRenderer.h" />
+    <ClInclude Include="Src\Scene\ResultScene.h" />
+    <ClInclude Include="Src\Scene\MovieScene.h" />
+    <ClInclude Include="Src\Scene\SelectScene.h" />
+    <ClInclude Include="Src\Object\ActorBase.h" />
+    <ClInclude Include="Src\Application.h" />
+    <ClInclude Include="Src\Common\Fader.h" />
+    <ClInclude Include="Src\Common\Quaternion.h" />
+    <ClInclude Include="Src\Common\Vector2.h" />
+    <ClInclude Include="Src\main.h" />
+    <ClInclude Include="Src\Manager\Generic\Camera.h" />
+    <ClInclude Include="Src\Manager\Generic\InputManager.h" />
+    <ClInclude Include="Src\Manager\Generic\Resource.h" />
+    <ClInclude Include="Src\Manager\Generic\ResourceManager.h" />
+    <ClInclude Include="Src\Manager\Generic\SceneManager.h" />
+    <ClInclude Include="Src\Object\Common\AnimationController.h" />
+    <ClInclude Include="Src\Object\Common\Capsule.h" />
+    <ClInclude Include="Src\Object\Common\Collider.h" />
+    <ClInclude Include="Src\Object\Common\Transform.h" />
+    <ClInclude Include="Src\Object\Player.h" />
+    <ClInclude Include="Src\Object\Stage\StageManager.h" />
+    <ClInclude Include="Src\Scene\GameScene.h" />
+    <ClInclude Include="Src\Scene\SceneBase.h" />
+    <ClInclude Include="Src\Scene\TitleScene.h" />
+    <ClInclude Include="Src\Utility\AsoUtility.h" />
+    <ClInclude Include="Src\Scene\TutorialScene.h" />
+    <ClInclude Include="Src\Utility\StringUtility.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject.h" />
+    <ClInclude Include="Src\Object\Stage\StageObjectLibrary.h" />
+    <ClInclude Include="Src\Object\Stage\StageObject\Table.h" />
+    <ClInclude Include="Src\Object\UI\UIBase.h" />
+    <ClInclude Include="Src\Manager\GameSystem\Timer.h" />
+    <ClInclude Include="Src\Object\UI\UIManager.h" />
+    <ClInclude Include="Src\Object\TutorialText.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />
+    <None Include="Src\Shader\Common\Pixel\PixelShader3DHeader.hlsli" />
+    <None Include="Src\Shader\Common\VertexToPixelHeader.hlsli" />
+    <None Include="Src\Shader\Common\Vertex\CommonShader3DHeader.hlsli" />
+    <None Include="Src\Shader\Common\Vertex\VertexInput.hlsli" />
+    <None Include="Src\Shader\Common\Vertex\VertexInputType.hlsli" />
+    <None Include="Src\Shader\Common\Vertex\VertexShader3DHeader.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\Shader\Model\OutLinePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Model\OutLineVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Model\StdModelPS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Model\StdModelVS.hlsl">
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Model\ToonPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{EAE8EE94-FD52-4CCB-AF50-ECC1E6485C92}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>BaseProject</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(DXLIB_DIR);$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXLIB_DIR);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(DXLIB_DIR)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(DXLIB_DIR)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(DXLIB_DIR);$(ProjectDir)Src/Libs/</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(DXLIB_DIR)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(DXLIB_DIR)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(DXLIB_DIR)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(DXLIB_DIR);$(ProjectDir)Src/Libs/</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(DXLIB_DIR)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,38 @@
+#pragma once
+#include <memory>
+#include "SceneBase.h"
+
+class GameScene : public SceneBase
+{
+public:
+	//コンストラクタ
+	GameScene(void);
+
+	//デストラクタ
+	~GameScene(void);
+
+	void Init(void) override;
+	void Update(void) override;
+	void Draw(void) override;
+
+private:
+
+	//関数ポインタ（カウントダウン、ゲーム中、タイムアップ）
+	using UpdateFunc_t = void(GameScene::*)();
+	using DrawFunc_t = void(GameScene::*)();
+
+	UpdateFunc_t update_;
+	DrawFunc_t draw_;
+
+	/// <summary>
+	/// ゲーム中の更新処理
+	/// </summary>
+	/// <param name="">ゲーム中の処理</param>
+	void UpdateGame(void);
+
+	/// <summary>
+	/// ゲーム中の描画
+	/// </summary>
+	/// <param name="">カウントダウン、カウントアップ以外の描画</param>
+	void DrawGame(void);
+};
