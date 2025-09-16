@@ -2,11 +2,11 @@
 #include <vector>
 #include "Cube.h"
 
-Cube::Cube(const Transform& parent) : transformParent_(parent)
+Cube::Cube(void)
 {
 }
 
-Cube::Cube(const Cube& base, const Transform& parent) : transformParent_(parent)
+Cube::Cube(const Cube& base)
 {
 }
 
@@ -29,18 +29,6 @@ void Cube::MakeCube(VECTOR center, float size, COLOR_U8  col)
         VGet(center.x + h, center.y + h, center.z + h), // 6: 右上後
         VGet(center.x - h, center.y + h, center.z + h)  // 7: 左上後
     };
-
-    ////底面座標を中心座標に
-    //VECTOR v[8] = {
-    //    VGet(center.x - h, center.y,     center.z - h), // 下
-    //    VGet(center.x + h, center.y,     center.z - h),
-    //    VGet(center.x + h, center.y + size, center.z - h),
-    //    VGet(center.x - h, center.y + size, center.z - h),
-    //    VGet(center.x - h, center.y,     center.z + h),
-    //    VGet(center.x + h, center.y,     center.z + h),
-    //    VGet(center.x + h, center.y + size, center.z + h),
-    //    VGet(center.x - h, center.y + size, center.z + h)
-    //};
 
     // 各面ごとに三角形を2枚定義（全6面 → 12三角形）
 
@@ -91,18 +79,6 @@ void Cube::MakeBox(VECTOR center, float width, float height, float depth, COLOR_
     float hw = width / 2.0f;
     float hh = height / 2.0f;
     float hd = depth / 2.0f;
-
-    //VECTOR p[8] =
-    //{
-    //    VGet(center.x - hw, center.y - hh, center.z - hd), // 0: 左下手前
-    //    VGet(center.x + hw, center.y - hh, center.z - hd), // 1: 右下手前
-    //    VGet(center.x + hw, center.y + hh, center.z - hd), // 2: 右上手前
-    //    VGet(center.x - hw, center.y + hh, center.z - hd), // 3: 左上手前
-    //    VGet(center.x - hw, center.y - hh, center.z + hd), // 4: 左下奥
-    //    VGet(center.x + hw, center.y - hh, center.z + hd), // 5: 右下奥
-    //    VGet(center.x + hw, center.y + hh, center.z + hd), // 6: 右上奥
-    //    VGet(center.x - hw, center.y + hh, center.z + hd), // 7: 左上奥
-    //};
 
     //底面中心座標
     VECTOR p[8] =

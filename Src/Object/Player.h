@@ -4,8 +4,6 @@
 #include <map>
 #include <functional>
 #include <DxLib.h>
-#include "Stage/StageManager.h"
-#include "Order/Order.h"
 #include "ActorBase.h"
 
 class AnimationController;
@@ -33,18 +31,19 @@ public:
 	{
 		NONE,
 		PLAY,
-		STOP,
+		DEAD,
 	};
 
 	//アニメーション種別
 	enum class ANIM_TYPE
 	{
-		IDLE,
-		WALK,
-		RUN,
-		IDLE_HOLD,
-		WALK_HOLD,
-		JUMP,
+		IDLE,	//通常
+		WALK,	//歩き
+		RUN,	//走り
+		JUMP,	//ジャンプ
+		PARRY,	//パリィ
+		DODGE,	//回避
+		USE_ITEM, //アイテム使用
 	};
 
 	//コンストラクタ
@@ -68,15 +67,6 @@ public:
 	const Sphere& GetSphere(void) const { return *sphere_; }
 
 	bool IsPlay(void);
-
-	void SetIsHoldiong(bool hold) { isHolding_ = hold; }
-
-	void SurveItem(void);
-
-	bool GetIsHolding(void)const { return isHolding_; }
-	std::string GetHoldItem(void) { return holdItemId_; }
-
-	void SetHoldItem(std::string item) { holdItemId_ = item; }
 
 	void ChangeState(STATE state);
 
@@ -113,7 +103,7 @@ private:
 	
 	//衝突判定に用いられるコライダ
 	std::vector<std::weak_ptr<Collider>> colliders_;
-	
+
 	//衝突チェック
 	VECTOR gravHitPosDown_;
 	VECTOR gravHitPosUp_;
@@ -123,6 +113,8 @@ private:
 
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
+
+	//球体
 	std::unique_ptr<Sphere> sphere_;
 
 	//足煙エフェクト
@@ -133,15 +125,21 @@ private:
 	//フレームごとの移動値
 	VECTOR moveDiff_;
 
-	//プレイヤーがオブジェクトを持っているかどうか
-	bool isHolding_;
+	//ジャンプ量
+	VECTOR jumpPow_;
 
-	//持っているアイテムのID
-	std::string holdItemId_;
+	//ジャンプ判定
+	bool isJump_;
+
+	//ジャンプの入力受付時間
+	float stepJump_;
 
 	int chestFrmNo_;
 	VECTOR chestPos_;
 
+	/// <summary>
+	/// アニメーション初期化
+	/// </summary>
 	void InitAnimation(void);
 
 	//状態遷移
@@ -160,17 +158,22 @@ private:
 	//操作 
 	void ProcessMove(void);
 
+	void ProcessJump(void);
+
 	//回転
 	void SetGoalRotate(double rotRad);
 	void Rotate(void);
 
 	//衝突判定
 	void Collision(void);
-	
+	void CollisionCapsule(void);
+	void CollisionGravity(void);
+
+	// 移動量の計算
+	void CalcGravityPow(void);
+
 	//着地モーション終了
 	bool IsEndLanding(void);
-
-	void CollisionCapsule(void);
 
 	//足煙エフェクト
 	void EffectFootSmoke(void);

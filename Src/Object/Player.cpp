@@ -13,7 +13,6 @@
 #include "Common/Capsule.h"
 #include "Common/Collider.h"
 #include "Common/Sphere.h"
-#include "Order/Order.h"
 #include "Player.h"
 
 Player::Player(void)
@@ -25,14 +24,12 @@ Player::Player(void)
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
-	stateChanges_.emplace(STATE::STOP, std::bind(&Player::ChangeStateStop, this));
+	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateStop, this));
 
 	//衝突チェック
 	gravHitPosDown_ = AsoUtility::VECTOR_ZERO;
 	gravHitPosUp_ = AsoUtility::VECTOR_ZERO;
 
-	isHolding_ = false;
-	holdItemId_ = "";
 	chestFrmNo_ = 0;
 }
 
@@ -47,7 +44,7 @@ void Player::Init(void)
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
 	transform_.scl = {0.7f,0.7f,0.7f};
-	transform_.pos = { -60.0f, 30.0f, 30.0f };
+	transform_.pos = { -60.0f, 0.0f, 30.0f };
 	transform_.quaRot = Quaternion();
 	transform_.quaRotLocal =
 		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
@@ -82,15 +79,12 @@ void Player::Init(void)
 	ChangeState(STATE::PLAY);
 
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
-
-	isHolding_ = false;
 }
 
 void Player::Update(void)
 {
 	chestPos_ = MV1GetFramePosition(transform_.modelId, chestFrmNo_);
 	sphere_->SetLocalPos({ 0.0f, chestPos_.y, 50.0f });
-	transform_.pos.y = 30.0f;
 
 	//更新ステップ
 	stateUpdate_();
@@ -108,7 +102,7 @@ void Player::Draw(void)
 	MV1DrawModel(transform_.modelId);
 
 	//丸影描画
-	//DrawShadow();
+	DrawShadow();
 }
 
 void Player::AddCollider(std::weak_ptr<Collider> collider)
@@ -131,29 +125,20 @@ bool Player::IsPlay(void)
 	return state_ == STATE::PLAY;
 }
 
-void Player::SurveItem(void)
-{
-	isHolding_ = false;
-	holdItemId_ = "";
-}
-
 void Player::InitAnimation(void)
 {
 
 	std::string path = Application::PATH_MODEL + "Player/";
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 30.0f);
-	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walk.mv1", 30.0f);
-	animationController_->Add((int)ANIM_TYPE::RUN, path + "Walk.mv1", 30.0f);
-	animationController_->Add((int)ANIM_TYPE::IDLE_HOLD, path + "Idle_Hold.mv1", 30.0f);
-	animationController_->Add((int)ANIM_TYPE::WALK_HOLD, path + "Walk_Hold.mv1", 30.0f);
+	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walking.mv1", 30.0f);
+	animationController_->Add((int)ANIM_TYPE::RUN, path + "Running.mv1", 30.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
 
 void Player::ChangeState(STATE state)
 {
-
 	//状態変更
 	state_ = state;
 
@@ -183,14 +168,17 @@ void Player::UpdateNone(void)
 
 void Player::UpdatePlay(void)
 {
-	if (holdItemId_ == "")isHolding_ = false;
-	else isHolding_ = true;
-
 	//移動処理
 	ProcessMove();
 
+	//ジャンプ処理
+	ProcessJump();
+
 	//移動方向に応じた回転
 	Rotate();
+
+	//重力による移動量
+	CalcGravityPow();
 
 	//衝突判定
 	Collision();
@@ -205,9 +193,6 @@ void Player::UpdatePlay(void)
 
 void Player::UpdateStop(void)
 {
-	//ストップというよりインタラクト中という感じ
-	//インタラクト用のアニメーションをさせたい
-	animationController_->Play((int)ANIM_TYPE::IDLE_HOLD);
 }
 
 void Player::DrawShadow(void)
@@ -310,63 +295,109 @@ void Player::ProcessMove(void)
 	//WASDで位置を変える
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 	movePow_ = AsoUtility::VECTOR_ZERO;
-	//if (ins.IsInputPressed("Up")) { dir = cameraRot.GetForward();  rotRad = AsoUtility::Deg2RadF(0.0f); }
-	//if (ins.IsInputPressed("Left")){ dir = cameraRot.GetLeft();  rotRad = AsoUtility::Deg2RadF(-90.0f); }
-	//if (ins.IsInputPressed("Down")){ dir = cameraRot.GetBack();  rotRad = AsoUtility::Deg2RadF(180.0f); }
-	//if (ins.IsInputPressed("Right")){dir = cameraRot.GetRight(); rotRad = AsoUtility::Deg2RadF(90.0f);	}
-
-	if (ins.IsInputPressed("Up"))	dir.z += 1.0f;
-	if (ins.IsInputPressed("Down")) dir.z -= 1.0f;
-	if (ins.IsInputPressed("Right"))dir.x += 1.0f;
-	if (ins.IsInputPressed("Left")) dir.x -= 1.0f;
+	if (ins.IsInputPressed("Up"))
+	{
+		dir = VAdd(dir, cameraRot.GetForward());
+		rotRad = AsoUtility::Deg2RadD(0.0);
+	}
+	if (ins.IsInputPressed("Left"))
+	{
+		dir = VAdd(dir, cameraRot.GetLeft());
+		rotRad = AsoUtility::Deg2RadD(270.0);
+	}
+	if (ins.IsInputPressed("Down"))
+	{ 
+		dir = VAdd(dir,cameraRot.GetBack());
+		rotRad = AsoUtility::Deg2RadD(180.0);
+	}
+	if (ins.IsInputPressed("Right"))
+	{
+		dir = VAdd(dir, cameraRot.GetRight());
+		rotRad = AsoUtility::Deg2RadD(90.0);
+	}
 
 	if (!AsoUtility::EqualsVZero(dir))
 	{
-		dir = VNorm(dir); //方向を正規化
+		dir = VNorm(dir);
 
-		// カメラのY軸角度だけ取得（XZ平面の回転だけで十分）
-		float camYRad = mainCamera->GetQuaRot().y; // ←ここはカメラのY軸回転角（ラジアン）
+		//カメラのY軸角度だけ取得（XZ平面の回転だけで十分）
+		float camYRad = mainCamera->GetQuaRot().y;
 
-		// 回転行列を使って入力ベクトルを回す（XZ平面）
+		//回転行列を使って入力ベクトルを回す（XZ平面）
 		float sinY = sinf(camYRad);
 		float cosY = cosf(camYRad);
-		VECTOR worldDir = VGet(
-			dir.x * cosY - dir.z * sinY,
-			0.0f,
-			dir.x * sinY + dir.z * cosY
-		);
+		VECTOR worldDir = VGet(0.0f, 0.0f, 0.0f);
+		worldDir.x = dir.x * cosY - dir.z * sinY;
+		worldDir.y = 0.0f;
+		worldDir.z = dir.x * sinY + dir.z * cosY;
 
-		// 移動速度の設定
+		//移動速度の設定
 		speed_ = ins.IsInputPressed("Dash") ? SPEED_RUN : SPEED_MOVE;
 		moveDir_ = worldDir;
-		movePow_ = VScale(worldDir, speed_);
+		movePow_ = VScale(dir, speed_);
 
-		// プレイヤーの向きを移動方向に合わせる
-		double rotRad = atan2(worldDir.x, worldDir.z); // ラジアン
+		//プレイヤーの向きを移動方向に合わせる
+		//double rotRad = atan2(worldDir.x, worldDir.z); // ラジアン
 		SetGoalRotate(rotRad);
-
-		// アニメーション
-		if (speed_ == SPEED_RUN)
+		if (!isJump_ && IsEndLanding())
 		{
-			animationController_->Play((int)ANIM_TYPE::RUN);
-			if (isHolding_)animationController_->Play((int)ANIM_TYPE::WALK_HOLD);
-		}
-		else
-		{
-			animationController_->Play((int)ANIM_TYPE::WALK);
-			if (isHolding_)animationController_->Play((int)ANIM_TYPE::WALK_HOLD);
+			//アニメーション
+			if (speed_ == SPEED_RUN)
+			{
+				animationController_->Play((int)ANIM_TYPE::RUN);
+			}
+			else
+			{
+				animationController_->Play((int)ANIM_TYPE::WALK);
+			}
 		}
 	}
 	else
 	{
-		if (IsEndLanding() && !isHolding_)
+		if (!isJump_ && IsEndLanding())
 		{
 			animationController_->Play((int)ANIM_TYPE::IDLE);
 		}
-		else if (IsEndLanding() && isHolding_)
+	}
+
+}
+
+void Player::ProcessJump(void)
+{
+	bool isHit = CheckHitKey(KEY_INPUT_BACKSLASH);
+
+	// ジャンプ
+	if (isHit && (isJump_ || IsEndLanding()))
+	{
+
+		if (!isJump_)
 		{
-			animationController_->Play((int)ANIM_TYPE::IDLE_HOLD);
+			// 制御無しジャンプ
+			//mAnimationController->Play((int)ANIM_TYPE::JUMP);
+			// ループしないジャンプ
+			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
+			// 切り取りアニメーション
+			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
+			// 無理やりアニメーション
+			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
+			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
 		}
+
+		isJump_ = true;
+
+		// ジャンプの入力受付時間をヘラス
+		stepJump_ += SceneManager::GetInstance().GetDeltaTime();
+		if (stepJump_ < 0.5f)
+		{
+			jumpPow_ = VScale(AsoUtility::DIR_U, 35.0f);
+		}
+
+	}
+
+	// ボタンを離したらジャンプ力に加算しない
+	if (!isHit)
+	{
+		stepJump_ = 0.5f;
 	}
 
 }
@@ -404,18 +435,14 @@ void Player::Collision(void)
 	movedPos_ = VAdd(transform_.pos, movePow_);
 	
 	//衝突(カプセル)
-	//CollisionCapsule();
+	CollisionCapsule();
+
+	// 衝突(重力)
+	CollisionGravity();
 	
 	//移動
 	moveDiff_ = VSub(movedPos_, transform_.pos);
 	transform_.pos = movedPos_;
-}
-
-bool Player::IsEndLanding(void)
-{
-	bool ret = true;
-
-	return true;
 }
 
 void Player::CollisionCapsule(void)
@@ -465,6 +492,99 @@ void Player::CollisionCapsule(void)
 	}
 }
 
+void Player::CollisionGravity(void)
+{
+	// ジャンプ量を加算
+	movedPos_ = VAdd(movedPos_, jumpPow_);
+
+	// 重力方向
+	VECTOR dirGravity = AsoUtility::DIR_D;
+
+	// 重力方向の反対
+	VECTOR dirUpGravity = AsoUtility::DIR_U;
+
+	// 重力の強さ
+	float gravityPow = 25.0f;
+
+	float checkPow = 10.0f;
+	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
+	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
+	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
+	for (const auto c : colliders_)
+	{
+
+		// 地面との衝突
+		auto hit = MV1CollCheck_Line(
+			c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
+
+		// 最初は上の行のように実装して、木の上に登ってしまうことを確認する
+		//if (hit.HitFlag > 0)
+		if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
+		{
+
+			// 衝突地点から、少し上に移動
+			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
+
+			// ジャンプリセット
+			jumpPow_ = AsoUtility::VECTOR_ZERO;
+			stepJump_ = 0.0f;
+
+			if (isJump_)
+			{
+				// 着地モーション
+				animationController_->Play(
+					(int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
+			}
+
+			isJump_ = false;
+
+		}
+
+	}
+}
+
+void Player::CalcGravityPow(void)
+{
+	// 重力方向
+	VECTOR dirGravity = AsoUtility::DIR_D;
+
+	// 重力の強さ
+	float gravityPow = 25.0f;
+
+	// 重力
+	VECTOR gravity = VScale(dirGravity, gravityPow);
+	jumpPow_ = VAdd(jumpPow_, gravity);
+
+	// 最初は実装しない。地面と突き抜けることを確認する。
+	// 内積
+	float dot = VDot(dirGravity, jumpPow_);
+	if (dot >= 0.0f)
+	{
+		// 重力方向と反対方向(マイナス)でなければ、ジャンプ力を無くす
+		jumpPow_ = gravity;
+	}
+}
+
+bool Player::IsEndLanding(void)
+{
+	bool ret = true;
+
+	// アニメーションがジャンプではない
+	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP)
+	{
+		return ret;
+	}
+
+	// アニメーションが終了しているか
+	if (animationController_->IsEnd())
+	{
+		return ret;
+	}
+
+
+	return true;
+}
+
 void Player::EffectFootSmoke(void)
 {
 	stepFootSmoke_ -= SceneManager::GetInstance().GetDeltaTime();
@@ -474,7 +594,9 @@ void Player::EffectFootSmoke(void)
 	if (len >= 1.0f &&
 		stepFootSmoke_ < 0.0f)
 	{
-		stepFootSmoke_ = TERM_FOOT_SMOKE;
+
+		stepFootSmoke_ = speed_ == SPEED_RUN ? 0.5f : TERM_FOOT_SMOKE;
+		//stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 		//エフェクト再生
 		effectSmokePlayId_ = PlayEffekseer3DEffect(effectSmokeResId_);

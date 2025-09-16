@@ -2,6 +2,9 @@
 #include <memory>
 #include "SceneBase.h"
 
+class Player;
+class Cube;
+
 class GameScene : public SceneBase
 {
 public:
@@ -24,6 +27,9 @@ private:
 	UpdateFunc_t update_;
 	DrawFunc_t draw_;
 
+	std::unique_ptr<Player> player_;
+	std::unique_ptr<Cube> cube_;
+
 	/// <summary>
 	/// ゲーム中の更新処理
 	/// </summary>
@@ -35,4 +41,13 @@ private:
 	/// </summary>
 	/// <param name="">カウントダウン、カウントアップ以外の描画</param>
 	void DrawGame(void);
+
+
+#ifdef _DEBUG
+
+	Transform floor_;
+
+	void DrawDebug(void);
+
+#endif // _DEBUG
 };

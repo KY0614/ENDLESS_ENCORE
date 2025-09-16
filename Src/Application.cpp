@@ -78,7 +78,7 @@ void Application::Run(void)
 	auto& imGuiWrapper = ImGuiWrapper::GetInstance();
 
 	//ゲームループ
-	while (ProcessMessage() == 0 /*&& CheckHitKey(KEY_INPUT_ESCAPE) == 0 */&& !isEnd_)
+	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0 && !isEnd_)
 	{
 
 		//フレームレート更新

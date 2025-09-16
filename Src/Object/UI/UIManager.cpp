@@ -1,4 +1,3 @@
-#include "OrderUI.h"
 #include "GaugeUI.h"
 #include "IconUi.h"
 #include "PopUpUI.h"
@@ -42,11 +41,6 @@ void UIManager::Update(void)
 	{
 		ui->Update();
 	}	
-	for (auto& ui : orderUIs_) 
-	{
-		ui->Update();
-	}
-
 }
 
 void UIManager::PopUpUIUpdate(void)
@@ -59,16 +53,10 @@ void UIManager::PopUpUIUpdate(void)
 
 void UIManager::Draw(void)
 {
-	if (gaugeUIs_.empty() && orderUIs_.empty())return;
-
 	for (auto& ui : gaugeUIs_) 
 	{
 		ui->Draw();
 	}	
-	for (auto& ui : orderUIs_) 
-	{
-		ui->Draw();
-	}
 	for (auto& ui : iconUIs_)
 	{
 		ui->Draw();
@@ -82,7 +70,6 @@ void UIManager::Draw(void)
 void UIManager::Release(void)
 {
 	gaugeUIs_.clear();
-	orderUIs_.clear();
 	iconUIs_.clear();
 	popUpUIs_.clear();
 }
@@ -90,7 +77,6 @@ void UIManager::Release(void)
 void UIManager::Destroy(void)
 {
 	gaugeUIs_.clear();
-	orderUIs_.clear();
 	iconUIs_.clear();
 	popUpUIs_.clear();
 	delete instance_;
@@ -99,11 +85,6 @@ void UIManager::Destroy(void)
 void UIManager::AddGaugeUI(GaugeUI* ui)
 {
 	gaugeUIs_.emplace_back(ui);
-}
-
-void UIManager::AddOrderUI(OrderUI* ui)
-{
-	orderUIs_.emplace_back(ui);
 }
 
 void UIManager::AddIconUI(IconUI* ui)

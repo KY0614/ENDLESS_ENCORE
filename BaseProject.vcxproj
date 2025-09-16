@@ -19,36 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
     <ClCompile Include="Src\Object\UI\PopUpUI.cpp" />
     <ClCompile Include="Src\Scene\PauseScene\KeyConfigScene.cpp" />
     <ClCompile Include="Src\Scene\PauseScene\ExplainScene.cpp" />
     <ClCompile Include="Src\Scene\PauseScene.cpp" />
     <ClCompile Include="Src\Object\UI\IconUI.cpp" />
-    <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
-    <ClCompile Include="Src\Object\UI\OrderUI.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\Furnitures.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
-    <ClCompile Include="Src\Object\Score.cpp" />
     <ClCompile Include="Src\Object\UI\GaugeUI.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\FollowingObject.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\RackObject.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\ItemObject.cpp" />
     <ClCompile Include="Src\Manager\Generic\Input.cpp" />
     <ClCompile Include="Src\FpsControl.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\IceDispenser.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\DustBox.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\CupLidRack.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\Machine.cpp" />
     <ClCompile Include="Src\Object\Common\Cube.cpp" />
     <ClCompile Include="Src\Object\Common\Sphere.cpp" />
-    <ClCompile Include="Src\Manager\GameSystem\OrderCustomerManager.cpp" />
-    <ClCompile Include="Src\Object\Customer\CustomerManager.cpp" />
-    <ClCompile Include="Src\Object\Customer\IceCustomer.cpp" />
-    <ClCompile Include="Src\Object\Customer\CustomerBase.cpp" />
-    <ClCompile Include="Src\Object\Customer\HotCustomer.cpp" />
     <ClCompile Include="Src\Common\DebugDrawFormat.cpp" />
-    <ClCompile Include="Src\Object\Order\Order.cpp" />
-    <ClCompile Include="Src\Object\Order\OrderManager.cpp" />
     <ClCompile Include="Src\Libs\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_win32.cpp" />
@@ -57,7 +40,6 @@
     <ClCompile Include="Src\Libs\ImGui\imgui_draw.cpp" />
     <ClCompile Include="Src\Libs\ImGui\imgui_tables.cpp" />
     <ClCompile Include="Src\Libs\ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="Src\Manager\GameSystem\ScoreManager.cpp" />
     <ClCompile Include="Src\Renderer\ModelMaterial.cpp" />
     <ClCompile Include="Src\Renderer\ModelRenderer.cpp" />
     <ClCompile Include="Src\Renderer\PixelMaterial.cpp" />
@@ -81,42 +63,27 @@
     <ClCompile Include="Src\Object\Common\Collider.cpp" />
     <ClCompile Include="Src\Object\Common\Transform.cpp" />
     <ClCompile Include="Src\Object\Player.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageManager.cpp" />
     <ClCompile Include="Src\Scene\GameScene.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Scene\TitleScene.cpp" />
     <ClCompile Include="Src\Utility\AsoUtility.cpp" />
     <ClCompile Include="Src\Scene\TutorialScene.cpp" />
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObjectLibrary.cpp" />
-    <ClCompile Include="Src\Object\Stage\StageObject\Table.cpp" />
     <ClCompile Include="Src\Object\UI\UIBase.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\Timer.cpp" />
     <ClCompile Include="Src\Object\UI\UIManager.cpp" />
-    <ClCompile Include="Src\Object\TutorialText.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
     <ClInclude Include="Src\Object\UI\PopUpUI.h" />
     <ClInclude Include="Src\Scene\PauseScene\KeyConfigScene.h" />
     <ClInclude Include="Src\Scene\PauseScene\ExplainScene.h" />
     <ClInclude Include="Src\Scene\PauseScene.h" />
     <ClInclude Include="Src\Object\UI\IconUI.h" />
-    <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
-    <ClInclude Include="Src\Object\UI\OrderUI.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\Furnitures.h" />
     <ClInclude Include="Src\Common\Easing.h" />
-    <ClInclude Include="Src\Object\Score.h" />
     <ClInclude Include="Src\Object\UI\GaugeUI.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\FollowingObject.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\RackObject.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\ItemObject.h" />
     <ClInclude Include="Src\Manager\Generic\Input.h" />
     <ClInclude Include="Src\FpsControl.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\IceDispenser.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\DustBox.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\CupLidRack.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\Machine.h" />
     <ClInclude Include="Src\Object\Common\Cube.h" />
     <ClInclude Include="Src\Object\Common\Sphere.h" />
     <ClInclude Include="Src\Libs\nlohmann\adl_serializer.hpp" />
@@ -165,14 +132,7 @@
     <ClInclude Include="Src\Libs\nlohmann\ordered_map.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\thirdparty\hedley\hedley.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
-    <ClInclude Include="Src\Manager\GameSystem\OrderCustomerManager.h" />
-    <ClInclude Include="Src\Object\Customer\CustomerManager.h" />
-    <ClInclude Include="Src\Object\Customer\IceCustomer.h" />
-    <ClInclude Include="Src\Object\Customer\CustomerBase.h" />
-    <ClInclude Include="Src\Object\Customer\HotCustomer.h" />
     <ClInclude Include="Src\Common\DebugDrawFormat.h" />
-    <ClInclude Include="Src\Object\Order\Order.h" />
-    <ClInclude Include="Src\Object\Order\OrderManager.h" />
     <ClInclude Include="Src\Libs\ImGuiWrapper.h" />
     <ClInclude Include="Src\Libs\ImGui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="Src\Libs\ImGui\backends\imgui_impl_win32.h" />
@@ -182,7 +142,6 @@
     <ClInclude Include="Src\Libs\ImGui\imstb_rectpack.h" />
     <ClInclude Include="Src\Libs\ImGui\imstb_textedit.h" />
     <ClInclude Include="Src\Libs\ImGui\imstb_truetype.h" />
-    <ClInclude Include="Src\Manager\GameSystem\ScoreManager.h" />
     <ClInclude Include="Src\Renderer\ModelMaterial.h" />
     <ClInclude Include="Src\Renderer\ModelRenderer.h" />
     <ClInclude Include="Src\Renderer\PixelMaterial.h" />
@@ -206,20 +165,15 @@
     <ClInclude Include="Src\Object\Common\Collider.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
     <ClInclude Include="Src\Object\Player.h" />
-    <ClInclude Include="Src\Object\Stage\StageManager.h" />
     <ClInclude Include="Src\Scene\GameScene.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Scene\TitleScene.h" />
     <ClInclude Include="Src\Utility\AsoUtility.h" />
     <ClInclude Include="Src\Scene\TutorialScene.h" />
     <ClInclude Include="Src\Utility\StringUtility.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject.h" />
-    <ClInclude Include="Src\Object\Stage\StageObjectLibrary.h" />
-    <ClInclude Include="Src\Object\Stage\StageObject\Table.h" />
     <ClInclude Include="Src\Object\UI\UIBase.h" />
     <ClInclude Include="Src\Manager\GameSystem\Timer.h" />
     <ClInclude Include="Src\Object\UI\UIManager.h" />
-    <ClInclude Include="Src\Object\TutorialText.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />

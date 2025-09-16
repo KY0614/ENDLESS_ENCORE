@@ -12,8 +12,8 @@ public:
 
 	//コンストラクタ
 	//カプセルをつけるオブジェクトを指定する
-	Cube(const Transform& parent);
-	Cube(const Cube& base, const Transform& parent);
+	Cube(void);
+	Cube(const Cube& base);
 
 	//デストラクタ
 	~Cube(void);
@@ -27,18 +27,6 @@ public:
 private:
 	// 頂点配列（最大12枚の三角形 → 36頂点）
 	VERTEX3D Vertex[36];
-
-	//カプセルをくっつける相手
-	const Transform& transformParent_;
-
-	//親Transformからの相対位置(上側)
-	VECTOR localPosTop_;
-
-	//親Transformからの相対位置(下側)
-	VECTOR localPosDown_;
-
-	//半径
-	float radius_;
 
 };
 

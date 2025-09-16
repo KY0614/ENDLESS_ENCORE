@@ -68,7 +68,6 @@ void Camera::SetBeforeDraw(void)
 	//DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
 
-	//UpdateDebugImGui();
 }
 
 void Camera::Draw(void)

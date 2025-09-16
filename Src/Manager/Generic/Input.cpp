@@ -143,37 +143,37 @@ void Input::ResetTable()
 							{PeripheralType::gamepad, PAD_INPUT_B},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::r_trigger}*/ };
 
-	inputTable_["Up"] = {	{PeripheralType::keyboard,KEY_INPUT_UP},
+	inputTable_["Up"] = {	{PeripheralType::keyboard,KEY_INPUT_W},
 							{PeripheralType::gamepad,PAD_INPUT_UP},
 							{PeripheralType::x_analog,(int)AnalogInputType::l_up} };
 
-	inputTable_["Down"] = { {PeripheralType::keyboard,KEY_INPUT_DOWN},
+	inputTable_["Down"] = { {PeripheralType::keyboard,KEY_INPUT_S},
 							{PeripheralType::gamepad,PAD_INPUT_DOWN},
 							{PeripheralType::x_analog,(int)AnalogInputType::l_down} };
 
-	inputTable_["Right"] = {{PeripheralType::keyboard,KEY_INPUT_RIGHT},
+	inputTable_["Right"] = {{PeripheralType::keyboard,KEY_INPUT_D},
 							{PeripheralType::gamepad,PAD_INPUT_RIGHT},
 							{PeripheralType::x_analog,(int)AnalogInputType::l_right} };
 
-	inputTable_["Left"] = { {PeripheralType::keyboard,KEY_INPUT_LEFT},
+	inputTable_["Left"] = { {PeripheralType::keyboard,KEY_INPUT_A},
 							{PeripheralType::gamepad,PAD_INPUT_LEFT},
 							{PeripheralType::x_analog,(int)AnalogInputType::l_left} };
-	//
-	//inputTable_["CameraUp"] = { {PeripheralType::keyboard,KEY_INPUT_W},
-	//				{PeripheralType::gamepad,PAD_INPUT_UP},
-	//				{PeripheralType::x_analog,(int)AnalogInputType::l_up} };
+	
+	inputTable_["CameraUp"] = { {PeripheralType::keyboard,KEY_INPUT_UP},
+					{PeripheralType::gamepad,PAD_INPUT_UP},
+					{PeripheralType::x_analog,(int)AnalogInputType::l_up} };
 
-	//inputTable_["CameraDown"] = { {PeripheralType::keyboard,KEY_INPUT_S},
-	//						{PeripheralType::gamepad,PAD_INPUT_DOWN},
-	//						{PeripheralType::x_analog,(int)AnalogInputType::l_down} };
+	inputTable_["CameraDown"] = { {PeripheralType::keyboard,KEY_INPUT_DOWN},
+							{PeripheralType::gamepad,PAD_INPUT_DOWN},
+							{PeripheralType::x_analog,(int)AnalogInputType::l_down} };
 
-	//inputTable_["CameraRight"] = { {PeripheralType::keyboard,KEY_INPUT_D},
-	//						{PeripheralType::gamepad,PAD_INPUT_RIGHT},
-	//						{PeripheralType::x_analog,(int)AnalogInputType::l_right} };
+	inputTable_["CameraRight"] = { {PeripheralType::keyboard,KEY_INPUT_RIGHT},
+							{PeripheralType::gamepad,PAD_INPUT_RIGHT},
+							{PeripheralType::x_analog,(int)AnalogInputType::l_right} };
 
-	//inputTable_["CameraLeft"] = { {PeripheralType::keyboard,KEY_INPUT_A},
-	//						{PeripheralType::gamepad,PAD_INPUT_LEFT},
-	//						{PeripheralType::x_analog,(int)AnalogInputType::l_left} };
+	inputTable_["CameraLeft"] = { {PeripheralType::keyboard,KEY_INPUT_LEFT},
+							{PeripheralType::gamepad,PAD_INPUT_LEFT},
+							{PeripheralType::x_analog,(int)AnalogInputType::l_left} };
 
 	//inputTable_["CameraFront"] = { {PeripheralType::keyboard,KEY_INPUT_I}};
 	//inputTable_["CameraBack"] = { {PeripheralType::keyboard,KEY_INPUT_K}};
