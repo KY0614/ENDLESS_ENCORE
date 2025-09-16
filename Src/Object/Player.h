@@ -29,9 +29,9 @@ public:
 	//状態
 	enum class STATE
 	{
-		NONE,
-		PLAY,
-		DEAD,
+		NONE,	//初期化前
+		PLAY,	//操作可能
+		DEAD,	//死亡
 	};
 
 	//アニメーション種別
@@ -52,16 +52,38 @@ public:
 	//デストラクタ
 	~Player(void);
 
+	/// <summary>
+	///	初期化
+	/// </summary>
 	void Init(void) override;
+
+	/// <summary>
+	///	更新処理
+	/// </summary>
 	void Update(void) override;
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
 	void Draw(void) override;
 
-	//衝突判定に用いられるコライダ制御
+	/// <summary>
+	/// 衝突判定に用いられるコライダーを追加する
+	/// </summary>
+	/// <param name="collider"></param>
 	void AddCollider(std::weak_ptr<Collider> collider);
 
+	/// <summary>
+	/// コライダーの削除
+	/// </summary>
+	/// <param name=""></param>
 	void ClearCollider(void);
 
-	//衝突用カプセルの取得
+	/// <summary>
+	/// 衝突用カプセルの取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	const Capsule& GetCapsule(void) const;
 
 	const Sphere& GetSphere(void) const { return *sphere_; }

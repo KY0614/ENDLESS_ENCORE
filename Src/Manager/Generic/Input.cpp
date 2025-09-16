@@ -129,11 +129,16 @@ void Input::ResetTable()
 		//{PeripheralType::mouse,MOUSE_INPUT_LEFT}}//左クリック	
 		}
 	},
+
 	{"pause",{
 		{PeripheralType::keyboard,KEY_INPUT_P},
 		{PeripheralType::gamepad,PAD_INPUT_R}}	//STARTボタン
 	},
 	};
+
+	inputTable_["Dodge"] = { {PeripheralType::keyboard,KEY_INPUT_SPACE},
+							{PeripheralType::gamepad, PAD_INPUT_A},
+							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
 	inputTable_["Dash"] = { {PeripheralType::keyboard,KEY_INPUT_LCONTROL},
 							{PeripheralType::gamepad, PAD_INPUT_Y},
