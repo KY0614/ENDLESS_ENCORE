@@ -37,13 +37,13 @@ public:
 	//アニメーション種別
 	enum class ANIM_TYPE
 	{
-		IDLE,	//通常
-		WALK,	//歩き
-		RUN,	//走り
-		JUMP,	//ジャンプ
-		PARRY,	//パリィ
-		DODGE,	//回避
-		USE_ITEM, //アイテム使用
+		IDLE,		//通常
+		WALK,		//歩き
+		RUN,		//走り
+		JUMP,		//ジャンプ
+		PARRY,		//パリィ
+		DODGE,		//回避
+		USE_ITEM,	//アイテム使用
 	};
 
 	//コンストラクタ
@@ -88,6 +88,11 @@ public:
 
 	const Sphere& GetSphere(void) const { return *sphere_; }
 
+	/// <summary>
+	/// プレイヤーの状態をPLAYにする
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>stateをPLAYにする</returns>
 	bool IsPlay(void);
 
 	void ChangeState(STATE state);
@@ -119,16 +124,16 @@ private:
 	VECTOR movedPos_;
 
 	//回転
-	Quaternion playerRotY_;
-	Quaternion goalQuaRot_;
-	float stepRotTime_;
+	Quaternion playerRotY_;		//Y軸回転
+	Quaternion goalQuaRot_;		//目標回転
+	float stepRotTime_;			//回転完了までの時間経過
 	
 	//衝突判定に用いられるコライダ
 	std::vector<std::weak_ptr<Collider>> colliders_;
 
-	//衝突チェック
-	VECTOR gravHitPosDown_;
-	VECTOR gravHitPosUp_;
+	//衝突チェック	
+	VECTOR gravHitPosDown_;	//重力方向の当たり判定位置
+	VECTOR gravHitPosUp_;	//重力と逆方向の当たり判定位置
 	
 	//丸影
 	int imgShadow_;

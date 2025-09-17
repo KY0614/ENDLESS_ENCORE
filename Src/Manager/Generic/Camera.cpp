@@ -15,6 +15,8 @@ Camera::Camera(void)
 	pos_ = AsoUtility::VECTOR_ZERO;
 	targetPos_ = AsoUtility::VECTOR_ZERO;
 	followTransform_ = nullptr;
+	cameraNear_ = -1.0f;
+	cameraFar_ = -1.0f;
 }
 
 Camera::~Camera(void)
@@ -23,8 +25,17 @@ Camera::~Camera(void)
 
 void Camera::Init(void)
 {
-
+	//カメラの初期設定
 	ChangeMode(MODE::FIXED_POINT);
+
+#ifdef _DEBUG
+	cameraNear_ = CAMERA_NEAR;
+	cameraFar_ = CAMERA_FAR;
+	localF2CPos_ = LOCAL_F2C_POS;
+	localF2TPos_ = LOCAL_F2T_POS;
+
+#endif // _DEBUG
+
 }
 
 void Camera::Update(void)
@@ -35,7 +46,7 @@ void Camera::SetBeforeDraw(void)
 {
 
 	//クリップ距離を設定する(SetDrawScreenでリセットされる)
-	SetCameraNearFar(CAMERA_NEAR, CAMERA_FAR);
+	SetCameraNearFar(cameraNear_, cameraFar_);
 
 	switch (mode_)
 	{
@@ -68,6 +79,7 @@ void Camera::SetBeforeDraw(void)
 	//DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
 
+	UpdateDebugImGui();
 }
 
 void Camera::Draw(void)
@@ -163,11 +175,11 @@ void Camera::SyncFollow(void)
 	Quaternion followRot = Quaternion::Quaternion();
 
 	//注視点(通常重力でいうところのY値を追従対象と同じにする)
-	VECTOR localPos = rotOutX_.PosAxis(LOCAL_F2T_POS);
+	VECTOR localPos = rotOutX_.PosAxis(localF2TPos_);
 	targetPos_ = VAdd(pos, localPos);
 
 	//カメラ位置
-	localPos = rot_.PosAxis(LOCAL_F2C_POS);
+	localPos = rot_.PosAxis(localF2CPos_);
 	pos_ = VAdd(pos, localPos);
 
 	//正面から設定されたY軸分、回転させる
@@ -251,21 +263,29 @@ void Camera::UpdateDebugImGui(void)
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Camera");
 
-	//位置
-	ImGui::Text("position");
+	//near far
+	ImGui::Text("near far");
 	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("Pos", &pos_.x);
-	ImGui::SliderFloat("PosX", &pos_.x, -800.0f, 1000.0f);
-	ImGui::SliderFloat("PosY", &pos_.y, -800.0f, 1000.0f);
-	ImGui::SliderFloat("PosZ", &pos_.z, -800.0f, 1000.0f);
+	ImGui::InputFloat("Near", &cameraNear_);
+	ImGui::InputFloat("Far", &cameraFar_);/*
+	ImGui::SliderFloat("Near", &cameraNear_, -1000.0f, 10000.0f);
+	ImGui::SliderFloat("Far", &cameraFar_, -1000.0f, 10000.0f);*/
 
 	//位置
-	ImGui::Text("target");
+	ImGui::Text("localF2CPos");
 	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("target", &targetPos_.x);
-	ImGui::SliderFloat("targetX", &targetPos_.x, -800.0f, 1000.0f);
-	ImGui::SliderFloat("targetY", &targetPos_.y, -800.0f, 1000.0f);
-	ImGui::SliderFloat("targetZ", &targetPos_.z, -800.0f, 1000.0f);
+	ImGui::InputFloat3("localF2CPos", &localF2CPos_.x);
+	ImGui::SliderFloat("localF2CPosX", &localF2CPos_.x, -800.0f, 1000.0f);
+	ImGui::SliderFloat("localF2CPosY", &localF2CPos_.y, -800.0f, 1000.0f);
+	ImGui::SliderFloat("localF2CPosZ", &localF2CPos_.z, -800.0f, 1000.0f);
+
+	//位置
+	ImGui::Text("localF2TPos");
+	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
+	ImGui::InputFloat3("localF2TPos", &localF2TPos_.x);
+	ImGui::SliderFloat("localF2TPosX", &localF2TPos_.x, -800.0f, 1000.0f);
+	ImGui::SliderFloat("localF2TPosY", &localF2TPos_.y, -800.0f, 1000.0f);
+	ImGui::SliderFloat("localF2TPosZ", &localF2TPos_.z, -800.0f, 1000.0f);
 
 	//終了処理
 	ImGui::End();

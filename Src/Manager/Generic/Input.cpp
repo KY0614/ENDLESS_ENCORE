@@ -144,7 +144,7 @@ void Input::ResetTable()
 							{PeripheralType::gamepad, PAD_INPUT_Y},
 							{PeripheralType::x_analog,(int)AnalogInputType::l_trigger} };
 
-	inputTable_["Interact"] = { {PeripheralType::keyboard,KEY_INPUT_SPACE},
+	inputTable_["Jump"] = { {PeripheralType::keyboard,KEY_INPUT_F},
 							{PeripheralType::gamepad, PAD_INPUT_B},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::r_trigger}*/ };
 

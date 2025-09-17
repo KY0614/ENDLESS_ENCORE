@@ -122,6 +122,7 @@ const Capsule& Player::GetCapsule(void) const
 
 bool Player::IsPlay(void)
 {
+	//
 	return state_ == STATE::PLAY;
 }
 
@@ -133,6 +134,7 @@ void Player::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 30.0f);
 	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walking.mv1", 30.0f);
 	animationController_->Add((int)ANIM_TYPE::RUN, path + "Running.mv1", 30.0f);
+	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", 30.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
@@ -364,7 +366,8 @@ void Player::ProcessMove(void)
 
 void Player::ProcessJump(void)
 {
-	bool isHit = CheckHitKey(KEY_INPUT_BACKSLASH);
+	InputManager& ins = InputManager::GetInstance();
+	bool isHit = ins.IsInputTriggered("Jump");
 
 	// ジャンプ
 	if (isHit && (isJump_ || IsEndLanding()))
@@ -372,12 +375,6 @@ void Player::ProcessJump(void)
 
 		if (!isJump_)
 		{
-			// 制御無しジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP);
-			// ループしないジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
-			// 切り取りアニメーション
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
 			// 無理やりアニメーション
 			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
 			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
@@ -385,7 +382,7 @@ void Player::ProcessJump(void)
 
 		isJump_ = true;
 
-		// ジャンプの入力受付時間をヘラス
+		// ジャンプの入力受付時間を減らす
 		stepJump_ += SceneManager::GetInstance().GetDeltaTime();
 		if (stepJump_ < 0.5f)
 		{

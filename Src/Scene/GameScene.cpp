@@ -36,7 +36,8 @@ void GameScene::Init(void)
 #ifdef _DEBUG
 	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::FLOOR));
-	floor_.scl = { 0.5f,0.5f,0.5f };
+	float scale = 0.5f;
+	floor_.scl = { scale,scale,scale };
 	floor_.pos = { 0.0f, 0.0f, 0.0f };
 	floor_.quaRot = Quaternion();
 	floor_.quaRotLocal =

@@ -18,28 +18,21 @@ public:
 	//カメラクリップ：NEAR
 	static constexpr float CAMERA_FAR = 30000.0f;
 
-	//カメラの初期座標
-	//static constexpr VECTOR DEFAULT_CAMERA_POS = { 0.0f, 100.0f, -500.0f };
-
 	//追従位置からカメラ位置までの相対座標
-	static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 50.0f, -400.0f };
+	//static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 50.0f, -400.0f };
+	static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 90.0f, -340.0f };
 
 	//追従位置から注視点までの相対座標
-	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, -500.0f, 500.0f };
+	//static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, -500.0f, 500.0f };
+	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, -60.0f, 575.0f };
 
 	//カメラ座標関連の定数---------------------------------------------------------------------
 
 	static constexpr VECTOR DEFAULT_CAMERA_POS = { 0.0f, 500.0f, -800.0f };			//カメラの初期座標
-	//static constexpr VECTOR FIXEDTOP_CAMERA_POS = { 20.0f, 500.0f, -370.0f };		//固定カメラの初期座標
-	//static constexpr VECTOR FIXEDTOP_CAMERA_POS = { 20.0f, 570.0f, -325.0f };		//固定カメラの初期座標
-	//static constexpr VECTOR FIXEDTOP_CAMERA_POS = { 20.0f, 450.0f, -530.0f };		//固定カメラの初期座標
 	static constexpr VECTOR FIXEDTOP_CAMERA_POS = { 20.0f, 600.0f, -360.0f };		//固定カメラの初期座標
 
 	static constexpr VECTOR RELATIVE_C2T_POS = { 0.0f, 165.0f, 200.0f };			//カメラ位置から注視点までの相対座標
-	//static constexpr VECTOR FIXEDTOP_CAMERA_RELATIVE_POS = { 20.0f, 0.0f, 137.0f };	//固定カメラ位置から注視点までの相対座標
-	//static constexpr VECTOR FIXEDTOP_CAMERA_RELATIVE_POS = { 20.0f, 0.0f, 15.0f };	//固定カメラ位置から注視点までの相対座標
 	static constexpr VECTOR FIXEDTOP_CAMERA_RELATIVE_POS = { 20.0f, 0.0f, 65.0f };	//固定カメラ位置から注視点までの相対座標
-
 
 	static constexpr VECTOR RELATIVE_F2C_POS_FOLLOW = { 0.0f, 500.0f, -500.0f };	//追従対象からカメラ位置までの相対座標(完全追従)
 
@@ -130,7 +123,17 @@ private:
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawFree(void);
+#ifdef _DEBUG
+
+	float cameraNear_;
+	float cameraFar_;
+
+	VECTOR localF2CPos_;
+	VECTOR localF2TPos_;
 
 	void UpdateDebugImGui(void);
+
+#endif // _DEBUG
+
 };
 
