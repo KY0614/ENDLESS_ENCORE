@@ -229,7 +229,7 @@ void ResourceManager::InitGame(void)
 	std::unique_ptr<Resource> res;
 
 	//プレイヤー
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Model.mv1");
 	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
 
 	//プレイヤー影

@@ -15,9 +15,16 @@
 #include "Common/Sphere.h"
 #include "Player.h"
 
+namespace
+{
+	//ジャンプ力
+	const float JUMP_POW = 7.5f; 
+	//重力加速度
+	const float GRAVITY_POW = 15.0f;
+}
+
 Player::Player(void)
 {
-
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
 
@@ -26,11 +33,28 @@ Player::Player(void)
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateStop, this));
 
-	//衝突チェック
 	gravHitPosDown_ = AsoUtility::VECTOR_ZERO;
 	gravHitPosUp_ = AsoUtility::VECTOR_ZERO;
 
 	chestFrmNo_ = 0;
+	chestPos_ = AsoUtility::VECTOR_ZERO;
+
+	effectSmokePlayId_ = -1;
+	effectSmokeResId_ = -1;
+	stepFootSmoke_ = -1.0f;
+	stepJump_ = -1.0f;
+	isJump_ = false;
+	speed_ = -1.0f;
+	movedPos_ = AsoUtility::VECTOR_ZERO;
+	moveDir_ = AsoUtility::VECTOR_ZERO;
+	movePow_ = AsoUtility::VECTOR_ZERO;
+	moveDiff_ = AsoUtility::VECTOR_ZERO;
+	jumpPow_ = AsoUtility::VECTOR_ZERO;
+	playerRotY_ = Quaternion::Quaternion();
+	goalQuaRot_ = Quaternion::Quaternion();
+	stepRotTime_ = 0.0f;
+	imgShadow_ = -1;
+	isJumpUnlimited_ = false;
 }
 
 Player::~Player(void)
@@ -59,14 +83,9 @@ void Player::Init(void)
 
 	//カプセルコライダ
 	capsule_ = std::make_unique<Capsule>(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 90.0f, 0.0f });
-	capsule_->SetLocalPosDown({ 0.0f, -10.0f, 0.0f });
+	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
+	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
-	
-	//オブジェクト用コライダ
-	sphere_ = std::make_unique<Sphere>(transform_);
-	sphere_->SetLocalPos({ 0.0f, chestPos_.y, 50.0f });
-	sphere_->SetRadius(20.0f);
 
 	//足煙エフェクト
 	effectSmokeResId_ = ResourceManager::GetInstance().Load(
@@ -83,17 +102,15 @@ void Player::Init(void)
 
 void Player::Update(void)
 {
-	chestPos_ = MV1GetFramePosition(transform_.modelId, chestFrmNo_);
-	sphere_->SetLocalPos({ 0.0f, chestPos_.y, 50.0f });
-
 	//更新ステップ
 	stateUpdate_();
 
 	transform_.Update();
-	sphereTran_.Update();
 
 	//アニメーション再生
 	animationController_->Update();
+
+	UpdateDebugImGui();
 }
 
 void Player::Draw(void)
@@ -103,6 +120,15 @@ void Player::Draw(void)
 
 	//丸影描画
 	DrawShadow();
+#ifdef _DEBUG
+
+	DrawFormatString(0, 20, 0xffffff, L"pos : %.2f, %.2f, %.2f", transform_.pos.x,
+		transform_.pos.y, transform_.pos.z);
+	DrawFormatString(0, 40, 0xffffff, L"jumpPow : %.2f, %.2f, %.2f", jumpPow_.x,
+		jumpPow_.y, jumpPow_.z);
+	DrawFormatString(0, 60, 0xffffff, L"isJUmp : %d", isJump_);
+#endif // _DEBUG
+
 }
 
 void Player::AddCollider(std::weak_ptr<Collider> collider)
@@ -174,7 +200,8 @@ void Player::UpdatePlay(void)
 	ProcessMove();
 
 	//ジャンプ処理
-	ProcessJump();
+	//ProcessJump();
+	ProcessJumpTest();
 
 	//移動方向に応じた回転
 	Rotate();
@@ -294,6 +321,11 @@ void Player::ProcessMove(void)
 
 	double rotRad = 0;
 
+	if (ins.IsInputTriggered("Reset"))
+	{
+		transform_.pos = { -60.0f, 0.0f, 30.0f };
+	}
+
 	//WASDで位置を変える
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 	movePow_ = AsoUtility::VECTOR_ZERO;
@@ -333,14 +365,18 @@ void Player::ProcessMove(void)
 		worldDir.y = 0.0f;
 		worldDir.z = dir.x * sinY + dir.z * cosY;
 
-		//移動速度の設定
-		speed_ = ins.IsInputPressed("Dash") ? SPEED_RUN : SPEED_MOVE;
+		//ジャンプ中に加速しないように
+		if (!isJump_)
+		{
+			//移動速度の設定
+			speed_ = ins.IsInputPressed("Dash") ? SPEED_RUN : SPEED_MOVE;
+		}
 		moveDir_ = worldDir;
 		movePow_ = VScale(dir, speed_);
-
 		//プレイヤーの向きを移動方向に合わせる
-		//double rotRad = atan2(worldDir.x, worldDir.z); // ラジアン
+		//double goalRotRad = atan2(worldDir.x, worldDir.z); // ラジアン
 		SetGoalRotate(rotRad);
+
 		if (!isJump_ && IsEndLanding())
 		{
 			//アニメーション
@@ -367,7 +403,7 @@ void Player::ProcessMove(void)
 void Player::ProcessJump(void)
 {
 	InputManager& ins = InputManager::GetInstance();
-	bool isHit = ins.IsInputTriggered("Jump");
+	bool isHit = ins.IsInputPressed("Jump");
 
 	// ジャンプ
 	if (isHit && (isJump_ || IsEndLanding()))
@@ -395,6 +431,34 @@ void Player::ProcessJump(void)
 	if (!isHit)
 	{
 		stepJump_ = 0.5f;
+	}
+
+}
+
+void Player::ProcessJumpTest(void)
+{
+	InputManager& ins = InputManager::GetInstance();
+	bool isHit = ins.IsInputTriggered("Jump");
+
+	//ジャンプ
+	if (isHit && IsEndLanding())
+	{
+		isJump_ = true;
+		// ジャンプの初速度を設定
+		// ここでは、JUMP_POWを初速としてv0に相当する値を設定します
+		jumpPow_.y = JUMP_POW;
+
+		// ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
+		//jumpPow_.x = movePow_.x;
+		//jumpPow_.z = movePow_.z;
+
+		// ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
+		jumpPow_.x = movePow_.x * 0.01f;
+		jumpPow_.z = movePow_.z * 0.01f;
+
+		// 無理やりアニメーション
+		animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
+		animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
 	}
 
 }
@@ -474,8 +538,7 @@ void Player::CollisionCapsule(void)
 				if (pHit)
 				{
 					//法線の方向にちょっとだけ移動させる
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 1.0f));
-					movedPos_.y = 30.0f;
+					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 2.0f));
 					//カプセルも一緒に移動させる
 					trans.pos = movedPos_;
 					trans.Update();
@@ -501,7 +564,7 @@ void Player::CollisionGravity(void)
 	VECTOR dirUpGravity = AsoUtility::DIR_U;
 
 	// 重力の強さ
-	float gravityPow = 25.0f;
+	float gravityPow = GRAVITY_POW;
 
 	float checkPow = 10.0f;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
@@ -509,32 +572,26 @@ void Player::CollisionGravity(void)
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 	for (const auto c : colliders_)
 	{
-
 		// 地面との衝突
 		auto hit = MV1CollCheck_Line(
 			c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
 
-		// 最初は上の行のように実装して、木の上に登ってしまうことを確認する
-		//if (hit.HitFlag > 0)
 		if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
 		{
-
 			// 衝突地点から、少し上に移動
 			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
 
 			// ジャンプリセット
 			jumpPow_ = AsoUtility::VECTOR_ZERO;
-			stepJump_ = 0.0f;
-
+			//jumpVelocity_ = AsoUtility::VECTOR_ZERO;
+			//stepJump_ = 0.0f;
 			if (isJump_)
 			{
 				// 着地モーション
 				animationController_->Play(
 					(int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
 			}
-
 			isJump_ = false;
-
 		}
 
 	}
@@ -542,30 +599,42 @@ void Player::CollisionGravity(void)
 
 void Player::CalcGravityPow(void)
 {
-	// 重力方向
-	VECTOR dirGravity = AsoUtility::DIR_D;
-
-	// 重力の強さ
-	float gravityPow = 25.0f;
-
-	// 重力
-	VECTOR gravity = VScale(dirGravity, gravityPow);
-	jumpPow_ = VAdd(jumpPow_, gravity);
-
-	// 最初は実装しない。地面と突き抜けることを確認する。
-	// 内積
-	float dot = VDot(dirGravity, jumpPow_);
-	if (dot >= 0.0f)
+	// ジャンプ中の場合のみ重力を適用
+	if (isJump_)
 	{
-		// 重力方向と反対方向(マイナス)でなければ、ジャンプ力を無くす
-		jumpPow_ = gravity;
+		// 重力による速度の減少
+		// v = v0 + at の式に相当
+		jumpPow_.y -= GRAVITY_POW * SceneManager::GetInstance().GetDeltaTime();
+	}
+	else
+	{
+		// 地面にいる場合はジャンプ力をリセット
+		//jumpPow_ = AsoUtility::VECTOR_ZERO;
+
+		// 重力方向
+		VECTOR dirGravity = AsoUtility::DIR_D;
+
+		// 重力の強さ
+		float gravityPow = GRAVITY_POW;
+
+		//重力
+		VECTOR gravity = VScale(dirGravity, gravityPow);
+		jumpPow_ = VAdd(jumpPow_, gravity);
+
+		// 内積
+		float dot = VDot(dirGravity, jumpPow_);
+		if (dot >= 0.0f)
+		{
+			// 重力方向と反対方向(マイナス)でなければ、ジャンプ力を無くす
+			jumpPow_ = gravity;
+		}
 	}
 }
 
 bool Player::IsEndLanding(void)
 {
 	bool ret = true;
-
+	if (isJumpUnlimited_)return ret;
 	// アニメーションがジャンプではない
 	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP)
 	{
@@ -578,8 +647,7 @@ bool Player::IsEndLanding(void)
 		return ret;
 	}
 
-
-	return true;
+	return false;
 }
 
 void Player::EffectFootSmoke(void)
@@ -609,4 +677,31 @@ void Player::EffectFootSmoke(void)
 			transform_.pos.y,
 			transform_.pos.z);
 	}
+}
+
+void Player::UpdateDebugImGui(void)
+{
+	//ウィンドウタイトル&開始処理
+	ImGui::Begin("Player");
+
+	if (ImGui::Button("Normal Jump"))
+	{
+		isJumpUnlimited_ = false;
+	}
+
+	if (ImGui::Button("Unlimited Jump"))
+	{
+		isJumpUnlimited_ = true;
+	}
+
+	////位置
+	//ImGui::Text("localF2TPos");
+	////構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
+	//ImGui::InputFloat3("localF2TPos", &localF2TPos_.x);
+	//ImGui::SliderFloat("localF2TPosX", &localF2TPos_.x, -800.0f, 1000.0f);
+	//ImGui::SliderFloat("localF2TPosY", &localF2TPos_.y, -800.0f, 1000.0f);
+	//ImGui::SliderFloat("localF2TPosZ", &localF2TPos_.z, -800.0f, 1000.0f);
+
+	//終了処理
+	ImGui::End();
 }

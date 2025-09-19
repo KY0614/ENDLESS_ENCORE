@@ -17,11 +17,14 @@ class Player : public ActorBase
 public:
 
 	//スピード
-	static constexpr float SPEED_MOVE = 5.0f;
-	static constexpr float SPEED_RUN = 7.0f;
+	static constexpr float SPEED_MOVE = 4.0f;
+	static constexpr float SPEED_RUN = 8.0f;
+
+	static constexpr float ACCEL_MOVE = 3.0f;	//加速度
+	static constexpr float DECEL_MOVE = 0.1f;	//減速度
 
 	//回転完了までの時間
-	static constexpr float TIME_ROT = 0.5f;
+	static constexpr float TIME_ROT = 0.3f;
 
 	//煙エフェクト発生間隔
 	static constexpr float TERM_FOOT_SMOKE = 0.3f;
@@ -95,6 +98,10 @@ public:
 	/// <returns>stateをPLAYにする</returns>
 	bool IsPlay(void);
 
+	/// <summary>
+	/// 状態を変更する
+	/// </summary>
+	/// <param name="state">変更する状態</param>
 	void ChangeState(STATE state);
 
 private:
@@ -122,6 +129,10 @@ private:
 	
 	//移動後の座標
 	VECTOR movedPos_;
+
+	//加速度、減速度
+	VECTOR velocity_;	//現在の速度
+	VECTOR accelation_;	//加速度
 
 	//回転
 	Quaternion playerRotY_;		//Y軸回転
@@ -158,6 +169,12 @@ private:
 	//ジャンプ判定
 	bool isJump_;
 
+	//無限ジャンプ
+	bool isJumpUnlimited_;
+
+	//ジャンプ用
+	VECTOR jumpVelocity_;	//現在の速度
+
 	//ジャンプの入力受付時間
 	float stepJump_;
 
@@ -182,10 +199,18 @@ private:
 	//描画系
 	void DrawShadow(void);
 
-	//操作 
+	/// <summary>
+	/// 移動処理
+	/// </summary>
+	/// <param name="">WASDで移動する処理</param>
 	void ProcessMove(void);
 
+	/// <summary>
+	/// ジャンプ処理
+	/// </summary>
+	/// <param name="">スペースキー押下でジャンプする処理</param>
 	void ProcessJump(void);
+	void ProcessJumpTest(void);
 
 	//回転
 	void SetGoalRotate(double rotRad);
@@ -204,4 +229,6 @@ private:
 
 	//足煙エフェクト
 	void EffectFootSmoke(void);
+
+	void UpdateDebugImGui(void);
 };
