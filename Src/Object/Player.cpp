@@ -12,7 +12,6 @@
 #include "Common/AnimationController.h"
 #include "Common/Capsule.h"
 #include "Common/Collider.h"
-#include "Common/Sphere.h"
 #include "Player.h"
 
 namespace
@@ -21,6 +20,9 @@ namespace
 	const float JUMP_POW = 7.5f; 
 	//重力加速度
 	const float GRAVITY_POW = 15.0f;
+
+	//アニメーション再生速度
+	const float ANIM_SPEED = 30.0f;
 }
 
 Player::Player(void)
@@ -31,7 +33,7 @@ Player::Player(void)
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
-	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateStop, this));
+	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
 
 	gravHitPosDown_ = AsoUtility::VECTOR_ZERO;
 	gravHitPosUp_ = AsoUtility::VECTOR_ZERO;
@@ -55,6 +57,9 @@ Player::Player(void)
 	stepRotTime_ = 0.0f;
 	imgShadow_ = -1;
 	isJumpUnlimited_ = false;
+	jumpVelocity_ = AsoUtility::VECTOR_ZERO;
+	isDodge_ = false;
+	stepDodge_ = -1.0f;
 }
 
 Player::~Player(void)
@@ -63,7 +68,6 @@ Player::~Player(void)
 
 void Player::Init(void)
 {
-
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
@@ -78,6 +82,7 @@ void Player::Init(void)
 	imgShadow_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PLAYER_SHADOW).handleId_;
 
+	//胸の位置取得
 	chestFrmNo_ = MV1SearchFrame(transform_.modelId, L"mixamorig:Hips");
 	chestPos_ = MV1GetFramePosition(transform_.modelId, chestFrmNo_);
 
@@ -97,7 +102,10 @@ void Player::Init(void)
 	//初期状態
 	ChangeState(STATE::PLAY);
 
+	//歩きエフェクトの発生間隔
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
+
+	stepDodge_ = 1.5f;
 }
 
 void Player::Update(void)
@@ -110,7 +118,11 @@ void Player::Update(void)
 	//アニメーション再生
 	animationController_->Update();
 
+#ifdef _DEBUG
+
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void Player::Draw(void)
@@ -127,8 +139,8 @@ void Player::Draw(void)
 	DrawFormatString(0, 40, 0xffffff, L"jumpPow : %.2f, %.2f, %.2f", jumpPow_.x,
 		jumpPow_.y, jumpPow_.z);
 	DrawFormatString(0, 60, 0xffffff, L"isJUmp : %d", isJump_);
-#endif // _DEBUG
 
+#endif // _DEBUG
 }
 
 void Player::AddCollider(std::weak_ptr<Collider> collider)
@@ -146,22 +158,23 @@ const Capsule& Player::GetCapsule(void) const
 	return *capsule_;
 }
 
-bool Player::IsPlay(void)
+bool Player::IsPlay(void) const
 {
-	//
+	//状態がPLAYかどうかを返す
 	return state_ == STATE::PLAY;
 }
 
 void Player::InitAnimation(void)
 {
-
+	//アニメーションコントローラーの生成とアニメーションの登録
 	std::string path = Application::PATH_MODEL + "Player/";
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
-	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 30.0f);
-	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walking.mv1", 30.0f);
-	animationController_->Add((int)ANIM_TYPE::RUN, path + "Running.mv1", 30.0f);
-	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", 30.0f);
-
+	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walking.mv1", ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::RUN, path + "Running.mv1", ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::DODGE, path + "Rolling.mv1", ANIM_SPEED);
+	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
 
@@ -185,9 +198,9 @@ void Player::ChangeStatePlay(void)
 	stateUpdate_ = std::bind(&Player::UpdatePlay, this);
 }
 
-void Player::ChangeStateStop(void)
+void Player::ChangeStateDead(void)
 {
-	stateUpdate_ = std::bind(&Player::UpdateStop, this);
+	stateUpdate_ = std::bind(&Player::UpdateDead, this);
 }
 
 void Player::UpdateNone(void)
@@ -202,6 +215,8 @@ void Player::UpdatePlay(void)
 	//ジャンプ処理
 	//ProcessJump();
 	ProcessJumpTest();
+
+	ProcessDodge();
 
 	//移動方向に応じた回転
 	Rotate();
@@ -220,7 +235,7 @@ void Player::UpdatePlay(void)
 	transform_.quaRot = transform_.quaRot.Mult(playerRotY_);
 }
 
-void Player::UpdateStop(void)
+void Player::UpdateDead(void)
 {
 }
 
@@ -377,7 +392,7 @@ void Player::ProcessMove(void)
 		//double goalRotRad = atan2(worldDir.x, worldDir.z); // ラジアン
 		SetGoalRotate(rotRad);
 
-		if (!isJump_ && IsEndLanding())
+		if (!isJump_ && IsEndLanding() && !isDodge_)
 		{
 			//アニメーション
 			if (speed_ == SPEED_RUN)
@@ -392,7 +407,7 @@ void Player::ProcessMove(void)
 	}
 	else
 	{
-		if (!isJump_ && IsEndLanding())
+		if (!isJump_ && IsEndLanding() && !isDodge_)
 		{
 			animationController_->Play((int)ANIM_TYPE::IDLE);
 		}
@@ -444,8 +459,8 @@ void Player::ProcessJumpTest(void)
 	if (isHit && IsEndLanding())
 	{
 		isJump_ = true;
-		// ジャンプの初速度を設定
-		// ここでは、JUMP_POWを初速としてv0に相当する値を設定します
+		//ジャンプの初速度を設定
+		//ここでは、JUMP_POWを初速としてv0に相当する値を設定します
 		jumpPow_.y = JUMP_POW;
 
 		// ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
@@ -456,15 +471,38 @@ void Player::ProcessJumpTest(void)
 		jumpPow_.x = movePow_.x * 0.01f;
 		jumpPow_.z = movePow_.z * 0.01f;
 
-		// 無理やりアニメーション
+		//無理やりアニメーション
 		animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
 		animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
 	}
 
 }
 
+void Player::ProcessDodge(void)
+{
+	InputManager& ins = InputManager::GetInstance();
+	bool isHit = ins.IsInputTriggered("Dodge");
+
+	if (isHit && (isDodge_ || IsEndDodge()))
+	{
+		isDodge_ = true;
+		
+		animationController_->Play((int)ANIM_TYPE::DODGE,false);
+	}
+
+	if (!isDodge_)return;
+
+	//アニメーションが終了したら回避終了
+	if(animationController_->IsEnd())
+	{
+		isDodge_ = false;
+	}
+
+}
+
 void Player::SetGoalRotate(double rotRad)
 {
+	//目標回転にカメラのY軸角度を加算
 	VECTOR cameraRot = mainCamera->GetAngles();
 	Quaternion axis =
 		Quaternion::AngleAxis(
@@ -478,11 +516,13 @@ void Player::SetGoalRotate(double rotRad)
 	{
 		stepRotTime_ = TIME_ROT;
 	}
+	//目標回転を設定
 	goalQuaRot_ = axis;
 }
 
 void Player::Rotate(void)
 {
+	//回転時間の減少
 	stepRotTime_ -= SceneManager::GetInstance().GetDeltaTime();
 	
 	//回転の球面補間
@@ -631,10 +671,12 @@ void Player::CalcGravityPow(void)
 	}
 }
 
-bool Player::IsEndLanding(void)
+bool Player::IsEndLanding(void) const
 {
 	bool ret = true;
+	//無限ジャンプモードの場合は常にtrue
 	if (isJumpUnlimited_)return ret;
+
 	// アニメーションがジャンプではない
 	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP)
 	{
@@ -644,7 +686,25 @@ bool Player::IsEndLanding(void)
 	// アニメーションが終了しているか
 	if (animationController_->IsEnd())
 	{
+		return ret;	//終了している
+	}
+
+	return false;
+}
+
+bool Player::IsEndDodge(void) const
+{
+	bool ret = true;
+	// アニメーションが回避ではない
+	if (animationController_->GetPlayType() != (int)ANIM_TYPE::DODGE)
+	{
 		return ret;
+	}
+
+	// アニメーションが終了しているか
+	if (animationController_->IsEnd())
+	{
+		return ret;	//終了している
 	}
 
 	return false;

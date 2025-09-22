@@ -89,14 +89,12 @@ public:
 	/// <returns></returns>
 	const Capsule& GetCapsule(void) const;
 
-	const Sphere& GetSphere(void) const { return *sphere_; }
-
 	/// <summary>
-	/// プレイヤーの状態をPLAYにする
+	/// 状態がPLAYかどうか
 	/// </summary>
 	/// <param name=""></param>
-	/// <returns>stateをPLAYにする</returns>
-	bool IsPlay(void);
+	/// <returns>true:状態がPLAYの場合　false:それ以外</returns>
+	bool IsPlay(void) const;
 
 	/// <summary>
 	/// 状態を変更する
@@ -130,9 +128,9 @@ private:
 	//移動後の座標
 	VECTOR movedPos_;
 
-	//加速度、減速度
-	VECTOR velocity_;	//現在の速度
-	VECTOR accelation_;	//加速度
+	////加速度、減速度
+	//VECTOR velocity_;	//現在の速度
+	//VECTOR accelation_;	//加速度
 
 	//回転
 	Quaternion playerRotY_;		//Y軸回転
@@ -152,13 +150,10 @@ private:
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
 
-	//球体
-	std::unique_ptr<Sphere> sphere_;
-
 	//足煙エフェクト
-	int effectSmokeResId_;
-	int effectSmokePlayId_;
-	float stepFootSmoke_;	
+	int effectSmokeResId_;	//エフェクトリソースID
+	int effectSmokePlayId_;	//エフェクト再生ID
+	float stepFootSmoke_;	//足煙エフェクト発生までの時間経過
 
 	//フレームごとの移動値
 	VECTOR moveDiff_;
@@ -181,22 +176,42 @@ private:
 	int chestFrmNo_;
 	VECTOR chestPos_;
 
+	//回避判定
+	bool isDodge_;
+
+	float stepDodge_;
+
 	/// <summary>
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);
 
-	//状態遷移
+	//状態遷移--------------------------------------------------------
+
+	/// <summary>
+	/// 状態遷移：NONE
+	/// </summary>
+	/// <param name=""></param>
 	void ChangeStateNone(void);
+	/// <summary>
+	/// 状態遷移：PLAY
+	/// </summary>
+	/// <param name=""></param>
 	void ChangeStatePlay(void);
-	void ChangeStateStop(void);
+	/// <summary>
+	/// 状態遷移：DEAD
+	/// </summary>
+	/// <param name=""></param>
+	void ChangeStateDead(void);
 
 	//更新ステップ
 	void UpdateNone(void);
 	void UpdatePlay(void);
-	void UpdateStop(void);
+	void UpdateDead(void);
 
-	//描画系
+	/// <summary>
+	/// 影の描画処理
+	/// </summary>
 	void DrawShadow(void);
 
 	/// <summary>
@@ -205,30 +220,79 @@ private:
 	/// <param name="">WASDで移動する処理</param>
 	void ProcessMove(void);
 
+	//ジャンプ--------------------------------------------------------
+
+	/// <summary>
+	/// ジャンプ処理（真上にジャンプ）
+	/// </summary>
+	void ProcessJump(void);
+
 	/// <summary>
 	/// ジャンプ処理
 	/// </summary>
 	/// <param name="">スペースキー押下でジャンプする処理</param>
-	void ProcessJump(void);
 	void ProcessJumpTest(void);
 
-	//回転
+	//回避------------------------------------------------------------
+
+	/// <summary>
+	/// 回避処理
+	/// </summary>
+	/// <param name=""></param>
+	void ProcessDodge(void);
+
+	//モデルの回転----------------------------------------------------
+
+	/// <summary>
+	/// 目標回転角度の設定
+	/// </summary>
+	/// <param name="rotRad"></param>
 	void SetGoalRotate(double rotRad);
+
+	/// <summary>
+	/// 回転処理
+	/// </summary>
 	void Rotate(void);
 
-	//衝突判定
+	//衝突判定---------------------------------------
+
+	/// <summary>
+	/// 衝突判定処理
+	/// </summary>
 	void Collision(void);
+
+	/// <summary>
+	/// カプセルの衝突判定処理
+	/// </summary>
 	void CollisionCapsule(void);
+
+	/// <summary>
+	/// 重力方向の衝突判定処理
+	/// </summary>
 	void CollisionGravity(void);
 
-	// 移動量の計算
+	//------------------------------------------------
+
+	/// <summary>
+	/// 移動量の計算
+	/// </summary>
 	void CalcGravityPow(void);
 
-	//着地モーション終了
-	bool IsEndLanding(void);
+	/// <summary>
+	/// 着地モーションが終了したかどうか
+	/// </summary>
+	/// <returns>true: 着地モーションが終了した場合</returns>
+	bool IsEndLanding(void) const;
 
-	//足煙エフェクト
+	bool IsEndDodge(void) const;
+
+	/// <summary>
+	/// 足煙エフェクトの発生処理
+	/// </summary>
 	void EffectFootSmoke(void);
 
+	/// <summary>
+	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
+	/// </summary>
 	void UpdateDebugImGui(void);
 };

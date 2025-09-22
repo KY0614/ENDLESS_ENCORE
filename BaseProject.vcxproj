@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
     <ClCompile Include="Src\Object\UI\PopUpUI.cpp" />
     <ClCompile Include="Src\Scene\PauseScene\KeyConfigScene.cpp" />
@@ -74,6 +75,7 @@
     <ClCompile Include="Src\Object\UI\UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
     <ClInclude Include="Src\Object\UI\PopUpUI.h" />
     <ClInclude Include="Src\Scene\PauseScene\KeyConfigScene.h" />
