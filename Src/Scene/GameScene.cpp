@@ -1,5 +1,5 @@
 #include <DxLib.h>
-#include "../Utility/AsoUtility.h"
+#include "../Utility/CommonUtility.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/InputManager.h"
@@ -89,7 +89,7 @@ void GameScene::DrawGame(void)
 
 	player_->Draw();
 
-	/*cube_->MakeBox(AsoUtility::VECTOR_ZERO,
+	/*cube_->MakeBox(CommonUtility::VECTOR_ZERO,
 		200.0f, 30.0f, 200.0f, GetColorU8(255, 255, 255, 255));*/
 
 	DrawString(0, 0,L"Game", 0xFFFFFF);

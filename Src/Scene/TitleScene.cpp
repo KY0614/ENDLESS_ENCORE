@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include "../Application.h"
 #include "../Libs/ImGui/imgui.h"
-#include "../Utility/AsoUtility.h"
+#include "../Utility/CommonUtility.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
@@ -66,7 +66,7 @@ void TitleScene::InitMaterial(void)
 	material_->AddConstBufVS({ TILLING_SIZE ,TILLING_SIZE,TILLING_SIZE,TILLING_SIZE });
 
 	//色の影響度
-	material_->AddConstBufPS({ AsoUtility::VECTOR_ONE.x,AsoUtility::VECTOR_ONE.y,AsoUtility::VECTOR_ONE.z,1.0f });
+	material_->AddConstBufPS({ CommonUtility::VECTOR_ONE.x,CommonUtility::VECTOR_ONE.y,CommonUtility::VECTOR_ONE.z,1.0f });
 
 	//ライトの方向
 	VECTOR light = GetLightDirection();

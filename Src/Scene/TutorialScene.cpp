@@ -1,6 +1,6 @@
 #include <DxLib.h>
 #include "../Application.h"
-#include "../Utility/AsoUtility.h"
+#include "../Utility/CommonUtility.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/SceneManager.h"

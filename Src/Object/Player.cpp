@@ -2,7 +2,7 @@
 #include <cassert>
 #include<EffekseerForDXLib.h>
 #include "../Application.h"
-#include "../Utility/AsoUtility.h"
+#include "../Utility/CommonUtility.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Common/DebugDrawFormat.h"
 #include "../Manager/Generic/SceneManager.h"
@@ -10,6 +10,7 @@
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "Common/AnimationController.h"
+#include "Common/ControllerAnimation.h"
 #include "Common/Capsule.h"
 #include "Common/Collider.h"
 #include "Player.h"
@@ -28,6 +29,7 @@ namespace
 Player::Player(void)
 {
 	animationController_ = nullptr;
+	controllerAnimation_ = nullptr;
 	state_ = STATE::NONE;
 
 	//状態管理
@@ -35,11 +37,11 @@ Player::Player(void)
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
 
-	gravHitPosDown_ = AsoUtility::VECTOR_ZERO;
-	gravHitPosUp_ = AsoUtility::VECTOR_ZERO;
+	gravHitPosDown_ = CommonUtility::VECTOR_ZERO;
+	gravHitPosUp_ = CommonUtility::VECTOR_ZERO;
 
 	chestFrmNo_ = 0;
-	chestPos_ = AsoUtility::VECTOR_ZERO;
+	chestPos_ = CommonUtility::VECTOR_ZERO;
 
 	effectSmokePlayId_ = -1;
 	effectSmokeResId_ = -1;
@@ -47,17 +49,17 @@ Player::Player(void)
 	stepJump_ = -1.0f;
 	isJump_ = false;
 	speed_ = -1.0f;
-	movedPos_ = AsoUtility::VECTOR_ZERO;
-	moveDir_ = AsoUtility::VECTOR_ZERO;
-	movePow_ = AsoUtility::VECTOR_ZERO;
-	moveDiff_ = AsoUtility::VECTOR_ZERO;
-	jumpPow_ = AsoUtility::VECTOR_ZERO;
+	movedPos_ = CommonUtility::VECTOR_ZERO;
+	moveDir_ = CommonUtility::VECTOR_ZERO;
+	movePow_ = CommonUtility::VECTOR_ZERO;
+	moveDiff_ = CommonUtility::VECTOR_ZERO;
+	jumpPow_ = CommonUtility::VECTOR_ZERO;
 	playerRotY_ = Quaternion::Quaternion();
 	goalQuaRot_ = Quaternion::Quaternion();
 	stepRotTime_ = 0.0f;
 	imgShadow_ = -1;
 	isJumpUnlimited_ = false;
-	jumpVelocity_ = AsoUtility::VECTOR_ZERO;
+	jumpVelocity_ = CommonUtility::VECTOR_ZERO;
 	isDodge_ = false;
 	stepDodge_ = -1.0f;
 }
@@ -75,7 +77,7 @@ void Player::Init(void)
 	transform_.pos = { -60.0f, 0.0f, 30.0f };
 	transform_.quaRot = Quaternion();
 	transform_.quaRotLocal =
-		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
 	transform_.Update();
 
 	//丸影画像
@@ -117,6 +119,7 @@ void Player::Update(void)
 
 	//アニメーション再生
 	animationController_->Update();
+	//controllerAnimation_->Update();
 
 #ifdef _DEBUG
 
@@ -167,7 +170,7 @@ bool Player::IsPlay(void) const
 void Player::InitAnimation(void)
 {
 	//アニメーションコントローラーの生成とアニメーションの登録
-	std::string path = Application::PATH_MODEL + "Player/";
+	const std::string path = Application::PATH_MODEL + "Player/";
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", ANIM_SPEED);
 	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walking.mv1", ANIM_SPEED);
@@ -176,6 +179,21 @@ void Player::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::DODGE, path + "Rolling.mv1", ANIM_SPEED);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
+
+	//int IdleAnimHandle = MV1LoadModel(L"Data/Model/Player/Idle.mv1");
+	//int WalkAnimHandle = MV1LoadModel(L"Data/Model/Player/Walking.mv1");
+	//int RunAnimHandle = MV1LoadModel(L"Data/Model/Player/Running.mv1");
+	//int JumpAnimHandle = MV1LoadModel(L"Data/Model/Player/Jump.mv1");
+	//int DodgeAnimHandle = MV1LoadModel(L"Data/Model/Player/Rolling.mv1");
+	//controllerAnimation_ = std::make_unique<ControllerAnimation>(transform_.modelId);
+	//controllerAnimation_->Add("Idle", IdleAnimHandle, ANIM_SPEED);
+	//controllerAnimation_->Add("Walk", WalkAnimHandle, ANIM_SPEED);
+	//controllerAnimation_->Add("Run", RunAnimHandle, ANIM_SPEED);
+	//controllerAnimation_->Add("Jump", JumpAnimHandle, ANIM_SPEED);
+	//controllerAnimation_->Add("Dodge", DodgeAnimHandle, ANIM_SPEED);
+
+	////初期アニメーションはアイドルを再生
+	//controllerAnimation_->Play("Idle");
 }
 
 void Player::ChangeState(STATE state)
@@ -342,30 +360,30 @@ void Player::ProcessMove(void)
 	}
 
 	//WASDで位置を変える
-	VECTOR dir = AsoUtility::VECTOR_ZERO;
-	movePow_ = AsoUtility::VECTOR_ZERO;
+	VECTOR dir = CommonUtility::VECTOR_ZERO;
+	movePow_ = CommonUtility::VECTOR_ZERO;
 	if (ins.IsInputPressed("Up"))
 	{
 		dir = VAdd(dir, cameraRot.GetForward());
-		rotRad = AsoUtility::Deg2RadD(0.0);
+		rotRad = CommonUtility::Deg2RadD(0.0);
 	}
 	if (ins.IsInputPressed("Left"))
 	{
 		dir = VAdd(dir, cameraRot.GetLeft());
-		rotRad = AsoUtility::Deg2RadD(270.0);
+		rotRad = CommonUtility::Deg2RadD(270.0);
 	}
 	if (ins.IsInputPressed("Down"))
 	{ 
 		dir = VAdd(dir,cameraRot.GetBack());
-		rotRad = AsoUtility::Deg2RadD(180.0);
+		rotRad = CommonUtility::Deg2RadD(180.0);
 	}
 	if (ins.IsInputPressed("Right"))
 	{
 		dir = VAdd(dir, cameraRot.GetRight());
-		rotRad = AsoUtility::Deg2RadD(90.0);
+		rotRad = CommonUtility::Deg2RadD(90.0);
 	}
 
-	if (!AsoUtility::EqualsVZero(dir))
+	if (!CommonUtility::EqualsVZero(dir))
 	{
 		dir = VNorm(dir);
 
@@ -398,10 +416,12 @@ void Player::ProcessMove(void)
 			if (speed_ == SPEED_RUN)
 			{
 				animationController_->Play((int)ANIM_TYPE::RUN);
+				//controllerAnimation_->Play("Run");
 			}
 			else
 			{
 				animationController_->Play((int)ANIM_TYPE::WALK);
+				//controllerAnimation_->Play("Walk");
 			}
 		}
 	}
@@ -410,6 +430,7 @@ void Player::ProcessMove(void)
 		if (!isJump_ && IsEndLanding() && !isDodge_)
 		{
 			animationController_->Play((int)ANIM_TYPE::IDLE);
+			//controllerAnimation_->Play("Idle");
 		}
 	}
 
@@ -426,9 +447,11 @@ void Player::ProcessJump(void)
 
 		if (!isJump_)
 		{
-			// 無理やりアニメーション
+			//無理やりアニメーション
 			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
-			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);/*
+			controllerAnimation_->Play("Jump", true, 13.0f, 25.0f);
+			controllerAnimation_->SetEndLoop(23.0f, 25.0f, 5.0f);*/
 		}
 
 		isJump_ = true;
@@ -437,7 +460,7 @@ void Player::ProcessJump(void)
 		stepJump_ += SceneManager::GetInstance().GetDeltaTime();
 		if (stepJump_ < 0.5f)
 		{
-			jumpPow_ = VScale(AsoUtility::DIR_U, 35.0f);
+			jumpPow_ = VScale(CommonUtility::DIR_U, 35.0f);
 		}
 
 	}
@@ -474,6 +497,10 @@ void Player::ProcessJumpTest(void)
 		//無理やりアニメーション
 		animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
 		animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+
+		////無理やりアニメーション
+		//controllerAnimation_->Play("Jump", true, 13.0f, 25.0f);
+		//controllerAnimation_->SetEndLoop(23.0f, 25.0f, 5.0f);
 	}
 
 }
@@ -488,9 +515,16 @@ void Player::ProcessDodge(void)
 		isDodge_ = true;
 		
 		animationController_->Play((int)ANIM_TYPE::DODGE,false);
+		//controllerAnimation_->Play("Dodge", false);
 	}
 
 	if (!isDodge_)return;
+
+	////アニメーションが終了したら回避終了
+	//if(controllerAnimation_->IsEnd())
+	//{
+	//	isDodge_ = false;
+	//}
 
 	//アニメーションが終了したら回避終了
 	if(animationController_->IsEnd())
@@ -506,7 +540,7 @@ void Player::SetGoalRotate(double rotRad)
 	VECTOR cameraRot = mainCamera->GetAngles();
 	Quaternion axis =
 		Quaternion::AngleAxis(
-			(double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
+			(double)cameraRot.y + rotRad, CommonUtility::AXIS_Y);
 	
 	//現在設定されている回転との角度差を取る
 	double angleDiff = Quaternion::Angle(axis, goalQuaRot_);
@@ -598,10 +632,10 @@ void Player::CollisionGravity(void)
 	movedPos_ = VAdd(movedPos_, jumpPow_);
 
 	// 重力方向
-	VECTOR dirGravity = AsoUtility::DIR_D;
+	VECTOR dirGravity = CommonUtility::DIR_D;
 
 	// 重力方向の反対
-	VECTOR dirUpGravity = AsoUtility::DIR_U;
+	VECTOR dirUpGravity = CommonUtility::DIR_U;
 
 	// 重力の強さ
 	float gravityPow = GRAVITY_POW;
@@ -622,14 +656,17 @@ void Player::CollisionGravity(void)
 			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
 
 			// ジャンプリセット
-			jumpPow_ = AsoUtility::VECTOR_ZERO;
-			//jumpVelocity_ = AsoUtility::VECTOR_ZERO;
+			jumpPow_ = CommonUtility::VECTOR_ZERO;
+			//jumpVelocity_ = CommonUtility::VECTOR_ZERO;
 			//stepJump_ = 0.0f;
 			if (isJump_)
 			{
 				// 着地モーション
 				animationController_->Play(
 					(int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
+				// 着地モーション
+				//controllerAnimation_->Play(
+				//	"Jump", false, 29.0f, 45.0f, false, true);
 			}
 			isJump_ = false;
 		}
@@ -649,10 +686,10 @@ void Player::CalcGravityPow(void)
 	else
 	{
 		// 地面にいる場合はジャンプ力をリセット
-		//jumpPow_ = AsoUtility::VECTOR_ZERO;
+		//jumpPow_ = CommonUtility::VECTOR_ZERO;
 
 		// 重力方向
-		VECTOR dirGravity = AsoUtility::DIR_D;
+		VECTOR dirGravity = CommonUtility::DIR_D;
 
 		// 重力の強さ
 		float gravityPow = GRAVITY_POW;
@@ -678,6 +715,18 @@ bool Player::IsEndLanding(void) const
 	if (isJumpUnlimited_)return ret;
 
 	// アニメーションがジャンプではない
+	//if (controllerAnimation_->GetPlayType() != "Jump")
+	//{
+	//	return ret;
+	//}
+
+	//// アニメーションが終了しているか
+	//if (controllerAnimation_->IsEnd())
+	//{
+	//	return ret;	//終了している
+	//}
+
+	// アニメーションがジャンプではない
 	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP)
 	{
 		return ret;
@@ -695,6 +744,17 @@ bool Player::IsEndLanding(void) const
 bool Player::IsEndDodge(void) const
 {
 	bool ret = true;
+	// アニメーションが回避ではない
+	//if (controllerAnimation_->GetPlayType() != "Dodge")
+	//{
+	//	return ret;
+	//}
+
+	//// アニメーションが終了しているか
+	//if (controllerAnimation_->IsEnd())
+	//{
+	//	return ret;	//終了している
+	//}
 	// アニメーションが回避ではない
 	if (animationController_->GetPlayType() != (int)ANIM_TYPE::DODGE)
 	{
@@ -714,7 +774,7 @@ void Player::EffectFootSmoke(void)
 {
 	stepFootSmoke_ -= SceneManager::GetInstance().GetDeltaTime();
 
-	float len = AsoUtility::MagnitudeF(moveDiff_);
+	float len = CommonUtility::MagnitudeF(moveDiff_);
 
 	if (len >= 1.0f &&
 		stepFootSmoke_ < 0.0f)

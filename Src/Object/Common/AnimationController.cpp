@@ -60,10 +60,7 @@ void AnimationController::Play(int type, bool isLoop,
 		{
 
 			//モデルからアニメーションを外す
-			//playAnim_.attachNo = MV1DetachAnim(modelId_, playAnim_.attachNo);
-			MV1SetAttachAnimBlendRate(modelId_, playAnim_.attachNo, 1.0f);
-			MV1SetAttachAnimBlendRate(modelId_, type, 1.0f);
-
+			playAnim_.attachNo = MV1DetachAnim(modelId_, playAnim_.attachNo);
 		}
 
 		//アニメーション種別を変更

@@ -54,3 +54,12 @@ std::string StringUtility::WstringToString(const std::wstring& wstr)
         nullptr);
     return ret;
 }
+
+std::wstring StringUtility::GetWStringFromString(const std::string& str)
+{
+    if (!str.empty())
+    {
+        return StringToWstring(str);
+	}
+    return std::wstring();
+}

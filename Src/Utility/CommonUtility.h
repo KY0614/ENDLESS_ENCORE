@@ -4,7 +4,7 @@
 #include <DxLib.h>
 #include "../Common/Vector2.h"
 #include "../Common/Quaternion.h"
-class AsoUtility
+class CommonUtility
 {
 
 public:

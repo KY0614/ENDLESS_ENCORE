@@ -7,6 +7,7 @@
 #include "ActorBase.h"
 
 class AnimationController;
+class ControllerAnimation;
 class Collider;
 class Capsule;
 class Sphere;
@@ -106,6 +107,7 @@ private:
 
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
+	std::unique_ptr<ControllerAnimation> controllerAnimation_;
 
 	//状態管理
 	STATE state_;

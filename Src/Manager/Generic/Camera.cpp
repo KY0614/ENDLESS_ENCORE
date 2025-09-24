@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "../../Libs/ImGui/imgui.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/CommonUtility.h"
 #include "../Generic/InputManager.h"
 #include "../../Object/Common/Transform.h"
 #include "Camera.h"
@@ -12,8 +12,8 @@ Camera::Camera(void)
 	angles_ = VECTOR();
 	cameraUp_ = VECTOR();
 	mode_ = MODE::NONE;
-	pos_ = AsoUtility::VECTOR_ZERO;
-	targetPos_ = AsoUtility::VECTOR_ZERO;
+	pos_ = CommonUtility::VECTOR_ZERO;
+	targetPos_ = CommonUtility::VECTOR_ZERO;
 	followTransform_ = nullptr;
 	cameraNear_ = -1.0f;
 	cameraFar_ = -1.0f;
@@ -153,12 +153,12 @@ void Camera::SetDefault(void)
 	pos_ = DEFAULT_CAMERA_POS;
 
 	//注視点
-	targetPos_ = AsoUtility::VECTOR_ZERO;
+	targetPos_ = CommonUtility::VECTOR_ZERO;
 
 	//カメラの上方向
-	cameraUp_ = AsoUtility::DIR_U;
+	cameraUp_ = CommonUtility::DIR_U;
 
-	angles_.x = AsoUtility::Deg2RadF(30.0f);
+	angles_.x = CommonUtility::Deg2RadF(30.0f);
 	angles_.y = 0.0f;
 	angles_.z = 0.0f;
 
@@ -183,10 +183,10 @@ void Camera::SyncFollow(void)
 	pos_ = VAdd(pos, localPos);
 
 	//正面から設定されたY軸分、回転させる
-	rotOutX_ = followRot.Mult(Quaternion::AngleAxis(angles_.y, AsoUtility::AXIS_Y));
+	rotOutX_ = followRot.Mult(Quaternion::AngleAxis(angles_.y, CommonUtility::AXIS_Y));
 
 	//正面から設定されたX軸分、回転させる
-	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, AsoUtility::AXIS_X));
+	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, CommonUtility::AXIS_X));
 
 	rot_ = Quaternion::Slerp(rot_, rot_, 0.1f);
 
@@ -221,7 +221,7 @@ void Camera::ProcessMove(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
-	VECTOR dir = AsoUtility::VECTOR_ZERO;
+	VECTOR dir = CommonUtility::VECTOR_ZERO;
 	if (ins.IsInputPressed("CameraFront"))	pos_.z += 5.0f; targetPos_.z += 5.0f;
 	if (ins.IsInputPressed("CameraBack"))	pos_.z -= 5.0f; targetPos_.z -= 5.0f;
 	if (ins.IsInputPressed("CameraR"))		pos_.x += 5.0f;	targetPos_.x += 5.0f;

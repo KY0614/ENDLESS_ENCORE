@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "../../Libs/ImGui/imgui.h"
-#include "../../Utility/AsoUtility.h"
+#include "../../Utility/CommonUtility.h"
 #include "../../Common/Fader.h"
 #include "../../Scene/TitleScene.h"
 #include "../../Scene/MovieScene.h"
@@ -240,7 +240,7 @@ SceneManager::SceneManager(void)
 	deltaTime_ = 1.0f / 60.0f;
 
 	camera_ = nullptr;
-	lightDir_ = AsoUtility::VECTOR_ZERO;
+	lightDir_ = CommonUtility::VECTOR_ZERO;
 }
 
 void SceneManager::ResetDeltaTime(void)

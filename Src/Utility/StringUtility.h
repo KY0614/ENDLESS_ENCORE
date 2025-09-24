@@ -19,6 +19,8 @@ public:
 	/// <returns>string‚Ì•¶Žš—ñ</returns>
 	static std::string WstringToString(const std::wstring& wstr);
 
+	static std::wstring GetWStringFromString(const std::string& str);
+
 private:
 
 };
