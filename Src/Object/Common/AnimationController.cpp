@@ -1,5 +1,7 @@
 #include <DxLib.h>
+#include "../../Utility/ModelFrameUtility.h"
 #include "../../Utility/StringUtility.h"
+#include "../../Utility/CommonUtility.h"
 #include "../../Manager/Generic/SceneManager.h"
 #include "AnimationController.h"
 
@@ -33,6 +35,7 @@ void AnimationController::Add(int type, const std::string& path, float speed)
 	anim.model = MV1LoadModel(StringUtility::StringToWstring(path).c_str());
 	anim.animIndex = type;
 	anim.speed = speed;
+	anim.firstPos = VGet(0.0f,0.0f,0.0f);
 
 	if (animations_.count(type) == 0)
 	{
@@ -46,6 +49,12 @@ void AnimationController::Add(int type, const std::string& path, float speed)
 		animations_[type].animIndex = anim.animIndex;
 		animations_[type].attachNo = anim.attachNo;
 		animations_[type].totalTime = anim.totalTime;
+		// --- 【追加】アニメーション再生開始時に、フレームの初期位置を設定 ---
+		const int frmNo = MV1SearchFrame(modelId_, L"mixamorig:Hips");
+		// フレームのローカル行列を取得し、初期位置(firstPos)として保存
+		MATRIX m = MV1GetFrameLocalMatrix(modelId_, frmNo);
+		// 行列の並進成分 (4行目) を位置として取得し、保存 (X, Y, Z全て)
+		playAnim_.firstPos = VGet(m.m[3][0], m.m[3][1], m.m[3][2]);
 	}
 
 }
@@ -58,9 +67,9 @@ void AnimationController::Play(int type, bool isLoop,
 
 		if (playType_ != -1)
 		{
-
 			//モデルからアニメーションを外す
 			playAnim_.attachNo = MV1DetachAnim(modelId_, playAnim_.attachNo);
+			MV1ResetFrameUserLocalMatrix(modelId_,0);
 		}
 
 		//アニメーション種別を変更
@@ -104,6 +113,10 @@ void AnimationController::Play(int type, bool isLoop,
 
 void AnimationController::Update(void)
 {
+	const int frmNo = MV1SearchFrame(modelId_, L"mixamorig:Hips");
+	// アニメーション進行前のルートのローカル座標
+	VECTOR pre = MV1GetAttachAnimFrameLocalPosition(
+		modelId_, playAnim_.attachNo, frmNo);
 
 	//経過時間の取得
 	float deltaTime = SceneManager::GetInstance().GetDeltaTime();
@@ -166,13 +179,24 @@ void AnimationController::Update(void)
 				//ループしない
 				playAnim_.step = playAnim_.totalTime;
 			}
-
 		}
-
 	}
 
 	//アニメーション設定
 	MV1SetAttachAnimTime(modelId_, playAnim_.attachNo, playAnim_.step);
+
+	//// アニメーション進行後のルートのローカル座標
+	//VECTOR post = MV1GetAttachAnimFrameLocalPosition(
+	//	modelId_, playAnim_.attachNo, frmNo);
+
+	//// アニメーション移動量を取得
+	//playAnim_.movePow = VSub(post, pre);
+
+	////腰の位置がずれるので補正
+	//playAnim_.firstPos.y = post.y;
+
+	////移動量を打ち消す
+	//ModelFrameUtility::SetFrameLocalMatrixPos(modelId_, frmNo, playAnim_.firstPos);
 
 }
 
@@ -208,4 +232,9 @@ bool AnimationController::IsEnd(void) const
 
 	return ret;
 
+}
+
+VECTOR AnimationController::GetMovePow(void) const
+{
+	return playAnim_.movePow;
 }

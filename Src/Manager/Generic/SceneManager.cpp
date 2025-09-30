@@ -13,7 +13,7 @@
 #include "../../Scene/ResultScene.h"
 #include "Camera.h"
 #include "../GameSystem/SoundManager.h"
-#include "../../Object/UI/UIManager.h"
+//#include "../../Object/UI/UIManager.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
@@ -36,7 +36,7 @@ SceneManager& SceneManager::GetInstance(void)
 void SceneManager::Init(void)
 {
 	SoundManager::CreateInstance();
-	UIManager::CreateInstance();
+	//UIManager::CreateInstance();
 
 	sceneId_ = SCENE_ID::NONE;
 	waitSceneId_ = SCENE_ID::NONE;
@@ -159,7 +159,7 @@ void SceneManager::Draw(void)
 void SceneManager::Destroy(void)
 {
 	SoundManager::GetInstance().Destroy();
-	UIManager::GetInstance().Destroy();
+	//UIManager::GetInstance().Destroy();
 	delete instance_;
 }
 
@@ -255,7 +255,7 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	//リソースの解放
 	resM.Release();
 	SoundManager::GetInstance().Release();
-	UIManager::GetInstance().Release();
+	//UIManager::GetInstance().Release();
 
 	//シーンを変更する
 	sceneId_ = sceneId;

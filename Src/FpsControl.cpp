@@ -4,8 +4,7 @@
 
 FpsControl::FpsControl()
     : currentTime_(0), prevFrmTime_(0),
-    frmCnt_(0), updatreFrmRateTime_(0),
-    frmRate_(0.0f)
+    frmCnt_(0), updatreFrmRateTime_(0),frmRate_(0.0f)
 {   
 }
 
@@ -66,4 +65,9 @@ void FpsControl::CalcFrameRate(void)
 void FpsControl::DrawFrameRate(void)
 {
     DrawFormatString(0, 0, 0xFF0000, L"FPS[%.2f]", frmRate_);
+}
+
+const float& FpsControl::GetFrameRate(void)const
+{
+    return frmRate_;
 }

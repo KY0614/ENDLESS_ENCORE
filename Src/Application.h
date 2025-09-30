@@ -68,6 +68,8 @@ public:
 
 	void EndGame(void) { isEnd_ = true; }
 
+	const float& GetFrameRate(void) const;
+
 private:
 
 	Size windowSize_;

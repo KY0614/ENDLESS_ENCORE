@@ -10,14 +10,13 @@ class AnimationController;
 class ControllerAnimation;
 class Collider;
 class Capsule;
-class Sphere;
 
 class Player : public ActorBase
 {
-
 public:
 
 	//スピード
+	static constexpr float SPEED_DODGE = 2.0f;
 	static constexpr float SPEED_MOVE = 4.0f;
 	static constexpr float SPEED_RUN = 8.0f;
 
@@ -103,6 +102,15 @@ public:
 	/// <param name="state">変更する状態</param>
 	void ChangeState(STATE state);
 
+	void SubHp(float subHp) { hp_ -= subHp; }
+
+	/// <summary>
+	/// 回避中かどうかを取得する
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true:回避中　false:回避してない</returns>
+	const bool& GetisDodge(void)const  { return isDodge_; }
+
 private:
 
 	//アニメーション
@@ -117,6 +125,8 @@ private:
 
 	//状態管理(更新ステップ)
 	std::function<void(void)> stateUpdate_;
+
+	float hp_;
 
 	//移動スピード
 	float speed_;
@@ -177,9 +187,13 @@ private:
 
 	int chestFrmNo_;
 	VECTOR chestPos_;
-
+	
 	//回避判定
 	bool isDodge_;
+	int hipFrmNo_;			//ヒップフレーム番号
+	VECTOR animMovePow_;
+	VECTOR prevPos_;
+	VECTOR hipMovedPos_;	//ヒップ位置
 
 	float stepDodge_;
 
@@ -243,6 +257,14 @@ private:
 	/// <param name=""></param>
 	void ProcessDodge(void);
 
+	//パリィ------------------------------------------------------------
+
+	/// <summary>
+	/// パリィ処理
+	/// </summary>
+	/// <param name=""></param>
+	void ProcessParry(void);
+
 	//モデルの回転----------------------------------------------------
 
 	/// <summary>
@@ -283,9 +305,14 @@ private:
 	/// <summary>
 	/// 着地モーションが終了したかどうか
 	/// </summary>
-	/// <returns>true: 着地モーションが終了した場合</returns>
+	/// <returns>true: 着地モーションが終了した場合　false:それ以外</returns>
 	bool IsEndLanding(void) const;
 
+	/// <summary>
+	/// 回避モーションが終了したかどうか
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true:回避モーションが終了した場合　false:それ以外</returns>
 	bool IsEndDodge(void) const;
 
 	/// <summary>
@@ -297,4 +324,9 @@ private:
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
 	/// </summary>
 	void UpdateDebugImGui(void);
+
+	/// <summary>
+	/// デバッグ用の描画処理
+	/// </summary>
+	void DebugDraw(void);
 };

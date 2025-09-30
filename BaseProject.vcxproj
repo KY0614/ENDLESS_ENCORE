@@ -19,16 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Utility\ModelFrameUtility.cpp" />
     <ClCompile Include="Src\Object\Common\ControllerAnimation.cpp" />
     <ClCompile Include="Src\Object\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
-    <ClCompile Include="Src\Object\UI\PopUpUI.cpp" />
     <ClCompile Include="Src\Scene\PauseScene\KeyConfigScene.cpp" />
     <ClCompile Include="Src\Scene\PauseScene\ExplainScene.cpp" />
     <ClCompile Include="Src\Scene\PauseScene.cpp" />
-    <ClCompile Include="Src\Object\UI\IconUI.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
-    <ClCompile Include="Src\Object\UI\GaugeUI.cpp" />
     <ClCompile Include="Src\Manager\Generic\Input.cpp" />
     <ClCompile Include="Src\FpsControl.cpp" />
     <ClCompile Include="Src\Object\Common\Cube.cpp" />
@@ -71,21 +69,16 @@
     <ClCompile Include="Src\Utility\CommonUtility.cpp" />
     <ClCompile Include="Src\Scene\TutorialScene.cpp" />
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
-    <ClCompile Include="Src\Object\UI\UIBase.cpp" />
-    <ClCompile Include="Src\Manager\GameSystem\Timer.cpp" />
-    <ClCompile Include="Src\Object\UI\UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Utility\ModelFrameUtility.h" />
     <ClInclude Include="Src\Object\Common\ControllerAnimation.h" />
     <ClInclude Include="Src\Object\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
-    <ClInclude Include="Src\Object\UI\PopUpUI.h" />
     <ClInclude Include="Src\Scene\PauseScene\KeyConfigScene.h" />
     <ClInclude Include="Src\Scene\PauseScene\ExplainScene.h" />
     <ClInclude Include="Src\Scene\PauseScene.h" />
-    <ClInclude Include="Src\Object\UI\IconUI.h" />
     <ClInclude Include="Src\Common\Easing.h" />
-    <ClInclude Include="Src\Object\UI\GaugeUI.h" />
     <ClInclude Include="Src\Manager\Generic\Input.h" />
     <ClInclude Include="Src\FpsControl.h" />
     <ClInclude Include="Src\Object\Common\Cube.h" />
@@ -175,9 +168,6 @@
     <ClInclude Include="Src\Utility\CommonUtility.h" />
     <ClInclude Include="Src\Scene\TutorialScene.h" />
     <ClInclude Include="Src\Utility\StringUtility.h" />
-    <ClInclude Include="Src\Object\UI\UIBase.h" />
-    <ClInclude Include="Src\Manager\GameSystem\Timer.h" />
-    <ClInclude Include="Src\Object\UI\UIManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />

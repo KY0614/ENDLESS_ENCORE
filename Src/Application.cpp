@@ -133,10 +133,17 @@ bool Application::IsReleaseFail(void) const
 	return isReleaseFail_;
 }
 
+const float& Application::GetFrameRate(void) const
+{
+	return fps_->GetFrameRate();
+}
+
 Application::Application(void)
 {
 	isInitFail_ = false;
 	isReleaseFail_ = false;
+	isEnd_ = false;
+	windowSize_ = {};
 	fps_ = nullptr;
 }
 

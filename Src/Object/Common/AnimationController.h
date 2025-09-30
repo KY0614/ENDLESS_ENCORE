@@ -1,4 +1,5 @@
 #pragma once
+#include <DxLib.h>
 #include <string>
 #include <map>
 class SceneManager;
@@ -17,6 +18,8 @@ public :
 		float speed = 0.0f;
 		float totalTime = 0.0f;
 		float step = 0.0f;
+		VECTOR movePow = { 0.0f,0.0f,0.0f };
+		VECTOR firstPos = { 0.0f,0.0f,0.0f };
 	};
 
 	//コンストラクタ
@@ -41,6 +44,8 @@ public :
 
 	//再生終了
 	bool IsEnd(void) const;
+
+	VECTOR GetMovePow(void) const;
 
 private :
 

@@ -6,7 +6,8 @@
 #include "../Manager/GameSystem/SoundManager.h"
 #include "ExplainScene.h"
 
-namespace {
+namespace 
+{
 	const int MARGINE_SIZE = 30;
 	const int EXPLAIN_SIZE = 60;
 }
@@ -27,20 +28,7 @@ ExplainScene::~ExplainScene(void)
 
 void ExplainScene::Init(void)
 {
-	auto& sound = SoundManager::GetInstance();
-	//ÉJÅ[É\ÉãSE
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::MENU_BACK,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::MENU_BACK).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::MENU_BACK, 256 / 2);
 
-	backImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::TUTORIAL_BACK).handleId_;
-
-	explainImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::TUTORIAL).handleId_;
-
-	menuBackImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::MENU_BACK_LOGO).handleId_;
 }
 
 void ExplainScene::Update(void)

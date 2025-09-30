@@ -82,29 +82,7 @@ PauseScene::~PauseScene(void)
 
 void PauseScene::Init(void)
 {
-	auto& sound = SoundManager::GetInstance();
-	//カーソルSE
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::NEXT_PAGE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::NEXT_PAGE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::NEXT_PAGE, 256 / 2);
 
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::RETURN_PAGE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::RETURN_PAGE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::RETURN_PAGE, 256 / 2);
-
-	//メニュー時SE
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::MENU_CLOSE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::MENU_CLOSE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::MENU_CLOSE, 256 / 2);
-
-	backImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::TUTORIAL_BACK).handleId_;
-
-	menuListImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::MENU_LIST).handleIds_;
-
-	menuCursorImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::MENU_CURSOR).handleId_;
 }
 
 void PauseScene::Update(void)

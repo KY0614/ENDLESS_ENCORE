@@ -16,9 +16,6 @@ Input::Input()
 	ResetTable();
 	Load();
 
-	inputlistForDisplay_ = {
-		"Back","pause","Dash","Interact"
-	};
 	analogInputTable_[AnalogInputType::l_up] = [](const XINPUT_STATE& state) {
 		return state.ThumbLY > 10000;
 	};	
@@ -138,6 +135,10 @@ void Input::ResetTable()
 
 	inputTable_["Reset"] = { {PeripheralType::keyboard,KEY_INPUT_R},
 							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
+							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
+
+	inputTable_["Parry"] = { {PeripheralType::keyboard,KEY_INPUT_F},
+							{PeripheralType::gamepad, PAD_INPUT_A},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
 	inputTable_["Dodge"] = { {PeripheralType::keyboard,KEY_INPUT_SPACE},

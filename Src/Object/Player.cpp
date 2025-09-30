@@ -1,4 +1,3 @@
-#include <string>
 #include <cassert>
 #include<EffekseerForDXLib.h>
 #include "../Application.h"
@@ -14,6 +13,7 @@
 #include "Common/Capsule.h"
 #include "Common/Collider.h"
 #include "Player.h"
+#include "Enemy.h"
 
 namespace
 {
@@ -24,6 +24,8 @@ namespace
 
 	//アニメーション再生速度
 	const float ANIM_SPEED = 30.0f;
+
+	const float HP_MAX = 50.0f;
 }
 
 Player::Player(void)
@@ -31,7 +33,7 @@ Player::Player(void)
 	animationController_ = nullptr;
 	controllerAnimation_ = nullptr;
 	state_ = STATE::NONE;
-
+	hp_ = 0.0f;
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
@@ -42,6 +44,8 @@ Player::Player(void)
 
 	chestFrmNo_ = 0;
 	chestPos_ = CommonUtility::VECTOR_ZERO;
+
+	hipFrmNo_ = 0;
 
 	effectSmokePlayId_ = -1;
 	effectSmokeResId_ = -1;
@@ -108,6 +112,7 @@ void Player::Init(void)
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 	stepDodge_ = 1.5f;
+	hp_ = 50.0f;
 }
 
 void Player::Update(void)
@@ -115,11 +120,17 @@ void Player::Update(void)
 	//更新ステップ
 	stateUpdate_();
 
-	transform_.Update();
+	//ヒップの位置更新
+	//prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId,0, hipFrmNo_);
 
 	//アニメーション再生
 	animationController_->Update();
 	//controllerAnimation_->Update();
+	
+	//胸の位置更新
+	hipMovedPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
+
+	transform_.Update();
 
 #ifdef _DEBUG
 
@@ -130,6 +141,7 @@ void Player::Update(void)
 
 void Player::Draw(void)
 {
+
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 
@@ -137,11 +149,7 @@ void Player::Draw(void)
 	DrawShadow();
 #ifdef _DEBUG
 
-	DrawFormatString(0, 20, 0xffffff, L"pos : %.2f, %.2f, %.2f", transform_.pos.x,
-		transform_.pos.y, transform_.pos.z);
-	DrawFormatString(0, 40, 0xffffff, L"jumpPow : %.2f, %.2f, %.2f", jumpPow_.x,
-		jumpPow_.y, jumpPow_.z);
-	DrawFormatString(0, 60, 0xffffff, L"isJUmp : %d", isJump_);
+	DebugDraw();
 
 #endif // _DEBUG
 }
@@ -180,6 +188,10 @@ void Player::InitAnimation(void)
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
+	//ヒップの位置取得
+	hipFrmNo_ = MV1SearchFrame(transform_.modelId, L"mixamorig:Hips");
+	MV1SetAttachAnimTime(transform_.modelId, hipFrmNo_, 0.0f);
+	prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
 	//int IdleAnimHandle = MV1LoadModel(L"Data/Model/Player/Idle.mv1");
 	//int WalkAnimHandle = MV1LoadModel(L"Data/Model/Player/Walking.mv1");
 	//int RunAnimHandle = MV1LoadModel(L"Data/Model/Player/Running.mv1");
@@ -234,6 +246,7 @@ void Player::UpdatePlay(void)
 	//ProcessJump();
 	ProcessJumpTest();
 
+	//回避処理
 	ProcessDodge();
 
 	//移動方向に応じた回転
@@ -399,7 +412,7 @@ void Player::ProcessMove(void)
 		worldDir.z = dir.x * sinY + dir.z * cosY;
 
 		//ジャンプ中に加速しないように
-		if (!isJump_)
+		if (!isJump_ && !isDodge_)
 		{
 			//移動速度の設定
 			speed_ = ins.IsInputPressed("Dash") ? SPEED_RUN : SPEED_MOVE;
@@ -509,16 +522,24 @@ void Player::ProcessDodge(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 	bool isHit = ins.IsInputTriggered("Dodge");
-
+	// ルートフレーム（Hipフレーム）の現在の行列を取得
+	MATRIX hipMatrix = MGetIdent();
 	if (isHit && (isDodge_ || IsEndDodge()))
 	{
 		isDodge_ = true;
-		
 		animationController_->Play((int)ANIM_TYPE::DODGE,false);
 		//controllerAnimation_->Play("Dodge", false);
+		prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
 	}
 
 	if (!isDodge_)return;
+
+	VECTOR dodgeAnimMove = VSub(hipMovedPos_,prevPos_);
+	float movePow = VSize(dodgeAnimMove);
+	VECTOR moveDir = VScale(moveDir_, movePow);
+	transform_.pos = VAdd(transform_.pos, moveDir);
+	animMovePow_ = VAdd(transform_.pos, moveDir);
+	prevPos_ = hipMovedPos_;
 
 	////アニメーションが終了したら回避終了
 	//if(controllerAnimation_->IsEnd())
@@ -532,6 +553,17 @@ void Player::ProcessDodge(void)
 		isDodge_ = false;
 	}
 
+}
+
+void Player::ProcessParry(void)
+{
+	InputManager& ins = InputManager::GetInstance();
+	bool isHit = ins.IsInputTriggered("Parry");
+
+	if (isHit)
+	{
+
+	}
 }
 
 void Player::SetGoalRotate(double rotRad)
@@ -824,4 +856,29 @@ void Player::UpdateDebugImGui(void)
 
 	//終了処理
 	ImGui::End();
+}
+
+void Player::DebugDraw(void)
+{
+	capsule_->Draw();
+	int lineH = 1;
+
+	DebugDrawFormat::FormatString(L"HP : %.2f",
+		hp_,
+		lineH);
+	DebugDrawFormat::FormatString(L"hipMoved : %.2f",
+		hipMovedPos_.z,
+		lineH);
+	DebugDrawFormat::FormatString(L"preHipPos : %.2f",
+		prevPos_.z,
+		lineH);
+	DebugDrawFormat::FormatString(L"sub : %.2f",
+		hipMovedPos_.z - prevPos_.z,
+		lineH);
+	//DrawFormatString(0, 40, 0xffffff, L"pos : %.2f, %.2f, %.2f", transform_.pos.x,
+	//	transform_.pos.y, transform_.pos.z);
+	//DrawFormatString(0, 60, 0xffffff, L"jumpPow : %.2f, %.2f, %.2f", jumpPow_.x,
+	//	jumpPow_.y, jumpPow_.z);
+	//DrawFormatString(0, 80, 0xffffff, L"isDodge : %d", isDodge_);
+
 }

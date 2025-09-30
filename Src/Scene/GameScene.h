@@ -3,7 +3,7 @@
 #include "SceneBase.h"
 
 class Player;
-class Cube;
+class Enemy;
 
 class GameScene : public SceneBase
 {
@@ -28,7 +28,7 @@ private:
 	DrawFunc_t draw_;
 
 	std::unique_ptr<Player> player_;
-	std::unique_ptr<Cube> cube_;
+	std::unique_ptr<Enemy> enemy_;
 
 	/// <summary>
 	/// ゲーム中の更新処理
@@ -42,11 +42,14 @@ private:
 	/// <param name="">カウントダウン、カウントアップ以外の描画</param>
 	void DrawGame(void);
 
-
 #ifdef _DEBUG
 
+	//床
 	Transform floor_;
-
+	
+	/// <summary>
+	/// デバッグ用の描画処理
+	/// </summary>
 	void DrawDebug(void);
 
 #endif // _DEBUG

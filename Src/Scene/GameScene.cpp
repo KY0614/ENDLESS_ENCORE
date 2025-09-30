@@ -5,6 +5,7 @@
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Player.h"
+#include "../Object/Enemy.h"
 #include "../Object/Common/Cube.h"
 #include "PauseScene.h"
 #include "GameScene.h"
@@ -26,8 +27,9 @@ void GameScene::Init(void)
 	player_ = std::make_unique<Player>();
 	player_->Init();
 
-	//
-	cube_ = std::make_unique<Cube>();
+	//プレイヤー
+	enemy_ = std::make_unique<Enemy>(*player_);
+	enemy_->Init();
 
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
@@ -64,6 +66,7 @@ void GameScene::UpdateGame(void)
 	InputManager& ins = InputManager::GetInstance();
 
 	player_->Update();
+	enemy_->Update();
 
 	if (ins.IsInputTriggered("pause"))
 	{
@@ -84,15 +87,14 @@ void GameScene::UpdateGame(void)
 void GameScene::DrawGame(void)
 {
 #ifdef _DEBUG
+
+	DrawString(0, 0, L"Game", 0xFFFFFF);
+
 	DrawDebug();
 #endif // _DEBUG
 
 	player_->Draw();
-
-	/*cube_->MakeBox(CommonUtility::VECTOR_ZERO,
-		200.0f, 30.0f, 200.0f, GetColorU8(255, 255, 255, 255));*/
-
-	DrawString(0, 0,L"Game", 0xFFFFFF);
+	enemy_->Draw();
 
 }
 

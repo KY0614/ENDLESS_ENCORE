@@ -25,20 +25,7 @@ KeyConfigScene::~KeyConfigScene(void)
 
 void KeyConfigScene::Init(void)
 {
-	auto& sound = SoundManager::GetInstance();
-	//ÉJÅ[É\ÉãSE
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::MENU_BACK,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::MENU_BACK).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::MENU_BACK, 256 / 2);
 
-	backImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::TUTORIAL_BACK).handleId_;
-
-	keyConfImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::MENU_KEY_CONFIG).handleId_;
-
-	menuBackImg_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::MENU_BACK_LOGO).handleId_;
 }
 
 void KeyConfigScene::Update(void)

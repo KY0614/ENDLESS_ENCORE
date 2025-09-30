@@ -16,6 +16,8 @@ public:
 
     void DrawFrameRate(void);
 
+    const float& GetFrameRate(void)const;
+
 private:
     int currentTime_;   //現在の時間
     int prevFrmTime_;   //前回のフレーム実行時の時間
