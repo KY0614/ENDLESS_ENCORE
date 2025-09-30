@@ -89,6 +89,7 @@ public:
 	/// <param name=""></param>
 	/// <returns></returns>
 	const Capsule& GetCapsule(void) const;
+	const Sphere& GetSphere(void) const;
 
 	/// <summary>
 	/// 状態がPLAYかどうか
@@ -111,6 +112,8 @@ public:
 	/// <param name=""></param>
 	/// <returns>true:回避中　false:回避してない</returns>
 	const bool& GetisDodge(void)const  { return isDodge_; }
+	const bool& GetisInvicible(void)const  { return isInvincible_; }
+	const bool& GetisParry(void)const  { return isParry_	; }
 
 private:
 
@@ -193,12 +196,17 @@ private:
 	//回避判定
 	bool isDodge_;
 	bool isInvincible_;		//無敵状態かどうか
+	float stepDodge_;
+
+	//パリィ判定
+	bool isParry_;
+	float stepParry_;
+
 	int hipFrmNo_;			//ヒップフレーム番号
 	VECTOR animMovePow_;
 	VECTOR prevPos_;
 	VECTOR hipMovedPos_;	//ヒップ位置
 
-	float stepDodge_;
 
 	/// <summary>
 	/// アニメーション初期化
@@ -332,4 +340,6 @@ private:
 	/// デバッグ用の描画処理
 	/// </summary>
 	void DebugDraw(void);
+
+	int col_;
 };

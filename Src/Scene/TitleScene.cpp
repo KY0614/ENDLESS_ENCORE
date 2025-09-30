@@ -40,6 +40,8 @@ void TitleScene::Update(void)
 void TitleScene::Draw(void)
 {
 	DrawString(0, 0, L"Title", 0xFFFFFF);
+	DrawString(Application::SCREEN_SIZE_X/2, 
+		Application::SCREEN_SIZE_Y / 2, L"Push Enter", 0xFFFFFF);
 
 	////ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
 	//SetDrawMode(DX_DRAWMODE_BILINEAR);

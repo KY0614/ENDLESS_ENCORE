@@ -35,4 +35,7 @@ void TutorialScene::Draw(void)
 {
 	//(this->*draw_)();
 	DrawString(0, 0, L"Tutorial", 0xFFFFFF);
+	DrawString(Application::SCREEN_SIZE_X / 2,
+		Application::SCREEN_SIZE_Y / 2, L"Push Enter", 0xFFFFFF);
+
 }

@@ -20,6 +20,7 @@ public:
 		MOVE,		//
 		ATTACK_NEAR,	//
 		ATTACK_FAR,		//
+		DOWN,		//
 		DEAD,		//
 	};
 
@@ -91,6 +92,9 @@ private:
 	float currentAngle_;        // プレイヤーを中心とした現在の角度 (ラジアン)
 	float circlingSpeedRad_;    // 円周移動の角速度 (ラジアン/秒)
 
+	bool isDown_;
+	float stepDownTime_;
+
 	/// <summary>
 	/// アニメーション初期化
 	/// </summary>
@@ -143,6 +147,11 @@ private:
 	/// <param name=""></param>
 	void ChangeStateAttackFar(void);
 	/// <summary>
+	/// 状態遷移：DOWN
+	/// </summary>
+	/// <param name=""></param>
+	void ChangeStateDown(void);
+	/// <summary>
 	/// 状態遷移：DEAD
 	/// </summary>
 	/// <param name=""></param>
@@ -154,6 +163,7 @@ private:
 	void UpdateMove(void);
 	void UpdateAttackNear(void);
 	void UpdateAttackFar(void);
+	void UpdateDown(void);
 	void UpdateDead(void);
 
 #ifdef _DEBUG

@@ -137,19 +137,19 @@ void Input::ResetTable()
 							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
-	inputTable_["Parry"] = { {PeripheralType::keyboard,KEY_INPUT_F},
+	inputTable_["Parry"] = { {PeripheralType::keyboard,KEY_INPUT_SPACE},
 							{PeripheralType::gamepad, PAD_INPUT_A},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
-	inputTable_["Dodge"] = { {PeripheralType::keyboard,KEY_INPUT_SPACE},
+	inputTable_["Dodge"] = { {PeripheralType::keyboard,KEY_INPUT_LSHIFT},
 							{PeripheralType::gamepad, PAD_INPUT_A},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
-	inputTable_["Dash"] = { {PeripheralType::keyboard,KEY_INPUT_LSHIFT},
+	inputTable_["Dash"] = { {PeripheralType::keyboard,KEY_INPUT_LCONTROL},
 							{PeripheralType::gamepad, PAD_INPUT_Y},
 							{PeripheralType::x_analog,(int)AnalogInputType::l_trigger} };
 
-	inputTable_["Jump"] = { {PeripheralType::keyboard,KEY_INPUT_LCONTROL},
+	inputTable_["Jump"] = { {PeripheralType::keyboard,KEY_INPUT_F},
 							{PeripheralType::gamepad, PAD_INPUT_B},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::r_trigger}*/ };
 

@@ -15,12 +15,13 @@ namespace
 	const float HP_MAX = 100.0f;
 	const float MOVE_SPEED = 5.0f;
 
+	const float ATTACK_DISTANCE = 100.0f;
 	const float PLAYER_DISTANCE = 300.0f;
 	//追従距離
 	const float FOLLOW_DISTANCE = 700.0f;
 	//重力加速度
 	const float MOVE_TIME = 10.0f;
-	const float ATTACK_TIME = 2.0f;
+	const float ATTACK_TIME = 1.0f;
 
 	const float ATTACK_DAMAGE = 10.0f;
 
@@ -34,7 +35,9 @@ Enemy::Enemy(Player& player):player_(player)
 	state_ = STATE::NONE;
 	col_ = 0xff0000;
 	isAtacked_ = false;
+	isDown_ = false;
 	currentAngle_ = 0.0f;               // 初期角度は適当に設定 (atan2で初期化しても良い)
+	stepDownTime_ = 0.0f;
 
 	// 例: 1秒で 90度（π/2 ラジアン）回転する速度
 	circlingSpeedRad_ = DX_PI_F / 2.0f * 0.1f;
@@ -45,6 +48,7 @@ Enemy::Enemy(Player& player):player_(player)
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Enemy::ChangeStateMove, this));
 	stateChanges_.emplace(STATE::ATTACK_NEAR, std::bind(&Enemy::ChangeStateAttackNear, this));
 	stateChanges_.emplace(STATE::ATTACK_FAR, std::bind(&Enemy::ChangeStateAttackFar, this));
+	stateChanges_.emplace(STATE::DOWN, std::bind(&Enemy::ChangeStateDown, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Enemy::ChangeStateDead, this));
 }
 
@@ -71,8 +75,8 @@ void Enemy::Init(void)
 	capsule_->SetRadius(20.0f);
 
 	sphere_ = std::make_unique<Sphere>(transform_);
-	sphere_->SetLocalPos({ 0.0f, 110.0f, -50.0f });
-	sphere_->SetRadius(20.0f);
+	sphere_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
+	sphere_->SetRadius(30.0f);
 
 	InitAnimation();
 
@@ -93,9 +97,14 @@ void Enemy::Draw(void)
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 
+	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
+	if (isDown_)DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN!!!");
+
 #ifdef _DEBUG
 
 	if (state_ != STATE::ATTACK_NEAR)return;
+	if(!isAtacked_)col_= 0x00ff00;
+	else col_ = 0xff0000;
 	sphere_->Draw(col_);
 
 #endif // _DEBUG
@@ -194,12 +203,7 @@ void Enemy::FollowPlayer(void)
 		float angleDegrees = CommonUtility::Rad2DegF(angle);
 		SetGoalRotate(angle);
 	}
-	//プレイヤーとの距離を測り、一定以上近づいたら追従をやめる
-	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
-	if (VSize(distance) < PLAYER_DISTANCE)
-	{
-		ChangeState(STATE::MOVE);
-	}
+
 }
 
 void Enemy::SetGoalRotate(double rotRad)
@@ -255,6 +259,11 @@ void Enemy::ChangeStateAttackFar(void)
 	stateUpdate_ = std::bind(&Enemy::UpdateAttackFar, this);
 }
 
+void Enemy::ChangeStateDown(void)
+{
+	stateUpdate_ = std::bind(&Enemy::UpdateDown, this);
+}
+
 void Enemy::ChangeStateDead(void)
 {
 	stateUpdate_ = std::bind(&Enemy::UpdateDead, this);
@@ -267,6 +276,13 @@ void Enemy::UpdateNone(void)
 void Enemy::UpdateFollow(void)
 {
 	FollowPlayer();
+
+	//プレイヤーとの距離を測り、一定以上近づいたら追従をやめる
+	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
+	if (VSize(distance) < PLAYER_DISTANCE)
+	{
+		ChangeState(STATE::MOVE);
+	}
 
 	Rotate();
 
@@ -296,57 +312,75 @@ void Enemy::UpdateMove(void)
 		ChangeState(STATE::FOLLOW);
 	}
 
-	// 1. 角度を更新する
-   // 時間経過で角度を変化させます。プレイヤーの周りを右回り（時計回り）で動く。
-	currentAngle_ += circlingSpeedRad_ * SceneManager::GetInstance().GetDeltaTime();
+	//// 1. 角度を更新する
+ //  // 時間経過で角度を変化させます。プレイヤーの周りを右回り（時計回り）で動く。
+	//currentAngle_ += circlingSpeedRad_ * SceneManager::GetInstance().GetDeltaTime();
 
-	// 角度が一周したらリセット (省略可)
-	if (currentAngle_ > DX_PI_F * 2.0f)
-	{
-		currentAngle_ -= DX_PI_F * 2.0f;
-	}
+	//// 角度が一周したらリセット (省略可)
+	//if (currentAngle_ > DX_PI_F * 2.0f)
+	//{
+	//	currentAngle_ -= DX_PI_F * 2.0f;
+	//}
 
-	// 2. プレイヤーの周りの円上の座標を計算する
-	VECTOR playerPos = player_.GetTransform().pos;
+	//// 2. プレイヤーの周りの円上の座標を計算する
+	//VECTOR playerPos = player_.GetTransform().pos;
 
-	// X-Z平面での円運動の計算 (極座標からデカルト座標への変換)
-	// X = R * sin(θ)
-	// Z = R * cos(θ)
+	//// X-Z平面での円運動の計算 (極座標からデカルト座標への変換)
+	//// X = R * sin(θ)
+	//// Z = R * cos(θ)
 
-	// プレイヤーからの相対位置
-	VECTOR relativePos;
-	relativePos.x = PLAYER_DISTANCE * sinf(currentAngle_);
-	relativePos.y = 0.0f; // プレイヤーの高さと合わせる
-	relativePos.z = PLAYER_DISTANCE * cosf(currentAngle_);
+	//// プレイヤーからの相対位置
+	//VECTOR relativePos;
+	//relativePos.x = PLAYER_DISTANCE * sinf(currentAngle_);
+	//relativePos.y = 0.0f; // プレイヤーの高さと合わせる
+	//relativePos.z = PLAYER_DISTANCE * cosf(currentAngle_);
 
-	// 3. 敵のワールド座標を決定する
-	// プレイヤーの位置 + プレイヤーからの相対位置
-	transform_.pos = VAdd(playerPos, relativePos);
+	//// 3. 敵のワールド座標を決定する
+	//// プレイヤーの位置 + プレイヤーからの相対位置
+	//transform_.pos = VAdd(playerPos, relativePos);
 
-	// 4. プレイヤーの方を向く処理
-	// 移動した新しい位置からプレイヤーの方を向くように回転角度を計算し直す
+	//// 4. プレイヤーの方を向く処理
+	//// 移動した新しい位置からプレイヤーの方を向くように回転角度を計算し直す
 
-	// 敵からプレイヤーへのベクトル (このベクトルは原点(0,0,0)を向くベクトルと180度ずれている)
-	// 正しいターゲット方向ベクトルは relativePos の逆ベクトルになる
-	VECTOR posE2P = VScale(relativePos, -1.0f);
+	//// 敵からプレイヤーへのベクトル (このベクトルは原点(0,0,0)を向くベクトルと180度ずれている)
+	//// 正しいターゲット方向ベクトルは relativePos の逆ベクトルになる
+	//VECTOR posE2P = VScale(relativePos, -1.0f);
 
-	// atan2 で角度を計算
-	float angle = atan2(posE2P.x, posE2P.z);
+	//// atan2 で角度を計算
+	//float angle = atan2(posE2P.x, posE2P.z);
 
-	SetGoalRotate(angle);
+	//SetGoalRotate(angle);
 
 	// 回転処理を実行
-	Rotate();
+	//Rotate();
 
 }
 
 void Enemy::UpdateAttackNear(void)
 {
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > ATTACK_TIME)
+	Rotate();
+
+	//重力方向に沿って回転させる
+	transform_.quaRot = Quaternion::Quaternion();
+	transform_.quaRot = transform_.quaRot.Mult(enemyRotY_);
+	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
+	if (VSize(distance) > ATTACK_DISTANCE)
 	{
-		stateStep_ = 0.0f;
-		ChangeState(STATE::MOVE);
+		isAtacked_ = false;
+		FollowPlayer();
+		return;
+	}
+	isAtacked_ = true;
+
+	if (CommonUtility::IsHitSpheres(sphere_->GetPos(),sphere_->GetRadius(),
+		player_.GetSphere().GetPos(),player_.GetSphere().GetRadius()))
+	{
+		if (player_.GetisParry())
+		{
+			ChangeState(STATE::DOWN);
+			isAtacked_ = false;
+			return;
+		}
 	}
 
 	//当たり判定
@@ -354,14 +388,34 @@ void Enemy::UpdateAttackNear(void)
 		sphere_->GetRadius(),player_.GetCapsule().GetPosTop(),
 		player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
 	{
-		if (player_.GetisDodge())return;
+		if (player_.GetisDodge() && player_.GetisInvicible())return;
 		player_.SubHp(ATTACK_DAMAGE);
+		ChangeState(STATE::MOVE);
+	}
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	if (stateStep_ > ATTACK_TIME)
+	{
+		stateStep_ = 0.0f;
+		isAtacked_ = false;
 		ChangeState(STATE::MOVE);
 	}
 }
 
 void Enemy::UpdateAttackFar(void)
 {
+}
+
+void Enemy::UpdateDown(void)
+{
+	if(stepDownTime_ > 3.0f)
+	{
+		stepDownTime_ = 0.0f;
+		isDown_ = false;
+		ChangeState(STATE::MOVE);
+		return;
+	}
+	stepDownTime_ += SceneManager::GetInstance().GetDeltaTime();
+	isDown_ = true;
 }
 
 void Enemy::UpdateDead(void)

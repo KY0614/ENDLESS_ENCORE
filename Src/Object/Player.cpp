@@ -62,12 +62,15 @@ Player::Player(void)
 	playerRotY_ = Quaternion::Quaternion();
 	goalQuaRot_ = Quaternion::Quaternion();
 	stepRotTime_ = 0.0f;
+	stepParry_ = 0.0f;
 	imgShadow_ = -1;
 	isJumpUnlimited_ = false;
 	jumpVelocity_ = CommonUtility::VECTOR_ZERO;
 	isDodge_ = false;
 	stepDodge_ = 0.0f;
 	isInvincible_ = false;
+	isParry_ = false;
+	col_ = -1;
 }
 
 Player::~Player(void)
@@ -101,8 +104,8 @@ void Player::Init(void)
 	capsule_->SetRadius(20.0f);
 
 	sphere_ = std::make_unique<Sphere>(transform_);
-	sphere_->SetLocalPos({ 0.0f, 60.0f, 50.0f });
-	sphere_->SetRadius(20.0f);
+	sphere_->SetLocalPos({ 0.0f, 80.0f, 70.0f });
+	sphere_->SetRadius(40.0f);
 
 	//足煙エフェクト
 	effectSmokeResId_ = ResourceManager::GetInstance().Load(
@@ -118,6 +121,7 @@ void Player::Init(void)
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 	hp_ = 50.0f;
+	col_ = 0x000000;
 }
 
 void Player::Update(void)
@@ -171,6 +175,11 @@ void Player::ClearCollider(void)
 const Capsule& Player::GetCapsule(void) const
 {
 	return *capsule_;
+}
+
+const Sphere& Player::GetSphere(void) const
+{
+	return *sphere_;
 }
 
 bool Player::IsPlay(void) const
@@ -254,6 +263,8 @@ void Player::UpdatePlay(void)
 
 	//回避処理
 	ProcessDodge();
+
+	ProcessParry();
 
 	//移動方向に応じた回転
 	Rotate();
@@ -561,7 +572,7 @@ void Player::ProcessDodge(void)
 		stepDodge_ = 0.0f;
 	}
 
-	if(stepDodge_ > 0.5f && stepDodge_ < 1.5f)
+	if(stepDodge_ > 0.2f && stepDodge_ < 1.5f)
 	{
 		isInvincible_ = true;
 	}
@@ -577,10 +588,19 @@ void Player::ProcessParry(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 	bool isHit = ins.IsInputTriggered("Parry");
-
 	if (isHit)
 	{
+		isParry_ = true;
+	}
 
+	if (!isParry_)return;
+	stepParry_ += SceneManager::GetInstance().GetDeltaTime();
+	col_ = 0xff0000;
+	if(stepParry_ > 0.8f)
+	{
+		col_ = 0x000000;
+		isParry_ = false;
+		stepParry_ = 0.0f;
 	}
 }
 
@@ -883,14 +903,14 @@ void Player::DebugDraw(void)
 	DebugDrawFormat::FormatString(L"HP : %.2f",
 		hp_,
 		lineH);
-	DebugDrawFormat::FormatString(L"stepdodge : %.2f",
+	DebugDrawFormat::FormatString(L"移動 : WASD",
 		stepDodge_,
 		lineH);
-	DebugDrawFormat::FormatString(L"preHipPos : %.2f",
-		prevPos_.z,
+	DebugDrawFormat::FormatString(L"パリィ : SPACE",
+		0,
 		lineH);
-	DebugDrawFormat::FormatString(L"sub : %.2f",
-		hipMovedPos_.z - prevPos_.z,
+	DebugDrawFormat::FormatString(L"回避 : LSHIFT",
+		0,
 		lineH);
 	//DrawFormatString(0, 40, 0xffffff, L"pos : %.2f, %.2f, %.2f", transform_.pos.x,
 	//	transform_.pos.y, transform_.pos.z);
@@ -898,5 +918,5 @@ void Player::DebugDraw(void)
 	//	jumpPow_.y, jumpPow_.z);
 	//DrawFormatString(0, 80, 0xffffff, L"isDodge : %d", isDodge_);
 
-	sphere_->Draw();
+	sphere_->Draw(col_);
 }
