@@ -11,6 +11,7 @@
 #include "Common/AnimationController.h"
 #include "Common/ControllerAnimation.h"
 #include "Common/Capsule.h"
+#include "Common/Sphere.h"
 #include "Common/Collider.h"
 #include "Player.h"
 #include "Enemy.h"
@@ -65,7 +66,8 @@ Player::Player(void)
 	isJumpUnlimited_ = false;
 	jumpVelocity_ = CommonUtility::VECTOR_ZERO;
 	isDodge_ = false;
-	stepDodge_ = -1.0f;
+	stepDodge_ = 0.0f;
+	isInvincible_ = false;
 }
 
 Player::~Player(void)
@@ -98,6 +100,10 @@ void Player::Init(void)
 	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
 
+	sphere_ = std::make_unique<Sphere>(transform_);
+	sphere_->SetLocalPos({ 0.0f, 60.0f, 50.0f });
+	sphere_->SetRadius(20.0f);
+
 	//足煙エフェクト
 	effectSmokeResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::FOOT_SMOKE).handleId_;	
@@ -111,7 +117,6 @@ void Player::Init(void)
 	//歩きエフェクトの発生間隔
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
-	stepDodge_ = 1.5f;
 	hp_ = 50.0f;
 }
 
@@ -141,7 +146,6 @@ void Player::Update(void)
 
 void Player::Draw(void)
 {
-
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 
@@ -239,6 +243,8 @@ void Player::UpdateNone(void)
 
 void Player::UpdatePlay(void)
 {
+	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
+
 	//移動処理
 	ProcessMove();
 
@@ -533,6 +539,7 @@ void Player::ProcessDodge(void)
 	}
 
 	if (!isDodge_)return;
+	stepDodge_ += SceneManager::GetInstance().GetDeltaTime();
 
 	VECTOR dodgeAnimMove = VSub(hipMovedPos_,prevPos_);
 	float movePow = VSize(dodgeAnimMove);
@@ -551,8 +558,19 @@ void Player::ProcessDodge(void)
 	if(animationController_->IsEnd())
 	{
 		isDodge_ = false;
+		stepDodge_ = 0.0f;
 	}
 
+	if(stepDodge_ > 0.5f && stepDodge_ < 1.5f)
+	{
+		isInvincible_ = true;
+	}
+	else
+	{
+		isInvincible_ = false;
+	}
+
+	if(isInvincible_)MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void Player::ProcessParry(void)
@@ -860,14 +878,13 @@ void Player::UpdateDebugImGui(void)
 
 void Player::DebugDraw(void)
 {
-	capsule_->Draw();
 	int lineH = 1;
 
 	DebugDrawFormat::FormatString(L"HP : %.2f",
 		hp_,
 		lineH);
-	DebugDrawFormat::FormatString(L"hipMoved : %.2f",
-		hipMovedPos_.z,
+	DebugDrawFormat::FormatString(L"stepdodge : %.2f",
+		stepDodge_,
 		lineH);
 	DebugDrawFormat::FormatString(L"preHipPos : %.2f",
 		prevPos_.z,
@@ -881,4 +898,5 @@ void Player::DebugDraw(void)
 	//	jumpPow_.y, jumpPow_.z);
 	//DrawFormatString(0, 80, 0xffffff, L"isDodge : %d", isDodge_);
 
+	sphere_->Draw();
 }

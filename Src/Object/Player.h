@@ -10,6 +10,7 @@ class AnimationController;
 class ControllerAnimation;
 class Collider;
 class Capsule;
+class Sphere;
 
 class Player : public ActorBase
 {
@@ -161,6 +162,7 @@ private:
 
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
+	std::unique_ptr<Sphere> sphere_;
 
 	//足煙エフェクト
 	int effectSmokeResId_;	//エフェクトリソースID
@@ -190,6 +192,7 @@ private:
 	
 	//回避判定
 	bool isDodge_;
+	bool isInvincible_;		//無敵状態かどうか
 	int hipFrmNo_;			//ヒップフレーム番号
 	VECTOR animMovePow_;
 	VECTOR prevPos_;
