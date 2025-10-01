@@ -17,11 +17,11 @@ public:
 	{
 		NONE,
 		FOLLOW,
-		MOVE,		//
+		MOVE,			//
 		ATTACK_NEAR,	//
 		ATTACK_FAR,		//
-		DOWN,		//
-		DEAD,		//
+		DOWN,			//
+		DEAD,			//
 	};
 
 	//アニメーションタイプ
@@ -74,15 +74,17 @@ private:
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
 
-	//カプセル
-	std::unique_ptr<Sphere> sphere_;
+	//近接攻撃用の当たり判定球
+	std::unique_ptr<Sphere> sphereNear_;
+	//遠距離攻撃用の当たり判定球
+	std::vector<std::unique_ptr<Sphere>> spheresFar_; 
 
 	//当たり判定用カプセル
 	Player& player_;
 
 	float hp_;
 
-	bool isAtacked_;
+	bool isAttackedNear_;
 
 	//回転
 	Quaternion enemyRotY_;		//Y軸回転
@@ -104,7 +106,7 @@ private:
 	/// プレイヤーを追従する処理
 	/// </summary>
 	/// <param name=""></param>
-	void FollowPlayer(void);
+	void FollowPlayer(VECTOR& pos);
 
 	//回転--------------------------------------------------------
 
@@ -165,6 +167,11 @@ private:
 	void UpdateAttackFar(void);
 	void UpdateDown(void);
 	void UpdateDead(void);
+
+	/// <summary>
+	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
+	/// </summary>
+	void UpdateDebugImGui(void);
 
 #ifdef _DEBUG
 

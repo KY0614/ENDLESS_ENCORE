@@ -197,7 +197,7 @@ void Player::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walking.mv1", ANIM_SPEED);
 	animationController_->Add((int)ANIM_TYPE::RUN, path + "Running.mv1", ANIM_SPEED);
 	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::DODGE, path + "Rolling.mv1", ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::DODGE, path + "Roll.mv1", 40.0f);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
@@ -264,6 +264,7 @@ void Player::UpdatePlay(void)
 	//回避処理
 	ProcessDodge();
 
+	//パリィ処理
 	ProcessParry();
 
 	//移動方向に応じた回転
@@ -392,25 +393,50 @@ void Player::ProcessMove(void)
 	//WASDで位置を変える
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
 	movePow_ = CommonUtility::VECTOR_ZERO;
+	bool isUp = false;
 	if (ins.IsInputPressed("Up"))
 	{
+		isUp = true;
 		dir = VAdd(dir, cameraRot.GetForward());
 		rotRad = CommonUtility::Deg2RadD(0.0);
 	}
+	bool isLeft = false;
 	if (ins.IsInputPressed("Left"))
 	{
+		isLeft = true;
 		dir = VAdd(dir, cameraRot.GetLeft());
 		rotRad = CommonUtility::Deg2RadD(270.0);
 	}
+	bool isDown = false;
 	if (ins.IsInputPressed("Down"))
 	{ 
+		isDown = true;
 		dir = VAdd(dir,cameraRot.GetBack());
 		rotRad = CommonUtility::Deg2RadD(180.0);
 	}
+	bool isRight = false;
 	if (ins.IsInputPressed("Right"))
 	{
+		isRight = true;
 		dir = VAdd(dir, cameraRot.GetRight());
 		rotRad = CommonUtility::Deg2RadD(90.0);
+	}
+
+	if(isUp && isLeft)
+	{
+		rotRad = CommonUtility::Deg2RadD(315.0);
+	}
+	else if(isUp && isRight)
+	{
+		rotRad = CommonUtility::Deg2RadD(45.0);
+	}
+	else if(isDown && isLeft)
+	{
+		rotRad = CommonUtility::Deg2RadD(225.0);
+	}
+	else if(isDown && isRight)
+	{
+		rotRad = CommonUtility::Deg2RadD(135.0);
 	}
 
 	if (!CommonUtility::EqualsVZero(dir))
@@ -553,7 +579,7 @@ void Player::ProcessDodge(void)
 	stepDodge_ += SceneManager::GetInstance().GetDeltaTime();
 
 	VECTOR dodgeAnimMove = VSub(hipMovedPos_,prevPos_);
-	float movePow = VSize(dodgeAnimMove);
+	float movePow = VSize(animationController_->GetMovePow());
 	VECTOR moveDir = VScale(moveDir_, movePow);
 	transform_.pos = VAdd(transform_.pos, moveDir);
 	animMovePow_ = VAdd(transform_.pos, moveDir);

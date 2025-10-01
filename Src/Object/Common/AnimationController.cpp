@@ -35,7 +35,7 @@ void AnimationController::Add(int type, const std::string& path, float speed)
 	anim.model = MV1LoadModel(StringUtility::StringToWstring(path).c_str());
 	anim.animIndex = type;
 	anim.speed = speed;
-	anim.firstPos = VGet(0.0f,0.0f,0.0f);
+	anim.firstPos = CommonUtility::VECTOR_ZERO;
 
 	if (animations_.count(type) == 0)
 	{
@@ -49,70 +49,68 @@ void AnimationController::Add(int type, const std::string& path, float speed)
 		animations_[type].animIndex = anim.animIndex;
 		animations_[type].attachNo = anim.attachNo;
 		animations_[type].totalTime = anim.totalTime;
-		// --- 【追加】アニメーション再生開始時に、フレームの初期位置を設定 ---
-		const int frmNo = MV1SearchFrame(modelId_, L"mixamorig:Hips");
-		// フレームのローカル行列を取得し、初期位置(firstPos)として保存
-		MATRIX m = MV1GetFrameLocalMatrix(modelId_, frmNo);
-		// 行列の並進成分 (4行目) を位置として取得し、保存 (X, Y, Z全て)
-		playAnim_.firstPos = VGet(m.m[3][0], m.m[3][1], m.m[3][2]);
+		animations_[type].firstPos = anim.firstPos;
 	}
 
 }
 
-void AnimationController::Play(int type, bool isLoop, 
+void AnimationController::Play(int type, bool isLoop,
 	float startStep, float endStep, bool isStop, bool isForce)
 {
-
-	if (playType_ != type || isForce) {
-
-		if (playType_ != -1)
-		{
-			//モデルからアニメーションを外す
-			playAnim_.attachNo = MV1DetachAnim(modelId_, playAnim_.attachNo);
-			MV1ResetFrameUserLocalMatrix(modelId_,0);
-		}
-
-		//アニメーション種別を変更
-		playType_ = type;
-		playAnim_ = animations_[type];
-
-		//初期化
-		playAnim_.step = startStep;
-
-		//モデルにアニメーションを付ける
-		int animIdx = 0;
-		if (MV1GetAnimNum(playAnim_.model) > 1)
-		{
-			//アニメーションが複数保存されていたら、番号1を指定
-			animIdx = 1;
-		}
-		playAnim_.attachNo = MV1AttachAnim(modelId_, animIdx, playAnim_.model);
-
-		//アニメーション総時間の取得
-		if (endStep > 0.0f)
-		{
-			playAnim_.totalTime = endStep;
-		}
-		else
-		{
-			playAnim_.totalTime = MV1GetAttachAnimTotalTime(modelId_, playAnim_.attachNo);
-		}
-
-		//アニメーションループ
-		isLoop_ = isLoop;
-
-		//アニメーションしない
-		isStop_ = isStop;
-
-		stepEndLoopStart_ = -1.0f;
-		stepEndLoopEnd_ = -1.0f;
-		switchLoopReverse_ = 1.0f;
+	//同じ種類かつ強制再生を行わない場合
+	if (type == playType_ && !isForce)
+	{
+		return;
 	}
+
+	if (playType_ != -1)
+	{
+		//モデルからアニメーションを外す
+		playAnim_.attachNo = MV1DetachAnim(modelId_, playAnim_.attachNo);
+		//MV1ResetFrameUserLocalMatrix(modelId_, 0);
+	}
+
+	//アニメーション種別を変更
+	playType_ = type;
+	playAnim_ = animations_[type];
+
+	//初期化
+	playAnim_.step = startStep;
+
+	//モデルにアニメーションを付ける
+	int animIdx = 0;
+	if (MV1GetAnimNum(playAnim_.model) > 1)
+	{
+		//アニメーションが複数保存されていたら、番号1を指定
+		animIdx = 1;
+	}
+	playAnim_.attachNo = MV1AttachAnim(modelId_, animIdx, playAnim_.model);
+
+	//アニメーション総時間の取得
+	if (endStep > 0.0f)
+	{
+		playAnim_.totalTime = endStep;
+	}
+	else
+	{
+		playAnim_.totalTime = MV1GetAttachAnimTotalTime(modelId_, playAnim_.attachNo);
+	}
+
+	//アニメーションループ
+	isLoop_ = isLoop;
+
+	//アニメーションしない
+	isStop_ = isStop;
+
+	stepEndLoopStart_ = -1.0f;
+	stepEndLoopEnd_ = -1.0f;
+	switchLoopReverse_ = 1.0f;
 
 }
 
 void AnimationController::Update(void)
 {
+	//ルートフレームの番号取得(Hipsがルート)
 	const int frmNo = MV1SearchFrame(modelId_, L"mixamorig:Hips");
 	// アニメーション進行前のルートのローカル座標
 	VECTOR pre = MV1GetAttachAnimFrameLocalPosition(
@@ -185,18 +183,20 @@ void AnimationController::Update(void)
 	//アニメーション設定
 	MV1SetAttachAnimTime(modelId_, playAnim_.attachNo, playAnim_.step);
 
-	//// アニメーション進行後のルートのローカル座標
-	//VECTOR post = MV1GetAttachAnimFrameLocalPosition(
-	//	modelId_, playAnim_.attachNo, frmNo);
+	// アニメーション進行後のルートのローカル座標
+	VECTOR post = MV1GetAttachAnimFrameLocalPosition(
+		modelId_, playAnim_.attachNo, frmNo);
 
-	//// アニメーション移動量を取得
-	//playAnim_.movePow = VSub(post, pre);
+	// アニメーション移動量を取得
+	playAnim_.movePow = VSub(post, pre);
 
-	////腰の位置がずれるので補正
-	//playAnim_.firstPos.y = post.y;
+	//腰の位置がずれるので補正
+	playAnim_.firstPos.y = post.y;
 
-	////移動量を打ち消す
+	//移動量を打ち消す
 	//ModelFrameUtility::SetFrameLocalMatrixPos(modelId_, frmNo, playAnim_.firstPos);
+	ModelFrameUtility::SetFrameAnimAttachLocalMatrixPos(modelId_, playAnim_.attachNo,
+		frmNo, playAnim_.firstPos);
 
 }
 
