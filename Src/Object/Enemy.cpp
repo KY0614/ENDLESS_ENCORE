@@ -16,10 +16,11 @@ namespace
 	const float HP_MAX = 100.0f;
 	const float MOVE_SPEED = 5.0f;
 
-	const float ATTACK_DISTANCE = 100.0f;
-	const float PLAYER_DISTANCE = 300.0f;
+	const float ATTACK_NEAR_DISTANCE = 350.0f;
+	const float ATTACK_FAR_DISTANCE = 800.0f;
+	const float PLAYER_DISTANCE = 800.0f;
 	//追従距離
-	const float FOLLOW_DISTANCE = 800.0f;
+	const float FOLLOW_DISTANCE = 1200.0f;
 	//重力加速度
 	const float MOVE_TIME = 10.0f;
 	const float ATTACK_TIME = 1.0f;
@@ -67,7 +68,7 @@ void Enemy::Init(void)
 		ResourceManager::SRC::PLAYER));
 	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
 		175.0f/255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
-	const float scl = 1.5f;
+	const float scl = 1.0f;
 	transform_.scl = { scl ,scl ,scl };
 	transform_.pos = { -60.0f, 0.0f, 250.0f };
 	transform_.quaRot = Quaternion();
@@ -123,9 +124,34 @@ void Enemy::Draw(void)
 	MV1DrawModel(transform_.modelId);
 
 	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
-	if (isDown_)DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN!!!");
 
 #ifdef _DEBUG
+	switch (state_)
+	{
+	case Enemy::STATE::NONE:
+		break;
+	case Enemy::STATE::FOLLOW:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
+		break;
+	case Enemy::STATE::MOVE:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE", (int)state_);
+		break;
+	case Enemy::STATE::ATTACK_NEAR:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_NEAR");
+		break;
+	case Enemy::STATE::ATTACK_FAR:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_FAR");
+		break;
+	case Enemy::STATE::DOWN:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN");
+		break;
+	case Enemy::STATE::DEAD:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DEAD");
+		break;
+	default:
+		break;
+	}
+	DrawFormatString(0, 150, 0xffffff, L"p2E : %.2f", CheckPlayerDistance());
 
 	for (int i = 0; i < FAR_SPHERE_NUM; i++)
 	{
@@ -159,6 +185,19 @@ void Enemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::MOVE, path + "Walking.mv1", ANIM_SPEED);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
+}
+
+void Enemy::Move(void)
+{
+}
+
+float Enemy::CheckPlayerDistance(void)
+{
+	//プレイヤーとの距離を測る
+	VECTOR playerToEnemy = VSub(player_.GetTransform().pos, transform_.pos);
+	//ベクトルの大きさを測る
+	float distance = VSize(playerToEnemy);
+	return distance;	//距離を返す
 }
 
 void Enemy::FollowPlayer(VECTOR& pos)
@@ -233,7 +272,6 @@ void Enemy::FollowPlayer(VECTOR& pos)
 		float angleDegrees = CommonUtility::Rad2DegF(angle);
 		SetGoalRotate(angle);
 	}
-
 }
 
 void Enemy::SetGoalRotate(double rotRad)
@@ -310,16 +348,14 @@ void Enemy::UpdateNone(void)
 void Enemy::UpdateFollow(void)
 {
 	FollowPlayer(transform_.pos);
-
-	//プレイヤーとの距離を測り、一定以上近づいたら追従をやめる
-	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
-	if (VSize(distance) < PLAYER_DISTANCE)
-	{
-		ChangeState(STATE::MOVE);
-	}
-
 	Rotate();
 
+	//プレイヤーとの距離を測り、一定以上近づいたら追従をやめる
+	if (CheckPlayerDistance() < PLAYER_DISTANCE)
+	{
+		ChangeState(STATE::MOVE);
+		return;
+	}
 }
 
 void Enemy::UpdateMove(void)
@@ -330,11 +366,20 @@ void Enemy::UpdateMove(void)
 	if (stateStep_ > MOVE_TIME)
 	{
 		stateStep_ = 0.0f;
-		ChangeState(STATE::ATTACK_NEAR);
+		//プレイヤーとの距離を測り、一定以上離れていたら遠距離攻撃
+		//それ以外は近距離攻撃
+		if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
+		{
+			ChangeState(STATE::ATTACK_NEAR);
+		}
+		else
+		{
+			ChangeState(STATE::ATTACK_FAR);
+		}
 	}
 
-	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
-	if(VSize(distance) > FOLLOW_DISTANCE)
+	//プレイヤーとの距離を測り、一定以上離れていたら近づく
+	if(CheckPlayerDistance() > FOLLOW_DISTANCE)
 	{
 		ChangeState(STATE::FOLLOW);
 	}
@@ -386,9 +431,9 @@ void Enemy::UpdateMove(void)
 void Enemy::UpdateAttackNear(void)
 {
 	Rotate();
-
+	//プレイヤーとの距離を測り、一定以上離れていたら近づく
 	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
-	if (VSize(distance) > ATTACK_DISTANCE)
+	if (VSize(distance) > ATTACK_NEAR_DISTANCE)
 	{
 		isAttackedNear_ = false;
 		FollowPlayer(transform_.pos);
@@ -416,6 +461,7 @@ void Enemy::UpdateAttackNear(void)
 		player_.SubHp(ATTACK_DAMAGE);
 		ChangeState(STATE::MOVE);
 	}
+	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > ATTACK_TIME)
 	{
@@ -433,7 +479,14 @@ void Enemy::UpdateAttackFar(void)
 		return;
 	}
 
-	//sphere
+	//
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	if (stateStep_ > ATTACK_TIME)
+	{
+		stateStep_ = 0.0f;
+		ChangeState(STATE::MOVE);
+		return;
+	}
 }
 
 void Enemy::UpdateDown(void)

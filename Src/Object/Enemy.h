@@ -105,6 +105,19 @@ private:
 	void InitAnimation(void);
 
 	/// <summary>
+	/// 移動処理
+	/// </summary>
+	/// <param name=""></param>
+	void Move(void);
+
+	/// <summary>
+	/// プレイヤーとの距離をチェックする
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>プレイヤーと敵の距離</returns>
+	float CheckPlayerDistance(void);
+
+	/// <summary>
 	/// プレイヤーを追従する処理
 	/// </summary>
 	/// <param name=""></param>
