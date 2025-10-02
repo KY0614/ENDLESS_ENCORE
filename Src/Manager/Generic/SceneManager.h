@@ -22,6 +22,7 @@ public:
 	{
 		NONE,
 		TITLE,
+		ADVERTISE,
 		MOVIE,
 		SELECT,
 		TUTORIAL,

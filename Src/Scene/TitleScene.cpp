@@ -13,8 +13,14 @@
 #include "../Renderer/ModelRenderer.h"
 #include "TitleScene.h"
 
+namespace
+{
+	const int ADVERTISE_TIME = 300;
+}
+
 TitleScene::TitleScene(void)
 {
+	toAdvertiseLoopTimer_ = 0;
 }
 
 TitleScene::~TitleScene(void)
@@ -24,6 +30,7 @@ TitleScene::~TitleScene(void)
 
 void TitleScene::Init(void)
 {
+	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
 	//定点カメラ
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
 }
@@ -34,6 +41,13 @@ void TitleScene::Update(void)
 	if (ins.IsInputTriggered("Back"))
 	{
 		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TUTORIAL);
+	}
+
+	if(--toAdvertiseLoopTimer_ <= 0)
+	{
+		toAdvertiseLoopTimer_ = ADVERTISE_TIME;
+		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::ADVERTISE);
+		return;
 	}
 }
 
@@ -48,8 +62,6 @@ void TitleScene::Draw(void)
 
 	//renderer_->Draw();
 
-	//MV1DrawModel(cafeTran_.modelId);
-	//MV1DrawModel(character_.modelId);
 }
 
 void TitleScene::InitMaterial(void)
@@ -85,20 +97,6 @@ void TitleScene::UpdateDebugImGui(void)
 {
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("cafe");
-
-	// 大きさ
-	ImGui::Text("scale");
-	ImGui::InputFloat("SclX", &graoundTran_.scl.x);
-	ImGui::InputFloat("SclY", &graoundTran_.scl.y);
-	ImGui::InputFloat("SclZ", &graoundTran_.scl.z);
-
-	//位置
-	ImGui::Text("position");
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("Pos", &cafeTran_.pos.x);
-	ImGui::SliderFloat("PosX", &cafeTran_.pos.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("PosY", &cafeTran_.pos.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("PosZ", &cafeTran_.pos.z, -10000.0f, 10000.0f);
 
 	//終了処理
 	ImGui::End();

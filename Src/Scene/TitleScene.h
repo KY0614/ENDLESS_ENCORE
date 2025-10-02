@@ -40,17 +40,13 @@ private:
 	//レンダラ
 	std::unique_ptr<ModelRenderer> renderer_;
 
-	//お店用
-	Transform cafeTran_;
-
 	//地面用
 	Transform graoundTran_;
 
-	//キャラクター
-	Transform character_;
-
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
+
+	int toAdvertiseLoopTimer_;
 
 	/// <summary>
 	/// マテリアル情報初期化

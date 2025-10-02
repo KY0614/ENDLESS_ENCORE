@@ -5,6 +5,7 @@
 #include "../../Utility/CommonUtility.h"
 #include "../../Common/Fader.h"
 #include "../../Scene/TitleScene.h"
+#include "../../Scene/AdvertiseScene.h"
 #include "../../Scene/MovieScene.h"
 #include "../../Scene/SelectScene.h"
 #include "../../Scene/PauseScene.h"
@@ -60,7 +61,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//èâä˙ÉVÅ[ÉìÇÃê›íË
-	DoChangeScene(SCENE_ID::GAME);
+	DoChangeScene(SCENE_ID::TITLE);
 
 }
 
@@ -319,6 +320,11 @@ void SceneManager::MakeScene(SCENE_ID sceneId)
 		scene = std::make_unique<TitleScene>();
 		resM.InitTitle();
 		break;
+	
+	case SceneManager::SCENE_ID::ADVERTISE:
+		scene = std::make_unique<AdvertiseScene>();
+		break;
+	
 	
 	case SceneManager::SCENE_ID::MOVIE:
 		scene = std::make_unique<MovieScene>();
