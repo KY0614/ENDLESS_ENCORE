@@ -97,6 +97,8 @@ private:
 	bool isDown_;
 	float stepDownTime_;
 
+	float modelCol_[3];
+
 	/// <summary>
 	/// アニメーション初期化
 	/// </summary>

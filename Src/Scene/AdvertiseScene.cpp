@@ -49,3 +49,19 @@ void AdvertiseScene::Draw(void)
 
 	DrawGraph(0, 0, movieHandle_, true);
 }
+
+void AdvertiseScene::PlayDemoUpdate(void)
+{
+}
+
+void AdvertiseScene::RankingUpdate(void)
+{
+}
+
+void AdvertiseScene::PlayDemoDraw(void)
+{
+}
+
+void AdvertiseScene::RankingDraw(void)
+{
+}

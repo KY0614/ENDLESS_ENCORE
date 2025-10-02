@@ -43,7 +43,6 @@ Enemy::Enemy(Player& player):player_(player)
 	isDown_ = false;
 	currentAngle_ = 0.0f;               // 初期角度は適当に設定 (atan2で初期化しても良い)
 	stepDownTime_ = 0.0f;
-
 	// 例: 1秒で 90度（π/2 ラジアン）回転する速度
 	circlingSpeedRad_ = DX_PI_F / 2.0f  * 0.1f;
 
@@ -65,8 +64,11 @@ void Enemy::Init(void)
 {
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-		ResourceManager::SRC::ENEMY));
-	transform_.scl = CommonUtility::VECTOR_ONE;
+		ResourceManager::SRC::PLAYER));
+	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
+		175.0f/255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
+	const float scl = 1.5f;
+	transform_.scl = { scl ,scl ,scl };
 	transform_.pos = { -60.0f, 0.0f, 250.0f };
 	transform_.quaRot = Quaternion();
 	transform_.quaRotLocal =
@@ -112,7 +114,7 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
-	//UpdateDebugImGui();
+	UpdateDebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -461,6 +463,8 @@ void Enemy::UpdateDebugImGui(void)
 	//位置
 	ImGui::Text("spheresFar pos");
 	VECTOR pos = spheresFar_[index]->GetLocalPos();
+
+	ImGui::ColorEdit3("col", modelCol_);
 
 	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
 	ImGui::InputFloat3("pos", &pos.x);
