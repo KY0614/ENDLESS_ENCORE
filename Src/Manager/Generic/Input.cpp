@@ -143,7 +143,7 @@ void Input::ResetTable()
 
 	inputTable_["Dodge"] = { {PeripheralType::keyboard,KEY_INPUT_LSHIFT},
 							{PeripheralType::gamepad, PAD_INPUT_A},
-							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
+							{PeripheralType::mouse, MOUSE_INPUT_RIGHT} };
 
 	inputTable_["Dash"] = { {PeripheralType::keyboard,KEY_INPUT_LCONTROL},
 							{PeripheralType::gamepad, PAD_INPUT_Y},

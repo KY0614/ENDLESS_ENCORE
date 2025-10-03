@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
     <ClCompile Include="Src\Scene\AdvertiseScene.cpp" />
     <ClCompile Include="Src\Utility\ModelFrameUtility.cpp" />
     <ClCompile Include="Src\Object\Common\ControllerAnimation.cpp" />
@@ -72,6 +73,7 @@
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
     <ClInclude Include="Src\Scene\AdvertiseScene.h" />
     <ClInclude Include="Src\Utility\ModelFrameUtility.h" />
     <ClInclude Include="Src\Object\Common\ControllerAnimation.h" />

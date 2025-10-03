@@ -1,0 +1,19 @@
+{
+    "Player": {
+    "hp": 100,
+    "position": {"x": -60.0, "y": 1.0, "z": 30.0},
+    "scale": 0.7,
+    "localRotY": 180.0,
+    "jumpPower":7.5,
+    "walkSpeed": 6.0,
+    "runSpeed": 10.0,
+    "dodgeSpeed": 23.0,
+    "defaultAnimSpeed":30.0,
+    "animations": {
+      "idle": "Data/Model/Player/Idle.mv1",
+      "walk": "Data/Model/Player/Walking.mv1",
+      "run": "Data/Model/Player/Running.mv1",
+      "dodge": "Data/Model/Player/Dash.mv1"
+     }
+    }
+}

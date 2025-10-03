@@ -151,7 +151,7 @@ void Enemy::Draw(void)
 	default:
 		break;
 	}
-	DrawFormatString(0, 150, 0xffffff, L"p2E : %.2f", CheckPlayerDistance());
+	DrawFormatString(0, 160, 0xffffff, L"p2E : %.2f", CheckPlayerDistance());
 
 	for (int i = 0; i < FAR_SPHERE_NUM; i++)
 	{

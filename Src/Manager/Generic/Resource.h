@@ -16,6 +16,7 @@ public:
 		MODEL,
 		EFFEKSEER,
 		SOUND,
+		JSON,
 	};
 
 	// コンストラクタ

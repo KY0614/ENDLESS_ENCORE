@@ -185,6 +185,7 @@ private:
 	//‰ñ”ð”»’è
 	bool isDodge_;
 	float stepDodge_;
+	bool isDecelerate_;	//Œ¸‘¬’†‚©‚Ç‚¤‚©
 
 	//ƒpƒŠƒB”»’è
 	bool isParry_;
