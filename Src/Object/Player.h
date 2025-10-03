@@ -7,7 +7,6 @@
 #include "ActorBase.h"
 
 class AnimationController;
-class ControllerAnimation;
 class Collider;
 class Capsule;
 class Sphere;
@@ -15,14 +14,6 @@ class Sphere;
 class Player : public ActorBase
 {
 public:
-
-	//スピード
-	static constexpr float SPEED_DODGE = 2.0f;
-	static constexpr float SPEED_MOVE = 4.0f;
-	static constexpr float SPEED_RUN = 8.0f;
-
-	static constexpr float ACCEL_MOVE = 3.0f;	//加速度
-	static constexpr float DECEL_MOVE = 0.1f;	//減速度
 
 	//回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;
@@ -47,6 +38,7 @@ public:
 		JUMP,		//ジャンプ
 		PARRY,		//パリィ
 		DODGE,		//回避
+		DASH,		//回避
 		USE_ITEM,	//アイテム使用
 	};
 
@@ -112,14 +104,12 @@ public:
 	/// <param name=""></param>
 	/// <returns>true:回避中　false:回避してない</returns>
 	const bool& GetisDodge(void)const  { return isDodge_; }
-	const bool& GetisInvicible(void)const  { return isInvincible_; }
 	const bool& GetisParry(void)const  { return isParry_	; }
 
 private:
 
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
-	std::unique_ptr<ControllerAnimation> controllerAnimation_;
 
 	//状態管理
 	STATE state_;
@@ -143,6 +133,8 @@ private:
 	
 	//移動後の座標
 	VECTOR movedPos_;
+
+	float stepWalk_;	//歩きモーション完了までの時間経過
 
 	////加速度、減速度
 	//VECTOR velocity_;	//現在の速度
@@ -189,13 +181,9 @@ private:
 
 	//ジャンプの入力受付時間
 	float stepJump_;
-
-	int chestFrmNo_;
-	VECTOR chestPos_;
 	
 	//回避判定
 	bool isDodge_;
-	bool isInvincible_;		//無敵状態かどうか
 	float stepDodge_;
 
 	//パリィ判定
@@ -203,9 +191,9 @@ private:
 	float stepParry_;
 
 	int hipFrmNo_;			//ヒップフレーム番号
-	VECTOR animMovePow_;
 	VECTOR prevPos_;
 	VECTOR hipMovedPos_;	//ヒップ位置
+
 
 
 	/// <summary>
@@ -241,11 +229,15 @@ private:
 	/// </summary>
 	void DrawShadow(void);
 
+	//移動------------------------------------------------------------
+
 	/// <summary>
 	/// 移動処理
 	/// </summary>
 	/// <param name="">WASDで移動する処理</param>
 	void ProcessMove(void);
+
+	void SetMoveSpeed(const float speed) { speed_ = speed; }
 
 	//ジャンプ--------------------------------------------------------
 

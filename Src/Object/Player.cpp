@@ -4,17 +4,16 @@
 #include "../Utility/CommonUtility.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Common/DebugDrawFormat.h"
+#include "../Common/Easing.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "Common/AnimationController.h"
-#include "Common/ControllerAnimation.h"
 #include "Common/Capsule.h"
 #include "Common/Sphere.h"
 #include "Common/Collider.h"
 #include "Player.h"
-#include "Enemy.h"
 
 namespace
 {
@@ -27,12 +26,22 @@ namespace
 	const float ANIM_SPEED = 30.0f;
 
 	const float HP_MAX = 50.0f;
+
+	//移動
+	const float STEP_WALK2RUN = 1.5f;	//歩きから走りに切り替わる時間
+	const float SPEED_DODGE = 20.0f;	//回避時のスピード
+	const float DODGE_DECELERATION_TIME = 0.3f; //回避後の減速にかける時間
+	const float SPEED_WALK = 4.0f;		//歩きスピード
+	const float SPEED_RUN = 8.0f;		//走るスピード
+
+	//行動時間
+	const float DODGE_TIME = 0.4f;		//回避(無敵)時間
+	const float PARRY_TIME = 0.8f;		//パリィ時間
 }
 
 Player::Player(void)
 {
 	animationController_ = nullptr;
-	controllerAnimation_ = nullptr;
 	state_ = STATE::NONE;
 	hp_ = 0.0f;
 	//状態管理
@@ -42,12 +51,7 @@ Player::Player(void)
 
 	gravHitPosDown_ = CommonUtility::VECTOR_ZERO;
 	gravHitPosUp_ = CommonUtility::VECTOR_ZERO;
-
-	chestFrmNo_ = 0;
-	chestPos_ = CommonUtility::VECTOR_ZERO;
-
 	hipFrmNo_ = 0;
-
 	effectSmokePlayId_ = -1;
 	effectSmokeResId_ = -1;
 	stepFootSmoke_ = -1.0f;
@@ -68,9 +72,9 @@ Player::Player(void)
 	jumpVelocity_ = CommonUtility::VECTOR_ZERO;
 	isDodge_ = false;
 	stepDodge_ = 0.0f;
-	isInvincible_ = false;
 	isParry_ = false;
 	col_ = -1;
+	stepWalk_ = 0.0f;
 }
 
 Player::~Player(void)
@@ -92,10 +96,6 @@ void Player::Init(void)
 	//丸影画像
 	imgShadow_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PLAYER_SHADOW).handleId_;
-
-	//胸の位置取得
-	chestFrmNo_ = MV1SearchFrame(transform_.modelId, L"mixamorig:Hips");
-	chestPos_ = MV1GetFramePosition(transform_.modelId, chestFrmNo_);
 
 	//カプセルコライダ
 	capsule_ = std::make_unique<Capsule>(transform_);
@@ -134,7 +134,6 @@ void Player::Update(void)
 
 	//アニメーション再生
 	animationController_->Update();
-	//controllerAnimation_->Update();
 	
 	//胸の位置更新
 	hipMovedPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
@@ -198,6 +197,7 @@ void Player::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::RUN, path + "Running.mv1", ANIM_SPEED);
 	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", ANIM_SPEED);
 	animationController_->Add((int)ANIM_TYPE::DODGE, path + "Roll.mv1", 40.0f);
+	animationController_->Add((int)ANIM_TYPE::DASH, path + "Dash.mv1", 40.0f);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
@@ -205,20 +205,6 @@ void Player::InitAnimation(void)
 	hipFrmNo_ = MV1SearchFrame(transform_.modelId, L"mixamorig:Hips");
 	MV1SetAttachAnimTime(transform_.modelId, hipFrmNo_, 0.0f);
 	prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
-	//int IdleAnimHandle = MV1LoadModel(L"Data/Model/Player/Idle.mv1");
-	//int WalkAnimHandle = MV1LoadModel(L"Data/Model/Player/Walking.mv1");
-	//int RunAnimHandle = MV1LoadModel(L"Data/Model/Player/Running.mv1");
-	//int JumpAnimHandle = MV1LoadModel(L"Data/Model/Player/Jump.mv1");
-	//int DodgeAnimHandle = MV1LoadModel(L"Data/Model/Player/Rolling.mv1");
-	//controllerAnimation_ = std::make_unique<ControllerAnimation>(transform_.modelId);
-	//controllerAnimation_->Add("Idle", IdleAnimHandle, ANIM_SPEED);
-	//controllerAnimation_->Add("Walk", WalkAnimHandle, ANIM_SPEED);
-	//controllerAnimation_->Add("Run", RunAnimHandle, ANIM_SPEED);
-	//controllerAnimation_->Add("Jump", JumpAnimHandle, ANIM_SPEED);
-	//controllerAnimation_->Add("Dodge", DodgeAnimHandle, ANIM_SPEED);
-
-	////初期アニメーションはアイドルを再生
-	//controllerAnimation_->Play("Idle");
 }
 
 void Player::ChangeState(STATE state)
@@ -260,9 +246,30 @@ void Player::UpdatePlay(void)
 	//ジャンプ処理
 	//ProcessJump();
 	ProcessJumpTest();
-
+	bool previsDodge = isDodge_;
 	//回避処理
 	ProcessDodge();
+
+	//if(speed_ > SPEED_RUN)speed_ -= 0.1f;
+	//if (speed_ < SPEED_RUN)
+	//{
+	//	speed_ = SPEED_RUN;
+	//	stepWalk_ = STEP_WALK2RUN;
+	//}
+	//if (!isDodge_) //回避中でない場合のみスピードを調整
+	//{
+	//	if (speed_ < SPEED_RUN)
+	//	{
+	//		speed_ = SPEED_RUN;
+	//		stepWalk_ = STEP_WALK2RUN;
+	//	}
+	//}
+	//else
+	//{
+	//	// 回避中の場合はstepWalk_をリセットして、減速後の移動をダッシュから開始できるように準備
+	//	stepWalk_ = STEP_WALK2RUN;
+	//}
+
 
 	//パリィ処理
 	ProcessParry();
@@ -421,7 +428,7 @@ void Player::ProcessMove(void)
 		dir = VAdd(dir, cameraRot.GetRight());
 		rotRad = CommonUtility::Deg2RadD(90.0);
 	}
-
+	//斜め移動の回転角度調整
 	if(isUp && isLeft)
 	{
 		rotRad = CommonUtility::Deg2RadD(315.0);
@@ -441,6 +448,8 @@ void Player::ProcessMove(void)
 
 	if (!CommonUtility::EqualsVZero(dir))
 	{
+		//歩いている時間を加算
+		stepWalk_ += SceneManager::GetInstance().GetDeltaTime();
 		dir = VNorm(dir);
 
 		//カメラのY軸角度だけ取得（XZ平面の回転だけで十分）
@@ -457,8 +466,14 @@ void Player::ProcessMove(void)
 		//ジャンプ中に加速しないように
 		if (!isJump_ && !isDodge_)
 		{
+			if (stepWalk_ >= STEP_WALK2RUN)
+			{
+				speed_ = SPEED_RUN;
+			}
+			else speed_ = SPEED_WALK;
+
 			//移動速度の設定
-			speed_ = ins.IsInputPressed("Dash") ? SPEED_RUN : SPEED_MOVE;
+			//speed_ = ins.IsInputPressed("Dash") ? SPEED_RUN : SPEED_MOVE;
 		}
 		moveDir_ = worldDir;
 		movePow_ = VScale(dir, speed_);
@@ -472,21 +487,19 @@ void Player::ProcessMove(void)
 			if (speed_ == SPEED_RUN)
 			{
 				animationController_->Play((int)ANIM_TYPE::RUN);
-				//controllerAnimation_->Play("Run");
 			}
 			else
 			{
 				animationController_->Play((int)ANIM_TYPE::WALK);
-				//controllerAnimation_->Play("Walk");
 			}
 		}
 	}
 	else
 	{
+		stepWalk_ = 0.0f;
 		if (!isJump_ && IsEndLanding() && !isDodge_)
 		{
 			animationController_->Play((int)ANIM_TYPE::IDLE);
-			//controllerAnimation_->Play("Idle");
 		}
 	}
 
@@ -500,15 +513,12 @@ void Player::ProcessJump(void)
 	// ジャンプ
 	if (isHit && (isJump_ || IsEndLanding()))
 	{
-
-		if (!isJump_)
-		{
-			//無理やりアニメーション
-			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
-			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);/*
-			controllerAnimation_->Play("Jump", true, 13.0f, 25.0f);
-			controllerAnimation_->SetEndLoop(23.0f, 25.0f, 5.0f);*/
-		}
+		//if (!isJump_)
+		//{
+		//	//無理やりアニメーション
+		//	animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
+		//	animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+		//}
 
 		isJump_ = true;
 
@@ -553,12 +563,7 @@ void Player::ProcessJumpTest(void)
 		//無理やりアニメーション
 		animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
 		animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
-
-		////無理やりアニメーション
-		//controllerAnimation_->Play("Jump", true, 13.0f, 25.0f);
-		//controllerAnimation_->SetEndLoop(23.0f, 25.0f, 5.0f);
 	}
-
 }
 
 void Player::ProcessDodge(void)
@@ -567,47 +572,53 @@ void Player::ProcessDodge(void)
 	bool isHit = ins.IsInputTriggered("Dodge");
 	// ルートフレーム（Hipフレーム）の現在の行列を取得
 	MATRIX hipMatrix = MGetIdent();
-	if (isHit && (isDodge_ || IsEndDodge()))
+	if (isHit && (isDodge_ || IsEndDodge()) && !isJump_)
 	{
+		//回避中はスピードを早くする
 		isDodge_ = true;
-		animationController_->Play((int)ANIM_TYPE::DODGE,false);
-		//controllerAnimation_->Play("Dodge", false);
-		prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
+		
+		animationController_->Play((int)ANIM_TYPE::DASH);
+		
+		//animationController_->Play((int)ANIM_TYPE::DODGE,false);
+		
+		//回避時のフレームのローカル座標を取得しておく
+		//prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
 	}
-
 	if (!isDodge_)return;
 	stepDodge_ += SceneManager::GetInstance().GetDeltaTime();
+	movePow_ = VScale(transform_.GetForward(), speed_);
+	//VECTOR dodgeAnimMove = VSub(hipMovedPos_,prevPos_);
+	//float movePow = VSize(animationController_->GetMovePow());
+	//VECTOR moveDir = VScale(moveDir_, movePow);
+	//transform_.pos = VAdd(transform_.pos, moveDir);
+	//animMovePow_ = VAdd(transform_.pos, moveDir);
+	//prevPos_ = hipMovedPos_;
 
-	VECTOR dodgeAnimMove = VSub(hipMovedPos_,prevPos_);
-	float movePow = VSize(animationController_->GetMovePow());
-	VECTOR moveDir = VScale(moveDir_, movePow);
-	transform_.pos = VAdd(transform_.pos, moveDir);
-	animMovePow_ = VAdd(transform_.pos, moveDir);
-	prevPos_ = hipMovedPos_;
-
-	////アニメーションが終了したら回避終了
-	//if(controllerAnimation_->IsEnd())
-	//{
-	//	isDodge_ = false;
-	//}
-
-	//アニメーションが終了したら回避終了
-	if(animationController_->IsEnd())
+	//回避中はスピードを走りより速くする
+	if (stepDodge_ < DODGE_TIME)
 	{
-		isDodge_ = false;
-		stepDodge_ = 0.0f;
-	}
-
-	if(stepDodge_ > 0.2f && stepDodge_ < 1.5f)
-	{
-		isInvincible_ = true;
+		speed_ = SPEED_DODGE;
 	}
 	else
 	{
-		isInvincible_ = false;
+		//減速処理
+		float decelRate = (stepDodge_ - DODGE_TIME) / DODGE_DECELERATION_TIME;
+		float currentSpeed = Easing::CubicOut(decelRate,
+			1.0f, SPEED_DODGE, SPEED_RUN);
+		speed_ = currentSpeed;
+		//減速が終了したら走るスピードに戻す
+		if (stepDodge_ > DODGE_TIME + DODGE_DECELERATION_TIME)
+		{
+			stepDodge_ = 0.0f;
+			stepWalk_ = STEP_WALK2RUN;
+			speed_ = SPEED_RUN;
+		}
+		//回避終了
+		isDodge_ = false;
 	}
 
-	if(isInvincible_)MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+	//モデルの色変更（見た目でわかりやすくするため）
+	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void Player::ProcessParry(void)
@@ -760,9 +771,6 @@ void Player::CollisionGravity(void)
 				// 着地モーション
 				animationController_->Play(
 					(int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
-				// 着地モーション
-				//controllerAnimation_->Play(
-				//	"Jump", false, 29.0f, 45.0f, false, true);
 			}
 			isJump_ = false;
 		}
@@ -811,18 +819,6 @@ bool Player::IsEndLanding(void) const
 	if (isJumpUnlimited_)return ret;
 
 	// アニメーションがジャンプではない
-	//if (controllerAnimation_->GetPlayType() != "Jump")
-	//{
-	//	return ret;
-	//}
-
-	//// アニメーションが終了しているか
-	//if (controllerAnimation_->IsEnd())
-	//{
-	//	return ret;	//終了している
-	//}
-
-	// アニメーションがジャンプではない
 	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP)
 	{
 		return ret;
@@ -840,17 +836,6 @@ bool Player::IsEndLanding(void) const
 bool Player::IsEndDodge(void) const
 {
 	bool ret = true;
-	// アニメーションが回避ではない
-	//if (controllerAnimation_->GetPlayType() != "Dodge")
-	//{
-	//	return ret;
-	//}
-
-	//// アニメーションが終了しているか
-	//if (controllerAnimation_->IsEnd())
-	//{
-	//	return ret;	//終了している
-	//}
 	// アニメーションが回避ではない
 	if (animationController_->GetPlayType() != (int)ANIM_TYPE::DODGE)
 	{
@@ -929,20 +914,23 @@ void Player::DebugDraw(void)
 	DebugDrawFormat::FormatString(L"HP : %.2f",
 		hp_,
 		lineH);
-	DebugDrawFormat::FormatString(L"移動 : WASD",
+	DebugDrawFormat::FormatString(L"stepWalk : %.2f",
+		stepWalk_,
+		lineH);
+	DebugDrawFormat::FormatString(L"stepDodge : %.2f",
 		stepDodge_,
 		lineH);
-	DebugDrawFormat::FormatString(L"パリィ : SPACE",
-		0,
+	DebugDrawFormat::FormatString(L"speed : %.2f",
+		speed_,
 		lineH);
-	DebugDrawFormat::FormatString(L"回避 : LSHIFT",
-		0,
+	DebugDrawFormat::FormatString(L"isDodge : %d",
+		isDodge_,
 		lineH);
-	//DrawFormatString(0, 40, 0xffffff, L"pos : %.2f, %.2f, %.2f", transform_.pos.x,
-	//	transform_.pos.y, transform_.pos.z);
-	//DrawFormatString(0, 60, 0xffffff, L"jumpPow : %.2f, %.2f, %.2f", jumpPow_.x,
-	//	jumpPow_.y, jumpPow_.z);
-	//DrawFormatString(0, 80, 0xffffff, L"isDodge : %d", isDodge_);
+	DebugDrawFormat::FormatString(L"moveDir : %.2f,%.2f",
+		moveDir_.x,moveDir_.z,
+		lineH);
 
+
+	//球体描画（色指定あり）
 	sphere_->Draw(col_);
 }

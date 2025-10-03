@@ -457,7 +457,7 @@ void Enemy::UpdateAttackNear(void)
 		sphereNear_->GetRadius(),player_.GetCapsule().GetPosTop(),
 		player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
 	{
-		if (player_.GetisDodge() && player_.GetisInvicible())return;
+		if (player_.GetisDodge() && player_.GetisDodge())return;
 		player_.SubHp(ATTACK_DAMAGE);
 		ChangeState(STATE::MOVE);
 	}
