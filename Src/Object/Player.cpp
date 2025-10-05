@@ -105,8 +105,10 @@ void Player::Init(void)
 	capsule_->SetRadius(20.0f);
 
 	sphere_ = std::make_unique<Sphere>(transform_);
-	sphere_->SetLocalPos({ 0.0f, 80.0f, 70.0f });
-	sphere_->SetRadius(40.0f);
+	sphere_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
+	sphere_->SetRadius(80.0f);
+	//sphere_->SetLocalPos({ 0.0f, 80.0f, 70.0f });
+	//sphere_->SetRadius(40.0f);
 
 	//足煙エフェクト
 	effectSmokeResId_ = ResourceManager::GetInstance().Load(

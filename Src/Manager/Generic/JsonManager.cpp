@@ -17,6 +17,10 @@ JsonManager& JsonManager::GetInstance(void)
 	return *instance_;
 }
 
+void JsonManager::Init(void)
+{
+}
+
 nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::string& dataName)
 {
 	std::ifstream ifs(fileName);
