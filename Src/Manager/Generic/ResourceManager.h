@@ -27,6 +27,7 @@ public:
 		PLAYER_SHADOW,
 		FOOT_SMOKE,
 		ENEMY,
+		ENEMY_BULLET,
 		SKY_DOME,
 
 

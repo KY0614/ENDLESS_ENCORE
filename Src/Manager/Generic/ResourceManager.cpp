@@ -191,6 +191,10 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
 	resourcesMap_.emplace(SRC::ENEMY, std::move(res));
 
+	//敵の弾
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Arrow.mv1");
+	resourcesMap_.emplace(SRC::ENEMY_BULLET, std::move(res));
+
 	//プレイヤー
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Model.mv1");
 	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
@@ -199,7 +203,7 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
 	resourcesMap_.emplace(SRC::PLAYER_SHADOW, std::move(res));
 
-	//家具：床
+	//床
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Floor/floor.mv1");
 	resourcesMap_.emplace(SRC::FLOOR, std::move(res));
 

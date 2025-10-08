@@ -68,6 +68,11 @@ void GameScene::UpdateGame(void)
 	player_->Update();
 	enemy_->Update();
 
+	if (CheckHitKey(KEY_INPUT_R))
+	{
+		this->Init();
+	}
+
 	if (ins.IsInputTriggered("pause"))
 	{
 		//ポーズボタンが押されたらポーズシーンへ遷移

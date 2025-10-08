@@ -7,6 +7,7 @@
 class AnimationController;
 class Sphere;
 class Player;
+class EnemyBullet;
 
 class Enemy : public ActorBase
 {
@@ -74,6 +75,8 @@ private:
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
 
+	std::unique_ptr<EnemyBullet> bullet_;
+
 	//近接攻撃用の当たり判定球
 	std::unique_ptr<Sphere> sphereNear_;
 	//遠距離攻撃用の当たり判定球
@@ -82,6 +85,7 @@ private:
 	//当たり判定用カプセル
 	Player& player_;
 
+	//体力
 	float hp_;
 
 	bool isAttackedNear_;
@@ -94,10 +98,11 @@ private:
 	float currentAngle_;        // プレイヤーを中心とした現在の角度 (ラジアン)
 	float circlingSpeedRad_;    // 円周移動の角速度 (ラジアン/秒)
 
-	bool isDown_;
-	float stepDownTime_;
+	//ダウン
+	bool isDown_;			//ダウン中かどうか	
+	float stepDownTime_;	//ダウン中の時間経過
 
-	float modelCol_[3];
+	VECTOR moveDir_;	//移動方向
 
 	/// <summary>
 	/// アニメーション初期化

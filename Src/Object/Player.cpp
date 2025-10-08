@@ -898,11 +898,22 @@ void Player::UpdateDebugImGui(void)
 
 void Player::DebugDraw(void)
 {
-	int lineH = 1;
+	int lineH = 2;
+	const int HP_BAR_X = 20;         // HPバーの左上X座標
+	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
+	const int HP_BAR_WIDTH = 200;    // HPバーの最大幅
+	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
+	float hp = hp_ / HP_MAX;
+	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
+	// 背景（グレー）
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
+	// 現在HP（緑）
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
 
-	DebugDrawFormat::FormatString(L"HP : %.2f",
-		hp_,
-		lineH);
+
+	//DebugDrawFormat::FormatString(L"HP : %.2f",
+	//	hp_,
+	//	lineH);
 	DebugDrawFormat::FormatString(L"stepWalk : %.2f",
 		stepWalk_,
 		lineH);
@@ -918,30 +929,6 @@ void Player::DebugDraw(void)
 	DebugDrawFormat::FormatString(L"moveDir : %.2f,%.2f",
 		moveDir_.x,moveDir_.z,
 		lineH);
-
-	switch (animationController_->GetPlayType())
-	{
-
-	case 2:
-		DebugDrawFormat::FormatString(L"ANIM : RUN",
-			0,
-			lineH);
-		break;
-
-	case 5:
-		DebugDrawFormat::FormatString(L"ANIM : DODGE",
-			0,
-			lineH);
-		break;
-	case 6:
-		DebugDrawFormat::FormatString(L"ANIM : DASH",
-			0,
-			lineH);
-		break;
-
-	default:
-		break;
-	}
 
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);

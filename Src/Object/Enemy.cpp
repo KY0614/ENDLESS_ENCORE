@@ -8,6 +8,7 @@
 #include "Common/Capsule.h"
 #include "Common/Sphere.h"
 #include "Player.h"
+#include "EnemyBullet.h"
 #include "Enemy.h"
 
 namespace
@@ -15,15 +16,15 @@ namespace
 	const float TIME_ROT = 1.3f;
 	const float HP_MAX = 100.0f;
 	const float MOVE_SPEED = 5.0f;
-
-	const float ATTACK_NEAR_DISTANCE = 350.0f;
-	const float ATTACK_FAR_DISTANCE = 800.0f;
-	const float PLAYER_DISTANCE = 800.0f;
-	//追従距離
-	const float FOLLOW_DISTANCE = 1200.0f;
+	//距離の基準値
+	const float ATTACK_NEAR_DISTANCE = 350.0f;	//近距離攻撃判定距離
+	const float ATTACK_FAR_DISTANCE = 800.0f;	//遠距離攻撃判定距離
+	const float PLAYER_DISTANCE = 500.0f;		//維持するプレイヤーとの距離
+	const float FOLLOW_DISTANCE = 800.0f;		//追従距離
 	//重力加速度
 	const float MOVE_TIME = 10.0f;
 	const float ATTACK_TIME = 1.0f;
+	const float ATTACK_FAR_TIME = 5.0f;
 
 	const float ATTACK_DAMAGE = 10.0f;
 
@@ -37,6 +38,7 @@ namespace
 
 Enemy::Enemy(Player& player):player_(player)
 {
+	hp_ = 0.0f;
 	stateStep_ = 0.0f;
 	state_ = STATE::NONE;
 	col_ = 0xff0000;
@@ -46,6 +48,7 @@ Enemy::Enemy(Player& player):player_(player)
 	stepDownTime_ = 0.0f;
 	// 例: 1秒で 90度（π/2 ラジアン）回転する速度
 	circlingSpeedRad_ = DX_PI_F / 2.0f  * 0.1f;
+	moveDir_ = CommonUtility::VECTOR_ZERO;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
@@ -76,12 +79,17 @@ void Enemy::Init(void)
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
 	transform_.Update();
 
+	const int bulletNum = 3;
+	bullet_ = std::make_unique<EnemyBullet>(bulletNum);
+	bullet_->Init();
+
 	//カプセルコライダ
 	capsule_ = std::make_unique<Capsule>(transform_);
 	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
 	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
 
+	//近接攻撃用の球体コライダ
 	sphereNear_ = std::make_unique<Sphere>(transform_);
 	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
 	sphereNear_->SetRadius(30.0f);
@@ -113,6 +121,8 @@ void Enemy::Update(void)
 	//更新ステップ
 	stateUpdate_();
 
+	bullet_->Update();
+
 	animationController_->Update();
 	transform_.Update();
 	UpdateDebugImGui();
@@ -122,6 +132,8 @@ void Enemy::Draw(void)
 {
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
+
+	bullet_->Draw();
 
 	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
 
@@ -134,7 +146,7 @@ void Enemy::Draw(void)
 		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
 		break;
 	case Enemy::STATE::MOVE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE", (int)state_);
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE");
 		break;
 	case Enemy::STATE::ATTACK_NEAR:
 		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_NEAR");
@@ -158,7 +170,6 @@ void Enemy::Draw(void)
 		spheresFar_[i]->Draw(0x0000ff);
 	}
 
-	if (state_ != STATE::ATTACK_NEAR)return;
 	if(!isAttackedNear_)col_= 0x00ff00;
 	else col_ = 0xff0000;
 	sphereNear_->Draw(col_);
@@ -189,6 +200,60 @@ void Enemy::InitAnimation(void)
 
 void Enemy::Move(void)
 {
+	if(CheckPlayerDistance() > PLAYER_DISTANCE)
+	{
+		//プレイヤーに近づく
+		FollowPlayer(transform_.pos);
+	}
+
+	static float stepTime = 0.0f;
+	stepTime += SceneManager::GetInstance().GetDeltaTime();
+
+	if(stepTime > 2.0f)
+	{
+		stepTime = 0.0f;
+		moveDir_ = CommonUtility::DIR_R;
+	}
+
+
+	//// 1. 角度を更新する
+	////時間経過で角度を変化させます。プレイヤーの周りを右回り（時計回り）で動く。
+	//currentAngle_ += circlingSpeedRad_ * SceneManager::GetInstance().GetDeltaTime();
+
+	//// 角度が一周したらリセット (省略可)
+	//if (currentAngle_ > DX_PI_F * 2.0f)
+	//{
+	//	currentAngle_ -= DX_PI_F * 2.0f;
+	//}
+
+	//// 2. プレイヤーの周りの円上の座標を計算する
+	//VECTOR playerPos = player_.GetTransform().pos;
+
+	//// X-Z平面での円運動の計算 (極座標からデカルト座標への変換)
+	//// X = R * sin(θ)
+	//// Z = R * cos(θ)
+
+	//// プレイヤーからの相対位置
+	//VECTOR relativePos;
+	//relativePos.x = PLAYER_DISTANCE * sinf(currentAngle_);
+	//relativePos.y = 0.0f; // プレイヤーの高さと合わせる
+	//relativePos.z = PLAYER_DISTANCE * cosf(currentAngle_);
+
+	////3. 敵のワールド座標を決定する
+	////プレイヤーの位置 + プレイヤーからの相対位置
+	//transform_.pos = VAdd(playerPos, relativePos);
+
+	////4.プレイヤーの方を向く処理
+	////移動した新しい位置からプレイヤーの方を向くように回転角度を計算し直す
+
+	////敵からプレイヤーへのベクトル (このベクトルは原点(0,0,0)を向くベクトルと180度ずれている)
+	////正しいターゲット方向ベクトルは relativePos の逆ベクトルになる
+	//VECTOR posE2P = VScale(relativePos, -1.0f);
+
+	////atan2 で角度を計算
+	//float angle = atan2(posE2P.x, posE2P.z);
+
+	//SetGoalRotate(angle);
 }
 
 float Enemy::CheckPlayerDistance(void)
@@ -360,8 +425,6 @@ void Enemy::UpdateFollow(void)
 
 void Enemy::UpdateMove(void)
 {
-	Rotate();
-
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > MOVE_TIME)
 	{
@@ -378,54 +441,17 @@ void Enemy::UpdateMove(void)
 		}
 	}
 
-	//プレイヤーとの距離を測り、一定以上離れていたら近づく
+	//移動処理
+	Move();
+
+	//回転処理
+	Rotate();
+
+	//すごく離れていたら追従状態に遷移
 	if(CheckPlayerDistance() > FOLLOW_DISTANCE)
 	{
 		ChangeState(STATE::FOLLOW);
 	}
-
-	//// 1. 角度を更新する
-	////時間経過で角度を変化させます。プレイヤーの周りを右回り（時計回り）で動く。
-	//currentAngle_ += circlingSpeedRad_ * SceneManager::GetInstance().GetDeltaTime();
-
-	//// 角度が一周したらリセット (省略可)
-	//if (currentAngle_ > DX_PI_F * 2.0f)
-	//{
-	//	currentAngle_ -= DX_PI_F * 2.0f;
-	//}
-
-	//// 2. プレイヤーの周りの円上の座標を計算する
-	//VECTOR playerPos = player_.GetTransform().pos;
-
-	//// X-Z平面での円運動の計算 (極座標からデカルト座標への変換)
-	//// X = R * sin(θ)
-	//// Z = R * cos(θ)
-
-	//// プレイヤーからの相対位置
-	//VECTOR relativePos;
-	//relativePos.x = PLAYER_DISTANCE * sinf(currentAngle_);
-	//relativePos.y = 0.0f; // プレイヤーの高さと合わせる
-	//relativePos.z = PLAYER_DISTANCE * cosf(currentAngle_);
-
-	////3. 敵のワールド座標を決定する
-	////プレイヤーの位置 + プレイヤーからの相対位置
-	//transform_.pos = VAdd(playerPos, relativePos);
-
-	////4.プレイヤーの方を向く処理
-	////移動した新しい位置からプレイヤーの方を向くように回転角度を計算し直す
-
-	////敵からプレイヤーへのベクトル (このベクトルは原点(0,0,0)を向くベクトルと180度ずれている)
-	////正しいターゲット方向ベクトルは relativePos の逆ベクトルになる
-	//VECTOR posE2P = VScale(relativePos, -1.0f);
-
-	////atan2 で角度を計算
-	//float angle = atan2(posE2P.x, posE2P.z);
-
-	//SetGoalRotate(angle);
-
-	////回転処理を実行
-	//Rotate();
-
 }
 
 void Enemy::UpdateAttackNear(void)
@@ -441,6 +467,17 @@ void Enemy::UpdateAttackNear(void)
 	}
 	isAttackedNear_ = true;
 
+	//
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	if (stateStep_ > ATTACK_TIME)
+	{
+		stateStep_ = 0.0f;
+		isAttackedNear_ = false;
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
+	//パリィ判定
 	if (CommonUtility::IsHitSpheres(sphereNear_->GetPos(),sphereNear_->GetRadius(),
 		player_.GetSphere().GetPos(),player_.GetSphere().GetRadius()))
 	{
@@ -457,18 +494,10 @@ void Enemy::UpdateAttackNear(void)
 		sphereNear_->GetRadius(),player_.GetCapsule().GetPosTop(),
 		player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
 	{
-		if (player_.GetisDodge() && player_.GetisDodge())return;
+		//回避中だったらダメージを受けない
+		if (player_.GetisDodge())return;
 		player_.SubHp(ATTACK_DAMAGE);
 		ChangeState(STATE::MOVE);
-	}
-	//
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > ATTACK_TIME)
-	{
-		stateStep_ = 0.0f;
-		isAttackedNear_ = false;
-		ChangeState(STATE::MOVE);
-		return;
 	}
 }
 
@@ -479,9 +508,14 @@ void Enemy::UpdateAttackFar(void)
 		return;
 	}
 
+	if (stateStep_ >= 1.0f)
+	{
+
+	}
+
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > ATTACK_TIME)
+	if (stateStep_ > ATTACK_FAR_TIME)
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
@@ -516,8 +550,6 @@ void Enemy::UpdateDebugImGui(void)
 	//位置
 	ImGui::Text("spheresFar pos");
 	VECTOR pos = spheresFar_[index]->GetLocalPos();
-
-	ImGui::ColorEdit3("col", modelCol_);
 
 	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
 	ImGui::InputFloat3("pos", &pos.x);

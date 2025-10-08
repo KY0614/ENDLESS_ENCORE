@@ -3,18 +3,20 @@
 
 class Sphere;
 
-class EnemyShot :  public ShotBase
+class EnemyBullet :  public ShotBase
 {
 public:
-	EnemyShot(void);
-	~EnemyShot(void);
+	EnemyBullet(int num);
+	~EnemyBullet(void);
 
 	void Init(void)override;
 	void Update(void)override;
 	void Draw(void)override;
 
 private:
-	//ƒJƒvƒZƒ‹
+	int bulletNum_;
+
+	//‹…‘Ì
 	std::unique_ptr<Sphere> sphere_;
 };
 
