@@ -6,7 +6,15 @@ class Sphere;
 class EnemyBullet :  public ShotBase
 {
 public:
-	EnemyBullet(int num);
+
+	enum class STATE
+	{
+		NONE,
+		SHOT,
+		DETSTROY,
+	};
+
+	EnemyBullet(Transform& parent);
 	~EnemyBullet(void);
 
 	void Init(void)override;
@@ -14,9 +22,14 @@ public:
 	void Draw(void)override;
 
 private:
-	int bulletNum_;
+	//èÛë‘
+	STATE state_;
+
+	Transform parentTran_;
 
 	//ãÖëÃ
 	std::unique_ptr<Sphere> sphere_;
+	
+	void Move(void);
 };
 

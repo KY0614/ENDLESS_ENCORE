@@ -3,8 +3,8 @@
 #include "Common/Sphere.h"
 #include "EnemyBullet.h"
 
-EnemyBullet::EnemyBullet(int num)
-	: bulletNum_(num)
+EnemyBullet::EnemyBullet(Transform& parent)
+	: parentTran_(parent)
 {
 }
 
@@ -19,10 +19,10 @@ void EnemyBullet::Init(void)
 		ResourceManager::SRC::ENEMY_BULLET));
 	const float scl = 1.0f;
 	transform_.scl = { scl ,scl ,scl };
-	transform_.pos = { 0.0f, 0.0f, 0.0f };
-	transform_.quaRot = Quaternion();
+	transform_.pos = parentTran_.pos;
+	transform_.quaRot = parentTran_.quaRot;
 	transform_.quaRotLocal =
-		Quaternion::Euler({ CommonUtility::Deg2RadF(90.0f), 0.0f, 0.0f });
+		Quaternion::Euler({ CommonUtility::Deg2RadF(-90.0f), 0.0f, 0.0f });
 	transform_.Update();
 
 	//当たり判定用の球を生成
@@ -42,4 +42,24 @@ void EnemyBullet::Draw(void)
 	MV1DrawModel(transform_.modelId);
 
     sphere_->Draw();
+}
+
+void EnemyBullet::Move(void)
+{
+	// 前方向を取得
+	VECTOR forward = transform_.GetForward();
+	//下方向の取得
+	VECTOR downward = transform_.GetDown();
+
+	//横ベクトル
+	VECTOR widthMovePow = VScale(forward, 3.0f);
+
+	// 移動
+	//前方
+	transform_.pos =
+		VAdd(transform_.pos, widthMovePow);
+	//重力加速度
+	const float GRAVITY_POW = 15.0f;
+	transform_.pos =
+		VAdd(transform_.pos, VScale(downward, GRAVITY_POW));
 }

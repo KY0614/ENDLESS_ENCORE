@@ -79,8 +79,8 @@ void Enemy::Init(void)
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
 	transform_.Update();
 
-	const int bulletNum = 3;
-	bullet_ = std::make_unique<EnemyBullet>(bulletNum);
+	//弾の生成
+	bullet_ = std::make_unique<EnemyBullet>(transform_);
 	bullet_->Init();
 
 	//カプセルコライダ
