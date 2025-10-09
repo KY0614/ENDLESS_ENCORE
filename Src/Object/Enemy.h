@@ -76,6 +76,7 @@ private:
 	std::unique_ptr<Capsule> capsule_;
 
 	std::unique_ptr<EnemyBullet> bullet_;
+	std::vector<std::unique_ptr<EnemyBullet>> bullets_;
 
 	//‹ßÚUŒ‚—p‚Ì“–‚½‚è”»’è‹…
 	std::unique_ptr<Sphere> sphereNear_;
@@ -127,6 +128,8 @@ private:
 	/// </summary>
 	/// <param name=""></param>
 	void FollowPlayer(VECTOR& pos);
+
+	void CreateBullet(const int createNum);
 
 	//‰ñ“]--------------------------------------------------------
 

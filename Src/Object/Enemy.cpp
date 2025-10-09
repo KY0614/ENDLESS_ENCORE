@@ -15,7 +15,7 @@ namespace
 {
 	const float TIME_ROT = 1.3f;
 	const float HP_MAX = 100.0f;
-	const float MOVE_SPEED = 5.0f;
+	const float MOVE_SPEED = 13.0f;
 	//‹——£‚ÌŠî€’l
 	const float ATTACK_NEAR_DISTANCE = 350.0f;	//‹ß‹——£UŒ‚”»’è‹——£
 	const float ATTACK_FAR_DISTANCE = 800.0f;	//‰“‹——£UŒ‚”»’è‹——£
@@ -137,6 +137,11 @@ void Enemy::Draw(void)
 
 	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
 
+	for(const auto& bullet : bullets_)
+	{
+		bullet->Draw();
+	}
+
 #ifdef _DEBUG
 	switch (state_)
 	{
@@ -163,7 +168,7 @@ void Enemy::Draw(void)
 	default:
 		break;
 	}
-	DrawFormatString(0, 160, 0xffffff, L"p2E : %.2f", CheckPlayerDistance());
+	DrawFormatString(0, 160, 0xffffff, L"bullet : %d", bullets_.size());
 
 	for (int i = 0; i < FAR_SPHERE_NUM; i++)
 	{
@@ -339,6 +344,28 @@ void Enemy::FollowPlayer(VECTOR& pos)
 	}
 }
 
+void Enemy::CreateBullet(const int createNum)
+{
+	//–¢¶¬‚¾‚Á‚½‚ç’e‚ð¶¬‚·‚é
+	if (bullets_.empty())
+	{
+		for(int i = 0; i < createNum; i++)
+		{
+			bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
+			bullets_.back()->Init();
+		}
+		bullets_.resize(createNum);
+	}
+
+	//”jŠüÏ‚Ý‚Ì’e‚ð’T‚µ‚ÄÄ—˜—p‚·‚é
+	for (const auto& bullet : bullets_)
+	{
+		//’e‚ªÁ–Å‚µ‚Ä‚¢‚½‚çÄ—˜—p‚·‚é
+		if (bullet->GetState() != EnemyBullet::STATE::DETSTROY)continue;
+		bullet->ResetBullet();
+	}
+}
+
 void Enemy::SetGoalRotate(double rotRad)
 {
 	Quaternion axis =
@@ -437,6 +464,8 @@ void Enemy::UpdateMove(void)
 		}
 		else
 		{
+			const int bulletNum = 3;
+			CreateBullet(bulletNum);
 			ChangeState(STATE::ATTACK_FAR);
 		}
 	}
@@ -503,15 +532,6 @@ void Enemy::UpdateAttackNear(void)
 
 void Enemy::UpdateAttackFar(void)
 {
-	if(spheresFar_.empty())
-	{
-		return;
-	}
-
-	if (stateStep_ >= 1.0f)
-	{
-
-	}
 
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
@@ -520,6 +540,12 @@ void Enemy::UpdateAttackFar(void)
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
 		return;
+	}
+
+	for(const auto& bullet : bullets_)
+	{
+		bullet->ShotBullet();
+		bullet->Update();
 	}
 }
 
