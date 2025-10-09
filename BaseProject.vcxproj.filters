@@ -219,7 +219,10 @@
     <ClCompile Include="Src\Object\ShotBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\Transitor.cpp">
+    <ClCompile Include="Src\Manager\Transition\Transitor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -527,7 +530,10 @@
     <ClInclude Include="Src\Object\ShotBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\Transitor.h">
+    <ClInclude Include="Src\Manager\Transition\Transitor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Manager\Transition\WipeTransitor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

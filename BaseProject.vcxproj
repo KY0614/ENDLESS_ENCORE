@@ -73,7 +73,8 @@
     <ClCompile Include="Src\Utility\CommonUtility.cpp" />
     <ClCompile Include="Src\Scene\TutorialScene.cpp" />
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
-    <ClCompile Include="Src\Manager\Generic\Transitor.cpp" />
+    <ClCompile Include="Src\Manager\Transition\Transitor.cpp" />
+    <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
@@ -177,7 +178,8 @@
     <ClInclude Include="Src\Utility\CommonUtility.h" />
     <ClInclude Include="Src\Scene\TutorialScene.h" />
     <ClInclude Include="Src\Utility\StringUtility.h" />
-    <ClInclude Include="Src\Manager\Generic\Transitor.h" />
+    <ClInclude Include="Src\Manager\Transition\Transitor.h" />
+    <ClInclude Include="Src\Manager\Transition\WipeTransitor.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />

@@ -2,6 +2,14 @@
 #include "../../Application.h"
 #include "Transitor.h"
 
+Transitor::Transitor(void)
+{
+}
+
+Transitor::~Transitor(void)
+{
+}
+
 void Transitor::Start(void)
 {
 	const auto& size = Application::GetInstance().GetWindowSize();
