@@ -24,7 +24,7 @@ namespace
 	//重力加速度
 	const float MOVE_TIME = 10.0f;
 	const float ATTACK_TIME = 1.0f;
-	const float ATTACK_FAR_TIME = 5.0f;
+	const float ATTACK_FAR_TIME = 15.0f;
 
 	const float ATTACK_DAMAGE = 10.0f;
 
@@ -93,27 +93,11 @@ void Enemy::Init(void)
 	sphereNear_ = std::make_unique<Sphere>(transform_);
 	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
 	sphereNear_->SetRadius(30.0f);
-
-	//遠距離攻撃用の球体コライダ
-	spheresFar_.emplace_back(std::make_unique<Sphere>(transform_));
-	spheresFar_.back()->SetLocalPos({ 80.0f, 185.0f, 0.0f });
-	spheresFar_.back()->SetRadius(20.0f);
-
-	spheresFar_.emplace_back(std::make_unique<Sphere>(transform_));
-	spheresFar_.back()->SetLocalPos({ -80.0f, 185.0f, 0.0f });
-	spheresFar_.back()->SetRadius(20.0f);
-
-	spheresFar_.emplace_back(std::make_unique<Sphere>(transform_));
-	spheresFar_.back()->SetLocalPos({ -30.0f, 230.0f, 0.0f });
-	spheresFar_.back()->SetRadius(20.0f);
-
-	spheresFar_.emplace_back(std::make_unique<Sphere>(transform_));
-	spheresFar_.back()->SetLocalPos({ 30.0f, 230.0f, 0.0f });
-	spheresFar_.back()->SetRadius(20.0f);
-
+	//アニメーションの初期化
 	InitAnimation();
-
+	//初期の状態を設定
 	ChangeState(STATE::MOVE);
+	hp_ = 50.0f;
 }
 
 void Enemy::Update(void)
@@ -170,14 +154,26 @@ void Enemy::Draw(void)
 	}
 	DrawFormatString(0, 160, 0xffffff, L"bullet : %d", bullets_.size());
 
-	for (int i = 0; i < FAR_SPHERE_NUM; i++)
-	{
-		spheresFar_[i]->Draw(0x0000ff);
-	}
+	//for (int i = 0; i < FAR_SPHERE_NUM; i++)
+	//{
+	//	spheresFar_[i]->Draw(0x0000ff);
+	//}
 
 	if(!isAttackedNear_)col_= 0x00ff00;
 	else col_ = 0xff0000;
 	sphereNear_->Draw(col_);
+
+	const int HP_BAR_X = pos.x;         // HPバーの左上X座標
+	const int HP_BAR_Y = pos.z + 100.0f;         // HPバーの左上Y座標
+	const int HP_BAR_WIDTH = 200;    // HPバーの最大幅
+	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
+	float hp = hp_ / HP_MAX;
+	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
+	// 背景（グレー）
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
+	// 現在HP（赤）
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(255, 0, 0), TRUE);
+
 
 #endif // _DEBUG
 
@@ -201,6 +197,12 @@ void Enemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::MOVE, path + "Walking.mv1", ANIM_SPEED);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
+}
+
+void Enemy::Damage(void)
+{
+	//ダメージ処理
+	hp_ -= 10.0f;
 }
 
 void Enemy::Move(void)
@@ -354,6 +356,10 @@ void Enemy::CreateBullet(const int createNum)
 			bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
 			bullets_.back()->Init();
 		}
+		bullets_[0]->SetLocalPos({ -80.0f, 185.0f, 0.0f });
+		bullets_[1]->SetLocalPos({ 80.0f, 185.0f, 0.0f });
+		bullets_[2]->SetLocalPos({ -30.0f, 230.0f, 0.0f });
+		bullets_[3]->SetLocalPos({ 30.0f, 230.0f, 0.0f });
 		bullets_.resize(createNum);
 	}
 
@@ -362,7 +368,7 @@ void Enemy::CreateBullet(const int createNum)
 	{
 		//弾が消滅していたら再利用する
 		if (bullet->GetState() != EnemyBullet::STATE::DETSTROY)continue;
-		bullet->ResetBullet();
+		bullet->Reset();
 	}
 }
 
@@ -396,6 +402,29 @@ void Enemy::Rotate(void)
 	//重力方向に沿って回転させる
 	transform_.quaRot = Quaternion::Quaternion();
 	transform_.quaRot = transform_.quaRot.Mult(enemyRotY_);
+}
+
+void Enemy::RotateToPlayer(void)
+{
+	//敵からターゲットへの位置ベクトルを作成
+	VECTOR posE2T = VSub(player_.GetTransform().pos, transform_.pos);
+
+	//atan2 で角度を計算
+	float angle = atan2(posE2T.x, posE2T.z);
+	SetGoalRotate(angle);
+}
+
+bool Enemy::CheckBulletReady(void)
+{
+	for(const auto& bullet : bullets_)
+	{
+		if (bullet->GetState() != EnemyBullet::STATE::READY &&
+			bullet->GetState() != EnemyBullet::STATE::SHOT)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 void Enemy::ChangeStateNone(void)
@@ -464,7 +493,8 @@ void Enemy::UpdateMove(void)
 		}
 		else
 		{
-			const int bulletNum = 3;
+			//遠距離攻撃
+			const int bulletNum = 4;
 			CreateBullet(bulletNum);
 			ChangeState(STATE::ATTACK_FAR);
 		}
@@ -513,6 +543,7 @@ void Enemy::UpdateAttackNear(void)
 		if (player_.GetisParry())
 		{
 			ChangeState(STATE::DOWN);
+			Damage();
 			isAttackedNear_ = false;
 			return;
 		}
@@ -532,6 +563,8 @@ void Enemy::UpdateAttackNear(void)
 
 void Enemy::UpdateAttackFar(void)
 {
+	//RotateTarget(player_.GetTransform().pos);
+	Rotate();
 
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
@@ -542,9 +575,23 @@ void Enemy::UpdateAttackFar(void)
 		return;
 	}
 
-	for(const auto& bullet : bullets_)
+	for(auto& bullet : bullets_)
 	{
-		bullet->ShotBullet();
+		if (stateStep_ > 1.0f && bullet->GetState() == EnemyBullet::STATE::NONE)
+		{
+			bullet->SetStateReady();
+			stateStep_ = 0.0f;
+		}
+	}
+
+	for (const auto& bullet : bullets_)
+	{
+		if (!CheckBulletReady())break;
+		if (stateStep_ > 1.0f)
+		{
+			bullet->Shot();
+		}
+
 		bullet->Update();
 	}
 }
@@ -571,25 +618,7 @@ void Enemy::UpdateDebugImGui(void)
 {
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Enemy");
-	int index = 2;
-	ImGui::InputInt("index", &index);
-	//位置
-	ImGui::Text("spheresFar pos");
-	VECTOR pos = spheresFar_[index]->GetLocalPos();
 
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("pos", &pos.x);
-	ImGui::SliderFloat("posX", &pos.x, -800.0f, 1000.0f);
-	ImGui::SliderFloat("posY", &pos.y, -800.0f, 1000.0f);
-	ImGui::SliderFloat("posZ", &pos.z, -800.0f, 1000.0f);
-	//spheresFar_[index]->SetLocalPos(pos);
-	VECTOR localpos = spheresFar_[index]->GetLocalPos();
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("localpos", &localpos.x);
-	ImGui::SliderFloat("localposX", &localpos.x, -800.0f, 1000.0f);
-	ImGui::SliderFloat("localposY", &localpos.y, -800.0f, 1000.0f);
-	ImGui::SliderFloat("localposZ", &localpos.z, -800.0f, 1000.0f);
-	spheresFar_[index]->SetLocalPos(localpos);
 	//終了処理
 	ImGui::End();
 }

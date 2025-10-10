@@ -22,10 +22,11 @@ void EnemyBullet::Init(void)
 		ResourceManager::SRC::ENEMY_BULLET));
 	const float scl = 1.0f;
 	transform_.scl = { scl ,scl ,scl };
+	
 	transform_.pos = parentTran_.pos;
 	transform_.quaRot = parentTran_.quaRot;
 	transform_.quaRotLocal =
-		Quaternion::Euler({ CommonUtility::Deg2RadF(-90.0f), 0.0f, 0.0f });
+		Quaternion::Euler({ CommonUtility::Deg2RadF(-90.0f), CommonUtility::Deg2RadF(180.0f), 0.0f });
 	transform_.Update();
 
 	//当たり判定用の球を生成
@@ -36,26 +37,35 @@ void EnemyBullet::Init(void)
 
 void EnemyBullet::Update(void)
 {
-	//発射状態でなければ更新しない
-	if (!CheckBulletStateShot())return;
 
-	Move();
-
+	//モデル情報の更新
 	transform_.Update();
+
+	//発射状態でなければ更新しない
+	if (!CheckStateShot())return;
+
+	//弾の移動処理
+	Move();
 }
  
 void EnemyBullet::Draw(void)
 {
 	//発射状態でなければ描画しない
-	if (!CheckBulletStateShot())return;
+	//if (!isAlive_)return;
+
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 	//当たり判定用の球の描画
     sphere_->Draw();
+
+#ifdef _DEBUG
+
 	int line = 1;
 	DebugDrawFormat::FormatStringRight(L"bulletPos : %.2f,%.2f",
 		transform_.pos.x, transform_.pos.z,
 		line);
+
+#endif // _DEBUG
 }
 
 void EnemyBullet::Destroy(void)
@@ -65,19 +75,21 @@ void EnemyBullet::Destroy(void)
 	SetIsAlive(false);
 }
 
-void EnemyBullet::SetLocalPos(const VECTOR pos)
+void EnemyBullet::SetLocalPos(const VECTOR localPos)
 {
 	//親の位置+ローカル座標
-	transform_.pos = VAdd(parentTran_.pos, pos);
+	transform_.pos = VAdd(parentTran_.pos, localPos);
+	transform_.Update();
 }
 
-void EnemyBullet::ShotBullet(void)
+void EnemyBullet::Shot(void)
 {
+	//発射状態へ変更
 	state_ = STATE::SHOT;
 	isAlive_ = true;
 }
 
-void EnemyBullet::ResetBullet(void)
+void EnemyBullet::Reset(void)
 {
 	state_ = STATE::NONE;
 	isAlive_ = false;
@@ -96,14 +108,25 @@ void EnemyBullet::Move(void)
 	VECTOR downward = transform_.GetDown();
 
 	//横ベクトル
-	VECTOR widthMovePow = VScale(forward, 3.0f);
+	VECTOR widthMovePow = VScale(forward, 5.0f);
 
 	// 移動
 	//前方
 	transform_.pos =
 		VAdd(transform_.pos, widthMovePow);
+
 	//重力加速度
-	const float GRAVITY_POW = 0.5f;
+	const float GRAVITY_POW = 0.0f;
 	transform_.pos =
 		VAdd(transform_.pos, VScale(downward, GRAVITY_POW));
+}
+
+void EnemyBullet::Rotate(void)
+{
+	//ローカル座標を親の回転に合わせて回転させる
+	VECTOR localPos = VSub(transform_.pos, parentTran_.pos);
+
+	localPos = parentTran_.quaRot.PosAxis(localPos);
+	transform_.pos = VAdd(parentTran_.pos, localPos);
+
 }

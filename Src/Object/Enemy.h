@@ -80,8 +80,6 @@ private:
 
 	//近接攻撃用の当たり判定球
 	std::unique_ptr<Sphere> sphereNear_;
-	//遠距離攻撃用の当たり判定球
-	std::vector<std::unique_ptr<Sphere>> spheresFar_; 
 
 	//当たり判定用カプセル
 	Player& player_;
@@ -109,6 +107,11 @@ private:
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);
+
+	/// <summary>
+	/// ダメージ処理
+	/// </summary>
+	void Damage(void);
 
 	/// <summary>
 	/// 移動処理
@@ -143,6 +146,17 @@ private:
 	/// 回転処理
 	/// </summary>
 	void Rotate(void);
+
+	void RotateToPlayer(void);
+
+	//弾--------------------------------------------------------
+	
+	/// <summary>
+	/// 生成した弾全てが準備状態かチェックする
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true:全て準備状態　false:未準備</returns>
+	bool CheckBulletReady(void);
 
 	//状態遷移--------------------------------------------------------
 
