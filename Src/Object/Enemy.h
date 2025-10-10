@@ -75,7 +75,6 @@ private:
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
 
-	std::unique_ptr<EnemyBullet> bullet_;
 	std::vector<std::unique_ptr<EnemyBullet>> bullets_;
 
 	//近接攻撃用の当たり判定球

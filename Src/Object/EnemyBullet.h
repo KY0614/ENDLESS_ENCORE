@@ -44,6 +44,13 @@ public:
 	const STATE& GetState(void)const { return state_; }
 
 	/// <summary>
+	/// 当たり判定用の球体を取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	const Sphere& GetSphere(void)const { return *sphere_; }
+
+	/// <summary>
 	/// 準備状態に設定
 	/// </summary>
 	void SetStateReady(void) { state_ = STATE::READY; isAlive_ = true; }
@@ -53,6 +60,8 @@ public:
 	/// </summary>
 	/// <param name="isAlive">true:生存中　false:生存してない</param>
 	void SetIsAlive(const bool isAlive) { isAlive_ = isAlive; }
+
+	void SetTargetPos(const VECTOR targetPos) { targetPos_ = targetPos; }
 
 	/// <summary>
 	/// ローカル座標を設定
@@ -70,12 +79,17 @@ public:
 	/// </summary>
 	void Reset(void);
 
+
+
 private:
 	//状態
 	STATE state_;
 
 	//親のモデル情報
 	Transform& parentTran_;
+
+	VECTOR localPos_;
+	VECTOR targetPos_;
 
 	//生存状態
 	bool isAlive_;

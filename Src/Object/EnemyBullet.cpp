@@ -1,3 +1,4 @@
+#include <DxLib.h>
 #include "../Common/DebugDrawFormat.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Utility/CommonUtility.h"
@@ -51,7 +52,7 @@ void EnemyBullet::Update(void)
 void EnemyBullet::Draw(void)
 {
 	//発射状態でなければ描画しない
-	//if (!isAlive_)return;
+	if (!isAlive_)return;
 
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
@@ -61,9 +62,9 @@ void EnemyBullet::Draw(void)
 #ifdef _DEBUG
 
 	int line = 1;
-	DebugDrawFormat::FormatStringRight(L"bulletPos : %.2f,%.2f",
-		transform_.pos.x, transform_.pos.z,
-		line);
+	//DebugDrawFormat::FormatStringRight(L"bulletPos : %.2f,%.2f",
+	//	transform_.pos.x, transform_.pos.z,
+	//	line);
 
 #endif // _DEBUG
 }
@@ -78,6 +79,7 @@ void EnemyBullet::Destroy(void)
 void EnemyBullet::SetLocalPos(const VECTOR localPos)
 {
 	//親の位置+ローカル座標
+	localPos_ = localPos;
 	transform_.pos = VAdd(parentTran_.pos, localPos);
 	transform_.Update();
 }
@@ -102,15 +104,16 @@ void EnemyBullet::Reset(void)
 
 void EnemyBullet::Move(void)
 {
-	// 前方向を取得
-	VECTOR forward = transform_.GetForward();
+	//前方向を取得
+	VECTOR forward = VNorm(VSub(targetPos_,transform_.pos));
+
 	//下方向の取得
 	VECTOR downward = transform_.GetDown();
-
+	const float speed = 10.0f;
 	//横ベクトル
-	VECTOR widthMovePow = VScale(forward, 5.0f);
+	VECTOR widthMovePow = VScale(forward, speed);
 
-	// 移動
+	//移動
 	//前方
 	transform_.pos =
 		VAdd(transform_.pos, widthMovePow);
@@ -123,10 +126,10 @@ void EnemyBullet::Move(void)
 
 void EnemyBullet::Rotate(void)
 {
-	//ローカル座標を親の回転に合わせて回転させる
-	VECTOR localPos = VSub(transform_.pos, parentTran_.pos);
+	VECTOR followPos = parentTran_.pos;
+	Quaternion followRot = parentTran_.quaRot;
 
-	localPos = parentTran_.quaRot.PosAxis(localPos);
-	transform_.pos = VAdd(parentTran_.pos, localPos);
+	VECTOR relativePos = followRot.PosAxis(localPos_);
+
 
 }

@@ -49,6 +49,7 @@ Enemy::Enemy(Player& player):player_(player)
 	// 例: 1秒で 90度（π/2 ラジアン）回転する速度
 	circlingSpeedRad_ = DX_PI_F / 2.0f  * 0.1f;
 	moveDir_ = CommonUtility::VECTOR_ZERO;
+	stepRotTime_ = 0.0f;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
@@ -79,10 +80,6 @@ void Enemy::Init(void)
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
 	transform_.Update();
 
-	//弾の生成
-	bullet_ = std::make_unique<EnemyBullet>(transform_);
-	bullet_->Init();
-
 	//カプセルコライダ
 	capsule_ = std::make_unique<Capsule>(transform_);
 	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
@@ -93,6 +90,7 @@ void Enemy::Init(void)
 	sphereNear_ = std::make_unique<Sphere>(transform_);
 	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
 	sphereNear_->SetRadius(30.0f);
+
 	//アニメーションの初期化
 	InitAnimation();
 	//初期の状態を設定
@@ -105,8 +103,6 @@ void Enemy::Update(void)
 	//更新ステップ
 	stateUpdate_();
 
-	bullet_->Update();
-
 	animationController_->Update();
 	transform_.Update();
 	UpdateDebugImGui();
@@ -116,8 +112,6 @@ void Enemy::Draw(void)
 {
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
-
-	bullet_->Draw();
 
 	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
 
@@ -355,11 +349,24 @@ void Enemy::CreateBullet(const int createNum)
 		{
 			bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
 			bullets_.back()->Init();
-		}
-		bullets_[0]->SetLocalPos({ -80.0f, 185.0f, 0.0f });
-		bullets_[1]->SetLocalPos({ 80.0f, 185.0f, 0.0f });
-		bullets_[2]->SetLocalPos({ -30.0f, 230.0f, 0.0f });
-		bullets_[3]->SetLocalPos({ 30.0f, 230.0f, 0.0f });
+		} 
+		//弾の初期位置を調整
+		VECTOR localPos = { -80.0f, 185.0f, 0.0f };
+		//敵の回転に合わせて弾の位置を回転させる
+		localPos = transform_.quaRot.PosAxis(localPos);
+		bullets_[0]->SetLocalPos(localPos);
+
+		localPos = { 80.0f, 185.0f, 0.0f };
+		localPos = transform_.quaRot.PosAxis(localPos);
+		bullets_[1]->SetLocalPos(localPos);
+
+		localPos = { -30.0f, 230.0f, 0.0f };
+		localPos = transform_.quaRot.PosAxis(localPos);
+		bullets_[2]->SetLocalPos(localPos);
+
+		localPos = { 30.0f, 230.0f, 0.0f };
+		localPos = transform_.quaRot.PosAxis(localPos);
+		bullets_[3]->SetLocalPos(localPos);
 		bullets_.resize(createNum);
 	}
 
@@ -563,8 +570,7 @@ void Enemy::UpdateAttackNear(void)
 
 void Enemy::UpdateAttackFar(void)
 {
-	//RotateTarget(player_.GetTransform().pos);
-	Rotate();
+	RotateToPlayer();
 
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
@@ -572,12 +578,13 @@ void Enemy::UpdateAttackFar(void)
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
+		bullets_.clear();
 		return;
 	}
-
+	const float bulletInterval = 0.7f;
 	for(auto& bullet : bullets_)
 	{
-		if (stateStep_ > 1.0f && bullet->GetState() == EnemyBullet::STATE::NONE)
+		if (stateStep_ > bulletInterval && bullet->GetState() == EnemyBullet::STATE::NONE)
 		{
 			bullet->SetStateReady();
 			stateStep_ = 0.0f;
@@ -587,13 +594,30 @@ void Enemy::UpdateAttackFar(void)
 	for (const auto& bullet : bullets_)
 	{
 		if (!CheckBulletReady())break;
-		if (stateStep_ > 1.0f)
+		if (stateStep_ > bulletInterval)
 		{
 			bullet->Shot();
+			bullet->SetTargetPos(player_.GetTransform().pos);
 		}
 
 		bullet->Update();
+
+		//当たり判定
+		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+			bullet->GetSphere().GetRadius(), player_.GetCapsule().GetPosTop(),
+			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
+		{
+			//回避中だったらダメージを受けない
+			if (player_.GetisDodge())
+			{
+				bullet->Destroy();
+				continue;
+			}
+			player_.SubHp(ATTACK_DAMAGE);
+			bullet->Destroy();
+		}
 	}
+
 }
 
 void Enemy::UpdateDown(void)
