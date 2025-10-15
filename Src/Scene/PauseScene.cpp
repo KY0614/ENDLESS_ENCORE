@@ -206,10 +206,10 @@ void PauseScene::DrawMenuList(void)
 			lineX += SELECT_MENU_MARGINE * scale;
 		}
 
-		DrawRotaGraph(Application::SCREEN_SIZE_X / 2 + lineX * scale,
-			(MENU_START_Y * scale) + (MENU_SCALE * size * scale * i),
-			scale * size, 0.0f, menuListImg_[i], true
-		);
+		//DrawRotaGraph(Application::SCREEN_SIZE_X / 2 + lineX * scale,
+		//	(MENU_START_Y * scale) + (MENU_SCALE * size * scale * i),
+		//	scale * size, 0.0f, menuListImg_[i], true
+		//);
 
 		lineY += MENU_SCALE * size * scale;
 	}
