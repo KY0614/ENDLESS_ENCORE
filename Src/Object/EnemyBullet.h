@@ -12,7 +12,8 @@ public:
 		NONE,
 		READY,
 		SHOT,
-		DETSTROY,
+		REVERSE,
+		DESTROY,
 	};
 
 	//コンストラクタ
@@ -79,11 +80,21 @@ public:
 	/// </summary>
 	void Reset(void);
 
-
+	/// <summary>
+	/// 状態変更
+	/// </summary>
+	/// <param name="state">遷移したい状態</param>
+	void ChangeState(const STATE state) { state_ = state; }
 
 private:
-	//状態
+	//状態管理
 	STATE state_;
+
+	//状態管理(状態遷移時初期処理)
+	std::map<STATE, std::function<void(void)>> stateChanges_;
+
+	//状態管理(更新ステップ)
+	std::function<void(void)> stateUpdate_;
 
 	//親のモデル情報
 	Transform& parentTran_;
@@ -97,16 +108,15 @@ private:
 	//球体
 	std::unique_ptr<Sphere> sphere_;
 	
-	//弾の移動処理
+	/// <summary>
+	/// 移動処理
+	/// </summary>
 	void Move(void);
 
-	void Rotate(void);
-
 	/// <summary>
-	/// 状態を変更する
+	/// 回転処理
 	/// </summary>
-	/// <param name="state">指定する状態</param>
-	void ChangeState(const STATE state) { state_ = state; }
+	void Rotate(void);
 
 };
 

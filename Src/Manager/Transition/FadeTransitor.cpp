@@ -9,6 +9,10 @@ void FadeTransitor::Update(void)
 		++frame_;
 		SetDrawScreen(true);	
 	}
+	else
+	{
+
+	}
 }
 
 void FadeTransitor::Draw(void)

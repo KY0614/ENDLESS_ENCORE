@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Manager\Transition\PushTransitor.cpp" />
     <ClCompile Include="Src\Manager\Transition\FadeTransitor.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
     <ClCompile Include="Src\Object\EnemyBullet.cpp" />
@@ -78,6 +79,7 @@
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Manager\Transition\PushTransitor.h" />
     <ClInclude Include="Src\Manager\Transition\FadeTransitor.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
     <ClInclude Include="Src\Object\EnemyBullet.h" />

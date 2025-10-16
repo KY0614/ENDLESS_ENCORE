@@ -374,7 +374,7 @@ void Enemy::CreateBullet(const int createNum)
 	for (const auto& bullet : bullets_)
 	{
 		//’e‚ªÁ–Å‚µ‚Ä‚¢‚½‚çÄ—˜—p‚·‚é
-		if (bullet->GetState() != EnemyBullet::STATE::DETSTROY)continue;
+		if (bullet->GetState() != EnemyBullet::STATE::DESTROY)continue;
 		bullet->Reset();
 	}
 }

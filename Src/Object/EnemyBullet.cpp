@@ -72,7 +72,7 @@ void EnemyBullet::Draw(void)
 void EnemyBullet::Destroy(void)
 {
 	//”jŠüó‘Ô‚Ö•ÏX
-	ChangeState(STATE::DETSTROY);
+	ChangeState(STATE::DESTROY);
 	SetIsAlive(false);
 }
 

@@ -23,6 +23,6 @@ void Transitor::Start(void)
 	newRT_ = MakeScreen(size.width_, size.height_);
 
 	//現在表示中の画面をoldRT_にコピー
-	int result = GetDrawScreen(0, 0, size.width_, size.height_,oldRT_);
+	//int result = GetDrawScreen(0, 0, size.width_, size.height_,oldRT_);
 	frame_ = 0;
 }
