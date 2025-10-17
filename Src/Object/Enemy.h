@@ -156,6 +156,13 @@ private:
 	/// <returns>true:全て準備状態　false:未準備</returns>
 	bool CheckBulletReady(void);
 
+	/// <summary>
+	/// 生成した弾全てが破棄状態かチェックする
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true:全て破棄状態　false:未破棄</returns>
+	bool CheckBulletDestroy(void);
+
 	//状態遷移--------------------------------------------------------
 
 	/// <summary>

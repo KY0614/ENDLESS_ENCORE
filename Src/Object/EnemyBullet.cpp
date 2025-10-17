@@ -38,7 +38,7 @@ void EnemyBullet::Init(void)
 
 void EnemyBullet::Update(void)
 {
-
+	if (!isAlive_)return;
 	//モデル情報の更新
 	transform_.Update();
 
@@ -91,11 +91,12 @@ void EnemyBullet::Shot(void)
 	isAlive_ = true;
 }
 
-void EnemyBullet::Reset(void)
+void EnemyBullet::Reset(const Transform& transform)
 {
 	state_ = STATE::NONE;
 	isAlive_ = false;
-
+	transform_.pos = transform.pos;
+	transform_.quaRot = transform.quaRot;
 	//諸々モデルの初期化
 	const VECTOR ARROW_LOCAL_POS = { 0.0f, 185.0f, 0.0f };
 	VECTOR localPos = transform_.quaRot.PosAxis(ARROW_LOCAL_POS);

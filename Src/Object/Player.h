@@ -96,7 +96,7 @@ public:
 	/// <param name="state">•ÏX‚·‚éó‘Ô</param>
 	void ChangeState(STATE state);
 
-	void SubHp(float subHp) { hp_ -= subHp; }
+	void Damage(float subHp) { hp_ -= subHp; }
 
 	/// <summary>
 	/// ‰ñ”ğ’†‚©‚Ç‚¤‚©‚ğæ“¾‚·‚é

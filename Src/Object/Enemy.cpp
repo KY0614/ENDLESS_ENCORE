@@ -14,8 +14,9 @@
 namespace
 {
 	const float TIME_ROT = 1.3f;
-	const float HP_MAX = 100.0f;
-	const float MOVE_SPEED = 13.0f;
+	//“G‚ÌŠî–{ƒpƒ‰ƒ[ƒ^
+	const float HP_MAX = 100.0f;	//Å‘åHP	
+	const float MOVE_SPEED = 13.0f;	//ˆÚ“®‘¬“x
 	//‹——£‚ÌŠî€’l
 	const float ATTACK_NEAR_DISTANCE = 350.0f;	//‹ß‹——£UŒ‚”»’è‹——£
 	const float ATTACK_FAR_DISTANCE = 800.0f;	//‰“‹——£UŒ‚”»’è‹——£
@@ -95,7 +96,7 @@ void Enemy::Init(void)
 	InitAnimation();
 	//‰Šú‚Ìó‘Ô‚ðÝ’è
 	ChangeState(STATE::MOVE);
-	hp_ = 50.0f;
+	hp_ = HP_MAX;
 }
 
 void Enemy::Update(void)
@@ -105,7 +106,7 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
-	UpdateDebugImGui();
+	//UpdateDebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -146,7 +147,7 @@ void Enemy::Draw(void)
 	default:
 		break;
 	}
-	DrawFormatString(0, 160, 0xffffff, L"bullet : %d", bullets_.size());
+	DrawFormatString(0, 160, 0xffffff, L"E HP : %.2f", hp_);
 
 	//for (int i = 0; i < FAR_SPHERE_NUM; i++)
 	//{
@@ -350,33 +351,33 @@ void Enemy::CreateBullet(const int createNum)
 			bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
 			bullets_.back()->Init();
 		} 
-		//’e‚Ì‰ŠúˆÊ’u‚ð’²®
-		VECTOR localPos = { -80.0f, 185.0f, 0.0f };
-		//“G‚Ì‰ñ“]‚É‡‚í‚¹‚Ä’e‚ÌˆÊ’u‚ð‰ñ“]‚³‚¹‚é
-		localPos = transform_.quaRot.PosAxis(localPos);
-		bullets_[0]->SetLocalPos(localPos);
-
-		localPos = { 80.0f, 185.0f, 0.0f };
-		localPos = transform_.quaRot.PosAxis(localPos);
-		bullets_[1]->SetLocalPos(localPos);
-
-		localPos = { -30.0f, 230.0f, 0.0f };
-		localPos = transform_.quaRot.PosAxis(localPos);
-		bullets_[2]->SetLocalPos(localPos);
-
-		localPos = { 30.0f, 230.0f, 0.0f };
-		localPos = transform_.quaRot.PosAxis(localPos);
-		bullets_[3]->SetLocalPos(localPos);
-		bullets_.resize(createNum);
 	}
-
 	//”jŠüÏ‚Ý‚Ì’e‚ð’T‚µ‚ÄÄ—˜—p‚·‚é
 	for (const auto& bullet : bullets_)
 	{
 		//’e‚ªÁ–Å‚µ‚Ä‚¢‚½‚çÄ—˜—p‚·‚é
 		if (bullet->GetState() != EnemyBullet::STATE::DESTROY)continue;
-		bullet->Reset();
+		bullet->Reset(transform_);
 	}
+
+	//’e‚Ì‰ŠúˆÊ’u‚ð’²®
+	VECTOR localPos = { -80.0f, 185.0f, 0.0f };
+	//“G‚Ì‰ñ“]‚É‡‚í‚¹‚Ä’e‚ÌˆÊ’u‚ð‰ñ“]‚³‚¹‚é
+	localPos = transform_.quaRot.PosAxis(localPos);
+	bullets_[0]->SetLocalPos(localPos);
+
+	localPos = { 80.0f, 185.0f, 0.0f };
+	localPos = transform_.quaRot.PosAxis(localPos);
+	bullets_[1]->SetLocalPos(localPos);
+
+	localPos = { -30.0f, 230.0f, 0.0f };
+	localPos = transform_.quaRot.PosAxis(localPos);
+	bullets_[2]->SetLocalPos(localPos);
+
+	localPos = { 30.0f, 230.0f, 0.0f };
+	localPos = transform_.quaRot.PosAxis(localPos);
+	bullets_[3]->SetLocalPos(localPos);
+	bullets_.resize(createNum);
 }
 
 void Enemy::SetGoalRotate(double rotRad)
@@ -425,12 +426,24 @@ bool Enemy::CheckBulletReady(void)
 {
 	for(const auto& bullet : bullets_)
 	{
-		if (bullet->GetState() == EnemyBullet::STATE::READY)
+		if (bullet->GetState() != EnemyBullet::STATE::READY)
 		{
-			return true;
+			return false;
 		}
 	}
-	return false;
+	return true;
+}
+
+bool Enemy::CheckBulletDestroy(void)
+{
+	for (const auto& bullet : bullets_)
+	{
+		if (bullet->GetState() != EnemyBullet::STATE::DESTROY)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 void Enemy::ChangeStateNone(void)
@@ -562,13 +575,14 @@ void Enemy::UpdateAttackNear(void)
 	{
 		//‰ñ”ð’†‚¾‚Á‚½‚çƒ_ƒ[ƒW‚ðŽó‚¯‚È‚¢
 		if (player_.GetisDodge())return;
-		player_.SubHp(ATTACK_DAMAGE);
+		player_.Damage(ATTACK_DAMAGE);
 		ChangeState(STATE::MOVE);
 	}
 }
 
 void Enemy::UpdateAttackFar(void)
 {
+	static int damageCount = 0;
 	//‰ñ“]ˆ—
 	RotateToPlayer();
 
@@ -578,7 +592,7 @@ void Enemy::UpdateAttackFar(void)
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
-		bullets_.clear();
+
 		return;
 	}
 	//’e‚ð‡X‚É€”õó‘Ô‚É‚·‚é
@@ -595,18 +609,18 @@ void Enemy::UpdateAttackFar(void)
 	//’e‚ª‘S•”€”õ‚Å‚«‚½‚çƒvƒŒƒCƒ„[‚ÉŒü‚¯‚Ä”­ŽË‚·‚é
 	for (const auto& bullet : bullets_)
 	{
-		//if (!CheckBulletReady())break;
-		if (stateStep_ > bulletInterval && CheckBulletReady())
+		if (CheckBulletDestroy())break;
+		if (stateStep_ > bulletInterval && bullet->GetState() == EnemyBullet::STATE::READY)
 		{
 			//ƒ^[ƒQƒbƒg‚É”­ŽË
 			bullet->Shot();
 			bullet->SetTargetPos(player_.GetTransform().pos);
 		}
-
+		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
 		bullet->Update();
 
 		//ƒpƒŠƒB”»’è
-		if(CommonUtility::IsHitSpheres(
+		if (CommonUtility::IsHitSpheres(
 			bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
 			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
 		{
@@ -630,11 +644,39 @@ void Enemy::UpdateAttackFar(void)
 				continue;
 			}
 			//ƒ_ƒ[ƒWˆ—(“–‚½‚Á‚½’e‚Í”jŠü)
-			player_.SubHp(ATTACK_DAMAGE);
+			player_.Damage(ATTACK_DAMAGE);
 			bullet->Destroy();
+		}
+
+		//“–‚½‚è”»’è
+		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+			bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
+			capsule_->GetPosDown(), capsule_->GetRadius()))
+		{
+			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
+			//ƒ_ƒ[ƒWˆ—(“–‚½‚Á‚½’e‚Í”jŠü)
+			Damage();
+			bullet->Destroy();
+			damageCount++;
+			continue;
 		}
 	}
 
+	if(damageCount >= 4) 
+	{
+		ChangeState(STATE::DOWN);
+		damageCount = 0;
+		return;
+	}
+	
+
+	if (CheckBulletDestroy())
+	{
+		stateStep_ = 0.0f;
+		ChangeState(STATE::MOVE);
+
+		return;
+	}
 }
 
 void Enemy::UpdateDown(void)

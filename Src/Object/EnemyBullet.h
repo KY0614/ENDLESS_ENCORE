@@ -90,7 +90,7 @@ public:
 	/// <summary>
 	/// リセットする
 	/// </summary>
-	void Reset(void);
+	void Reset(const Transform& transform);
 
 	/// <summary>
 	/// 状態変更
