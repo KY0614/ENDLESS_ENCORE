@@ -35,5 +35,5 @@ nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::str
 void JsonManager::InitGame(void)
 {
 	//各種データの読み込み
-	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadData("Data/Paramate/Player.json", "Player"));
+	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadData("Data/Json/Player.json", "Player"));
 }
