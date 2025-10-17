@@ -425,13 +425,12 @@ bool Enemy::CheckBulletReady(void)
 {
 	for(const auto& bullet : bullets_)
 	{
-		if (bullet->GetState() != EnemyBullet::STATE::READY &&
-			bullet->GetState() != EnemyBullet::STATE::SHOT)
+		if (bullet->GetState() == EnemyBullet::STATE::READY)
 		{
-			return false;
+			return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 void Enemy::ChangeStateNone(void)
@@ -570,6 +569,7 @@ void Enemy::UpdateAttackNear(void)
 
 void Enemy::UpdateAttackFar(void)
 {
+	//回転処理
 	RotateToPlayer();
 
 	//
@@ -581,6 +581,7 @@ void Enemy::UpdateAttackFar(void)
 		bullets_.clear();
 		return;
 	}
+	//弾を順々に準備状態にする
 	const float bulletInterval = 0.7f;
 	for(auto& bullet : bullets_)
 	{
@@ -591,16 +592,31 @@ void Enemy::UpdateAttackFar(void)
 		}
 	}
 
+	//弾が全部準備できたらプレイヤーに向けて発射する
 	for (const auto& bullet : bullets_)
 	{
-		if (!CheckBulletReady())break;
-		if (stateStep_ > bulletInterval)
+		//if (!CheckBulletReady())break;
+		if (stateStep_ > bulletInterval && CheckBulletReady())
 		{
+			//ターゲットに発射
 			bullet->Shot();
 			bullet->SetTargetPos(player_.GetTransform().pos);
 		}
 
 		bullet->Update();
+
+		//パリィ判定
+		if(CommonUtility::IsHitSpheres(
+			bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
+			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
+		{
+			if (player_.GetisParry())
+			{
+				bullet->SetStateReverse();
+				bullet->SetTargetPos(transform_.pos);
+				continue;
+			}
+		}
 
 		//当たり判定
 		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
@@ -613,6 +629,7 @@ void Enemy::UpdateAttackFar(void)
 				bullet->Destroy();
 				continue;
 			}
+			//ダメージ処理(当たった弾は破棄)
 			player_.SubHp(ATTACK_DAMAGE);
 			bullet->Destroy();
 		}

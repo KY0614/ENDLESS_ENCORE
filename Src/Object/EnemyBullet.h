@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+#include <map>
 #include "ShotBase.h"
 
 class Sphere;
@@ -37,6 +39,7 @@ public:
 	/// <param name=""></param>
 	/// <returns>true:発射中　false:発射してない</returns>
 	const bool& CheckStateShot(void)const { return state_ == STATE::SHOT; }
+	const bool& CheckStateReverse(void)const { return state_ == STATE::REVERSE; }
 
 	/// <summary>
 	/// 状態を取得
@@ -57,11 +60,20 @@ public:
 	void SetStateReady(void) { state_ = STATE::READY; isAlive_ = true; }
 
 	/// <summary>
+	/// 反射状態に設定
+	/// </summary>
+	void SetStateReverse(void) { state_ = STATE::REVERSE; isAlive_ = true; }
+
+	/// <summary>
 	/// 生存状態を設定
 	/// </summary>
 	/// <param name="isAlive">true:生存中　false:生存してない</param>
 	void SetIsAlive(const bool isAlive) { isAlive_ = isAlive; }
 
+	/// <summary>
+	/// ターゲット座標を設定
+	/// </summary>
+	/// <param name="targetPos">指定するターゲット座標</param>
 	void SetTargetPos(const VECTOR targetPos) { targetPos_ = targetPos; }
 
 	/// <summary>

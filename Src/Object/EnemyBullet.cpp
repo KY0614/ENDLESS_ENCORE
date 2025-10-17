@@ -43,7 +43,7 @@ void EnemyBullet::Update(void)
 	transform_.Update();
 
 	//”­Ëó‘Ô‚Å‚È‚¯‚ê‚ÎXV‚µ‚È‚¢
-	if (!CheckStateShot())return;
+	if (!CheckStateShot() && !CheckStateReverse())return;
 
 	//’e‚ÌˆÚ“®ˆ—
 	Move();

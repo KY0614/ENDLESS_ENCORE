@@ -1,7 +1,6 @@
 #pragma once
 #include <functional>
 #include <map>
-#include<medparam.h>
 #include "ActorBase.h"
 
 class AnimationController;
