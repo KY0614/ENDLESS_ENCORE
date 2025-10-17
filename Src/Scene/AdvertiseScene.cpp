@@ -27,7 +27,7 @@ void AdvertiseScene::Update(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 	//入力があったらタイトルシーンへ
-	if(ins.IsInputTriggered("Dadge"))
+	if(CheckHitKeyAll())
 	{
 		SceneManager::GetInstance().ChangeScene(
 			SceneManager::SCENE_ID::TITLE);
@@ -35,12 +35,12 @@ void AdvertiseScene::Update(void)
 	}
 
 	//ムービーが最後まで再生されたらタイトルシーンへ
-	if(TellMovieToGraph(movieHandle_) >= totalMovieFrame_ - 1)
-	{
-		SceneManager::GetInstance().ChangeScene(
-			SceneManager::SCENE_ID::TITLE);
-		return;
-	}
+	//if(TellMovieToGraph(movieHandle_) >= totalMovieFrame_ - 1)
+	//{
+	//	SceneManager::GetInstance().ChangeScene(
+	//		SceneManager::SCENE_ID::TITLE);
+	//	return;
+	//}
 }
 
 void AdvertiseScene::Draw(void)

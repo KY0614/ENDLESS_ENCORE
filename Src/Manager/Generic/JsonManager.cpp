@@ -21,6 +21,19 @@ void JsonManager::Init(void)
 {
 }
 
+void JsonManager::Release(void)
+{
+	//読み込んだデータの解放
+	jsonDataMap_.clear();
+}
+
+void JsonManager::Destroy(void)
+{
+	//インスタンスの解放
+	Release();
+	delete instance_;
+}
+
 nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::string& dataName)
 {
 	std::ifstream ifs(fileName);

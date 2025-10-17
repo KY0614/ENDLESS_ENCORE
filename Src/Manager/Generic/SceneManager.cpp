@@ -12,9 +12,10 @@
 #include "../../Scene/TutorialScene.h"
 #include "../../Scene/GameScene.h"
 #include "../../Scene/ResultScene.h"
-#include "Camera.h"
 #include "../GameSystem/SoundManager.h"
+#include "JsonManager.h"
 //#include "../../Object/UI/UIManager.h"
+#include "Camera.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
@@ -37,6 +38,7 @@ SceneManager& SceneManager::GetInstance(void)
 void SceneManager::Init(void)
 {
 	SoundManager::CreateInstance();
+	JsonManager::CreateInstance();
 	//UIManager::CreateInstance();
 
 	sceneId_ = SCENE_ID::NONE;
@@ -160,6 +162,7 @@ void SceneManager::Draw(void)
 void SceneManager::Destroy(void)
 {
 	SoundManager::GetInstance().Destroy();
+	JsonManager::GetInstance().Destroy();
 	//UIManager::GetInstance().Destroy();
 	delete instance_;
 }
@@ -253,8 +256,10 @@ void SceneManager::ResetDeltaTime(void)
 void SceneManager::DoChangeScene(SCENE_ID sceneId)
 {
 	auto& resM = ResourceManager::GetInstance();
+	auto& jsonM = JsonManager::GetInstance();
 	//ÉäÉ\Å[ÉXÇÃâï˙
 	resM.Release();
+	jsonM.Release();
 	SoundManager::GetInstance().Release();
 	//UIManager::GetInstance().Release();
 
@@ -310,6 +315,7 @@ void SceneManager::Fade(void)
 void SceneManager::MakeScene(SCENE_ID sceneId)
 {
 	auto& resM = ResourceManager::GetInstance();
+	auto& jsonM = JsonManager::GetInstance();
 	std::unique_ptr<SceneBase> scene;
 	switch (sceneId)
 	{
@@ -342,6 +348,7 @@ void SceneManager::MakeScene(SCENE_ID sceneId)
 	case SceneManager::SCENE_ID::GAME:
 		scene = std::make_unique<GameScene>();
 		resM.InitGame();
+		jsonM.InitGame();
 		break;
 	
 	case SceneManager::SCENE_ID::PAUSE:

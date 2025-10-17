@@ -9,7 +9,8 @@
     "runSpeed": 10.0,
     "dodgeSpeed": 23.0,
     "defaultAnimSpeed":30.0,
-    "animations": {
+    "animations": 
+    {
       "idle": "Data/Model/Player/Idle.mv1",
       "walk": "Data/Model/Player/Walking.mv1",
       "run": "Data/Model/Player/Running.mv1",
