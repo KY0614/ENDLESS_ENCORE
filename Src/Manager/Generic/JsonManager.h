@@ -29,7 +29,7 @@ public:
 	// リソースの完全破棄
 	void Destroy(void);
 
-	void AddJsonData(void);
+	nlohmann::json GetJsonData(JSON_DATA data);
 
 	/// <summary>
 	/// 指定されたオブジェクト名に基づいてデータを読み込む

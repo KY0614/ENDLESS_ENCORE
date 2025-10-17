@@ -1,4 +1,3 @@
-#include "../../Libs/nlohmann/json.hpp"
 #include "JsonManager.h"
 
 JsonManager* JsonManager::instance_ = nullptr;
@@ -32,6 +31,12 @@ void JsonManager::Destroy(void)
 	//インスタンスの解放
 	Release();
 	delete instance_;
+}
+
+nlohmann::json JsonManager::GetJsonData(JSON_DATA data)
+{
+	nlohmann::json jsonData = jsonDataMap_[data];
+	return jsonData;
 }
 
 nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::string& dataName)

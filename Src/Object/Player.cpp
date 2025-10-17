@@ -1,6 +1,7 @@
 #include <cassert>
 #include<EffekseerForDXLib.h>
 #include "../Application.h"
+#include "../Libs/nlohmann/json.hpp"
 #include "../Utility/CommonUtility.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Common/DebugDrawFormat.h"
@@ -8,12 +9,16 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
+#include "../Manager/Generic/JsonManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "Common/AnimationController.h"
 #include "Common/Capsule.h"
 #include "Common/Sphere.h"
 #include "Common/Collider.h"
 #include "Player.h"
+
+// 長いのでnamespaceの省略
+using json = nlohmann::json;
 
 namespace
 {
@@ -84,6 +89,12 @@ Player::~Player(void)
 
 void Player::Init(void)
 {
+	auto& jsonM = JsonManager::GetInstance();
+
+	json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	const auto& val = data["Player"];
+	
+
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
@@ -123,7 +134,8 @@ void Player::Init(void)
 	//歩きエフェクトの発生間隔
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
-	hp_ = 50.0f;
+	hp_ = val.value("hp", 0.0f);
+	//hp_ = 100.0f;
 	col_ = 0x000000;
 }
 
@@ -903,7 +915,7 @@ void Player::DebugDraw(void)
 	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
 	const int HP_BAR_WIDTH = 200;    // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
-	float hp = hp_ / HP_MAX;
+	float hp = hp_ / 200.0f;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
 	// 背景（グレー）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
@@ -911,9 +923,9 @@ void Player::DebugDraw(void)
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
 
 
-	//DebugDrawFormat::FormatString(L"HP : %.2f",
-	//	hp_,
-	//	lineH);
+	DebugDrawFormat::FormatString(L"P HP : %.2f",
+		hp_,
+		lineH);
 	DebugDrawFormat::FormatString(L"stepWalk : %.2f",
 		stepWalk_,
 		lineH);
