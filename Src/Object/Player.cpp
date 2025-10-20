@@ -384,7 +384,7 @@ void Player::ProcessMove(void)
 	InputManager& ins = InputManager::GetInstance();
 	Quaternion cameraRot = mainCamera->GetQuaRotOutX();
 
-	double rotRad = 0;
+	double rotRad = 0.0;
 
 	if (ins.IsInputTriggered("Reset"))
 	{
@@ -915,7 +915,7 @@ void Player::DebugDraw(void)
 	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
 	const int HP_BAR_WIDTH = 200;    // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
-	float hp = hp_ / 200.0f;
+	float hp = hp_ / 100.0f;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
 	// 背景（グレー）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);

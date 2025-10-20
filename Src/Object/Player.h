@@ -120,7 +120,9 @@ private:
 	//状態管理(更新ステップ)
 	std::function<void(void)> stateUpdate_;
 
-	float hp_;
+	//HP
+	float hp_;		//現在HP
+	float maxHp_;	//最大HP
 
 	//移動スピード
 	float speed_;

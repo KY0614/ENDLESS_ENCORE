@@ -10,28 +10,28 @@
 /// 周辺機器種別
 /// </summary>
 enum class PeripheralType {
-	keyboard,	//キーボード
-	gamepad,	//ゲームパッド
-	mouse,		//マウス
-	x_analog,	//Xboxコントローラーのアナログ入力
-	end			//for文で回すとき用に定義
+	KEYBOARD,	//キーボード
+	GAMEPAD,	//ゲームパッド
+	MOUSE,		//マウス
+	X_ANALOG,	//Xboxコントローラーのアナログ入力
+	END			//for文で回すとき用に定義
 };
 
 /// <summary>
 /// アナログ入力種別
 /// </summary>
 enum class AnalogInputType {
-	none,	//押してない
-	l_up,	//左スティックの上
-	l_down,	//左スティックの下
-	l_left,	//左スティックの左
-	l_right,//左スティックの右
-	r_up,	//右スティックの上
-	r_down,	//右スティックの下
-	r_left,	//右スティックの左
-	r_right,//右スティックの右
-	l_trigger,
-	r_trigger
+	NONE,		//押してない
+	L_UP,		//左スティックの上
+	L_DOWN,		//左スティックの下
+	L_LEFT,		//左スティックの左
+	L_RIGHT,	//左スティックの右
+	R_UP,		//右スティックの上
+	R_DOWN,		//右スティックの下
+	R_LEFT,		//右スティックの左
+	R_RIGHT,	//右スティックの右
+	L_TRIGGER,	//左トリガー
+	R_TRIGGER	//右トリガー
 };
 
 class KeyConfigScene;
@@ -58,10 +58,17 @@ public:
 	/// <returns>押されている間:true / false :押されていない</returns>
 	bool IsPressed(const std::string& eventcode)const;
 
-	void Update(void);//入力状態を更新する
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	/// <param name=""></param>
+	void Update(void);
+
 
 private:
-
+	/// <summary>
+		///	入力状態
+		/// </summary>
 	struct InputState {
 		PeripheralType type;	//周辺機器種別
 		uint32_t code;			//入力コード(汎用)
@@ -75,9 +82,7 @@ private:
 	InputData_t currentInput_;	//そのイベントに対応するボタンが押されている状態か
 	InputData_t lastInput_;		//そのイベントに対応するボタンが押されている状態か(直前)
 
-	std::vector<std::string> inputlistForDisplay_;
-
-	using AnalogInputTable_t = 
+	using AnalogInputTable_t =
 		std::unordered_map < AnalogInputType, std::function<bool(const XINPUT_STATE&)>>;
 
 	AnalogInputTable_t analogInputTable_;
@@ -90,6 +95,9 @@ private:
 
 	void Load();
 
+	/// <summary>
+	/// 入力対応表を初期化する
+	/// </summary>
 	void ResetTable();
 };
 

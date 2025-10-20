@@ -9,6 +9,10 @@ namespace {
 		float version;
 		uint32_t dataSize;//4バイト
 	};
+
+	//アナログスティックのしきい値
+	const int MAX_ANALOG_STICK = 10000;	//スティックの最大値
+	const int MAX_ANALOG_TRIGGER = 128;	//トリガーの最大値
 }
 
 Input::Input()
@@ -16,36 +20,36 @@ Input::Input()
 	ResetTable();
 	Load();
 
-	analogInputTable_[AnalogInputType::l_up] = [](const XINPUT_STATE& state) {
-		return state.ThumbLY > 10000;
-	};	
-	analogInputTable_[AnalogInputType::l_down] = [](const XINPUT_STATE& state) {
-		return state.ThumbLY < -10000;
-	};
-	analogInputTable_[AnalogInputType::l_right] = [](const XINPUT_STATE& state) {
-		return state.ThumbLX > 10000;
-	};
-	analogInputTable_[AnalogInputType::l_left] = [](const XINPUT_STATE& state) {
-		return state.ThumbLX < -10000;
-	};
-	analogInputTable_[AnalogInputType::r_up] = [](const XINPUT_STATE& state) {
-		return state.ThumbRY > 10000;
-	};
-	analogInputTable_[AnalogInputType::r_down] = [](const XINPUT_STATE& state) {
-		return state.ThumbRY < -10000;
-	};
-	analogInputTable_[AnalogInputType::r_left] = [](const XINPUT_STATE& state) {
-		return state.ThumbRX > 10000;
-	};
-	analogInputTable_[AnalogInputType::r_right] = [](const XINPUT_STATE& state) {
-		return state.ThumbRX < -10000;
-	};
-	analogInputTable_[AnalogInputType::l_trigger] = [](const XINPUT_STATE& state) {
-		return state.LeftTrigger > 128;
-	};
-	analogInputTable_[AnalogInputType::r_trigger] = [](const XINPUT_STATE& state) {
-		return state.RightTrigger > 128;
-	};
+	analogInputTable_[AnalogInputType::L_UP] = [](const XINPUT_STATE& state) {
+		return state.ThumbLY > MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::L_DOWN] = [](const XINPUT_STATE& state) {
+		return state.ThumbLY < -MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::L_RIGHT] = [](const XINPUT_STATE& state) {
+		return state.ThumbLX > MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::L_LEFT] = [](const XINPUT_STATE& state) {
+		return state.ThumbLX < -MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::R_UP] = [](const XINPUT_STATE& state) {
+		return state.ThumbRY > MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::R_DOWN] = [](const XINPUT_STATE& state) {
+		return state.ThumbRY < -MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::R_LEFT] = [](const XINPUT_STATE& state) {
+		return state.ThumbRX > MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::R_RIGHT] = [](const XINPUT_STATE& state) {
+		return state.ThumbRX < -MAX_ANALOG_STICK;
+		};
+	analogInputTable_[AnalogInputType::L_TRIGGER] = [](const XINPUT_STATE& state) {
+		return state.LeftTrigger > MAX_ANALOG_TRIGGER;
+		};
+	analogInputTable_[AnalogInputType::R_TRIGGER] = [](const XINPUT_STATE& state) {
+		return state.RightTrigger > MAX_ANALOG_TRIGGER;
+		};
 
 	for (const auto& keyvalue : inputTable_)
 	{
@@ -95,19 +99,19 @@ void Input::Update(void)
 		for (auto input : keyvalue.second)
 		{
 			bool pressed = false;
-			if (input.type == PeripheralType::keyboard)
+			if (input.type == PeripheralType::KEYBOARD)
 			{
 				pressed = keyState[input.code];
 			}
-			else if (input.type == PeripheralType::gamepad)
+			else if (input.type == PeripheralType::GAMEPAD)
 			{
 				pressed = padState&input.code;
 			}
-			else if (input.type == PeripheralType::mouse)
+			else if (input.type == PeripheralType::MOUSE)
 			{
 				pressed = mouseState & input.code;
 			}
-			else if (input.type == PeripheralType::x_analog)
+			else if (input.type == PeripheralType::X_ANALOG)
 			{
 				pressed = analogInputTable_[(AnalogInputType)input.code](xinputState);
 			}
@@ -121,69 +125,69 @@ void Input::ResetTable()
 {
 	inputTable_ = {
 	{"Back",{
-		{PeripheralType::keyboard,KEY_INPUT_RETURN},
-		{PeripheralType::gamepad,PAD_INPUT_A},//Aボタン
+		{PeripheralType::KEYBOARD,KEY_INPUT_RETURN},
+		{PeripheralType::GAMEPAD,PAD_INPUT_L},//selectボタン
 		//{PeripheralType::mouse,MOUSE_INPUT_LEFT}}//左クリック	
 		}
 	},
 
 	{"pause",{
-		{PeripheralType::keyboard,KEY_INPUT_P},
-		{PeripheralType::gamepad,PAD_INPUT_R}}	//STARTボタン
+		{PeripheralType::KEYBOARD,KEY_INPUT_P},
+		{PeripheralType::GAMEPAD,PAD_INPUT_R}}	//STARTボタン
 	},
 	};
 
-	inputTable_["Reset"] = { {PeripheralType::keyboard,KEY_INPUT_R},
+	inputTable_["Reset"] = { {PeripheralType::KEYBOARD,KEY_INPUT_R},
 							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
-	inputTable_["Parry"] = { {PeripheralType::keyboard,KEY_INPUT_SPACE},
-							{PeripheralType::gamepad, PAD_INPUT_A},
+	inputTable_["Parry"] = { {PeripheralType::KEYBOARD,KEY_INPUT_SPACE},
+							{PeripheralType::GAMEPAD, PAD_INPUT_B},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
-	inputTable_["Dodge"] = { {PeripheralType::keyboard,KEY_INPUT_LSHIFT},
-							{PeripheralType::gamepad, PAD_INPUT_A},
-							{PeripheralType::mouse, MOUSE_INPUT_RIGHT} };
+	inputTable_["Dodge"] = { {PeripheralType::KEYBOARD,KEY_INPUT_LSHIFT},
+							{PeripheralType::GAMEPAD, PAD_INPUT_A},
+							{PeripheralType::MOUSE, MOUSE_INPUT_RIGHT} };
 
-	inputTable_["Dash"] = { {PeripheralType::keyboard,KEY_INPUT_LCONTROL},
-							{PeripheralType::gamepad, PAD_INPUT_Y},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_trigger} };
+	//inputTable_["Dash"] = { {PeripheralType::KEYBOARD,KEY_INPUT_LCONTROL},
+	//						{PeripheralType::GAMEPAD, PAD_INPUT_Y},
+	//						{PeripheralType::X_ANALOG,(int)AnalogInputType::L_TRIGGER} };
 
-	inputTable_["Jump"] = { {PeripheralType::keyboard,KEY_INPUT_F},
-							{PeripheralType::gamepad, PAD_INPUT_B},
+	inputTable_["Jump"] = { {PeripheralType::KEYBOARD,KEY_INPUT_F},
+							{PeripheralType::GAMEPAD, PAD_INPUT_Y},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::r_trigger}*/ };
 
-	inputTable_["Up"] = {	{PeripheralType::keyboard,KEY_INPUT_W},
-							{PeripheralType::gamepad,PAD_INPUT_UP},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_up} };
+	inputTable_["Up"] = {	{PeripheralType::KEYBOARD,KEY_INPUT_W},
+							{PeripheralType::GAMEPAD,PAD_INPUT_UP},
+							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_UP} };
 
-	inputTable_["Down"] = { {PeripheralType::keyboard,KEY_INPUT_S},
-							{PeripheralType::gamepad,PAD_INPUT_DOWN},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_down} };
+	inputTable_["Down"] = { {PeripheralType::KEYBOARD,KEY_INPUT_S},
+							{PeripheralType::GAMEPAD,PAD_INPUT_DOWN},
+							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_DOWN} };
 
-	inputTable_["Right"] = {{PeripheralType::keyboard,KEY_INPUT_D},
-							{PeripheralType::gamepad,PAD_INPUT_RIGHT},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_right} };
+	inputTable_["Right"] = {{PeripheralType::KEYBOARD,KEY_INPUT_D},
+							{PeripheralType::GAMEPAD,PAD_INPUT_RIGHT},
+							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_RIGHT} };
 
-	inputTable_["Left"] = { {PeripheralType::keyboard,KEY_INPUT_A},
-							{PeripheralType::gamepad,PAD_INPUT_LEFT},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_left} };
+	inputTable_["Left"] = { {PeripheralType::KEYBOARD,KEY_INPUT_A},
+							{PeripheralType::GAMEPAD,PAD_INPUT_LEFT},
+							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_LEFT} };
 	
-	inputTable_["CameraUp"] = { {PeripheralType::keyboard,KEY_INPUT_UP},
-					{PeripheralType::gamepad,PAD_INPUT_UP},
-					{PeripheralType::x_analog,(int)AnalogInputType::l_up} };
+	inputTable_["CameraUp"] = { {PeripheralType::KEYBOARD,KEY_INPUT_UP},
+					/*{PeripheralType::GAMEPAD,PAD_INPUT_UP},*/
+					{PeripheralType::X_ANALOG,(int)AnalogInputType::R_UP} };
 
-	inputTable_["CameraDown"] = { {PeripheralType::keyboard,KEY_INPUT_DOWN},
-							{PeripheralType::gamepad,PAD_INPUT_DOWN},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_down} };
+	inputTable_["CameraDown"] = { {PeripheralType::KEYBOARD,KEY_INPUT_DOWN},
+							/*{PeripheralType::GAMEPAD,PAD_INPUT_DOWN},*/
+							{PeripheralType::X_ANALOG,(int)AnalogInputType::R_DOWN} };
 
-	inputTable_["CameraRight"] = { {PeripheralType::keyboard,KEY_INPUT_RIGHT},
-							{PeripheralType::gamepad,PAD_INPUT_RIGHT},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_right} };
+	inputTable_["CameraRight"] = { {PeripheralType::KEYBOARD,KEY_INPUT_RIGHT},
+							/*{PeripheralType::GAMEPAD,PAD_INPUT_RIGHT},*/
+							{PeripheralType::X_ANALOG,(int)AnalogInputType::R_LEFT} };
 
-	inputTable_["CameraLeft"] = { {PeripheralType::keyboard,KEY_INPUT_LEFT},
-							{PeripheralType::gamepad,PAD_INPUT_LEFT},
-							{PeripheralType::x_analog,(int)AnalogInputType::l_left} };
+	inputTable_["CameraLeft"] = { {PeripheralType::KEYBOARD,KEY_INPUT_LEFT},
+							/*{PeripheralType::GAMEPAD,PAD_INPUT_LEFT},*/
+							{PeripheralType::X_ANALOG,(int)AnalogInputType::R_RIGHT} };
 
 	//inputTable_["CameraFront"] = { {PeripheralType::keyboard,KEY_INPUT_I}};
 	//inputTable_["CameraBack"] = { {PeripheralType::keyboard,KEY_INPUT_K}};
