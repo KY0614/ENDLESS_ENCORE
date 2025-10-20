@@ -1,3 +1,4 @@
+#include <DxLib.h>
 #include "JsonManager.h"
 
 JsonManager* JsonManager::instance_ = nullptr;
@@ -48,6 +49,26 @@ nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::str
 	nlohmann::json data = nlohmann::json::parse(ifs);
 	if (!data.contains(dataName))return{};
 	return data;
+}
+
+const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const std::string& key)
+{
+	//配列のサイズ
+	const int arraySize = 3;	
+	//配列のフォーマットチェック
+	if (!jsonData.contains(key) || !jsonData[key].is_array() || jsonData[key].size() < arraySize)
+	{
+		//存在しなかったりしたらデフォルト値を返す
+		assert(L"%s のフォーマットが不正です。\n", key.c_str());
+		return VGet(0.0f, 0.0f, 0.0f);
+	}
+	//配列の取得
+	const auto& arr = jsonData[key];
+	return VGet(
+		arr[0].get<float>(),//X座標
+		arr[1].get<float>(),//Y座標
+		arr[2].get<float>()	//Z座標	
+	);
 }
 
 void JsonManager::InitGame(void)

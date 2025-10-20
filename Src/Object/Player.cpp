@@ -30,8 +30,6 @@ namespace
 	//アニメーション再生速度
 	const float ANIM_SPEED = 30.0f;
 
-	const float HP_MAX = 50.0f;
-
 	//移動
 	const float STEP_WALK2RUN = 1.5f;	//歩きから走りに切り替わる時間
 	const float SPEED_DODGE = 23.0f;	//回避時のスピード
@@ -49,6 +47,7 @@ Player::Player(void)
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	hp_ = 0.0f;
+	maxHp_ = 0.0f;
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
@@ -56,13 +55,15 @@ Player::Player(void)
 
 	gravHitPosDown_ = CommonUtility::VECTOR_ZERO;
 	gravHitPosUp_ = CommonUtility::VECTOR_ZERO;
-	hipFrmNo_ = 0;
+
 	effectSmokePlayId_ = -1;
 	effectSmokeResId_ = -1;
 	stepFootSmoke_ = -1.0f;
+
 	stepJump_ = -1.0f;
 	isJump_ = false;
 	speed_ = -1.0f;
+
 	movedPos_ = CommonUtility::VECTOR_ZERO;
 	moveDir_ = CommonUtility::VECTOR_ZERO;
 	movePow_ = CommonUtility::VECTOR_ZERO;
@@ -90,19 +91,22 @@ Player::~Player(void)
 void Player::Init(void)
 {
 	auto& jsonM = JsonManager::GetInstance();
-
-	json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-	const auto& val = data["Player"];
-	
-
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	const auto& param = data[JsonManager::KEY_PLAYER];
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
+	const auto& transParam = param[JsonManager::KEY_TRANSFORM];
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
-	transform_.scl = {0.7f,0.7f,0.7f};
-	transform_.pos = { -60.0f, 0.0f, 30.0f };
+	const float scale = transParam.value(JsonManager::KEY_SCALE, 1.0f);
+	transform_.scl = { scale ,scale ,scale };
+	transform_.pos = JsonManager::GetParseVector(transParam, JsonManager::KEY_POSITION);
 	transform_.quaRot = Quaternion();
+	const float rotY = transParam.value(JsonManager::KEY_ROT_Y, 0.0f);
 	transform_.quaRotLocal =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 
 	//丸影画像
@@ -134,8 +138,8 @@ void Player::Init(void)
 	//歩きエフェクトの発生間隔
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
-	hp_ = val.value("hp", 0.0f);
-	//hp_ = 100.0f;
+	hp_ = param.value("hp", 0.0f);
+	maxHp_ = param.value("maxHp", 0.0f);
 	col_ = 0x000000;
 }
 
@@ -144,14 +148,8 @@ void Player::Update(void)
 	//更新ステップ
 	stateUpdate_();
 
-	//ヒップの位置更新
-	//prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId,0, hipFrmNo_);
-
 	//アニメーション再生
 	animationController_->Update();
-	
-	//胸の位置更新
-	hipMovedPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
 
 	transform_.Update();
 
@@ -204,22 +202,23 @@ bool Player::IsPlay(void) const
 
 void Player::InitAnimation(void)
 {
+	auto& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	const auto& param = data[JsonManager::KEY_PLAYER];
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!param.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
+	const auto& animPath = param[JsonManager::KEY_ANIMATION];
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Player/";
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
-	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::WALK, path + "Walking.mv1", ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::RUN, path + "Running.mv1", ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::DODGE, path + "Dash.mv1", 40.0f);
-	animationController_->Add((int)ANIM_TYPE::DASH, path + "Dash.mv1", 40.0f);
+	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value("Idle", ""), ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value("Walk", ""), ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value("Run", ""), ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::JUMP, path + animPath.value("Jump", ""), ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value("Dodge", ""), 40.0f);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
-
-	//ヒップの位置取得
-	hipFrmNo_ = MV1SearchFrame(transform_.modelId, L"mixamorig:Hips");
-	MV1SetAttachAnimTime(transform_.modelId, hipFrmNo_, 0.0f);
-	prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
 }
 
 void Player::ChangeState(STATE state)
@@ -573,18 +572,7 @@ void Player::ProcessDodge(void)
 		speed_ = SPEED_DODGE;
 		animationController_->Play((int)ANIM_TYPE::DODGE, true, 0.0f, 4.0f);
 		animationController_->SetEndLoop(4.0f, 4.0f, 5.0f);
-		
-		//animationController_->Play((int)ANIM_TYPE::DODGE,false);
-		
-		//回避時のフレームのローカル座標を取得しておく
-		//prevPos_ = MV1GetAttachAnimFrameLocalPosition(transform_.modelId, 0, hipFrmNo_);
 	}
-	//VECTOR dodgeAnimMove = VSub(hipMovedPos_,prevPos_);
-	//float movePow = VSize(animationController_->GetMovePow());
-	//VECTOR moveDir = VScale(moveDir_, movePow);
-	//transform_.pos = VAdd(transform_.pos, moveDir);
-	//animMovePow_ = VAdd(transform_.pos, moveDir);
-	//prevPos_ = hipMovedPos_;
 
 	if (!isDodge_ && !isDecelerate_)return;
 	stepDodge_ += SceneManager::GetInstance().GetDeltaTime();
@@ -597,7 +585,8 @@ void Player::ProcessDodge(void)
 		isDodge_ = false;
 		//速度減衰開始
 		isDecelerate_ = true;
-		animationController_->Play((int)ANIM_TYPE::DASH,true,4.0f,-1.0f,false,true);
+		//animationController_->Play((int)ANIM_TYPE::DASH,true,4.0f,-1.0f,false,true);
+		animationController_->Play((int)ANIM_TYPE::DODGE,true,4.0f,-1.0f,false,true);
 	}
 	if (isDecelerate_)
 	{
@@ -915,7 +904,7 @@ void Player::DebugDraw(void)
 	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
 	const int HP_BAR_WIDTH = 200;    // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
-	float hp = hp_ / 100.0f;
+	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
 	// 背景（グレー）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);

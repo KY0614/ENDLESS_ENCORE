@@ -38,7 +38,6 @@ public:
 		JUMP,		//ジャンプ
 		PARRY,		//パリィ
 		DODGE,		//回避
-		DASH,		//回避
 		USE_ITEM,	//アイテム使用
 	};
 
@@ -192,11 +191,6 @@ private:
 	//パリィ判定
 	bool isParry_;
 	float stepParry_;
-
-	int hipFrmNo_;			//ヒップフレーム番号
-	VECTOR prevPos_;
-	VECTOR hipMovedPos_;	//ヒップ位置
-
 
 
 	/// <summary>

@@ -7,6 +7,14 @@
 class JsonManager
 {
 public:
+	//JSONキー名を定義
+	static constexpr const char* KEY_PLAYER = "Player";
+	static constexpr const char* KEY_TRANSFORM = "Transform";
+	static constexpr const char* KEY_POSITION = "position";
+	static constexpr const char* KEY_SCALE = "scale";
+	static constexpr const char* KEY_ROT_Y = "localRotY";
+	static constexpr const char* KEY_ANIMATION = "Animation";
+
 	//jsonデータの種類
 	enum class JSON_DATA
 	{
@@ -37,6 +45,8 @@ public:
 	/// <param name="objName">データを読み込む対象のオブジェクト名</param>
 	/// <returns>オブジェクト名と対応するパラメータ</returns>
 	nlohmann::json LoadData(const std::string& fileName, const std::string& dataName);
+
+	static const VECTOR GetParseVector(const nlohmann::json& jsonData, const std::string& key);
 
 	//シーンごとにデータを読み込むことにする
 	void InitTitle(void);
