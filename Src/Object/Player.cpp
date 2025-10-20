@@ -93,10 +93,13 @@ void Player::Init(void)
 	auto& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
 	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(JsonManager::KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
 	const auto& param = data[JsonManager::KEY_PLAYER];
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
 	const auto& transParam = param[JsonManager::KEY_TRANSFORM];
+
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
