@@ -4,6 +4,7 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
+#include "../Manager/Generic/JsonManager.h"
 #include "Common/AnimationController.h"
 #include "Common/Capsule.h"
 #include "Common/Sphere.h"
@@ -11,8 +12,16 @@
 #include "EnemyBullet.h"
 #include "Enemy.h"
 
+// 長いのでnamespaceの省略
+using json = nlohmann::json;
+
 namespace
 {
+	//JSONキー名を定義
+	static const std::string KEY_ENEMY = "Enemy";
+	static const std::string KEY_IDLE = "Idle";
+	static const std::string KEY_WALK = "Walk";
+
 	const float TIME_ROT = 1.3f;
 	//敵の基本パラメータ
 	const float HP_MAX = 100.0f;	//最大HP	
@@ -69,31 +78,27 @@ Enemy::~Enemy(void)
 void Enemy::Init(void)
 {
 	//モデルの基本設定
-	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-		ResourceManager::SRC::PLAYER));
-	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
-		175.0f/255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
-	const float scl = 1.0f;
-	transform_.scl = { scl ,scl ,scl };
-	transform_.pos = { -60.0f, 0.0f, 250.0f };
-	transform_.quaRot = Quaternion();
-	transform_.quaRotLocal =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
-	transform_.Update();
+	//transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
+	//	ResourceManager::SRC::PLAYER));
+	//MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
+	//	175.0f/255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
+	//const float scl = 1.0f;
+	//transform_.scl = { scl ,scl ,scl };
+	//transform_.pos = { -60.0f, 0.0f, 250.0f };
+	//transform_.quaRot = Quaternion();
+	//transform_.quaRotLocal =
+	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
+	//transform_.Update();
 
-	//カプセルコライダ
-	capsule_ = std::make_unique<Capsule>(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
-	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
-	capsule_->SetRadius(20.0f);
+	//3Dモデルの初期化
+	Init3DModel();
 
-	//近接攻撃用の球体コライダ
-	sphereNear_ = std::make_unique<Sphere>(transform_);
-	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
-	sphereNear_->SetRadius(30.0f);
+	//当たり判定の初期化
+	InitCollider();
 
 	//アニメーションの初期化
 	InitAnimation();
+
 	//初期の状態を設定
 	ChangeState(STATE::MOVE);
 	hp_ = HP_MAX;
@@ -183,13 +188,74 @@ void Enemy::ChangeState(const STATE state)
 	stateChanges_[state_]();
 }
 
+void Enemy::Init3DModel(void)
+{
+	auto& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(KEY_ENEMY))assert(0 && "データが存在しないか不正なデータです");
+	const auto& param = data[KEY_ENEMY];
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
+	const auto& transformData = param[JsonManager::KEY_TRANSFORM];
+
+	//モデルの基本設定
+	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
+		ResourceManager::SRC::PLAYER));
+	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
+		175.0f / 255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
+	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
+	transform_.scl = { scale ,scale ,scale };
+	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
+	transform_.quaRot = Quaternion();
+	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
+	transform_.quaRotLocal =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+	transform_.Update();
+
+	const auto& paramData = param[JsonManager::KEY_PARAMETER];
+	hp_ = paramData.value(JsonManager::KEY_HP, 0.0f);
+	//maxHp_ = paramData.value(JsonManager::KEY_MAX_HP, 0.0f);
+}
+
+void Enemy::InitCollider(void)
+{
+	//カプセルコライダ
+	capsule_ = std::make_unique<Capsule>(transform_);
+	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
+	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
+	capsule_->SetRadius(20.0f);
+
+	//近接攻撃用の球体コライダ
+	sphereNear_ = std::make_unique<Sphere>(transform_);
+	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
+	sphereNear_->SetRadius(30.0f);
+
+	col_ = 0x000000;
+
+}
+
 void Enemy::InitAnimation(void)
 {
+	auto& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
+	const auto& param = data[KEY_ENEMY];
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!param.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
+	const auto& animPath = param[JsonManager::KEY_ANIMATION];
+
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Player/";
+	const char* KEY_EMPTY = "";
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
-	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::MOVE, path + "Walking.mv1", ANIM_SPEED);
+	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+	animationController_->Add((int)ANIM_TYPE::MOVE, path + animPath.value(KEY_WALK, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }

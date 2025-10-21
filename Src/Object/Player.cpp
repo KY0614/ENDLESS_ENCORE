@@ -22,6 +22,14 @@ using json = nlohmann::json;
 
 namespace
 {
+	//JSONキー名を定義
+	static const std::string KEY_PLAYER = "Player";
+	static const std::string KEY_IDLE = "Idle";
+	static const std::string KEY_WALK = "Walk";
+	static const std::string KEY_RUN = "Run";
+	static const std::string KEY_JUMP = "Jump";
+	static const std::string KEY_DODGE = "Dodge";
+
 	//ジャンプ力
 	const float JUMP_POW = 7.5f; 
 	//重力加速度
@@ -80,7 +88,6 @@ Player::Player(void)
 	isDecelerate_ = false;
 	stepDodge_ = 0.0f;
 	isParry_ = false;
-	col_ = -1;
 	stepWalk_ = 0.0f;
 }
 
@@ -90,60 +97,28 @@ Player::~Player(void)
 
 void Player::Init(void)
 {
-	auto& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(JsonManager::KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	const auto& param = data[JsonManager::KEY_PLAYER];
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
-	const auto& transParam = param[JsonManager::KEY_TRANSFORM];
+	//3Dモデルの初期化
+	Init3DModel();
 
-	//モデルの基本設定
-	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-		ResourceManager::SRC::PLAYER));
-	const float scale = transParam.value(JsonManager::KEY_SCALE, 1.0f);
-	transform_.scl = { scale ,scale ,scale };
-	transform_.pos = JsonManager::GetParseVector(transParam, JsonManager::KEY_POSITION);
-	transform_.quaRot = Quaternion();
-	const float rotY = transParam.value(JsonManager::KEY_ROT_Y, 0.0f);
-	transform_.quaRotLocal =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
-	transform_.Update();
+	//当たり判定の初期化
+	InitCollider();
+
+	//アニメーションの設定
+	InitAnimation();
 
 	//丸影画像
 	imgShadow_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PLAYER_SHADOW).handleId_;
 
-	//カプセルコライダ
-	capsule_ = std::make_unique<Capsule>(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
-	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
-	capsule_->SetRadius(20.0f);
-
-	sphere_ = std::make_unique<Sphere>(transform_);
-	sphere_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
-	sphere_->SetRadius(80.0f);
-	//sphere_->SetLocalPos({ 0.0f, 80.0f, 70.0f });
-	//sphere_->SetRadius(40.0f);
-
 	//足煙エフェクト
 	effectSmokeResId_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::FOOT_SMOKE).handleId_;	
+		ResourceManager::SRC::FOOT_SMOKE).handleId_;
 
-	//アニメーションの設定
-	InitAnimation();
+	//足煙エフェクトの発生間隔
+	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 	//初期状態
 	ChangeState(STATE::PLAY);
-
-	//歩きエフェクトの発生間隔
-	stepFootSmoke_ = TERM_FOOT_SMOKE;
-
-	hp_ = param.value("hp", 0.0f);
-	maxHp_ = param.value("maxHp", 0.0f);
-	col_ = 0x000000;
 }
 
 void Player::Update(void)
@@ -203,23 +178,79 @@ bool Player::IsPlay(void) const
 	return state_ == STATE::PLAY;
 }
 
+void Player::Init3DModel(void)
+{
+	auto& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
+	const auto& param = data[KEY_PLAYER];
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
+	const auto& transformData = param[JsonManager::KEY_TRANSFORM];
+
+	//モデルの基本設定
+	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
+		ResourceManager::SRC::PLAYER));
+	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
+	transform_.scl = { scale ,scale ,scale };
+	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
+	transform_.quaRot = Quaternion();
+	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
+	transform_.quaRotLocal =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+	transform_.Update();
+
+	const auto& paramData = param[JsonManager::KEY_PARAMETER];
+	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
+	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
+}
+
+void Player::InitCollider(void)
+{
+	//カプセルコライダ
+	capsule_ = std::make_unique<Capsule>(transform_);
+	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
+	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
+	capsule_->SetRadius(20.0f);
+
+	sphere_ = std::make_unique<Sphere>(transform_);
+	sphere_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
+	sphere_->SetRadius(80.0f);
+	//sphere_->SetLocalPos({ 0.0f, 80.0f, 70.0f });
+	//sphere_->SetRadius(40.0f);
+
+	col_ = 0x000000;
+
+}
+
 void Player::InitAnimation(void)
 {
 	auto& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
 	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-	const auto& param = data[JsonManager::KEY_PLAYER];
+	const auto& param = data[KEY_PLAYER];
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!param.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
 	const auto& animPath = param[JsonManager::KEY_ANIMATION];
+
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Player/";
+	const char* KEY_EMPTY = "";
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
-	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value("Idle", ""), ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value("Walk", ""), ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value("Run", ""), ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::JUMP, path + animPath.value("Jump", ""), ANIM_SPEED);
-	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value("Dodge", ""), 40.0f);
+	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value(KEY_RUN, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+	animationController_->Add((int)ANIM_TYPE::JUMP, path + animPath.value(KEY_JUMP, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value(KEY_DODGE, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
@@ -626,7 +657,7 @@ void Player::ProcessParry(void)
 	if (!isParry_)return;
 	stepParry_ += SceneManager::GetInstance().GetDeltaTime();
 	col_ = 0xff0000;
-	if(stepParry_ > 0.8f)
+	if(stepParry_ > PARRY_TIME)
 	{
 		col_ = 0x000000;
 		isParry_ = false;
@@ -905,7 +936,7 @@ void Player::DebugDraw(void)
 	int lineH = 2;
 	const int HP_BAR_X = 20;         // HPバーの左上X座標
 	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
-	const int HP_BAR_WIDTH = 200;    // HPバーの最大幅
+	const int HP_BAR_WIDTH = maxHp_; // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);

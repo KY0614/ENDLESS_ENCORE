@@ -1,5 +1,12 @@
 #include <DxLib.h>
+#include "../../Application.h"
 #include "JsonManager.h"
+
+namespace 
+{
+	const std::string JSON_PLAYER = "Player";
+	const std::string JSON_ENEMY = "Enemy";
+}
 
 JsonManager* JsonManager::instance_ = nullptr;
 
@@ -73,6 +80,11 @@ const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const s
 
 void JsonManager::InitGame(void)
 {
-	//各種データの読み込み
-	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadData("Data/Json/Player.json", "Player"));
+	static std::string PATH_JSON = Application::PATH_JSON;
+
+	//プレイヤーデータの読み込み
+	const std::string playerPath = "Player.json";
+	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadData(PATH_JSON + playerPath, JSON_PLAYER));
+	const std::string enemyPath = "Enemy.json";
+	jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadData(PATH_JSON + enemyPath, JSON_ENEMY));
 }

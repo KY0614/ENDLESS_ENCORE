@@ -1,24 +1,21 @@
 {
-    "Player": {
-    "Transform": {
-    "position": [-60.0, 1.0, 30.0],
-    "scale": 0.7,
-    "localRotY": 180.0
+    "Enemy": {
+    "Transform": 
+    {
+      "position": [-60.0, 1.0, 250.0],
+      "scale": 1.0,
+      "localRotY": 180.0
     },
-    "hp": 50.0,
-    "maxHp": 100.0,
-    "jumpPower":7.5,
-    "walk_Speed": 6.0,
-    "runSpeed": 10.0,
-    "dodgeSpeed": 23.0,
-    "defaultAnimSpeed":30.0,
     "Animation": 
     {
+      "defaultSpeed":30.0,
       "Idle": "Idle.mv1",
-      "Walk": "Walking.mv1",
-      "Run": "Running.mv1",
-      "Jump": "Jump.mv1",
-      "Dodge": "Dash.mv1"
-     }
+      "Walk": "Walking.mv1"
+     },
+    "Parameter":
+    {
+      "hp": 120.0,
+      "maxHp": 200.0
+    }
     }
 }

@@ -102,6 +102,16 @@ private:
 	VECTOR moveDir_;	//移動方向
 
 	/// <summary>
+	/// 3Dモデル初期化
+	/// </summary>
+	void Init3DModel(void);
+
+	/// <summary>
+	/// 当たり判定の初期化
+	/// </summary>
+	void InitCollider(void);
+
+	/// <summary>
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);

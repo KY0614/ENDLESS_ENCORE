@@ -35,6 +35,7 @@ public:
 	static const std::string PATH_SHADER;
 	static const std::string PATH_SOUND;
 	static const std::string PATH_SCORE;
+	static const std::string PATH_JSON;
 	//-------------------------------------------
 
 	struct Size

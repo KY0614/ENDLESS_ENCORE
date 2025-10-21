@@ -192,11 +192,23 @@ private:
 	bool isParry_;
 	float stepParry_;
 
+	/// <summary>
+	/// 3Dモデル初期化
+	/// </summary>
+	void Init3DModel(void);
+
+	/// <summary>
+	/// 当たり判定の初期化
+	/// </summary>
+	void InitCollider(void);
 
 	/// <summary>
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);
+
+	void SetHP(const float hp) { hp_ = hp; }
+	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
 	//状態遷移--------------------------------------------------------
 

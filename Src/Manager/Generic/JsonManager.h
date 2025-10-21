@@ -8,12 +8,15 @@ class JsonManager
 {
 public:
 	//JSONキー名を定義
-	static constexpr const char* KEY_PLAYER = "Player";
 	static constexpr const char* KEY_TRANSFORM = "Transform";
 	static constexpr const char* KEY_POSITION = "position";
 	static constexpr const char* KEY_SCALE = "scale";
 	static constexpr const char* KEY_ROT_Y = "localRotY";
 	static constexpr const char* KEY_ANIMATION = "Animation";
+	static constexpr const char* KEY_ANIM_SPEED = "defaultSpeed";
+	static constexpr const char* KEY_PARAMETER = "Parameter";
+	static constexpr const char* KEY_HP = "hp";
+	static constexpr const char* KEY_MAX_HP = "maxHp";
 
 	//jsonデータの種類
 	enum class JSON_DATA

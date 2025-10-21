@@ -15,6 +15,7 @@ const std::string Application::PATH_EFFECT = "Data/Effect/";
 const std::string Application::PATH_SHADER = "Data/Shader/";
 const std::string Application::PATH_SOUND = "Data/Sound/";
 const std::string Application::PATH_SCORE = "Data/Score/";
+const std::string Application::PATH_JSON = "Data/Json/";
 
 void Application::CreateInstance(void)
 {
