@@ -52,13 +52,7 @@ public:
 	static const VECTOR GetParseVector(const nlohmann::json& jsonData, const std::string& key);
 
 	//シーンごとにデータを読み込むことにする
-	void InitTitle(void);
-	void InitMovie(void);
-	void InitSelect(void);
-	void InitTutorial(void);
 	void InitGame(void);
-	void InitPause(void);
-	void InitResult(void);
 
 private:
 
