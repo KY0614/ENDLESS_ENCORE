@@ -47,7 +47,7 @@ namespace
 
 	//行動時間
 	const float DODGE_TIME = 0.4f;		//回避(無敵)時間
-	const float PARRY_TIME = 0.5f;		//パリィ時間
+	const float PARRY_TIME = 0.3f;		//パリィ時間
 }
 
 Player::Player(void)

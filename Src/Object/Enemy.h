@@ -19,7 +19,8 @@ public:
 		FOLLOW,
 		MOVE,			//
 		ATTACK_NEAR,	//
-		ATTACK_FAR,		//
+		SHOT_ONE,		//
+		SHOT_ALL,		//
 		DOWN,			//
 		DEAD,			//
 	};
@@ -178,37 +179,34 @@ private:
 	/// <summary>
 	/// 状態遷移：NONE
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateNone(void);
 	/// <summary>
 	/// 状態遷移：FOLLOW
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateFollow(void);
 	/// <summary>
 	/// 状態遷移：MOVE
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateMove(void);
 	/// <summary>
 	/// 状態遷移：ATTACK
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateAttackNear(void);
 	/// <summary>
-	/// 状態遷移：ATTACK
+	/// 状態遷移：SHOT_ONE
 	/// </summary>
-	/// <param name=""></param>
-	void ChangeStateAttackFar(void);
+	void ChangeStateShotOne(void);
+	/// <summary>
+	/// 状態遷移：SHOT_ALL
+	/// </summary>
+	void ChangeStateShotAll(void);
 	/// <summary>
 	/// 状態遷移：DOWN
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateDown(void);
 	/// <summary>
 	/// 状態遷移：DEAD
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateDead(void);
 
 	//更新ステップ
@@ -216,7 +214,8 @@ private:
 	void UpdateFollow(void);
 	void UpdateMove(void);
 	void UpdateAttackNear(void);
-	void UpdateAttackFar(void);
+	void UpdateShotOne(void);
+	void UpdateShotAll(void);
 	void UpdateDown(void);
 	void UpdateDead(void);
 

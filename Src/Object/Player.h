@@ -102,8 +102,8 @@ public:
 	/// </summary>
 	/// <param name=""></param>
 	/// <returns>true:‰ñ”ğ’†@false:‰ñ”ğ‚µ‚Ä‚È‚¢</returns>
-	const bool& GetisDodge(void)const  { return isDodge_; }
-	const bool& GetisParry(void)const  { return isParry_	; }
+	const bool& GetIsDodge(void)const  { return isDodge_; }
+	const bool& GetIsParry(void)const  { return isParry_	; }
 
 private:
 
