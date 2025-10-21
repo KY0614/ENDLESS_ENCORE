@@ -245,6 +245,7 @@ private:
 	/// </summary>
 	/// <param name="">WASD‚ÅˆÚ“®‚·‚éˆ—</param>
 	void ProcessMove(void);
+	void ProcessMoveTest(void);
 
 	void SetMoveSpeed(const float speed) { speed_ = speed; }
 
