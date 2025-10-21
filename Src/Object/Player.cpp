@@ -432,46 +432,46 @@ void Player::ProcessMove(void)
 	{
 		isUp = true;
 		dir = VAdd(dir, cameraRot.GetForward());
-		rotRad = CommonUtility::Deg2RadD(0.0);
+		//rotRad = CommonUtility::Deg2RadD(0.0);
 	}
 	bool isLeft = false;
 	if (ins.IsInputPressed("Left"))
 	{
 		isLeft = true;
 		dir = VAdd(dir, cameraRot.GetLeft());
-		rotRad = CommonUtility::Deg2RadD(270.0);
+		//rotRad = CommonUtility::Deg2RadD(270.0);
 	}
 	bool isDown = false;
 	if (ins.IsInputPressed("Down"))
 	{ 
 		isDown = true;
 		dir = VAdd(dir,cameraRot.GetBack());
-		rotRad = CommonUtility::Deg2RadD(180.0);
+		//rotRad = CommonUtility::Deg2RadD(180.0);
 	}
 	bool isRight = false;
 	if (ins.IsInputPressed("Right"))
 	{
 		isRight = true;
 		dir = VAdd(dir, cameraRot.GetRight());
-		rotRad = CommonUtility::Deg2RadD(90.0);
+		//rotRad = CommonUtility::Deg2RadD(90.0);
 	}
 	//斜め移動の回転角度調整
-	if(isUp && isLeft)
-	{
-		rotRad = CommonUtility::Deg2RadD(315.0);
-	}
-	else if(isUp && isRight)
-	{
-		rotRad = CommonUtility::Deg2RadD(45.0);
-	}
-	else if(isDown && isLeft)
-	{
-		rotRad = CommonUtility::Deg2RadD(225.0);
-	}
-	else if(isDown && isRight)
-	{
-		rotRad = CommonUtility::Deg2RadD(135.0);
-	}
+	//if(isUp && isLeft)
+	//{
+	//	rotRad = CommonUtility::Deg2RadD(315.0);
+	//}
+	//else if(isUp && isRight)
+	//{
+	//	rotRad = CommonUtility::Deg2RadD(45.0);
+	//}
+	//else if(isDown && isLeft)
+	//{
+	//	rotRad = CommonUtility::Deg2RadD(225.0);
+	//}
+	//else if(isDown && isRight)
+	//{
+	//	rotRad = CommonUtility::Deg2RadD(135.0);
+	//}
 
 	if (!CommonUtility::EqualsVZero(dir))
 	{
@@ -485,10 +485,15 @@ void Player::ProcessMove(void)
 		//回転行列を使って入力ベクトルを回す（XZ平面）
 		float sinY = sinf(camYRad);
 		float cosY = cosf(camYRad);
-		VECTOR worldDir = VGet(0.0f, 0.0f, 0.0f);
-		worldDir.x = dir.x * cosY - dir.z * sinY;
-		worldDir.y = 0.0f;
-		worldDir.z = dir.x * sinY + dir.z * cosY;
+		//VECTOR worldDir = VGet(0.0f, 0.0f, 0.0f);
+		//worldDir.x = dir.x * cosY - dir.z * sinY;
+		//worldDir.y = 0.0f;
+		//worldDir.z = dir.x * sinY + dir.z * cosY;
+		VECTOR worldDir = VGet(
+			dir.x * cosY - dir.z * sinY,
+			0.0f,
+			dir.x * sinY + dir.z * cosY
+		);
 
 		//ジャンプ中に加速しないように
 		if (!isJump_ && !isDodge_)
@@ -499,13 +504,16 @@ void Player::ProcessMove(void)
 			}
 			else speed_ = SPEED_WALK;
 
-			//移動速度の設定
-			//speed_ = ins.IsInputPressed("Dash") ? SPEED_RUN : SPEED_MOVE;
+			//ダッシュ
+			if (ins.IsInputPressed("Dash"))
+			{
+				stepWalk_ = STEP_WALK2RUN;
+			}
 		}
 		moveDir_ = worldDir;
 		movePow_ = VScale(dir, speed_);
 		//プレイヤーの向きを移動方向に合わせる
-		//double goalRotRad = atan2(worldDir.x, worldDir.z); // ラジアン
+		double goalRotRad = atan2(worldDir.x, worldDir.z); // ラジアン
 		SetGoalRotate(rotRad);
 
 		if (!isJump_ && !isDodge_ && IsEndLanding() && !isDecelerate_)

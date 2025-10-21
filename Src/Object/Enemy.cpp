@@ -44,7 +44,7 @@ namespace
 
 	const int FAR_SPHERE_NUM = 4;
 
-	const float DOWN_TIME = 3.0f;
+	const float DOWN_TIME = 4.0f;
 }
 
 Enemy::Enemy(Player& player):player_(player)
@@ -433,21 +433,22 @@ void Enemy::CreateBullet(const int createNum)
 
 	//’e‚Ì‰ŠúˆÊ’u‚ð’²®
 	VECTOR localPos = { -80.0f, 185.0f, 0.0f };
+	int bulletNum = 0;
 	//“G‚Ì‰ñ“]‚É‡‚í‚¹‚Ä’e‚ÌˆÊ’u‚ð‰ñ“]‚³‚¹‚é
 	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[0]->SetLocalPos(localPos);
+	bullets_[bulletNum]->SetLocalPos(localPos);
 
 	localPos = { 80.0f, 185.0f, 0.0f };
 	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[1]->SetLocalPos(localPos);
+	bullets_[++bulletNum]->SetLocalPos(localPos);
 
 	localPos = { -30.0f, 230.0f, 0.0f };
 	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[2]->SetLocalPos(localPos);
+	bullets_[++bulletNum]->SetLocalPos(localPos);
 
 	localPos = { 30.0f, 230.0f, 0.0f };
 	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[3]->SetLocalPos(localPos);
+	bullets_[++bulletNum]->SetLocalPos(localPos);
 	bullets_.resize(createNum);
 }
 
