@@ -63,6 +63,11 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	void DrawDead(void);
+	void DrawVictory(void);
+
+	void DrawResultString(std::wstring str);
+
 	/// <summary>
 	/// 衝突判定に用いられるコライダーを追加する
 	/// </summary>

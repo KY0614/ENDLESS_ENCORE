@@ -30,6 +30,7 @@ public:
 	{
 		IDLE,
 		MOVE,
+		DEATH,
 	};
 
 	//コンストラクタ
@@ -57,6 +58,8 @@ public:
 	/// </summary>
 	/// <param name="state">遷移したい状態</param>
 	void ChangeState(const STATE state);
+
+	const bool GetIsDead(void)const;
 
 private:
 

@@ -22,6 +22,7 @@ namespace
 	static const std::string KEY_ENEMY = "Enemy";
 	static const std::string KEY_IDLE = "Idle";
 	static const std::string KEY_WALK = "Walk";
+	static const std::string KEY_DEATH = "Death";
 
 	const float TIME_ROT = 1.3f;
 	//敵の基本パラメータ
@@ -103,11 +104,15 @@ void Enemy::Init(void)
 
 	//初期の状態を設定
 	ChangeState(STATE::MOVE);
-	hp_ = HP_MAX;
 }
 
 void Enemy::Update(void)
 {
+	if(hp_ <= 0.0f)
+	{
+		bullets_.clear();
+		ChangeState(STATE::DEAD);
+	}
 	//更新ステップ
 	stateUpdate_();
 
@@ -193,6 +198,11 @@ void Enemy::ChangeState(const STATE state)
 	stateChanges_[state_]();
 }
 
+const bool Enemy::GetIsDead(void) const
+{
+	return state_ == STATE::DEAD && animationController_->IsEnd();
+}
+
 void Enemy::Init3DModel(void)
 {
 	auto& jsonM = JsonManager::GetInstance();
@@ -260,6 +270,8 @@ void Enemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	animationController_->Add((int)ANIM_TYPE::MOVE, path + animPath.value(KEY_WALK, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
@@ -885,7 +897,7 @@ void Enemy::UpdateDown(void)
 
 void Enemy::UpdateDead(void)
 {
-	
+	animationController_->Play((int)ANIM_TYPE::DEATH,false);
 }
 
 void Enemy::UpdateDebugImGui(void)

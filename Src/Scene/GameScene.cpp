@@ -101,6 +101,10 @@ void GameScene::DrawGame(void)
 	enemy_->Draw();
 	player_->Draw();
 
+	if(enemy_->GetIsDead())
+	{
+		player_->DrawVictory();
+	}
 }
 
 void GameScene::DrawDebug(void)

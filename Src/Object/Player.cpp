@@ -152,25 +152,55 @@ void Player::Draw(void)
 
 	DebugDraw();
 
+	DrawDead();
+#endif // _DEBUG
+}
+
+void Player::DrawDead(void)
+{
 	//デバッグ用死亡表記
 	if (hp_ <= 0.0f && animationController_->IsEnd())
 	{
-		static int alpha = 0;
-		//透明度の増加値
-		const int alphaSpeed = 5;
-		alpha = std::clamp(alpha, 0, 255);
-		alpha += alphaSpeed;	//透明度を増加させる
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-		SetFontSize(64);
-		int diff = GetDrawStringWidth(L"YOU DIED", strlen("YOU DIED"), NULL);
-		DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
-			Application::SCREEN_SIZE_Y / 2 - diff / 2,
-			L"YOU DIED", 0xff0000);
-		SetFontSize(16);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		//デバッグ用勝利表記
+		DrawResultString(L"YOU DIED");
 	}
+}
 
-#endif // _DEBUG
+void Player::DrawVictory(void)
+{
+	//デバッグ用勝利表記
+	DrawResultString(L"VICTORY");
+}
+
+void Player::DrawResultString(std::wstring str)
+{
+	static int alpha = 0;
+	static int interval = 0;
+	//透明度の増加値
+	const int alphaSpeed = 5;
+	alpha = std::clamp(alpha, 0, 255);
+	alpha += alphaSpeed;	//透明度を増加させる
+	if (alpha >= 255)
+	{
+		interval++;
+		if (interval > 120)
+		{
+			alpha = 0;
+			interval = 0;
+			SceneManager::GetInstance().ChangeScene(
+				SceneManager::SCENE_ID::TITLE);
+			return;
+		}
+	}
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+	SetFontSize(64);
+	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
+	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
+		Application::SCREEN_SIZE_Y / 2 - diff / 2,
+		str.c_str(), 0xffff00);
+	SetFontSize(16);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
 }
 
 void Player::AddCollider(std::weak_ptr<Collider> collider)
@@ -348,8 +378,8 @@ void Player::UpdatePlay(void)
 
 void Player::UpdateDead(void)
 {
-	animationController_->Play((int)ANIM_TYPE::DEATH,false);
 	hp_ = std::clamp(hp_, 0.0f, maxHp_);
+	animationController_->Play((int)ANIM_TYPE::DEATH,false);
 }
 
 void Player::DrawShadow(void)
