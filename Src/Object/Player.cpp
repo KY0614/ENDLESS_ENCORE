@@ -179,7 +179,6 @@ void Player::DrawResultString(std::wstring str)
 	//透明度の増加値
 	const int alphaSpeed = 5;
 	alpha = std::clamp(alpha, 0, 255);
-	alpha += alphaSpeed;	//透明度を増加させる
 	if (alpha >= 255)
 	{
 		interval++;
@@ -192,6 +191,7 @@ void Player::DrawResultString(std::wstring str)
 			return;
 		}
 	}
+	alpha += alphaSpeed;	//透明度を増加させる
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 	SetFontSize(64);
 	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
@@ -478,24 +478,6 @@ void Player::ProcessMove(void)
 	Quaternion cameraRot = mainCamera->GetQuaRotOutX();
 
 	double rotRad = 0.0;
-
-#ifdef _DEBUG
-	auto& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	const auto& param = data[KEY_PLAYER];
-
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
-	const auto& transformData = param[JsonManager::KEY_TRANSFORM];
-	if (ins.IsInputTriggered("Reset"))
-	{
-		transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
-	}
-#endif // _DEBUG
 
 	//WASDで位置を変える
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
