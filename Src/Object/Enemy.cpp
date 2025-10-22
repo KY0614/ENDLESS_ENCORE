@@ -707,6 +707,8 @@ void Enemy::UpdateShotOne(void)
 			bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
 			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
 		{
+			//”jŠüó‘Ô‚Ì’e‚Í–³‹
+			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
 			if (player_.GetIsParry())
 			{
 				bullet->SetStateReverse();
@@ -720,6 +722,7 @@ void Enemy::UpdateShotOne(void)
 			bullet->GetSphere().GetRadius(), player_.GetCapsule().GetPosTop(),
 			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
 		{
+			//”jŠüó‘Ô‚Ì’e‚Í–³‹
 			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
 			//‰ñ”ğ’†‚¾‚Á‚½‚çƒ_ƒ[ƒW‚ğó‚¯‚È‚¢
 			if (player_.GetIsDodge())

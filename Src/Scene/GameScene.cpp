@@ -98,8 +98,8 @@ void GameScene::DrawGame(void)
 	DrawDebug();
 #endif // _DEBUG
 
-	player_->Draw();
 	enemy_->Draw();
+	player_->Draw();
 
 }
 

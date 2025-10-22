@@ -22,22 +22,28 @@ public:
 	enum class JSON_DATA
 	{
 		PLAYER,		//プレイヤー
-		ENEMY,
+		ENEMY,		//敵
 	};
 
 	//インスタンスの生成
 	static void CreateInstance(void);
 
-	// 静的インスタンスの取得
+	//静的インスタンスの取得
 	static JsonManager& GetInstance(void);
 
-	// 初期化
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Init(void);
 
-	// 解放(シーン切替時に一旦解放)
+	/// <summary>
+	/// 解放（シーン切替時に一旦解放）
+	/// </summary>
 	void Release(void);
 
-	// リソースの完全破棄
+	/// <summary>
+	/// リソースの完全破棄
+	/// </summary>
 	void Destroy(void);
 
 	nlohmann::json GetJsonData(JSON_DATA data);
@@ -49,9 +55,20 @@ public:
 	/// <returns>オブジェクト名と対応するパラメータ</returns>
 	nlohmann::json LoadData(const std::string& fileName, const std::string& dataName);
 
+	/// <summary>
+	/// JSONデータからVECTOR型へ変換して取得
+	/// </summary>
+	/// <param name="jsonData">変換するJSONデータ</param>
+	/// <param name="key">取得するキーの文字列</param>
+	/// <returns>取得したVECTOR型データ</returns>
 	static const VECTOR GetParseVector(const nlohmann::json& jsonData, const std::string& key);
 
 	//シーンごとにデータを読み込むことにする
+	
+	/// <summary>
+	/// ゲームシーン用のデータを初期化する
+	/// </summary>
+	/// <param name=""></param>
 	void InitGame(void);
 
 private:

@@ -13,11 +13,12 @@
       "Walk": "Walking.mv1",
       "Run": "Running.mv1",
       "Jump": "Jump.mv1",
-      "Dodge": "Dash.mv1"
+      "Dodge": "Dash.mv1",
+      "Death": "Death.mv1"
      },
     "Parameter":
     {
-      "hp": 100.0,
+      "hp": 40.0,
       "maxHp": 100.0
     }
     }

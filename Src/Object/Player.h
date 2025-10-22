@@ -38,6 +38,7 @@ public:
 		JUMP,		//ジャンプ
 		PARRY,		//パリィ
 		DODGE,		//回避
+		DEATH,		//死亡
 		USE_ITEM,	//アイテム使用
 	};
 
@@ -245,7 +246,6 @@ private:
 	/// </summary>
 	/// <param name="">WASDで移動する処理</param>
 	void ProcessMove(void);
-	void ProcessMoveTest(void);
 
 	void SetMoveSpeed(const float speed) { speed_ = speed; }
 

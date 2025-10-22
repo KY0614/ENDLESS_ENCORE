@@ -29,6 +29,7 @@ namespace
 	static const std::string KEY_RUN = "Run";
 	static const std::string KEY_JUMP = "Jump";
 	static const std::string KEY_DODGE = "Dodge";
+	static const std::string KEY_DEATH = "Death";
 
 	//ジャンプ力
 	const float JUMP_POW = 7.5f; 
@@ -145,9 +146,29 @@ void Player::Draw(void)
 
 	//丸影描画
 	DrawShadow();
+
+
 #ifdef _DEBUG
 
 	DebugDraw();
+
+	//デバッグ用死亡表記
+	if (hp_ <= 0.0f && animationController_->IsEnd())
+	{
+		static int alpha = 0;
+		//透明度の増加値
+		const int alphaSpeed = 5;
+		alpha = std::clamp(alpha, 0, 255);
+		alpha += alphaSpeed;	//透明度を増加させる
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		SetFontSize(64);
+		int diff = GetDrawStringWidth(L"YOU DIED", strlen("YOU DIED"), NULL);
+		DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
+			Application::SCREEN_SIZE_Y / 2 - diff / 2,
+			L"YOU DIED", 0xff0000);
+		SetFontSize(16);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
 
 #endif // _DEBUG
 }
@@ -251,6 +272,8 @@ void Player::InitAnimation(void)
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value(KEY_DODGE, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
@@ -286,14 +309,18 @@ void Player::UpdateNone(void)
 
 void Player::UpdatePlay(void)
 {
+	if(hp_ <= 0.0f)
+	{
+		ChangeState(STATE::DEAD);
+		return;
+	}
+
 	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
 
 	//移動処理
-	//ProcessMove();
-	ProcessMoveTest();
+	ProcessMove();
 
 	//ジャンプ処理
-	//ProcessJump();
 	ProcessJumpTest();
 
 	//回避処理
@@ -321,6 +348,8 @@ void Player::UpdatePlay(void)
 
 void Player::UpdateDead(void)
 {
+	animationController_->Play((int)ANIM_TYPE::DEATH,false);
+	hp_ = std::clamp(hp_, 0.0f, maxHp_);
 }
 
 void Player::DrawShadow(void)
@@ -420,137 +449,23 @@ void Player::ProcessMove(void)
 
 	double rotRad = 0.0;
 
+#ifdef _DEBUG
+	auto& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
+	const auto& param = data[KEY_PLAYER];
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
+	const auto& transformData = param[JsonManager::KEY_TRANSFORM];
 	if (ins.IsInputTriggered("Reset"))
 	{
-		transform_.pos = { -60.0f, 0.0f, 30.0f };
+		transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	}
-
-	//WASDで位置を変える
-	VECTOR dir = CommonUtility::VECTOR_ZERO;
-	movePow_ = CommonUtility::VECTOR_ZERO;
-	bool isUp = false;
-	if (ins.IsInputPressed("Up"))
-	{
-		isUp = true;
-		dir = VAdd(dir, cameraRot.GetForward());
-		//rotRad = CommonUtility::Deg2RadD(0.0);
-	}
-	bool isLeft = false;
-	if (ins.IsInputPressed("Left"))
-	{
-		isLeft = true;
-		dir = VAdd(dir, cameraRot.GetLeft());
-		//rotRad = CommonUtility::Deg2RadD(270.0);
-	}
-	bool isDown = false;
-	if (ins.IsInputPressed("Down"))
-	{ 
-		isDown = true;
-		dir = VAdd(dir,cameraRot.GetBack());
-		//rotRad = CommonUtility::Deg2RadD(180.0);
-	}
-	bool isRight = false;
-	if (ins.IsInputPressed("Right"))
-	{
-		isRight = true;
-		dir = VAdd(dir, cameraRot.GetRight());
-		//rotRad = CommonUtility::Deg2RadD(90.0);
-	}
-	//斜め移動の回転角度調整
-	//if(isUp && isLeft)
-	//{
-	//	rotRad = CommonUtility::Deg2RadD(315.0);
-	//}
-	//else if(isUp && isRight)
-	//{
-	//	rotRad = CommonUtility::Deg2RadD(45.0);
-	//}
-	//else if(isDown && isLeft)
-	//{
-	//	rotRad = CommonUtility::Deg2RadD(225.0);
-	//}
-	//else if(isDown && isRight)
-	//{
-	//	rotRad = CommonUtility::Deg2RadD(135.0);
-	//}
-
-	if (!CommonUtility::EqualsVZero(dir))
-	{
-		//歩いている時間を加算
-		stepWalk_ += SceneManager::GetInstance().GetDeltaTime();
-		dir = VNorm(dir);
-
-		//カメラのY軸角度だけ取得（XZ平面の回転だけで十分）
-		float camYRad = mainCamera->GetQuaRot().y;
-
-		//回転行列を使って入力ベクトルを回す（XZ平面）
-		float sinY = sinf(camYRad);
-		float cosY = cosf(camYRad);
-		//VECTOR worldDir = VGet(0.0f, 0.0f, 0.0f);
-		//worldDir.x = dir.x * cosY - dir.z * sinY;
-		//worldDir.y = 0.0f;
-		//worldDir.z = dir.x * sinY + dir.z * cosY;
-		VECTOR worldDir = VGet(
-			dir.x * cosY - dir.z * sinY,
-			0.0f,
-			dir.x * sinY + dir.z * cosY
-		);
-
-		//ジャンプ中に加速しないように
-		if (!isJump_ && !isDodge_)
-		{
-			if (stepWalk_ >= STEP_WALK2RUN)
-			{
-				speed_ = SPEED_RUN;
-			}
-			else speed_ = SPEED_WALK;
-
-			//ダッシュ
-			if (ins.IsInputPressed("Dash"))
-			{
-				stepWalk_ = STEP_WALK2RUN;
-			}
-		}
-		moveDir_ = worldDir;
-		movePow_ = VScale(dir, speed_);
-		//プレイヤーの向きを移動方向に合わせる
-		double goalRotRad = atan2(worldDir.x, worldDir.z); // ラジアン
-		SetGoalRotate(rotRad);
-
-		if (!isJump_ && !isDodge_ && IsEndLanding() && !isDecelerate_)
-		{
-			//アニメーション
-			if (speed_ == SPEED_RUN)
-			{
-				animationController_->Play((int)ANIM_TYPE::RUN);
-			}
-			else
-			{
-				animationController_->Play((int)ANIM_TYPE::WALK);
-			}
-		}
-	}
-	else
-	{
-		stepWalk_ = 0.0f;
-		if (!isJump_ && IsEndLanding() && !isDodge_ && !isDecelerate_)
-		{
-			animationController_->Play((int)ANIM_TYPE::IDLE);
-		}
-	}
-}
-
-void Player::ProcessMoveTest(void)
-{
-	InputManager& ins = InputManager::GetInstance();
-	Quaternion cameraRot = mainCamera->GetQuaRotOutX();
-
-	double rotRad = 0.0;
-
-	if (ins.IsInputTriggered("Reset"))
-	{
-		transform_.pos = { -60.0f, 0.0f, 30.0f };
-	}
+#endif // _DEBUG
 
 	//WASDで位置を変える
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
