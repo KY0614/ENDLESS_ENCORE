@@ -31,7 +31,9 @@ private:
 	std::unique_ptr<Enemy> enemy_;
 
 	int RT_;
-	int sp_;
+
+	float shakeFrame_;
+	float shakeRate_;
 
 	/// <summary>
 	/// ƒQ[ƒ€’†‚ÌXVˆ—

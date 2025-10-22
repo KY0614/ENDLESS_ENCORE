@@ -931,21 +931,21 @@ void Player::DebugDraw(void)
 	DebugDrawFormat::FormatString(L"P HP : %.2f",
 		hp_,
 		lineH);
-	DebugDrawFormat::FormatString(L"stepWalk : %.2f",
-		stepWalk_,
-		lineH);
-	DebugDrawFormat::FormatString(L"stepDodge : %.2f",
-		stepDodge_,
-		lineH);
-	DebugDrawFormat::FormatString(L"speed : %.2f",
-		speed_,
-		lineH);
-	DebugDrawFormat::FormatString(L"isDodge : %d",
-		isDodge_,
-		lineH);
-	DebugDrawFormat::FormatString(L"moveDir : %.2f,%.2f",
-		moveDir_.x,moveDir_.z,
-		lineH);
+	//DebugDrawFormat::FormatString(L"stepWalk : %.2f",
+	//	stepWalk_,
+	//	lineH);
+	//DebugDrawFormat::FormatString(L"stepDodge : %.2f",
+	//	stepDodge_,
+	//	lineH);
+	//DebugDrawFormat::FormatString(L"speed : %.2f",
+	//	speed_,
+	//	lineH);
+	//DebugDrawFormat::FormatString(L"isDodge : %d",
+	//	isDodge_,
+	//	lineH);
+	//DebugDrawFormat::FormatString(L"moveDir : %.2f,%.2f",
+	//	moveDir_.x,moveDir_.z,
+	//	lineH);
 
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);

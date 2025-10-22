@@ -118,7 +118,7 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
-	//UpdateDebugImGui();
+	UpdateDebugImGui();
 }
 
 void Enemy::Draw(void)

@@ -20,6 +20,9 @@ GameScene::GameScene(void) :
 
 GameScene::~GameScene(void)
 {
+	RT_ = -1;
+	shakeFrame_ = 0.0f;
+	shakeRate_ = 0.0f;
 }
 
 void GameScene::Init(void)
@@ -38,7 +41,6 @@ void GameScene::Init(void)
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	RT_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
-	sp_ = LoadPixelShader(L"Data/Shader/StdModelPS.cso");
 #ifdef _DEBUG
 	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::FLOOR));
@@ -89,6 +91,11 @@ void GameScene::UpdateGame(void)
 		SceneManager::GetInstance().PushScene(std::make_unique<PauseScene>());
 	}
 
+	if (ins.IsInputTriggered("CameraShake"))
+	{
+		shakeFrame_ = 50.0f;
+	}
+
 	if (ins.IsInputTriggered("Back"))
 	{
 		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::RESULT);
@@ -101,7 +108,9 @@ void GameScene::UpdateGame(void)
 
 void GameScene::DrawGame(void)
 {
+	//•`‰ææ‚ğRT‚É•ÏX
 	SetDrawScreen(RT_);
+	//‰æ–Ê‚ğ‰Šú‰»
 	ClearDrawScreen();
 
 	//ƒJƒƒ‰‰Šú‰»
@@ -122,8 +131,11 @@ void GameScene::DrawGame(void)
 		player_->DrawVictory();
 	}
 
+	//•`‰ææ‚ğ— ‚Ì‰æ–Ê‚É–ß‚·
 	SetDrawScreen(DX_SCREEN_BACK);
+	//‰æ–Ê‚ğ‰Šú‰»
 	ClearDrawScreen();
+	//RT‚ğ‰æ–Ê‚É•`‰æ
 	DrawGraph(0, 0, RT_, false);
 }
 
