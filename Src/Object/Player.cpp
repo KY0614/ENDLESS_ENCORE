@@ -576,19 +576,6 @@ void Player::ProcessMoveTest(void)
 	{
 		//歩いている時間を加算
 		stepWalk_ += SceneManager::GetInstance().GetDeltaTime();
-		dir = VNorm(dir);
-
-		//カメラのY軸角度だけ取得（XZ平面の回転だけで十分）
-		float camYRad = mainCamera->GetQuaRot().y;
-
-		//回転行列を使って入力ベクトルを回す（XZ平面）
-		float sinY = sinf(camYRad);
-		float cosY = cosf(camYRad);
-		VECTOR worldDir = VGet(
-			dir.x * cosY - dir.z * sinY,
-			0.0f,
-			dir.x * sinY + dir.z * cosY
-		);
 
 		//ジャンプ中に加速しないように
 		if (!isJump_ && !isDodge_)
@@ -605,10 +592,10 @@ void Player::ProcessMoveTest(void)
 				stepWalk_ = STEP_WALK2RUN;
 			}
 		}
-		moveDir_ = worldDir;
+		moveDir_ = dir;
 		movePow_ = VScale(dir, speed_);
 		//プレイヤーの向きを移動方向に合わせる
-		double goalRotRad = atan2(worldDir.x, worldDir.z); // ラジアン
+		double goalRotRad = atan2(dir.x, dir.z); // ラジアン
 		SetGoalRotate(goalRotRad);
 
 		if (!isJump_ && !isDodge_ && IsEndLanding() && !isDecelerate_)
@@ -773,7 +760,7 @@ void Player::SetGoalRotate(double rotRad)
 	VECTOR cameraRot = mainCamera->GetAngles();
 	Quaternion axis =
 		Quaternion::AngleAxis(
-			(double)cameraRot.y + rotRad, CommonUtility::AXIS_Y);
+			/*(double)cameraRot.y + */rotRad, CommonUtility::AXIS_Y);
 	
 	//現在設定されている回転との角度差を取る
 	double angleDiff = Quaternion::Angle(axis, goalQuaRot_);

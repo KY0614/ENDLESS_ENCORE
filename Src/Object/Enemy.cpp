@@ -758,6 +758,7 @@ void Enemy::UpdateShotOne(void)
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
+		damageCount = 0;
 		return;
 	}
 }
@@ -861,6 +862,7 @@ void Enemy::UpdateShotAll(void)
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
+		damageCount = 0;
 		return;
 	}
 }
