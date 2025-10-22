@@ -36,7 +36,7 @@ void Application::Init(void)
 	isEnd_ = false;
 
 	//アプリケーションの初期設定
-	SetWindowText(L"BARISTA BLITZ");
+	SetWindowText(L"2025_AGS_Winter");
 
 	//ウィンドウサイズ
 	windowSize_ = { SCREEN_SIZE_X ,SCREEN_SIZE_Y };
@@ -93,6 +93,7 @@ void Application::Run(void)
 		sceneManager.Draw();
 
 		RenderVertex();
+
 		imGuiWrapper.Draw();
 
 		fps_->CalcFrameRate();	//フレームレート計算

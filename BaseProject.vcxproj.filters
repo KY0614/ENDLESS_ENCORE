@@ -231,6 +231,9 @@
     <ClCompile Include="Src\Manager\Transition\PushTransitor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Utility\DrawUtiity.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Common\Fader.h">
@@ -548,6 +551,9 @@
     <ClInclude Include="Src\Manager\Transition\PushTransitor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Utility\DrawUtiity.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />
@@ -564,5 +570,6 @@
     <FxCompile Include="Src\Shader\Model\OutLineVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\OutLinePS.hlsl" />
     <FxCompile Include="Src\Shader\Model\ToonPS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\PS.hlsl" />
   </ItemGroup>
 </Project>

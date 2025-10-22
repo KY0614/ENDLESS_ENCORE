@@ -137,6 +137,10 @@ void Input::ResetTable()
 	},
 	};
 
+	inputTable_["CameraShake"] = { {PeripheralType::KEYBOARD,KEY_INPUT_X},
+							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
+							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
+
 	inputTable_["Reset"] = { {PeripheralType::KEYBOARD,KEY_INPUT_R},
 							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };

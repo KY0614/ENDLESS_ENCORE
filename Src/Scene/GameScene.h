@@ -30,6 +30,9 @@ private:
 	std::unique_ptr<Player> player_;
 	std::unique_ptr<Enemy> enemy_;
 
+	int RT_;
+	int sp_;
+
 	/// <summary>
 	/// ƒQ[ƒ€’†‚ÌXVˆ—
 	/// </summary>

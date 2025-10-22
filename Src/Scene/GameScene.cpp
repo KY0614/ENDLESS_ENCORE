@@ -1,4 +1,6 @@
 #include <DxLib.h>
+#include "../Application.h"
+#include "../Utility/DrawUtiity.h"
 #include "../Utility/CommonUtility.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
@@ -35,6 +37,8 @@ void GameScene::Init(void)
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
+	RT_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+	sp_ = LoadPixelShader(L"Data/Shader/StdModelPS.cso");
 #ifdef _DEBUG
 	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::FLOOR));
@@ -73,6 +77,10 @@ void GameScene::UpdateGame(void)
 	{
 		this->Init();
 	}
+	if (ins.IsInputTriggered("CameraShake"))
+	{
+		mainCamera->ChangeMode(Camera::MODE::SHAKE);
+	}
 #endif // _DEBUG
 
 	if (ins.IsInputTriggered("pause"))
@@ -93,20 +101,30 @@ void GameScene::UpdateGame(void)
 
 void GameScene::DrawGame(void)
 {
-#ifdef _DEBUG
+	SetDrawScreen(RT_);
+	ClearDrawScreen();
 
-	DrawString(0, 0, L"Game", 0xFFFFFF);
+	//ƒJƒƒ‰‰Šú‰»
+	mainCamera->SetBeforeDraw();
+
+#ifdef _DEBUG
 
 	DrawDebug();
 #endif // _DEBUG
 
-	enemy_->Draw();
+	//“G•`‰æ
+	enemy_->Draw();	
+	//ƒvƒŒƒCƒ„[•`‰æ
 	player_->Draw();
 
 	if(enemy_->GetIsDead())
 	{
 		player_->DrawVictory();
 	}
+
+	SetDrawScreen(DX_SCREEN_BACK);
+	ClearDrawScreen();
+	DrawGraph(0, 0, RT_, false);
 }
 
 void GameScene::DrawDebug(void)

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Utility\DrawUtiity.cpp" />
     <ClCompile Include="Src\Manager\Transition\PushTransitor.cpp" />
     <ClCompile Include="Src\Manager\Transition\FadeTransitor.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
@@ -79,6 +80,7 @@
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Utility\DrawUtiity.h" />
     <ClInclude Include="Src\Manager\Transition\PushTransitor.h" />
     <ClInclude Include="Src\Manager\Transition\FadeTransitor.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
@@ -210,6 +212,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Model\PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Src\Shader\Model\StdModelPS.hlsl">
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>

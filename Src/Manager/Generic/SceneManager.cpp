@@ -69,7 +69,6 @@ void SceneManager::Init(void)
 
 void SceneManager::Init3D(void)
 {
-	//SetBackgroundColor(0, 139, 139);
 	//”wŒiFİ’è
 	SetBackgroundColor(64, 64, 128);
 

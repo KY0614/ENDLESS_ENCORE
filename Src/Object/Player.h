@@ -257,15 +257,9 @@ private:
 	//ジャンプ--------------------------------------------------------
 
 	/// <summary>
-	/// ジャンプ処理（真上にジャンプ）
-	/// </summary>
-	void ProcessJump(void);
-
-	/// <summary>
 	/// ジャンプ処理
 	/// </summary>
-	/// <param name="">スペースキー押下でジャンプする処理</param>
-	void ProcessJumpTest(void);
+	void ProcessJump(void);
 
 	//回避------------------------------------------------------------
 

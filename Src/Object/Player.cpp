@@ -351,7 +351,7 @@ void Player::UpdatePlay(void)
 	ProcessMove();
 
 	//ジャンプ処理
-	ProcessJumpTest();
+	ProcessJump();
 
 	//回避処理
 	ProcessDodge();
@@ -549,40 +549,6 @@ void Player::ProcessMove(void)
 }
 
 void Player::ProcessJump(void)
-{
-	InputManager& ins = InputManager::GetInstance();
-	bool isHit = ins.IsInputPressed("Jump");
-
-	// ジャンプ
-	if (isHit && (isJump_ || IsEndLanding()))
-	{
-		//if (!isJump_)
-		//{
-		//	//無理やりアニメーション
-		//	animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
-		//	animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
-		//}
-
-		isJump_ = true;
-
-		// ジャンプの入力受付時間を減らす
-		stepJump_ += SceneManager::GetInstance().GetDeltaTime();
-		if (stepJump_ < 0.5f)
-		{
-			jumpPow_ = VScale(CommonUtility::DIR_U, 35.0f);
-		}
-
-	}
-
-	// ボタンを離したらジャンプ力に加算しない
-	if (!isHit)
-	{
-		stepJump_ = 0.5f;
-	}
-
-}
-
-void Player::ProcessJumpTest(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 	bool isHit = ins.IsInputTriggered("Jump");

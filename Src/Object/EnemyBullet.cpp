@@ -110,7 +110,7 @@ void EnemyBullet::Move(void)
 
 	//‰º•ûŒü‚ÌŽæ“¾
 	VECTOR downward = transform_.GetDown();
-	const float speed = 10.0f;
+	const float speed = 20.0f;
 	//‰¡ƒxƒNƒgƒ‹
 	VECTOR widthMovePow = VScale(forward, speed);
 
@@ -131,6 +131,4 @@ void EnemyBullet::Rotate(void)
 	Quaternion followRot = parentTran_.quaRot;
 
 	VECTOR relativePos = followRot.PosAxis(localPos_);
-
-
 }

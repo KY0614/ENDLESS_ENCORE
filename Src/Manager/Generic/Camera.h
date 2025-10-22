@@ -40,6 +40,14 @@ public:
 	//カメラのX回転上限度角
 	static constexpr float LIMIT_X_UP_RAD = 90.0f * (DX_PI_F / 180.0f);
 	static constexpr float LIMIT_X_DW_RAD = 90.0f * (DX_PI_F / 180.0f);
+
+	//カメラ揺らし関連の定数--------------------------------------------------------------------
+
+	static constexpr float TIME_SHAKE = 0.5f;		//時間
+
+	static constexpr float WIDTH_SHAKE = 5.0f;		//幅
+
+	static constexpr float SPEED_SHAKE = 40.0f;		//スピード
 	
 	//カメラモード
 	enum class MODE
@@ -48,7 +56,8 @@ public:
 		FIXED_POINT,
 		TOP_FIXED,
 		FOLLOW,
-		FREE
+		FREE,
+		SHAKE
 	};
 
 	Camera(void);
@@ -123,6 +132,7 @@ private:
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawFree(void);
+	void SetBeforeDrawShake(void);
 #ifdef _DEBUG
 
 	float cameraNear_;
@@ -130,6 +140,13 @@ private:
 
 	VECTOR localF2CPos_;
 	VECTOR localF2TPos_;
+
+	//画面揺らし用
+	float stepShake_;
+
+	VECTOR defaultPos_;
+
+	VECTOR shakeDir_;
 
 	void UpdateDebugImGui(void);
 

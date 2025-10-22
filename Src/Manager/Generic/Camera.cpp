@@ -4,6 +4,7 @@
 #include "../../Libs/ImGui/imgui.h"
 #include "../../Utility/CommonUtility.h"
 #include "../Generic/InputManager.h"
+#include "../Generic/SceneManager.h"
 #include "../../Object/Common/Transform.h"
 #include "Camera.h"
 
@@ -66,6 +67,10 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawFree();
 		break;
 
+	case Camera::MODE::SHAKE:
+		SetBeforeDrawShake();
+		break;
+
 	default:
 		break;
 	}
@@ -84,6 +89,25 @@ void Camera::SetBeforeDraw(void)
 
 void Camera::Draw(void)
 {
+	switch (mode_)
+	{
+	case Camera::MODE::NONE:
+		break;
+	case Camera::MODE::FIXED_POINT:
+		break;
+	case Camera::MODE::TOP_FIXED:
+		break;
+	case Camera::MODE::FOLLOW:
+		DrawString(0, 0, L"Follow", GetColor(255, 0, 0));
+		break;
+	case Camera::MODE::FREE:
+		break;
+	case Camera::MODE::SHAKE:
+		DrawString(0, 0, L"Camera Shake", GetColor(255, 0, 0));
+		break;
+	default:
+		break;
+	}
 }
 
 void Camera::SetFollow(const Transform* follow)
@@ -142,6 +166,11 @@ void Camera::ChangeMode(MODE mode)
 		targetPos_ = FIXEDTOP_CAMERA_RELATIVE_POS;
 		break;	
 	case Camera::MODE::FOLLOW:
+		break;
+	case Camera::MODE::SHAKE:
+		stepShake_ = TIME_SHAKE;
+		shakeDir_ = VNorm({ 0.7f, 0.7f ,0.0f });
+		defaultPos_ = pos_;
 		break;
 	}
 }
@@ -256,6 +285,43 @@ void Camera::SetBeforeDrawFree(void)
 	ProcessRot();
 
 	ProcessMove();	
+}
+
+void Camera::SetBeforeDrawShake(void)
+{
+	// àÍíËéûä‘ÉJÉÅÉâÇóhÇÁÇ∑
+	stepShake_ -= SceneManager::GetInstance().GetDeltaTime();
+
+	if (stepShake_ < 0.0f)
+	{
+		pos_ = defaultPos_;
+		ChangeMode(MODE::FOLLOW);
+		return;
+	}
+
+	// -1.0fÅ`1.0f
+	float f = sinf(stepShake_ * SPEED_SHAKE);
+
+	// -1000.0fÅ`1000.0f
+	f *= 1000.0f;
+
+	// -1000 or 1000
+	int d = static_cast<int>(f);
+
+	// 0 or 1
+	int shake = d % 2;
+
+	// 0 or 2
+	shake *= 2;
+
+	// -1 or 1
+	shake -= 1;
+
+	// à⁄ìÆó 
+	VECTOR velocity = VScale(shakeDir_, (float)(shake)*WIDTH_SHAKE);
+
+	// à⁄ìÆêÊç¿ïW
+	pos_ = VAdd(defaultPos_, velocity);
 }
 
 void Camera::UpdateDebugImGui(void)

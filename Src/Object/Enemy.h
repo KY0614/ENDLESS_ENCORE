@@ -59,6 +59,10 @@ public:
 	/// <param name="state">‘JˆÚ‚µ‚½‚¢ó‘Ô</param>
 	void ChangeState(const STATE state);
 
+	/// <summary>
+	/// €–S‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğæ“¾
+	/// </summary>
+	/// <returns>true:€–S@false:¶‘¶</returns>
 	const bool GetIsDead(void)const;
 
 private:
