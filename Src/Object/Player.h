@@ -198,6 +198,8 @@ private:
 	bool isParry_;
 	float stepParry_;
 
+	int stringAlpha_;	//結果表示用文字列のアルファ値
+
 	/// <summary>
 	/// 3Dモデル初期化
 	/// </summary>

@@ -27,7 +27,6 @@ GameScene::~GameScene(void)
 
 void GameScene::Init(void)
 {
-
 	//ƒvƒŒƒCƒ„[
 	player_ = std::make_unique<Player>();
 	player_->Init();

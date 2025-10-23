@@ -90,6 +90,7 @@ Player::Player(void)
 	stepDodge_ = 0.0f;
 	isParry_ = false;
 	stepWalk_ = 0.0f;
+	stringAlpha_ = 0;
 }
 
 Player::~Player(void)
@@ -174,25 +175,24 @@ void Player::DrawVictory(void)
 
 void Player::DrawResultString(std::wstring str)
 {
-	static int alpha = 0;
 	static int interval = 0;
 	//透明度の増加値
 	const int alphaSpeed = 5;
-	alpha = std::clamp(alpha, 0, 255);
-	if (alpha >= 255)
+	const int maxAlpha = 255;
+	const int maxInterval = 120;
+	stringAlpha_ = std::clamp(stringAlpha_, 0, maxAlpha);
+	if (stringAlpha_ >= maxAlpha)
 	{
-		interval++;
-		if (interval > 120)
+		if (++interval > maxInterval)
 		{
-			alpha = 0;
 			interval = 0;
 			SceneManager::GetInstance().ChangeScene(
 				SceneManager::SCENE_ID::TITLE);
 			return;
 		}
 	}
-	alpha += alphaSpeed;	//透明度を増加させる
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+	stringAlpha_ += alphaSpeed;	//透明度を増加させる
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, stringAlpha_);
 	SetFontSize(64);
 	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
 	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
