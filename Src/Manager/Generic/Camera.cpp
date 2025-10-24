@@ -16,8 +16,6 @@ Camera::Camera(void)
 	pos_ = CommonUtility::VECTOR_ZERO;
 	targetPos_ = CommonUtility::VECTOR_ZERO;
 	followTransform_ = nullptr;
-	cameraNear_ = -1.0f;
-	cameraFar_ = -1.0f;
 }
 
 Camera::~Camera(void)
@@ -67,10 +65,6 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawFree();
 		break;
 
-	case Camera::MODE::SHAKE:
-		SetBeforeDrawShake();
-		break;
-
 	default:
 		break;
 	}
@@ -101,9 +95,6 @@ void Camera::Draw(void)
 		DrawString(0, 0, L"Follow", GetColor(255, 0, 0));
 		break;
 	case Camera::MODE::FREE:
-		break;
-	case Camera::MODE::SHAKE:
-		DrawString(0, 0, L"Camera Shake", GetColor(255, 0, 0));
 		break;
 	default:
 		break;
@@ -166,11 +157,6 @@ void Camera::ChangeMode(MODE mode)
 		targetPos_ = FIXEDTOP_CAMERA_RELATIVE_POS;
 		break;	
 	case Camera::MODE::FOLLOW:
-		break;
-	case Camera::MODE::SHAKE:
-		stepShake_ = TIME_SHAKE;
-		shakeDir_ = VNorm({ 0.7f, 0.7f ,0.0f });
-		defaultPos_ = pos_;
 		break;
 	}
 }
@@ -285,74 +271,4 @@ void Camera::SetBeforeDrawFree(void)
 	ProcessRot();
 
 	ProcessMove();	
-}
-
-void Camera::SetBeforeDrawShake(void)
-{
-	// 一定時間カメラを揺らす
-	stepShake_ -= SceneManager::GetInstance().GetDeltaTime();
-
-	if (stepShake_ < 0.0f)
-	{
-		pos_ = defaultPos_;
-		ChangeMode(MODE::FOLLOW);
-		return;
-	}
-
-	// -1.0f～1.0f
-	float f = sinf(stepShake_ * SPEED_SHAKE);
-
-	// -1000.0f～1000.0f
-	f *= 1000.0f;
-
-	// -1000 or 1000
-	int d = static_cast<int>(f);
-
-	// 0 or 1
-	int shake = d % 2;
-
-	// 0 or 2
-	shake *= 2;
-
-	// -1 or 1
-	shake -= 1;
-
-	// 移動量
-	VECTOR velocity = VScale(shakeDir_, (float)(shake)*WIDTH_SHAKE);
-
-	// 移動先座標
-	pos_ = VAdd(defaultPos_, velocity);
-}
-
-void Camera::UpdateDebugImGui(void)
-{
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("Camera");
-
-	//near far
-	ImGui::Text("near far");
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat("Near", &cameraNear_);
-	ImGui::InputFloat("Far", &cameraFar_);/*
-	ImGui::SliderFloat("Near", &cameraNear_, -1000.0f, 10000.0f);
-	ImGui::SliderFloat("Far", &cameraFar_, -1000.0f, 10000.0f);*/
-
-	//位置
-	ImGui::Text("localF2CPos");
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("localF2CPos", &localF2CPos_.x);
-	ImGui::SliderFloat("localF2CPosX", &localF2CPos_.x, -800.0f, 1000.0f);
-	ImGui::SliderFloat("localF2CPosY", &localF2CPos_.y, -800.0f, 1000.0f);
-	ImGui::SliderFloat("localF2CPosZ", &localF2CPos_.z, -800.0f, 1000.0f);
-
-	//位置
-	ImGui::Text("localF2TPos");
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("localF2TPos", &localF2TPos_.x);
-	ImGui::SliderFloat("localF2TPosX", &localF2TPos_.x, -800.0f, 1000.0f);
-	ImGui::SliderFloat("localF2TPosY", &localF2TPos_.y, -800.0f, 1000.0f);
-	ImGui::SliderFloat("localF2TPosZ", &localF2TPos_.z, -800.0f, 1000.0f);
-
-	//終了処理
-	ImGui::End();
 }

@@ -32,7 +32,7 @@ private:
 
 	int RT_;
 
-	float shakeFrame_;
+	int shakeFrame_;
 	float shakeRate_;
 
 	/// <summary>
@@ -47,8 +47,6 @@ private:
 	/// <param name="">カウントダウン、カウントアップ以外の描画</param>
 	void DrawGame(void);
 
-#ifdef _DEBUG
-
 	//床
 	Transform floor_;
 	
@@ -57,5 +55,4 @@ private:
 	/// </summary>
 	void DrawDebug(void);
 
-#endif // _DEBUG
 };

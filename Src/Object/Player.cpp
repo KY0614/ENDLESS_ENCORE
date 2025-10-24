@@ -12,8 +12,8 @@
 #include "../Manager/Generic/JsonManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "Common/AnimationController.h"
-#include "Common/Capsule.h"
-#include "Common/Sphere.h"
+#include "Common/Geometry/Capsule.h"
+#include "Common/Geometry/Sphere.h"
 #include "Common/Collider.h"
 #include "Player.h"
 
@@ -148,7 +148,6 @@ void Player::Draw(void)
 	//丸影描画
 	DrawShadow();
 
-
 #ifdef _DEBUG
 
 	DebugDraw();
@@ -162,18 +161,18 @@ void Player::DrawDead(void)
 	//デバッグ用死亡表記
 	if (hp_ <= 0.0f && animationController_->IsEnd())
 	{
-		//デバッグ用勝利表記
-		DrawResultString(L"YOU DIED");
+		//デバッグ用死亡表記
+		DrawResultString(L"YOU DIED", 0xff0000);
 	}
 }
 
 void Player::DrawVictory(void)
 {
 	//デバッグ用勝利表記
-	DrawResultString(L"VICTORY");
+	DrawResultString(L"VICTORY",0xffff00);
 }
 
-void Player::DrawResultString(std::wstring str)
+void Player::DrawResultString(std::wstring str, int col)
 {
 	static int interval = 0;
 	//透明度の増加値
@@ -197,7 +196,7 @@ void Player::DrawResultString(std::wstring str)
 	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
 	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
 		Application::SCREEN_SIZE_Y / 2 - diff / 2,
-		str.c_str(), 0xffff00);
+		str.c_str(), col);
 	SetFontSize(16);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
@@ -294,14 +293,19 @@ void Player::InitAnimation(void)
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+
 	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value(KEY_RUN, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+
 	animationController_->Add((int)ANIM_TYPE::JUMP, path + animPath.value(KEY_JUMP, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+
 	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value(KEY_DODGE, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	//初期アニメーションはアイドルを再生

@@ -57,7 +57,6 @@ public:
 		TOP_FIXED,
 		FOLLOW,
 		FREE,
-		SHAKE
 	};
 
 	Camera(void);
@@ -132,25 +131,11 @@ private:
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawFree(void);
-	void SetBeforeDrawShake(void);
-#ifdef _DEBUG
 
 	float cameraNear_;
 	float cameraFar_;
 
 	VECTOR localF2CPos_;
 	VECTOR localF2TPos_;
-
-	//‰æ–Ê—h‚ç‚µ—p
-	float stepShake_;
-
-	VECTOR defaultPos_;
-
-	VECTOR shakeDir_;
-
-	void UpdateDebugImGui(void);
-
-#endif // _DEBUG
-
 };
 

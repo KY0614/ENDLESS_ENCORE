@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Manager\Generic\CollisionManager.cpp" />
     <ClCompile Include="Src\Utility\DrawUtiity.cpp" />
     <ClCompile Include="Src\Manager\Transition\PushTransitor.cpp" />
     <ClCompile Include="Src\Manager\Transition\FadeTransitor.cpp" />
@@ -36,8 +37,8 @@
     <ClCompile Include="Src\Common\Easing.cpp" />
     <ClCompile Include="Src\Manager\Generic\Input.cpp" />
     <ClCompile Include="Src\FpsControl.cpp" />
-    <ClCompile Include="Src\Object\Common\Cube.cpp" />
-    <ClCompile Include="Src\Object\Common\Sphere.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\Cube.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\Sphere.cpp" />
     <ClCompile Include="Src\Common\DebugDrawFormat.cpp" />
     <ClCompile Include="Src\Libs\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_dx11.cpp" />
@@ -66,7 +67,7 @@
     <ClCompile Include="Src\Manager\Generic\ResourceManager.cpp" />
     <ClCompile Include="Src\Manager\Generic\SceneManager.cpp" />
     <ClCompile Include="Src\Object\Common\AnimationController.cpp" />
-    <ClCompile Include="Src\Object\Common\Capsule.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\Capsule.cpp" />
     <ClCompile Include="Src\Object\Common\Collider.cpp" />
     <ClCompile Include="Src\Object\Common\Transform.cpp" />
     <ClCompile Include="Src\Object\Player.cpp" />
@@ -80,6 +81,7 @@
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Manager\Generic\CollisionManager.h" />
     <ClInclude Include="Src\Utility\DrawUtiity.h" />
     <ClInclude Include="Src\Manager\Transition\PushTransitor.h" />
     <ClInclude Include="Src\Manager\Transition\FadeTransitor.h" />
@@ -97,8 +99,8 @@
     <ClInclude Include="Src\Common\Easing.h" />
     <ClInclude Include="Src\Manager\Generic\Input.h" />
     <ClInclude Include="Src\FpsControl.h" />
-    <ClInclude Include="Src\Object\Common\Cube.h" />
-    <ClInclude Include="Src\Object\Common\Sphere.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\Cube.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\Sphere.h" />
     <ClInclude Include="Src\Libs\nlohmann\adl_serializer.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\byte_container_with_subtype.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\detail\abi_macros.hpp" />
@@ -174,7 +176,7 @@
     <ClInclude Include="Src\Manager\Generic\ResourceManager.h" />
     <ClInclude Include="Src\Manager\Generic\SceneManager.h" />
     <ClInclude Include="Src\Object\Common\AnimationController.h" />
-    <ClInclude Include="Src\Object\Common\Capsule.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\Capsule.h" />
     <ClInclude Include="Src\Object\Common\Collider.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
     <ClInclude Include="Src\Object\Player.h" />
@@ -367,6 +369,7 @@
       <AdditionalIncludeDirectories>$(DXLIB_DIR);$(ProjectDir)Src/Libs/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -66,7 +66,7 @@ public:
 	void DrawDead(void);
 	void DrawVictory(void);
 
-	void DrawResultString(std::wstring str);
+	void DrawResultString(std::wstring str,int col);
 
 	/// <summary>
 	/// 衝突判定に用いられるコライダーを追加する
@@ -101,7 +101,10 @@ public:
 	/// <param name="state">変更する状態</param>
 	void ChangeState(STATE state);
 
-	void Damage(float subHp) { hp_ -= subHp; }
+	void Damage(float subHp) 
+	{ 
+		hp_ -= subHp; 
+	}
 
 	/// <summary>
 	/// 回避中かどうかを取得する
@@ -110,6 +113,11 @@ public:
 	/// <returns>true:回避中　false:回避してない</returns>
 	const bool& GetIsDodge(void)const  { return isDodge_; }
 	const bool& GetIsParry(void)const  { return isParry_	; }
+
+	float GetHP0(void) { return hp_; }
+	float GetHP1(void) const { return hp_; }
+	float& GetHP2(void) const { return hp_; }
+	const float& GetHP3(void) const { return hp_; }
 
 private:
 

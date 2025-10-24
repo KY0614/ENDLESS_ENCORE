@@ -99,7 +99,7 @@
     <ClCompile Include="Src\Object\Common\AnimationController.cpp">
       <Filter>ソース ファイル\Object\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Common\Capsule.cpp">
+    <ClCompile Include="Src\Object\Common\Geometry\Capsule.cpp">
       <Filter>ソース ファイル\Object\Common</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\Common\Collider.cpp">
@@ -159,10 +159,10 @@
     <ClCompile Include="Src\Utility\StringUtility.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Common\Sphere.cpp">
+    <ClCompile Include="Src\Object\Common\Geometry\Sphere.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Common\Cube.cpp">
+    <ClCompile Include="Src\Object\Common\Geometry\Cube.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\FpsControl.cpp">
@@ -234,6 +234,9 @@
     <ClCompile Include="Src\Utility\DrawUtiity.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Manager\Generic\CollisionManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Common\Fader.h">
@@ -272,7 +275,7 @@
     <ClInclude Include="Src\Object\Common\AnimationController.h">
       <Filter>ヘッダー ファイル\Object\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Common\Capsule.h">
+    <ClInclude Include="Src\Object\Common\Geometry\Capsule.h">
       <Filter>ヘッダー ファイル\Object\Common</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Common\Collider.h">
@@ -479,10 +482,10 @@
     <ClInclude Include="Src\Libs\nlohmann\ordered_map.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Common\Sphere.h">
+    <ClInclude Include="Src\Object\Common\Geometry\Sphere.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Common\Cube.h">
+    <ClInclude Include="Src\Object\Common\Geometry\Cube.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\FpsControl.h">
@@ -552,6 +555,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Utility\DrawUtiity.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Manager\Generic\CollisionManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

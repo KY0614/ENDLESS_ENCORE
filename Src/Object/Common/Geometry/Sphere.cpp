@@ -1,5 +1,5 @@
 #include <DxLib.h>
-#include "Transform.h"
+#include "../Transform.h"
 #include "Sphere.h"
 
 Sphere::Sphere(const Transform& parent) : transformParent_(parent)

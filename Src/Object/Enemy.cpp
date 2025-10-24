@@ -7,8 +7,8 @@
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/JsonManager.h"
 #include "Common/AnimationController.h"
-#include "Common/Capsule.h"
-#include "Common/Sphere.h"
+#include "Common/Geometry/Capsule.h"
+#include "Common/Geometry/Sphere.h"
 #include "Player.h"
 #include "EnemyBullet.h"
 #include "Enemy.h"
@@ -670,6 +670,7 @@ void Enemy::UpdateAttackNear(void)
 		//回避中だったらダメージを受けない
 		if (player_.GetIsDodge())return;
 		player_.Damage(ATTACK_DAMAGE);
+		SceneManager::GetInstance().SetShakeScreen(true);
 		ChangeState(STATE::MOVE);
 	}
 }
@@ -743,6 +744,7 @@ void Enemy::UpdateShotOne(void)
 			}
 			//ダメージ処理(当たった弾は破棄)
 			player_.Damage(ATTACK_DAMAGE);
+			SceneManager::GetInstance().SetShakeScreen(true);
 			bullet->Destroy();
 		}
 
@@ -847,6 +849,7 @@ void Enemy::UpdateShotAll(void)
 			}
 			//ダメージ処理(当たった弾は破棄)
  			player_.Damage(ATTACK_DAMAGE);
+			SceneManager::GetInstance().SetShakeScreen(true);
 			bullet->Destroy();
 		}
 

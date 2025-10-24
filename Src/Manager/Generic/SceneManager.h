@@ -3,6 +3,7 @@
 #include <memory>
 #include <chrono>
 #include <list>
+#include "../../Common/Vector2.h"
 
 // 推奨しませんが、どうしても使いたい方は
 #define mainCamera SceneManager::GetInstance().GetCamera().lock()
@@ -76,13 +77,16 @@ public:
 	/// <param name="scene">ジャンプ先シーン</param>
 	void JumpScene(std::unique_ptr<SceneBase> scene);
 
+	void SetShakeScreen(bool isShake);
+
 private:
 
 	// 静的インスタンス
 	static SceneManager* instance_;
 
-	SCENE_ID sceneId_;
-	SCENE_ID waitSceneId_;
+	//シーンID
+	SCENE_ID sceneId_;		//現在のシーンID
+	SCENE_ID waitSceneId_;	//待ち（次の）シーンID
 
 	// フェード
 	std::unique_ptr<SceneBase> scene_;
@@ -101,7 +105,15 @@ private:
 	std::chrono::system_clock::time_point preTime_;
 	float deltaTime_;
 
+	//ライトの方向
 	VECTOR lightDir_;
+
+	//シーンのレンダーターゲット
+	int mainScreen_;	
+	Vector2 screenPos_;
+
+	int shakeFrame_;
+	float shakeRate_;
 	
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする
@@ -121,6 +133,8 @@ private:
 	void Fade(void);
 
 	void MakeScene(SCENE_ID sceneId);
+
+	void ShakeScreen(void);
 
 	void UpdateDebugImGui(void);
 };

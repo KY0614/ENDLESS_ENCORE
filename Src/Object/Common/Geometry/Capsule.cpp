@@ -1,5 +1,5 @@
 #include <DxLib.h>
-#include "Transform.h"
+#include "../Transform.h"
 #include "Capsule.h"
 
 Capsule::Capsule(const Transform& parent) : transformParent_(parent)

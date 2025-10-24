@@ -1,6 +1,7 @@
 #include <chrono>
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
+#include "../../Application.h"
 #include "../../Libs/ImGui/imgui.h"
 #include "../../Utility/CommonUtility.h"
 #include "../../Common/Fader.h"
@@ -14,10 +15,14 @@
 #include "../../Scene/ResultScene.h"
 #include "../GameSystem/SoundManager.h"
 #include "JsonManager.h"
-//#include "../../Object/UI/UIManager.h"
 #include "Camera.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
+
+namespace
+{
+	const int SHAKE_PADDING = 60;
+}
 
 SceneManager* SceneManager::instance_ = nullptr;
 
@@ -59,6 +64,11 @@ void SceneManager::Init(void)
 	//ライトの向き
 	lightDir_ = LIGHT_DIR;
 
+	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+	shakeFrame_ = 0;
+	shakeRate_ = 0.0f;
+	screenPos_ = { 0,0 };
+
 	//3D用の設定
 	Init3D();
 
@@ -97,6 +107,7 @@ void SceneManager::Init3D(void)
 
 void SceneManager::Update(void)
 {
+	ShakeScreen();
 	ChangeLightTypeDir(lightDir_);
 	if (scenes_.empty())
 	{
@@ -122,7 +133,7 @@ void SceneManager::Update(void)
 
 	//カメラ更新
 	camera_->Update();
-
+	UpdateDebugImGui();
 }
 
 void SceneManager::Draw(void)
@@ -130,8 +141,8 @@ void SceneManager::Draw(void)
 	
 	//描画先グラフィック領域の指定
 	//(３Ｄ描画で使用するカメラの設定などがリセットされる)
-	SetDrawScreen(DX_SCREEN_BACK);
-
+	//SetDrawScreen(DX_SCREEN_BACK);
+	SetDrawScreen(mainScreen_);
 	//画面を初期化
 	ClearDrawScreen();
 
@@ -156,6 +167,25 @@ void SceneManager::Draw(void)
 	
 	//暗転・明転
 	fader_->Draw();
+
+	//int call = GetDrawCallCount();
+	//DrawFormatString(0,400,0Xffffff,L"call : %d", call);
+
+	SetDrawScreen(DX_SCREEN_BACK);
+	ClearDrawScreen();
+
+	if (shakeFrame_ == 0)
+	{
+		DrawGraph(0, 0, mainScreen_, false);
+	}
+	if (shakeFrame_ > 0)
+	{
+		Vector2 pos;
+		int lineH = 3;
+		pos.x = (int)(((shakeFrame_ % 3) * 3) * shakeRate_);
+		pos.y = 0;
+		DrawGraph(pos.x, 0, mainScreen_, false);
+	}
 }
 
 void SceneManager::Destroy(void)
@@ -225,6 +255,15 @@ void SceneManager::JumpScene(std::unique_ptr<SceneBase> scene)
 {
 	scenes_.clear();
 	scenes_.push_back(std::move(scene));
+}
+
+void SceneManager::SetShakeScreen(bool isShake)
+{
+	if (isShake)
+	{
+		shakeFrame_ = SHAKE_PADDING;
+		shakeRate_ = 1.0f;
+	}
 }
 
 SceneManager::SceneManager(void)
@@ -375,18 +414,28 @@ void SceneManager::MakeScene(SCENE_ID sceneId)
 	}
 }
 
+void SceneManager::ShakeScreen(void)
+{
+	if (shakeFrame_ > 0)
+	{
+		shakeFrame_--;
+		shakeRate_ *= 0.95f;
+	}
+	else {
+		shakeRate_ = 0.0f;
+	}
+}
+
 void SceneManager::UpdateDebugImGui(void)
 {
 	//ウィンドウタイトル&開始処理
-	ImGui::Begin("Camera");
+	ImGui::Begin("SceneM");
 
 	//位置
-	ImGui::Text("position");
+	ImGui::Text("screenPosXOffset");
 	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	ImGui::InputFloat3("Pos", &lightDir_.x);
-	ImGui::SliderFloat("PosX", &lightDir_.x, -10.0f, 10.0f);
-	ImGui::SliderFloat("PosY", &lightDir_.y, -10.0f, 10.0f);
-	ImGui::SliderFloat("PosZ", &lightDir_.z, -10.0f, 10.0f);
+	//ImGui::InputInt("XOffset", &screenPosXoffset_);
+	//ImGui::SliderInt("PosX", &screenPosXoffset_, -20, 20);
 
 	//終了処理
 	ImGui::End();

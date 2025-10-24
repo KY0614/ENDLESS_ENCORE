@@ -2,7 +2,7 @@
 #include "../Common/DebugDrawFormat.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Utility/CommonUtility.h"
-#include "Common/Sphere.h"
+#include "Common/Geometry/Sphere.h"
 #include "EnemyBullet.h"
 
 EnemyBullet::EnemyBullet(Transform& parent)

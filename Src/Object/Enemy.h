@@ -231,13 +231,9 @@ private:
 	/// </summary>
 	void UpdateDebugImGui(void);
 
-#ifdef _DEBUG
-
 	float stateStep_;
 
 	int col_;
-
-#endif // _DEBUG
 
 };
 

@@ -8,7 +8,6 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
-#include "../Object/Common/Cube.h"
 #include "PauseScene.h"
 #include "GameScene.h"
 
@@ -16,13 +15,13 @@ GameScene::GameScene(void) :
 	update_(&GameScene::UpdateGame),
 	draw_(&GameScene::DrawGame)
 {
+	shakeFrame_ = 0;
+	shakeRate_ = 0.0f;
+	RT_ = -1;
 }
 
 GameScene::~GameScene(void)
 {
-	RT_ = -1;
-	shakeFrame_ = 0.0f;
-	shakeRate_ = 0.0f;
 }
 
 void GameScene::Init(void)
@@ -40,7 +39,7 @@ void GameScene::Init(void)
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	RT_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
-#ifdef _DEBUG
+
 	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::FLOOR));
 	float scale = 1.0f;
@@ -52,7 +51,6 @@ void GameScene::Init(void)
 	floor_.MakeCollider(Collider::TYPE::STAGE);
 	floor_.Update();
 	player_->AddCollider(floor_.collider);
-#endif // _DEBUG
 
 }
 
@@ -78,21 +76,28 @@ void GameScene::UpdateGame(void)
 	{
 		this->Init();
 	}
+
 	if (ins.IsInputTriggered("CameraShake"))
 	{
-		mainCamera->ChangeMode(Camera::MODE::SHAKE);
+		shakeFrame_ = 60;
+		shakeRate_ = 1.0f;
 	}
+
+	if (shakeFrame_ > 0) {
+		shakeFrame_--;
+		shakeRate_ *= 0.95f;
+	}
+	else 
+	{
+		shakeRate_ = 0.0f;
+	}
+
 #endif // _DEBUG
 
 	if (ins.IsInputTriggered("pause"))
 	{
 		//ポーズボタンが押されたらポーズシーンへ遷移
 		SceneManager::GetInstance().PushScene(std::make_unique<PauseScene>());
-	}
-
-	if (ins.IsInputTriggered("CameraShake"))
-	{
-		shakeFrame_ = 50.0f;
 	}
 
 	if (ins.IsInputTriggered("Back"))
@@ -107,18 +112,19 @@ void GameScene::UpdateGame(void)
 
 void GameScene::DrawGame(void)
 {
-	//描画先をRTに変更
-	SetDrawScreen(RT_);
-	//画面を初期化
-	ClearDrawScreen();
+	////描画先をRTに変更
+	//SetDrawScreen(RT_);
+	////画面を初期化
+	//ClearDrawScreen();
+	
+	////カメラ初期化
+	//mainCamera->SetBeforeDraw();
 
-	//カメラ初期化
-	mainCamera->SetBeforeDraw();
+	//Vector2 pos;
+	//pos.x = ((shakeFrame_ % 5) * 3) * shakeRate_;
+	//pos.y = 0;
 
-#ifdef _DEBUG
-
-	DrawDebug();
-#endif // _DEBUG
+	MV1DrawModel(floor_.modelId);
 
 	//敵描画
 	enemy_->Draw();	
@@ -130,15 +136,25 @@ void GameScene::DrawGame(void)
 		player_->DrawVictory();
 	}
 
-	//描画先を裏の画面に戻す
-	SetDrawScreen(DX_SCREEN_BACK);
-	//画面を初期化
-	ClearDrawScreen();
-	//RTを画面に描画
-	DrawGraph(0, 0, RT_, false);
+	////描画先を裏の画面に戻す
+	//SetDrawScreen(DX_SCREEN_BACK);
+	////画面を初期化
+	//ClearDrawScreen();
+
+	//if (shakeFrame_ == 0)
+	//{
+	//	//RTを画面に描画
+	//	DrawGraph(0, 0, RT_, false);
+	//}
+	//if (shakeFrame_ > 0)
+	//{
+	//	//RTを画面に描画
+	//	DrawGraph(pos.x, 0, RT_, false);
+	//}
+	
 }
 
 void GameScene::DrawDebug(void)
 {
-	MV1DrawModel(floor_.modelId);
+	
 }
