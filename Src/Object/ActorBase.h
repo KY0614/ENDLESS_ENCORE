@@ -14,7 +14,8 @@ public:
 	struct ColliderParameter
 	{
 		std::unique_ptr<Geometry> geometry_;	//形状情報
-		std::shared_ptr<Collider> collider_;	//全体の当たり判定情報
+		std::shared_ptr<Collider> ownCollider_;	//自身の当たり判定情報
+		std::shared_ptr<Collider> hitCollider_;	//相手の当たり判定情報
 	};
 
 	//コンストラクタ

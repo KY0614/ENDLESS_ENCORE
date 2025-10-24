@@ -27,13 +27,11 @@ void Camera::Init(void)
 	//ƒJƒƒ‰‚Ì‰Šúİ’è
 	ChangeMode(MODE::FIXED_POINT);
 
-#ifdef _DEBUG
 	cameraNear_ = CAMERA_NEAR;
 	cameraFar_ = CAMERA_FAR;
 	localF2CPos_ = LOCAL_F2C_POS;
 	localF2TPos_ = LOCAL_F2T_POS;
 
-#endif // _DEBUG
 
 }
 

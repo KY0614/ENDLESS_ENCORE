@@ -21,7 +21,7 @@
 
 namespace
 {
-	const int SHAKE_PADDING = 60;
+	const int SHAKE_FRAME = 60;
 }
 
 SceneManager* SceneManager::instance_ = nullptr;
@@ -172,7 +172,7 @@ void SceneManager::Draw(void)
 	//DrawFormatString(0,400,0Xffffff,L"call : %d", call);
 
 	SetDrawScreen(DX_SCREEN_BACK);
-	ClearDrawScreen();
+	//ClearDrawScreen();
 
 	if (shakeFrame_ == 0)
 	{
@@ -182,7 +182,8 @@ void SceneManager::Draw(void)
 	{
 		Vector2 pos;
 		int lineH = 3;
-		pos.x = (int)(((shakeFrame_ % 3) * 3) * shakeRate_);
+		const int shakePadding = 10;
+		pos.x = (int)(((shakeFrame_ % 3) * shakePadding) * shakeRate_);
 		pos.y = 0;
 		DrawGraph(pos.x, 0, mainScreen_, false);
 	}
@@ -261,7 +262,7 @@ void SceneManager::SetShakeScreen(bool isShake)
 {
 	if (isShake)
 	{
-		shakeFrame_ = SHAKE_PADDING;
+		shakeFrame_ = SHAKE_FRAME;
 		shakeRate_ = 1.0f;
 	}
 }

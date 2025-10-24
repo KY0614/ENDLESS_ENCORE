@@ -146,7 +146,7 @@ void Player::Draw(void)
 	MV1DrawModel(transform_.modelId);
 
 	//ŠÛ‰e•`‰æ
-	DrawShadow();
+	//DrawShadow();
 
 #ifdef _DEBUG
 

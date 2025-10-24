@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderBase.cpp" />
+    <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\CollisionManager.cpp" />
     <ClCompile Include="Src\Utility\DrawUtiity.cpp" />
     <ClCompile Include="Src\Manager\Transition\PushTransitor.cpp" />
@@ -36,7 +38,6 @@
     <ClCompile Include="Src\Scene\PauseScene.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
     <ClCompile Include="Src\Manager\Generic\Input.cpp" />
-    <ClCompile Include="Src\FpsControl.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Cube.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Sphere.cpp" />
     <ClCompile Include="Src\Common\DebugDrawFormat.cpp" />
@@ -81,6 +82,8 @@
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderBase.h" />
+    <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\CollisionManager.h" />
     <ClInclude Include="Src\Utility\DrawUtiity.h" />
     <ClInclude Include="Src\Manager\Transition\PushTransitor.h" />
@@ -98,7 +101,6 @@
     <ClInclude Include="Src\Scene\PauseScene.h" />
     <ClInclude Include="Src\Common\Easing.h" />
     <ClInclude Include="Src\Manager\Generic\Input.h" />
-    <ClInclude Include="Src\FpsControl.h" />
     <ClInclude Include="Src\Object\Common\Geometry\Cube.h" />
     <ClInclude Include="Src\Object\Common\Geometry\Sphere.h" />
     <ClInclude Include="Src\Libs\nlohmann\adl_serializer.hpp" />

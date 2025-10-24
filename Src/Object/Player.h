@@ -116,8 +116,7 @@ public:
 
 	float GetHP0(void) { return hp_; }
 	float GetHP1(void) const { return hp_; }
-	float& GetHP2(void) const { return hp_; }
-	const float& GetHP3(void) const { return hp_; }
+	const float& GetHP2(void) const { return hp_; }
 
 private:
 

@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 
-class FpsControl;
+class FpsController;
 
 class Application
 {
@@ -69,8 +69,6 @@ public:
 
 	void EndGame(void) { isEnd_ = true; }
 
-	const float& GetFrameRate(void) const;
-
 private:
 
 	Size windowSize_;
@@ -86,7 +84,7 @@ private:
 
 	bool isEnd_;
 
-	std::unique_ptr<FpsControl> fps_;
+	std::unique_ptr<FpsController> fps_;
 
 	//デフォルトコンストラクタをprivateにして、
 	//外部から生成できない様にする

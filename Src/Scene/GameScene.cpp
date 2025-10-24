@@ -38,7 +38,6 @@ void GameScene::Init(void)
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
-	RT_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
 
 	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::FLOOR));
@@ -105,25 +104,11 @@ void GameScene::UpdateGame(void)
 		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::RESULT);
 	}
 
-#ifdef _DEBUG
 	floor_.Update();
-#endif // _DEBUG
 }
 
 void GameScene::DrawGame(void)
 {
-	////•`‰ææ‚ðRT‚É•ÏX
-	//SetDrawScreen(RT_);
-	////‰æ–Ê‚ð‰Šú‰»
-	//ClearDrawScreen();
-	
-	////ƒJƒƒ‰‰Šú‰»
-	//mainCamera->SetBeforeDraw();
-
-	//Vector2 pos;
-	//pos.x = ((shakeFrame_ % 5) * 3) * shakeRate_;
-	//pos.y = 0;
-
 	MV1DrawModel(floor_.modelId);
 
 	//“G•`‰æ
@@ -136,22 +121,6 @@ void GameScene::DrawGame(void)
 		player_->DrawVictory();
 	}
 
-	////•`‰ææ‚ð— ‚Ì‰æ–Ê‚É–ß‚·
-	//SetDrawScreen(DX_SCREEN_BACK);
-	////‰æ–Ê‚ð‰Šú‰»
-	//ClearDrawScreen();
-
-	//if (shakeFrame_ == 0)
-	//{
-	//	//RT‚ð‰æ–Ê‚É•`‰æ
-	//	DrawGraph(0, 0, RT_, false);
-	//}
-	//if (shakeFrame_ > 0)
-	//{
-	//	//RT‚ð‰æ–Ê‚É•`‰æ
-	//	DrawGraph(pos.x, 0, RT_, false);
-	//}
-	
 }
 
 void GameScene::DrawDebug(void)

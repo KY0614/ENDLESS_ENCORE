@@ -4,7 +4,7 @@
 #include "Manager/Generic/InputManager.h"
 #include "Manager/Generic/ResourceManager.h"
 #include "Manager/Generic/SceneManager.h"
-#include "FpsControl.h"
+#include "Common/FpsController.h"
 #include "Application.h"
 
 Application* Application::instance_ = nullptr;
@@ -43,6 +43,9 @@ void Application::Init(void)
 	SetGraphMode(windowSize_.width_, windowSize_.height_, 32);
 	ChangeWindowMode(true);
 
+	const int FPS_RATE = 60;	//フレームレート固定
+	fps_ = std::make_unique<FpsController>(FPS_RATE);
+
 	//DxLibの初期化
 	SetUseDirect3DVersion(DX_DIRECT3D_11);
 	isInitFail_ = false;
@@ -67,8 +70,6 @@ void Application::Init(void)
 	//シーン管理初期化
 	SceneManager::CreateInstance();
 
-	fps_ = std::make_unique<FpsControl>();
-	fps_->Init();
 }
 
 void Application::Run(void)
@@ -82,10 +83,6 @@ void Application::Run(void)
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0 && !isEnd_)
 	{
 
-		//フレームレート更新
-		//1/60秒経過していないなら再ループ
-		if (!fps_->UpdateFrameRate())continue;
-
 		inputManager.Update();
 		imGuiWrapper.Update();
 		sceneManager.Update();
@@ -96,10 +93,11 @@ void Application::Run(void)
 
 		imGuiWrapper.Draw();
 
-		fps_->CalcFrameRate();	//フレームレート計算
+		fps_->Draw();
 
 		ScreenFlip();
 
+		fps_->Wait();
 	}
 
 }
@@ -133,11 +131,6 @@ bool Application::IsInitFail(void) const
 bool Application::IsReleaseFail(void) const
 {
 	return isReleaseFail_;
-}
-
-const float& Application::GetFrameRate(void) const
-{
-	return fps_->GetFrameRate();
 }
 
 Application::Application(void)
