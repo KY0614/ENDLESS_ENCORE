@@ -96,7 +96,7 @@ void GameScene::UpdateGame(void)
 	if (ins.IsInputTriggered("Pause"))
 	{
 		//ポーズボタンが押されたらポーズシーンへ遷移
-		SceneManager::GetInstance().PushScene(std::make_unique<PauseScene>());
+		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
 		return;
 	}
 

@@ -10,6 +10,9 @@
 #include "../../Scene/MovieScene.h"
 #include "../../Scene/SelectScene.h"
 #include "../../Scene/PauseScene.h"
+#include "../../Scene/PauseScene/InventoryScene.h"
+#include "../../Scene/PauseScene/OptionScene.h"
+#include "../../Scene/PauseScene/CharacterScene.h"
 #include "../../Scene/TutorialScene.h"
 #include "../../Scene/GameScene.h"
 #include "../../Scene/ResultScene.h"
@@ -138,7 +141,6 @@ void SceneManager::Update(void)
 
 void SceneManager::Draw(void)
 {
-	
 	//描画先グラフィック領域の指定
 	//(３Ｄ描画で使用するカメラの設定などがリセットされる)
 	//SetDrawScreen(DX_SCREEN_BACK);
@@ -210,11 +212,13 @@ void SceneManager::ChangeScene(SCENE_ID nextId)
 
 void SceneManager::ChangeScene(std::unique_ptr<SceneBase> _scene)
 {
-	if (scenes_.empty()) {
+	if (scenes_.empty()) 
+	{
 		//空だったら新しく入れる
 		scenes_.push_back(std::move(_scene));
 	}
-	else {
+	else 
+	{
 		//末尾のものを新しい物に入れ替える
 		scenes_.back() = std::move(_scene);
 	}
@@ -223,7 +227,6 @@ void SceneManager::ChangeScene(std::unique_ptr<SceneBase> _scene)
 SceneManager::SCENE_ID SceneManager::GetSceneID(void)
 {
 	 return sceneId_;
-	//if()
 }
 
 float SceneManager::GetDeltaTime(void) const
@@ -241,6 +244,14 @@ void SceneManager::PushScene(std::unique_ptr<SceneBase> _scene)
 {
 	//新しく積むのでもともと入っている奴はまだ削除されない
 	scenes_.push_back(std::move(_scene));
+	scenes_.back()->Init();
+}
+
+void SceneManager::PushScene(SCENE_ID _scene)
+{
+	sceneId_ = _scene;
+	//新しく積むのでもともと入っている奴はまだ削除されない
+	scenes_.push_back(std::move(CreateScene(_scene)));
 	scenes_.back()->Init();
 }
 
@@ -312,7 +323,18 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 		scene_.reset();
 	}
 	
-	MakeScene(sceneId);
+	//MakeScene(sceneId);
+
+	if (scenes_.empty())
+	{
+		//空だったら新しく入れる
+		scenes_.push_back(std::move(CreateScene(sceneId)));
+	}
+	else
+	{
+		//末尾のものを新しい物に入れ替える
+		scenes_.back() = std::move(CreateScene(sceneId));
+	}
 
 	scenes_.back()->Init();
 	//scene_->Init();
@@ -428,6 +450,81 @@ void SceneManager::ShakeScreen(void)
 		shakeRate_ = 0.0f;
 	}
 }
+
+
+template<typename T>
+std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
+{
+
+	auto& resM = ResourceManager::GetInstance();
+	auto& jsonM = JsonManager::GetInstance();
+	std::unique_ptr<SceneBase> scene;
+	switch (sceneId)
+	{
+	case SceneManager::SCENE_ID::NONE:
+		break;
+
+	case SceneManager::SCENE_ID::TITLE:
+		scene = std::make_unique<TitleScene>();
+		resM.InitTitle();
+		break;
+
+	case SceneManager::SCENE_ID::ADVERTISE:
+		scene = std::make_unique<AdvertiseScene>();
+		break;
+
+	case SceneManager::SCENE_ID::MOVIE:
+		scene = std::make_unique<MovieScene>();
+		break;
+
+	case SceneManager::SCENE_ID::SELECT:
+		scene = std::make_unique<SelectScene>();
+		break;
+
+	case SceneManager::SCENE_ID::TUTORIAL:
+		scene = std::make_unique<TutorialScene>();
+		resM.InitTutorial();
+		break;
+
+	case SceneManager::SCENE_ID::GAME:
+		scene = std::make_unique<GameScene>();
+		resM.InitGame();
+		jsonM.InitGame();
+		break;
+
+	case SceneManager::SCENE_ID::PAUSE:
+		scene = std::make_unique<PauseScene>();
+		break;
+
+	case SceneManager::SCENE_ID::INVENTORY:
+		scene = std::make_unique<InventoryScene>();
+		break;
+
+	case SceneManager::SCENE_ID::CHARACTER:
+		scene = std::make_unique<CharacterScene>();
+		break;
+
+	case SceneManager::SCENE_ID::OPTION:
+		scene = std::make_unique<OptionScene>();
+		break;
+
+	case SceneManager::SCENE_ID::RESULT:
+		scene = std::make_unique<ResultScene>();
+		resM.InitResult();
+		break;
+
+	default:
+		break;
+	}
+	return scene;
+}
+
+template<typename T>
+SceneManager::SCENE_ID SceneManager::SerchScene(std::unique_ptr<T> scene)
+{
+	return SCENE_ID();
+}
+
 
 void SceneManager::UpdateDebugImGui(void)
 {

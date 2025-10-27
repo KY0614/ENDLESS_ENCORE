@@ -29,7 +29,10 @@ public:
 		TUTORIAL,
 		GAME,
 		PAUSE,
-		RESULT
+		INVENTORY,
+		CHARACTER,
+		OPTION,
+		RESULT,
 	};
 	
 	// インスタンスの生成
@@ -64,6 +67,7 @@ public:
 	/// </summary>
 	/// <param name="_scene">シーン情報</param>
 	void PushScene(std::unique_ptr<SceneBase>_scene);
+	void PushScene(SCENE_ID _scene);
 
 	/// <summary>
 	/// 最後に追加したシーンを削除する。
@@ -78,6 +82,8 @@ public:
 	void JumpScene(std::unique_ptr<SceneBase> scene);
 
 	void SetShakeScreen(bool isShake);
+
+	void SceneID2Game(void) { sceneId_ = SCENE_ID::GAME; }
 
 private:
 
@@ -135,6 +141,14 @@ private:
 	void MakeScene(SCENE_ID sceneId);
 
 	void ShakeScreen(void);
+
+	//SCENE_IDからシーンを生成する
+	template<typename T = SceneBase>
+	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
+
+	//SCENE_IDからシーンを生成する
+	template<typename T = SceneBase>
+	SCENE_ID SerchScene(std::unique_ptr<T> scene);
 
 	void UpdateDebugImGui(void);
 };

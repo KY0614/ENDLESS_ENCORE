@@ -282,6 +282,8 @@ void Camera::SetBeforeDrawMouse(void)
 		isStop = true;
 		SetMouseDispFlag(true);
 	}
+	else isStop = false;
+
 	if (isStop)return;
 	//マウスカーソルを非表示にする
 	SetMouseDispFlag(false);

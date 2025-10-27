@@ -37,20 +37,25 @@ PauseScene::PauseScene(void) :
 	menuFuncTable_ = {
 	{L"インベントリ",[this]()
 		{
-			std::unique_ptr<InventoryScene> scene = std::make_unique<InventoryScene>();
-			SceneManager::GetInstance().PushScene(std::move(scene));
+			//std::unique_ptr<InventoryScene> scene = std::make_unique<InventoryScene>();
+			//SceneManager::GetInstance().PushScene(std::move(scene));
+			SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::INVENTORY);
 		}
 	},
 	{ L"キャラクター",[this]()
 		{
-			std::unique_ptr<CharacterScene> scene = std::make_unique<CharacterScene>();
-			SceneManager::GetInstance().PushScene(std::move(scene));
+			//std::unique_ptr<CharacterScene> scene = std::make_unique<CharacterScene>();
+			//SceneManager::GetInstance().PushScene(std::move(scene));
+			SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::CHARACTER);
 		}
 	},
 	{ L"オプション",[this]()
 		{
-			std::unique_ptr<OptionScene> scene = std::make_unique<OptionScene>();
-			SceneManager::GetInstance().PushScene(std::move(scene));
+			//std::unique_ptr<OptionScene> scene = std::make_unique<OptionScene>();
+			//SceneManager::GetInstance().PushScene(std::move(scene));
+
+			SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::OPTION);
+
 			//SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TITLE);
 			//return;
 		}
@@ -131,6 +136,7 @@ void PauseScene::UpdateDisappear(void)
 	if (--frame_ <= 0) 
 	{
 		SceneManager::GetInstance().PopScene();
+		SceneManager::GetInstance().SceneID2Game();
 		return;
 	}
 }
