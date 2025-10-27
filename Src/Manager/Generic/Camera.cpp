@@ -276,9 +276,10 @@ void Camera::SetBeforeDrawMouse(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 	static bool isStop = false;
-	if(ins.IsInputTriggered("Pause"))
+	
+	if(SceneManager::GetInstance().GetSceneID() != SceneManager::SCENE_ID::GAME)
 	{
-		isStop = !isStop;
+		isStop = true;
 		SetMouseDispFlag(true);
 	}
 	if (isStop)return;

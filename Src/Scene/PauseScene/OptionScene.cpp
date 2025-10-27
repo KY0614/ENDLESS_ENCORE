@@ -31,7 +31,7 @@ void OptionScene::Update(void)
 	InputManager& ins = InputManager::GetInstance();
 	if (ins.IsInputTriggered("Pause"))
 	{
-		SceneManager::GetInstance().JumpScene(std::make_unique<PauseScene>());
+		SceneManager::GetInstance().PopScene();
 		return;
 	}
 

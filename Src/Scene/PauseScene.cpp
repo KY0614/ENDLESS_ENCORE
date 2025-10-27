@@ -7,6 +7,7 @@
 #include "../Scene/TitleScene.h"
 #include "../Scene/PauseScene/InventoryScene.h"
 #include "../Scene/PauseScene/OptionScene.h"
+#include "../Scene/PauseScene/CharacterScene.h"
 #include "../Scene/PauseScene/ExplainScene.h"
 #include "../Scene/PauseScene/KeyConfigScene.h"
 #include "PauseScene.h"
@@ -42,7 +43,7 @@ PauseScene::PauseScene(void) :
 	},
 	{ L"キャラクター",[this]()
 		{
-			std::unique_ptr<KeyConfigScene> scene = std::make_unique<KeyConfigScene>();
+			std::unique_ptr<CharacterScene> scene = std::make_unique<CharacterScene>();
 			SceneManager::GetInstance().PushScene(std::move(scene));
 		}
 	},

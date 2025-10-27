@@ -222,7 +222,8 @@ void SceneManager::ChangeScene(std::unique_ptr<SceneBase> _scene)
 
 SceneManager::SCENE_ID SceneManager::GetSceneID(void)
 {
-	return sceneId_;
+	 return sceneId_;
+	//if()
 }
 
 float SceneManager::GetDeltaTime(void) const
