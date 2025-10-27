@@ -109,14 +109,14 @@ public:
 	/// <summary>
 	/// 回避中かどうかを取得する
 	/// </summary>
-	/// <param name=""></param>
 	/// <returns>true:回避中　false:回避してない</returns>
 	const bool& GetIsDodge(void)const  { return isDodge_; }
-	const bool& GetIsParry(void)const  { return isParry_	; }
 
-	float GetHP0(void) { return hp_; }
-	float GetHP1(void) const { return hp_; }
-	const float& GetHP2(void) const { return hp_; }
+	/// <summary>
+	/// パリィ中かどうかを取得する
+	/// </summary>
+	/// <returns>true:パリィ中　false:パリィしてない</returns>
+	const bool& GetIsParry(void)const  { return isParry_; }
 
 private:
 
@@ -222,7 +222,16 @@ private:
 	/// </summary>
 	void InitAnimation(void);
 
+	/// <summary>
+	/// HPを設定
+	/// </summary>
+	/// <param name="hp">HP</param>
 	void SetHP(const float hp) { hp_ = hp; }
+
+	/// <summary>
+	/// 最大HPを設定
+	/// </summary>
+	/// <param name="maxHp">最大HP</param>
 	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
 	//状態遷移--------------------------------------------------------

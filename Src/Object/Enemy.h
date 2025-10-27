@@ -92,6 +92,7 @@ private:
 
 	//体力
 	float hp_;
+	float maxHp_;
 
 	bool isAttackedNear_;
 
@@ -123,6 +124,18 @@ private:
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);
+
+	/// <summary>
+	/// HPを設定
+	/// </summary>
+	/// <param name="hp">HP</param>
+	void SetHP(const float hp) { hp_ = hp; }
+
+	/// <summary>
+	/// 最大HPを設定
+	/// </summary>
+	/// <param name="maxHp">最大HP</param>
+	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
 	/// <summary>
 	/// ダメージ処理

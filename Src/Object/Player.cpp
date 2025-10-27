@@ -253,10 +253,10 @@ void Player::Init3DModel(void)
 	transform_.quaRotLocal =
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
-
+	//HPÇê›íË
 	const auto& paramData = param[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
-	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
+	SetMaxHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 }
 
 void Player::InitCollider(void)

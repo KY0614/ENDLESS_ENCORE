@@ -231,9 +231,10 @@ void Enemy::Init3DModel(void)
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 
+	//HPÇê›íË
 	const auto& paramData = param[JsonManager::KEY_PARAMETER];
-	hp_ = paramData.value(JsonManager::KEY_HP, 0.0f);
-	//maxHp_ = paramData.value(JsonManager::KEY_MAX_HP, 0.0f);
+	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
+	SetMaxHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 }
 
 void Enemy::InitCollider(void)
