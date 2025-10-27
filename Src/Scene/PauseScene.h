@@ -7,6 +7,8 @@ public:
 
 	static constexpr int APPEAR_INTERVAL = 15;
 
+	static constexpr int MARGINE_SIZE = 30;
+
 	PauseScene(void);
 	~PauseScene(void);
 
@@ -20,6 +22,10 @@ private:
 	std::vector<std::wstring> menuList_;
 	using MenuFunc_t = std::function<void()>;
 	std::map<std::wstring, MenuFunc_t> menuFuncTable_;
+
+	//メニューの描画関数リスト
+	using MenuDraw_t = std::function<void()>;
+	std::map<std::wstring, MenuDraw_t> menuDrawTable_;
 
 	//関数ポインタ
 	using UpdateFunc_t = void(PauseScene::*)();

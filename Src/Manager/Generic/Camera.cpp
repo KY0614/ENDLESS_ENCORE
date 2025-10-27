@@ -275,6 +275,13 @@ void Camera::SetBeforeDrawFree(void)
 void Camera::SetBeforeDrawMouse(void)
 {
 	InputManager& ins = InputManager::GetInstance();
+	static bool isStop = false;
+	if(ins.IsInputTriggered("Pause"))
+	{
+		isStop = !isStop;
+		SetMouseDispFlag(true);
+	}
+	if (isStop)return;
 	//マウスカーソルを非表示にする
 	SetMouseDispFlag(false);
 	Vector2 mousePos = ins.GetMousePos();

@@ -5,17 +5,21 @@
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Scene/TitleScene.h"
+#include "../Scene/PauseScene/InventoryScene.h"
+#include "../Scene/PauseScene/OptionScene.h"
 #include "../Scene/PauseScene/ExplainScene.h"
 #include "../Scene/PauseScene/KeyConfigScene.h"
 #include "PauseScene.h"
 
-namespace {
+namespace 
+{
 	const int BACK_IMG_SCALE = 1080;
 	const int APPEAR_INTERVAL = 15;
-	const int MARGINE_SIZE = 30;
-	const int MENU_SCALE = 216;
-	const int MENU_START_Y = 200;
-	const int SELECT_MENU_MARGINE = 25;
+	//メニューリスト関連
+	const int MENU_LIST_HEIGHT = 70;	//メニューリストの高さ(１行)
+	const int MENU_LIST_WIDTH = 200;	//メニューリストの幅(１行)
+	const int MENU_START_X = 300;		//メニューリストの開始X座標
+	const int MENU_START_Y = 100;		//メニューリストの開始Y座標
 }
 
 PauseScene::PauseScene(void) :
@@ -23,37 +27,31 @@ PauseScene::PauseScene(void) :
 	draw_(&PauseScene::DrawProcess)
 {
 	menuList_ = {
-		L"音量設定",
-		L"操作設定",
-		L"ゲームに戻る",
-		L"タイトルに戻る",
+		L"インベントリ",
+		L"キャラクター",
+		L"オプション",
 		L"ゲーム終了"
 	};
 
 	menuFuncTable_ = {
-	{L"音量設定",[this]()
+	{L"インベントリ",[this]()
 		{
-			std::unique_ptr<ExplainScene> scene = std::make_unique<ExplainScene>();
+			std::unique_ptr<InventoryScene> scene = std::make_unique<InventoryScene>();
 			SceneManager::GetInstance().PushScene(std::move(scene));
 		}
 	},
-	{ L"操作設定",[this]()
+	{ L"キャラクター",[this]()
 		{
 			std::unique_ptr<KeyConfigScene> scene = std::make_unique<KeyConfigScene>();
 			SceneManager::GetInstance().PushScene(std::move(scene));
 		}
 	},
-	{ L"ゲームに戻る",[this]()
+	{ L"オプション",[this]()
 		{
-			update_ = &PauseScene::UpdateDisappear;
-			draw_ = &PauseScene::DrawProcess;
-			return;
-		}
-	},
-	{ L"タイトルに戻る",[this]()
-		{
-			SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TITLE);
-			return;
+			std::unique_ptr<OptionScene> scene = std::make_unique<OptionScene>();
+			SceneManager::GetInstance().PushScene(std::move(scene));
+			//SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TITLE);
+			//return;
 		}
 	},
 	{ L"ゲーム終了",[this]()
@@ -64,6 +62,30 @@ PauseScene::PauseScene(void) :
 	}
 	};
 
+	menuDrawTable_ = {
+	{ L"インベントリ",[this]()
+		{
+			std::unique_ptr<InventoryScene> scene = std::make_unique<InventoryScene>();
+			scene->Draw();
+		}
+	},
+	{ L"キャラクター",[this]()
+		{
+			
+		}
+	},
+	{ L"オプション",[this]()
+		{
+			std::unique_ptr<OptionScene> scene = std::make_unique<OptionScene>();
+			scene->Draw();
+		}
+	},
+	{ L"ゲーム終了",[this]()
+		{
+			
+		}
+	}
+	};
 
 	backImg_ = -1;
 	menuListImg_ = nullptr;
@@ -82,7 +104,6 @@ PauseScene::~PauseScene(void)
 
 void PauseScene::Init(void)
 {
-
 }
 
 void PauseScene::Update(void)
@@ -97,7 +118,8 @@ void PauseScene::Draw(void)
 
 void PauseScene::UpdateAppear(void)
 {
-	if (++frame_ >= APPEAR_INTERVAL) {
+	if (++frame_ >= APPEAR_INTERVAL) 
+	{
 		update_ = &PauseScene::UpdateNormal;
 		draw_ = &PauseScene::DrawNormal;
 	}
@@ -105,7 +127,8 @@ void PauseScene::UpdateAppear(void)
 
 void PauseScene::UpdateDisappear(void)
 {
-	if (--frame_ <= 0) {
+	if (--frame_ <= 0) 
+	{
 		SceneManager::GetInstance().PopScene();
 		return;
 	}
@@ -125,36 +148,43 @@ void PauseScene::DrawProcess(void)
 
 	frameHalfHeight *= rate;
 
-	DrawExtendGraph(MARGINE_SIZE,
-		centerY - frameHalfHeight,
-		Application::SCREEN_SIZE_X - MARGINE_SIZE,
-		centerY + frameHalfHeight,
-		backImg_, true);
+	//白っぽいセロファン
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 168);
+	DrawBox(MARGINE_SIZE, centerY - frameHalfHeight, wSize.width_ - MARGINE_SIZE, centerY + frameHalfHeight, 0xffffff, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+	DrawBoxAA(MARGINE_SIZE, centerY - frameHalfHeight, wSize.width_ - MARGINE_SIZE, centerY + frameHalfHeight, 0xffffff, false);
+
+	//DrawExtendGraph(MARGINE_SIZE,
+	//	centerY - frameHalfHeight,
+	//	Application::SCREEN_SIZE_X - MARGINE_SIZE,
+	//	centerY + frameHalfHeight,
+	//	backImg_, true);
 }
 
 void PauseScene::UpdateNormal(void)
 {	
 	auto& sound = SoundManager::GetInstance();
 	InputManager& ins = InputManager::GetInstance();
-	if (ins.IsInputTriggered("pause"))
+	if (ins.IsInputTriggered("Pause"))
 	{
 		sound.Play(SoundManager::SOUND::MENU_CLOSE);
 		update_ = &PauseScene::UpdateDisappear;
 		draw_ = &PauseScene::DrawProcess;
 		return;
 	}
-	if (ins.IsInputTriggered("Down"))
+	if (ins.IsInputTriggered("Right"))
 	{
 		sound.Play(SoundManager::SOUND::NEXT_PAGE);
 		cursorIdx_ = (cursorIdx_ + 1) % menuList_.size();
 	}
-	else if (ins.IsInputTriggered("Up"))
+	else if (ins.IsInputTriggered("Left"))
 	{
 		sound.Play(SoundManager::SOUND::NEXT_PAGE);
 		cursorIdx_ = (cursorIdx_ + menuList_.size() - 1) % menuList_.size();
 	}
 
-	if (ins.IsInputTriggered("Interact"))
+	if (ins.IsInputTriggered("Decide"))
 	{
 		sound.Play(SoundManager::SOUND::RETURN_PAGE);
 		auto selectedName = menuList_[cursorIdx_];
@@ -165,12 +195,20 @@ void PauseScene::UpdateNormal(void)
 
 void PauseScene::DrawNormal(void)
 {
-	DrawExtendGraph(MARGINE_SIZE,
-		MARGINE_SIZE,
-		Application::SCREEN_SIZE_X - MARGINE_SIZE,
-		Application::SCREEN_SIZE_Y - MARGINE_SIZE,
-		backImg_, true);
+	const Application::Size& wSize = Application::GetInstance().GetWindowSize();
+	//白っぽいセロファン
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 168);
+	DrawBox(MARGINE_SIZE, MARGINE_SIZE,
+		wSize.width_ - MARGINE_SIZE, wSize.height_ - MARGINE_SIZE,
+		0xffffff, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
+	//白枠
+	DrawBoxAA(MARGINE_SIZE, MARGINE_SIZE,
+		wSize.width_ - MARGINE_SIZE, wSize.height_ - MARGINE_SIZE,
+		0xffffff, false, 3.0f);
+	DrawString(MARGINE_SIZE + 10, MARGINE_SIZE - 20, L"PauseScene", 0xFFFFFF, true);
+	//メニューリストの描画
 	DrawMenuList();
 }
 
@@ -180,36 +218,57 @@ void PauseScene::DrawMenuList(void)
 	float aspectRatio = static_cast<float>(Application::SCREEN_SIZE_Y) /
 		static_cast<float>(Application::SCREEN_MAX_SIZE_Y);
 	
-	const int line_start_X = (MARGINE_SIZE + 250) * aspectRatio;
+	int lineX = MENU_START_X * aspectRatio;
 
-	int lineY = MENU_START_Y * aspectRatio;
+	const int lineY = MENU_START_Y * aspectRatio;
 
-	auto currentStr = menuList_[cursorIdx_];
-
-	for (int i = 0; i < menuList_.size();++i) 
+	//現在選択している行をずらす幅
+	const int currentLineOffset = 20;
+	//現在選択している行の文字列
+	std::wstring currentStr = menuList_[cursorIdx_];
+	for (auto& row : menuList_)
 	{
-		int lineX = 0;
-
 		//文字列の幅を取得
-		int stringWidth = GetDrawStringWidth(menuList_[i].c_str(), menuList_[i].size());
-
-		//カーソルのX座標を動的に計算
-		int cursor_X = ((Application::SCREEN_SIZE_X / 2 - line_start_X) - (stringWidth));
-
-		if (menuList_[i] == currentStr)
+		int stringWidth = GetDrawStringWidth(row.c_str(), row.size());
+		//int lineX = line_start_X;
+		unsigned int col = 0xFFFFFF;
+		if(row == currentStr)
 		{
-			DrawRotaGraph(cursor_X ,
-				lineY,
-				aspectRatio * 1.0f, 0.0f, menuCursorImg_, true
-			);
-			lineX += SELECT_MENU_MARGINE * aspectRatio;
+			DrawString(lineX , lineY,L"⇒",0xFF0000);
+			col = 0xFF00FF;
+			lineX += currentLineOffset;
 		}
 
-		//DrawRotaGraph(Application::SCREEN_SIZE_X / 2 + lineX * scale,
-		//	(MENU_START_Y * scale) + (MENU_SCALE * size * scale * i),
-		//	scale * size, 0.0f, menuListImg_[i], true
-		//);
-
-		lineY += MENU_SCALE  * aspectRatio;
+		DrawFormatString(lineX + 1, lineY + 1, 0x000000, L"%s", row.c_str());
+		DrawFormatString(lineX, lineY, col, L"%s", row.c_str());
+		lineX += (MENU_LIST_WIDTH + stringWidth) * aspectRatio;
 	}
+	
+
+	//for (int i = 0; i < menuList_.size();++i) 
+	//{
+	//	int lineX = 0;
+
+	//	//文字列の幅を取得
+	//	int stringWidth = GetDrawStringWidth(menuList_[i].c_str(), menuList_[i].size());
+
+	//	//カーソルのX座標を動的に計算
+	//	int cursor_X = ((Application::SCREEN_SIZE_X / 2 - line_start_X) - (stringWidth));
+
+	//	if (menuList_[i] == currentStr)
+	//	{
+	//		//DrawRotaGraph(cursor_X ,
+	//		//	lineY,
+	//		//	aspectRatio * 1.0f, 0.0f, menuCursorImg_, true
+	//		//);
+	//		lineX += SELECT_MENU_MARGINE * aspectRatio;
+	//	}
+
+	//	DrawRotaGraph(Application::SCREEN_SIZE_X / 2 + lineX * scale,
+	//		(MENU_START_Y * scale) + (MENU_SCALE * size * scale * i),
+	//		scale * size, 0.0f, menuListImg_[i], true
+	//	);
+
+	//	lineY += MENU_SCALE  * aspectRatio;
+	//}
 }

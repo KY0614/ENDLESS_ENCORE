@@ -726,7 +726,8 @@ void Enemy::UpdateShotOne(void)
 			if (player_.GetIsParry())
 			{
 				bullet->SetStateReverse();
-				bullet->SetTargetPos(transform_.pos);
+				VECTOR targetPos = VAdd(transform_.pos,VGet(0.0f,80.0f,0.0f));
+				bullet->SetTargetPos(targetPos);
 				continue;
 			}
 		}
@@ -831,7 +832,8 @@ void Enemy::UpdateShotAll(void)
 			if (player_.GetIsParry())
 			{
 				bullet->SetStateReverse();
-				bullet->SetTargetPos(transform_.pos);
+				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, 80.0f, 0.0f));
+				bullet->SetTargetPos(targetPos);
 				continue;
 			}
 		}

@@ -68,7 +68,6 @@ void SceneManager::Init(void)
 	shakeFrame_ = 0;
 	shakeRate_ = 0.0f;
 	screenPos_ = { 0,0 };
-
 	//3D用の設定
 	Init3D();
 
@@ -133,6 +132,7 @@ void SceneManager::Update(void)
 
 	//カメラ更新
 	camera_->Update();
+
 	//UpdateDebugImGui();
 }
 
@@ -181,9 +181,9 @@ void SceneManager::Draw(void)
 	if (shakeFrame_ > 0)
 	{
 		Vector2 pos;
-		int lineH = 3;
-		const int shakePadding = 10;
-		pos.x = (int)(((shakeFrame_ % 3) * shakePadding) * shakeRate_);
+		const int shakeFrameRate = 3;
+		const int shakePadding = 5;
+		pos.x = (int)(((shakeFrame_ % shakeFrameRate) * shakePadding) * shakeRate_);
 		pos.y = 0;
 		DrawGraph(pos.x, 0, mainScreen_, false);
 	}
@@ -422,7 +422,8 @@ void SceneManager::ShakeScreen(void)
 		shakeFrame_--;
 		shakeRate_ *= 0.95f;
 	}
-	else {
+	else 
+	{
 		shakeRate_ = 0.0f;
 	}
 }

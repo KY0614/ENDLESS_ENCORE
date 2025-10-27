@@ -58,6 +58,7 @@ public:
 		FOLLOW,		//追従
 		FREE,		//自由
 		MOUSE,		//マウスで操作
+		PAUSE,		//一時停止
 	};
 
 	Camera(void);
@@ -133,6 +134,7 @@ private:
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawFree(void);
 	void SetBeforeDrawMouse(void);
+	void SetBeforeDrawPause(void);
 
 	float cameraNear_;
 	float cameraFar_;

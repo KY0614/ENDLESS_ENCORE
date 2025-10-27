@@ -131,18 +131,18 @@ void Input::ResetTable()
 		}
 	},
 
-	{"pause",{
+	{"Pause",{
 		{PeripheralType::KEYBOARD,KEY_INPUT_P},
 		{PeripheralType::GAMEPAD,PAD_INPUT_R}}	//STARTƒ{ƒ^ƒ“
 	},
 	};
 
-	inputTable_["CameraShake"] = { {PeripheralType::KEYBOARD,KEY_INPUT_X},
+	inputTable_["Reset"] = { {PeripheralType::KEYBOARD,KEY_INPUT_R},
 							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
-	inputTable_["Reset"] = { {PeripheralType::KEYBOARD,KEY_INPUT_R},
-							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
+	inputTable_["Decide"] = { {PeripheralType::KEYBOARD,KEY_INPUT_SPACE},
+							{PeripheralType::GAMEPAD, PAD_INPUT_B},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
 	inputTable_["Parry"] = { {PeripheralType::KEYBOARD,KEY_INPUT_SPACE},
@@ -176,6 +176,12 @@ void Input::ResetTable()
 	inputTable_["Left"] = { {PeripheralType::KEYBOARD,KEY_INPUT_A},
 							{PeripheralType::GAMEPAD,PAD_INPUT_LEFT},
 							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_LEFT} };
+
+
+	inputTable_["CameraShake"] = { {PeripheralType::KEYBOARD,KEY_INPUT_X},
+		/*{PeripheralType::gamepad, PAD_INPUT_A},*/
+		/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
+
 	
 	inputTable_["CameraUp"] = { {PeripheralType::KEYBOARD,KEY_INPUT_UP},
 					/*{PeripheralType::GAMEPAD,PAD_INPUT_UP},*/
