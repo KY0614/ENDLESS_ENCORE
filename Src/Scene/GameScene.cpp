@@ -36,7 +36,7 @@ void GameScene::Init(void)
 
 	//ƒJƒƒ‰
 	mainCamera->SetFollow(&player_->GetTransform());
-	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+	mainCamera->ChangeMode(Camera::MODE::MOUSE);
 
 
 	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(

@@ -23,21 +23,21 @@ PauseScene::PauseScene(void) :
 	draw_(&PauseScene::DrawProcess)
 {
 	menuList_ = {
-		L"チュートリアル",
-		L"キー設定",
+		L"音量設定",
+		L"操作設定",
 		L"ゲームに戻る",
 		L"タイトルに戻る",
 		L"ゲーム終了"
 	};
 
 	menuFuncTable_ = {
-	{L"チュートリアル",[this]()
+	{L"音量設定",[this]()
 		{
 			std::unique_ptr<ExplainScene> scene = std::make_unique<ExplainScene>();
 			SceneManager::GetInstance().PushScene(std::move(scene));
 		}
 	},
-	{ L"キー設定",[this]()
+	{ L"操作設定",[this]()
 		{
 			std::unique_ptr<KeyConfigScene> scene = std::make_unique<KeyConfigScene>();
 			SceneManager::GetInstance().PushScene(std::move(scene));
@@ -58,7 +58,7 @@ PauseScene::PauseScene(void) :
 	},
 	{ L"ゲーム終了",[this]()
 		{
-			Application::GetInstance().Destroy();
+			Application::GetInstance().EndGame();
 			return;
 		}
 	}
@@ -177,13 +177,12 @@ void PauseScene::DrawNormal(void)
 void PauseScene::DrawMenuList(void)
 {
 	//画面の大きさに合わせて拡大率を変える
-	float scale = static_cast<float>(Application::SCREEN_SIZE_Y) /
+	float aspectRatio = static_cast<float>(Application::SCREEN_SIZE_Y) /
 		static_cast<float>(Application::SCREEN_MAX_SIZE_Y);
-	float size = 0.8f;
+	
+	const int line_start_X = (MARGINE_SIZE + 250) * aspectRatio;
 
-	const int line_start_X = (MARGINE_SIZE + 250) * scale;
-
-	int lineY = MENU_START_Y * scale;
+	int lineY = MENU_START_Y * aspectRatio;
 
 	auto currentStr = menuList_[cursorIdx_];
 
@@ -201,9 +200,9 @@ void PauseScene::DrawMenuList(void)
 		{
 			DrawRotaGraph(cursor_X ,
 				lineY,
-				scale * 1.0f, 0.0f, menuCursorImg_, true
+				aspectRatio * 1.0f, 0.0f, menuCursorImg_, true
 			);
-			lineX += SELECT_MENU_MARGINE * scale;
+			lineX += SELECT_MENU_MARGINE * aspectRatio;
 		}
 
 		//DrawRotaGraph(Application::SCREEN_SIZE_X / 2 + lineX * scale,
@@ -211,6 +210,6 @@ void PauseScene::DrawMenuList(void)
 		//	scale * size, 0.0f, menuListImg_[i], true
 		//);
 
-		lineY += MENU_SCALE * size * scale;
+		lineY += MENU_SCALE  * aspectRatio;
 	}
 }

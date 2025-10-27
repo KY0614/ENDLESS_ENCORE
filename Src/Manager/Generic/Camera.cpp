@@ -1,12 +1,21 @@
 #include <math.h>
 #include <DxLib.h>
+#include <algorithm>
 #include <EffekseerForDXLib.h>
+#include "../../Application.h"
 #include "../../Libs/ImGui/imgui.h"
+#include "../../Common/Vector2.h"
 #include "../../Utility/CommonUtility.h"
 #include "../Generic/InputManager.h"
 #include "../Generic/SceneManager.h"
 #include "../../Object/Common/Transform.h"
 #include "Camera.h"
+
+namespace
+{
+	const float FPS_LIMIT_X_UP_RAD = -80.0f * (DX_PI_F / 180.0f);
+	const float FPS_LIMIT_X_DW_RAD = 70.0f * (DX_PI_F / 180.0f);
+}
 
 Camera::Camera(void)
 {
@@ -16,6 +25,11 @@ Camera::Camera(void)
 	pos_ = CommonUtility::VECTOR_ZERO;
 	targetPos_ = CommonUtility::VECTOR_ZERO;
 	followTransform_ = nullptr;
+	cameraNear_ = 0.0f;
+	cameraFar_ = 0.0f;
+	localF2CPos_ = CommonUtility::VECTOR_ZERO;
+	localF2TPos_ = CommonUtility::VECTOR_ZERO;
+
 }
 
 Camera::~Camera(void)
@@ -27,12 +41,11 @@ void Camera::Init(void)
 	//カメラの初期設定
 	ChangeMode(MODE::FIXED_POINT);
 
+	//クリップ距離の初期設定
 	cameraNear_ = CAMERA_NEAR;
 	cameraFar_ = CAMERA_FAR;
 	localF2CPos_ = LOCAL_F2C_POS;
 	localF2TPos_ = LOCAL_F2T_POS;
-
-
 }
 
 void Camera::Update(void)
@@ -63,6 +76,10 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawFree();
 		break;
 
+	case Camera::MODE::MOUSE:
+		SetBeforeDrawMouse();
+		break;
+
 	default:
 		break;
 	}
@@ -81,22 +98,6 @@ void Camera::SetBeforeDraw(void)
 
 void Camera::Draw(void)
 {
-	switch (mode_)
-	{
-	case Camera::MODE::NONE:
-		break;
-	case Camera::MODE::FIXED_POINT:
-		break;
-	case Camera::MODE::TOP_FIXED:
-		break;
-	case Camera::MODE::FOLLOW:
-		DrawString(0, 0, L"Follow", GetColor(255, 0, 0));
-		break;
-	case Camera::MODE::FREE:
-		break;
-	default:
-		break;
-	}
 }
 
 void Camera::SetFollow(const Transform* follow)
@@ -269,4 +270,29 @@ void Camera::SetBeforeDrawFree(void)
 	ProcessRot();
 
 	ProcessMove();	
+}
+
+void Camera::SetBeforeDrawMouse(void)
+{
+	InputManager& ins = InputManager::GetInstance();
+	//マウスカーソルを非表示にする
+	SetMouseDispFlag(false);
+	Vector2 mousePos = ins.GetMousePos();
+	
+	angles_.y += std::clamp((mousePos.x - Application::SCREEN_SIZE_X / 2 ), -120, 120) * 0.2f / GetFPS();
+	angles_.x += std::clamp((mousePos.y - Application::SCREEN_SIZE_Y / 2), -120, 120) * 0.2f / GetFPS();
+	
+	// マウスの位置を画面中央に戻す
+	SetMousePoint(Application::SCREEN_SIZE_X / 2, Application::SCREEN_SIZE_Y / 2);
+
+	if (angles_.x <= FPS_LIMIT_X_UP_RAD)
+	{
+		angles_.x = FPS_LIMIT_X_UP_RAD;
+	}
+	if (angles_.x >= FPS_LIMIT_X_DW_RAD)
+	{
+		angles_.x = FPS_LIMIT_X_DW_RAD;
+	}
+
+	SyncFollow();
 }

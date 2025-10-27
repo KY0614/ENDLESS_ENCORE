@@ -53,10 +53,11 @@ public:
 	enum class MODE
 	{
 		NONE,
-		FIXED_POINT,
-		TOP_FIXED,
-		FOLLOW,
-		FREE,
+		FIXED_POINT,//固定カメラ
+		TOP_FIXED,	//上部固定
+		FOLLOW,		//追従
+		FREE,		//自由
+		MOUSE,		//マウスで操作
 	};
 
 	Camera(void);
@@ -131,6 +132,7 @@ private:
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawFree(void);
+	void SetBeforeDrawMouse(void);
 
 	float cameraNear_;
 	float cameraFar_;
