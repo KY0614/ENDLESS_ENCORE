@@ -8,6 +8,7 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
+#include "../Object/ItemPrevew.h"
 #include "PauseScene.h"
 #include "GameScene.h"
 
@@ -30,12 +31,17 @@ void GameScene::Init(void)
 	player_ = std::make_unique<Player>();
 	player_->Init();
 
-	//プレイヤー
+	//敵
 	enemy_ = std::make_unique<Enemy>(*player_);
 	enemy_->Init();
 
+	//プレイヤー
+	item_ = std::make_unique<ItemPrevew>();
+	item_->Init();
+
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
+	mainCamera->SetTarget(&enemy_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::MOUSE);
 
 
@@ -78,17 +84,7 @@ void GameScene::UpdateGame(void)
 
 	if (ins.IsInputTriggered("CameraShake"))
 	{
-		shakeFrame_ = 60;
-		shakeRate_ = 1.0f;
-	}
-
-	if (shakeFrame_ > 0) {
-		shakeFrame_--;
-		shakeRate_ *= 0.95f;
-	}
-	else 
-	{
-		shakeRate_ = 0.0f;
+		SceneManager::GetInstance().SetShakeScreen(true);
 	}
 
 #endif // _DEBUG
@@ -121,7 +117,7 @@ void GameScene::DrawGame(void)
 	{
 		player_->DrawVictory();
 	}
-
+	item_->Draw();
 }
 
 void GameScene::DrawDebug(void)

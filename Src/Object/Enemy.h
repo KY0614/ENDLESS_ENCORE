@@ -19,6 +19,7 @@ public:
 		FOLLOW,
 		MOVE,			//
 		ATTACK_NEAR,	//
+		ATTACK_NEAR_CHARGE,	//
 		SHOT_ONE,		//
 		SHOT_ALL,		//
 		DOWN,			//
@@ -29,7 +30,12 @@ public:
 	enum class ANIM_TYPE
 	{
 		IDLE,
-		MOVE,
+		WALK,
+		RUN,
+		ATTACK_NEAR,
+		ATTACK_NEAR_CHARGE,
+		DAMAGE,
+		DOWN,
 		DEATH,
 	};
 
@@ -106,6 +112,7 @@ private:
 
 	//ダウン
 	bool isDown_;			//ダウン中かどうか	
+	int hitCount_;			//ヒット回数(ダウンまでのカウント)
 	float stepDownTime_;	//ダウン中の時間経過
 
 	VECTOR moveDir_;	//移動方向

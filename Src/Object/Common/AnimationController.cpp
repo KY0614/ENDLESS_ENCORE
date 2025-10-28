@@ -105,7 +105,6 @@ void AnimationController::Play(int type, bool isLoop,
 	stepEndLoopStart_ = -1.0f;
 	stepEndLoopEnd_ = -1.0f;
 	switchLoopReverse_ = 1.0f;
-
 }
 
 void AnimationController::Update(void)
@@ -197,7 +196,6 @@ void AnimationController::Update(void)
 	//ModelFrameUtility::SetFrameLocalMatrixPos(modelId_, frmNo, playAnim_.firstPos);
 	ModelFrameUtility::SetFrameAnimAttachLocalMatrixPos(modelId_, playAnim_.attachNo,
 		frmNo, playAnim_.firstPos);
-
 }
 
 void AnimationController::SetEndLoop(float startStep, float endStep, float speed)

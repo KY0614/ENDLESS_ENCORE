@@ -130,10 +130,6 @@ void ResourceManager::InitTitle(void)
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "SkyDome/SkyDome.mv1");
 	resourcesMap_.emplace(SRC::SKY_DOME, std::move(res));
 
-	//Ç®ìX
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/cafe.mv1");
-	resourcesMap_.emplace(SRC::CAFE, std::move(res));
-
 	//â∆ãÔÅFè∞
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/floor.mv1");
 	resourcesMap_.emplace(SRC::FLOOR, std::move(res));
@@ -206,6 +202,10 @@ void ResourceManager::InitGame(void)
 	//è∞
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Floor/floor.mv1");
 	resourcesMap_.emplace(SRC::FLOOR, std::move(res));
+
+	//ÉRÉCÉì
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Coin.mv1");
+	resourcesMap_.emplace(SRC::COIN, std::move(res));
 
 	//ë´âå
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Smoke/Smoke.efkefc");

@@ -89,11 +89,15 @@ public:
 	//追従対象の設定
 	void SetFollow(const Transform* follow);
 
+	//注視対象の設定
+	void SetTarget(const Transform* target);
 
 private:
 
 	//カメラが追従対象とするTransform
 	const Transform* followTransform_;
+	//注視対象とするTransform
+	const Transform* targetTransform_;
 
 	std::weak_ptr<Planet> planet_;
 
@@ -118,6 +122,9 @@ private:
 	//カメラの上方向
 	VECTOR cameraUp_;
 
+	//ロックオンしているかどうか true:ロックオン中
+	bool isLockOn_;
+
 	//カメラを初期位置に戻す
 	void SetDefault(void);
 
@@ -127,6 +134,7 @@ private:
 	//カメラ操作
 	void ProcessRot(void);
 	void ProcessMove(void);
+	void ProcessMouseMove(void);
 
 	//モード別更新ステップ
 	void SetBeforeDrawFixedPoint(void);
@@ -134,7 +142,6 @@ private:
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawFree(void);
 	void SetBeforeDrawMouse(void);
-	void SetBeforeDrawPause(void);
 
 	float cameraNear_;
 	float cameraFar_;

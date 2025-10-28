@@ -32,7 +32,8 @@ public :
 
 	//アニメーション再生
 	void Play(int type, bool isLoop = true, 
-		float startStep = 0.0f, float endStep = -1.0f, bool isStop = false, bool isForce = false);
+		float startStep = 0.0f, float endStep = -1.0f,
+		bool isStop = false,bool isForce = false);
 
 	void Update(void);
 

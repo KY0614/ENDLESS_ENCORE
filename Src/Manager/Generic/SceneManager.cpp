@@ -68,6 +68,7 @@ void SceneManager::Init(void)
 	lightDir_ = LIGHT_DIR;
 
 	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+	//mainScreen_ = MakeScreen(300, 300);
 	shakeFrame_ = 0;
 	shakeRate_ = 0.0f;
 	screenPos_ = { 0,0 };
@@ -174,10 +175,10 @@ void SceneManager::Draw(void)
 	//DrawFormatString(0,400,0Xffffff,L"call : %d", call);
 
 	SetDrawScreen(DX_SCREEN_BACK);
-	//ClearDrawScreen();
 
 	if (shakeFrame_ == 0)
 	{
+		ClearDrawScreen();
 		DrawGraph(0, 0, mainScreen_, false);
 	}
 	if (shakeFrame_ > 0)

@@ -30,6 +30,7 @@ public:
 		ENEMY_BULLET,
 		SKY_DOME,
 
+		COIN,
 
 		//ステージオブジェクト
 		FLOOR,

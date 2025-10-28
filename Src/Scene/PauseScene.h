@@ -27,6 +27,9 @@ private:
 	using MenuDraw_t = std::function<void()>;
 	std::map<std::wstring, MenuDraw_t> menuDrawTable_;
 
+	//ポーズ画面のシーン
+	std::list<std::unique_ptr<SceneBase>> scenes_;
+
 	//関数ポインタ
 	using UpdateFunc_t = void(PauseScene::*)();
 	using DrawFunc_t = void(PauseScene::*)();

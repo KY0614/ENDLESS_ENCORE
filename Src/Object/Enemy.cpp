@@ -22,6 +22,10 @@ namespace
 	static const std::string KEY_ENEMY = "Enemy";
 	static const std::string KEY_IDLE = "Idle";
 	static const std::string KEY_WALK = "Walk";
+	static const std::string KEY_RUN = "Run";
+	static const std::string KEY_ATK_NEAR = "Attack_Neaer";
+	static const std::string KEY_DAMAGE = "Damage";
+	static const std::string KEY_DOWN = "Down";
 	static const std::string KEY_DEATH = "Death";
 
 	const float TIME_ROT = 1.3f;
@@ -51,11 +55,13 @@ namespace
 Enemy::Enemy(Player& player):player_(player)
 {
 	hp_ = 0.0f;
+	maxHp_ = 0.0f;
 	stateStep_ = 0.0f;
 	state_ = STATE::NONE;
 	col_ = 0xff0000;
 	isAttackedNear_ = false;
 	isDown_ = false;
+	hitCount_ = 0;
 	currentAngle_ = 0.0f;               // 初期角度は適当に設定 (atan2で初期化しても良い)
 	stepDownTime_ = 0.0f;
 	// 例: 1秒で 90度（π/2 ラジアン）回転する速度
@@ -108,17 +114,20 @@ void Enemy::Init(void)
 
 void Enemy::Update(void)
 {
+	//死亡判定
 	if(hp_ <= 0.0f)
 	{
+		hitCount_ = 0;
 		bullets_.clear();
 		ChangeState(STATE::DEAD);
 	}
+
 	//更新ステップ
 	stateUpdate_();
 
 	animationController_->Update();
 	transform_.Update();
-	UpdateDebugImGui();
+	//UpdateDebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -265,15 +274,24 @@ void Enemy::InitAnimation(void)
 	const auto& animPath = param[JsonManager::KEY_ANIMATION];
 
 	//アニメーションコントローラーの生成とアニメーションの登録
-	const std::string path = Application::PATH_MODEL + "Player/";
+	const std::string path = Application::PATH_MODEL + "Enemy/";
 	const char* KEY_EMPTY = "";
+	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
-	animationController_->Add((int)ANIM_TYPE::MOVE, path + animPath.value(KEY_WALK, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
+		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value(KEY_RUN, KEY_EMPTY),
+		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::ATTACK_NEAR, path + animPath.value(KEY_ATK_NEAR, KEY_EMPTY),
+		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::DAMAGE, path + animPath.value(KEY_DAMAGE, KEY_EMPTY),
+		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::DOWN, path + animPath.value(KEY_DOWN, KEY_EMPTY),
+		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
@@ -286,10 +304,16 @@ void Enemy::Damage(void)
 
 void Enemy::Move(void)
 {
+
 	if(CheckPlayerDistance() > PLAYER_DISTANCE)
 	{
+		animationController_->Play((int)ANIM_TYPE::WALK);
 		//プレイヤーに近づく
 		FollowPlayer(transform_.pos);
+	}
+	else
+	{
+		animationController_->Play((int)ANIM_TYPE::IDLE);
 	}
 
 	static float stepTime = 0.0f;
@@ -300,7 +324,6 @@ void Enemy::Move(void)
 		stepTime = 0.0f;
 		moveDir_ = CommonUtility::DIR_R;
 	}
-
 
 	//// 1. 角度を更新する
 	////時間経過で角度を変化させます。プレイヤーの周りを右回り（時計回り）で動く。
@@ -365,7 +388,6 @@ void Enemy::FollowPlayer(VECTOR& pos)
 	// posE2P → direction
 	//大きさ √をとる関数 sqrt    float用  sqrtf
 	float size = sqrtf(posE2P.x * posE2P.x + posE2P.z * posE2P.z);
-
 
 	//敵の移動処理
 	if (size < MOVE_SPEED)
@@ -563,6 +585,9 @@ void Enemy::ChangeStateShotAll(void)
 
 void Enemy::ChangeStateDown(void)
 {
+	animationController_->Play((int)ANIM_TYPE::DOWN, true, 0.0f,9.0f);
+	animationController_->SetEndLoop(1.0f, 9.0f, 10.0f);
+	isDown_ = true;
 	stateUpdate_ = std::bind(&Enemy::UpdateDown, this);
 }
 
@@ -623,6 +648,7 @@ void Enemy::UpdateMove(void)
 	//すごく離れていたら追従状態に遷移
 	if(CheckPlayerDistance() > FOLLOW_DISTANCE)
 	{
+		animationController_->Play((int)ANIM_TYPE::RUN);
 		ChangeState(STATE::FOLLOW);
 	}
 }
@@ -642,14 +668,14 @@ void Enemy::UpdateAttackNear(void)
 
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > ATTACK_TIME)
+	if (animationController_->IsEnd())
 	{
 		stateStep_ = 0.0f;
 		isAttackedNear_ = false;
-		ChangeState(STATE::MOVE);
+		ChangeStateMove();
 		return;
 	}
-
+	animationController_->Play((int)ANIM_TYPE::ATTACK_NEAR,false);
 	//パリィ判定
 	if (CommonUtility::IsHitSpheres(sphereNear_->GetPos(),sphereNear_->GetRadius(),
 		player_.GetSphere().GetPos(),player_.GetSphere().GetRadius()))
@@ -678,7 +704,7 @@ void Enemy::UpdateAttackNear(void)
 
 void Enemy::UpdateShotOne(void)
 {
-	static int damageCount = 0;
+	animationController_->Play((int)ANIM_TYPE::IDLE);
 	//回転処理
 	RotateToPlayer();
 
@@ -687,8 +713,8 @@ void Enemy::UpdateShotOne(void)
 	if (stateStep_ > ATTACK_FAR_TIME)
 	{
 		stateStep_ = 0.0f;
+		hitCount_ = 0;
 		ChangeState(STATE::MOVE);
-
 		return;
 	}
 	//弾を順々に準備状態にする
@@ -759,16 +785,16 @@ void Enemy::UpdateShotOne(void)
 			//ダメージ処理(当たった弾は破棄)
 			Damage();
 			bullet->Destroy();
-			damageCount++;
+			hitCount_++;
 			continue;
 		}
 	}
 
 	//全弾命中でダウン状態へ
-	if (damageCount >= static_cast<int>(bullets_.size()))
+	if (hitCount_ >= static_cast<int>(bullets_.size()))
 	{
 		ChangeState(STATE::DOWN);
-		damageCount = 0;
+		hitCount_ = 0;
 		return;
 	}
 	
@@ -777,24 +803,24 @@ void Enemy::UpdateShotOne(void)
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
-		damageCount = 0;
+		hitCount_ = 0;
 		return;
 	}
 }
 
 void Enemy::UpdateShotAll(void)
 {
-	static int damageCount = 0;
+	animationController_->Play((int)ANIM_TYPE::IDLE);
 	//回転処理
 	RotateToPlayer();
 
-	//
+	//遠距離攻撃の状態
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > ATTACK_FAR_TIME)
 	{
 		stateStep_ = 0.0f;
+		hitCount_ = 0;
 		ChangeState(STATE::MOVE);
-
 		return;
 	}
 	//弾を順々に準備状態にする
@@ -865,16 +891,16 @@ void Enemy::UpdateShotAll(void)
 			//ダメージ処理(当たった弾は破棄)
 			Damage();
 			bullet->Destroy();
-			damageCount++;
+			hitCount_++;
 			continue;
 		}
 	}
 
 	//全弾命中でダウン状態へ
-	if (damageCount >= static_cast<int>(bullets_.size()))
+	if (hitCount_ >= static_cast<int>(bullets_.size()))
 	{
 		ChangeState(STATE::DOWN);
-		damageCount = 0;
+		hitCount_ = 0;
 		return;
 	}
 
@@ -883,22 +909,26 @@ void Enemy::UpdateShotAll(void)
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
-		damageCount = 0;
+		hitCount_ = 0;
 		return;
 	}
 }
 
 void Enemy::UpdateDown(void)
 {
-	if(stepDownTime_ > DOWN_TIME)
+	if(stepDownTime_ > DOWN_TIME && isDown_)
+	{
+		isDown_ = false;
+		animationController_->Play((int)ANIM_TYPE::DOWN, false,9.0f,-1.0f, false, true);
+	}
+	if (animationController_->IsEnd())
 	{
 		stepDownTime_ = 0.0f;
-		isDown_ = false;
 		ChangeState(STATE::MOVE);
 		return;
 	}
+
 	stepDownTime_ += SceneManager::GetInstance().GetDeltaTime();
-	isDown_ = true;
 }
 
 void Enemy::UpdateDead(void)

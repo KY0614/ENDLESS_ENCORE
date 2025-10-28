@@ -172,7 +172,7 @@ void Player::DrawVictory(void)
 	DrawResultString(L"VICTORY",0xffff00);
 }
 
-void Player::DrawResultString(std::wstring str, int col)
+void Player::DrawResultString(const std::wstring& str, int col)
 {
 	static int interval = 0;
 	//透明度の増加値
@@ -230,7 +230,7 @@ bool Player::IsPlay(void) const
 
 void Player::Init3DModel(void)
 {
-	auto& jsonM = JsonManager::GetInstance();
+	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
 	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
 
@@ -274,12 +274,11 @@ void Player::InitCollider(void)
 	//sphere_->SetRadius(40.0f);
 
 	col_ = 0x000000;
-
 }
 
 void Player::InitAnimation(void)
 {
-	auto& jsonM = JsonManager::GetInstance();
+	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
 	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
 	const auto& param = data[KEY_PLAYER];
@@ -605,7 +604,6 @@ void Player::ProcessDodge(void)
 		isDodge_ = false;
 		//速度減衰開始
 		isDecelerate_ = true;
-		//animationController_->Play((int)ANIM_TYPE::DASH,true,4.0f,-1.0f,false,true);
 		animationController_->Play((int)ANIM_TYPE::DODGE,true,4.0f,-1.0f,false,true);
 	}
 	if (isDecelerate_)

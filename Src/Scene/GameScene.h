@@ -5,6 +5,7 @@
 
 class Player;
 class Enemy;
+class ItemPrevew;
 
 class GameScene : public SceneBase
 {
@@ -30,6 +31,7 @@ private:
 
 	std::unique_ptr<Player> player_;
 	std::unique_ptr<Enemy> enemy_;
+	std::unique_ptr<ItemPrevew> item_;
 
 	int RT_;
 

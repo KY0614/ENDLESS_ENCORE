@@ -66,7 +66,7 @@ public:
 	void DrawDead(void);
 	void DrawVictory(void);
 
-	void DrawResultString(std::wstring str,int col);
+	void DrawResultString(const std::wstring& str,int col);
 
 	/// <summary>
 	/// 衝突判定に用いられるコライダーを追加する

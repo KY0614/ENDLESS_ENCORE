@@ -25,11 +25,12 @@ Camera::Camera(void)
 	pos_ = CommonUtility::VECTOR_ZERO;
 	targetPos_ = CommonUtility::VECTOR_ZERO;
 	followTransform_ = nullptr;
+	targetTransform_ = nullptr;
 	cameraNear_ = 0.0f;
 	cameraFar_ = 0.0f;
 	localF2CPos_ = CommonUtility::VECTOR_ZERO;
 	localF2TPos_ = CommonUtility::VECTOR_ZERO;
-
+	isLockOn_ = false;
 }
 
 Camera::~Camera(void)
@@ -103,6 +104,11 @@ void Camera::Draw(void)
 void Camera::SetFollow(const Transform* follow)
 {
 	followTransform_ = follow;
+}
+
+void Camera::SetTarget(const Transform* target)
+{
+	targetTransform_ = target;
 }
 
 VECTOR Camera::GetPos(void) const
@@ -245,6 +251,29 @@ void Camera::ProcessMove(void)
 	if (ins.IsInputPressed("CameraDescent"))pos_.y -= 5.0f;	targetPos_.y -= 5.0f;
 }
 
+void Camera::ProcessMouseMove(void)
+{
+	InputManager& ins = InputManager::GetInstance();
+	//マウスカーソルを非表示にする
+	SetMouseDispFlag(false);
+	Vector2 mousePos = ins.GetMousePos();
+
+	angles_.y += std::clamp((mousePos.x - Application::SCREEN_SIZE_X / 2), -120, 120) * 0.2f / GetFPS();
+	angles_.x += std::clamp((mousePos.y - Application::SCREEN_SIZE_Y / 2), -120, 120) * 0.2f / GetFPS();
+
+	// マウスの位置を画面中央に戻す
+	SetMousePoint(Application::SCREEN_SIZE_X / 2, Application::SCREEN_SIZE_Y / 2);
+
+	if (angles_.x <= FPS_LIMIT_X_UP_RAD)
+	{
+		angles_.x = FPS_LIMIT_X_UP_RAD;
+	}
+	if (angles_.x >= FPS_LIMIT_X_DW_RAD)
+	{
+		angles_.x = FPS_LIMIT_X_DW_RAD;
+	}
+}
+
 void Camera::SetBeforeDrawFixedPoint(void)
 {
 	//なにもしない
@@ -285,24 +314,21 @@ void Camera::SetBeforeDrawMouse(void)
 	else isStop = false;
 
 	if (isStop)return;
-	//マウスカーソルを非表示にする
-	SetMouseDispFlag(false);
-	Vector2 mousePos = ins.GetMousePos();
-	
-	angles_.y += std::clamp((mousePos.x - Application::SCREEN_SIZE_X / 2 ), -120, 120) * 0.2f / GetFPS();
-	angles_.x += std::clamp((mousePos.y - Application::SCREEN_SIZE_Y / 2), -120, 120) * 0.2f / GetFPS();
-	
-	// マウスの位置を画面中央に戻す
-	SetMousePoint(Application::SCREEN_SIZE_X / 2, Application::SCREEN_SIZE_Y / 2);
 
-	if (angles_.x <= FPS_LIMIT_X_UP_RAD)
+	if (ins.IsClickMouseLeft())
 	{
-		angles_.x = FPS_LIMIT_X_UP_RAD;
+		isLockOn_ = !isLockOn_;
 	}
-	if (angles_.x >= FPS_LIMIT_X_DW_RAD)
+	if (isLockOn_ && targetTransform_ != nullptr)
 	{
-		angles_.x = FPS_LIMIT_X_DW_RAD;
+		targetPos_ = targetTransform_->pos;
+		VECTOR lookDir = VSub(targetPos_, pos_);
+		angles_.y = atan2f(lookDir.x, lookDir.z); // Y軸回転 (方位角)
+		angles_.x = -atan2f(lookDir.y, VSize(VGet(lookDir.x, 0, lookDir.z))); // X軸回転 (仰角)
 	}
 
+	//マウス操作
+	ProcessMouseMove();
+	//追従
 	SyncFollow();
 }
