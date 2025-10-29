@@ -5,6 +5,7 @@
 #include "../Utility/CommonUtility.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Common/DebugDrawFormat.h"
+#include "../Common/FpsController.h"
 #include "../Common/Easing.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"

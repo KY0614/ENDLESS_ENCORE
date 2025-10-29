@@ -184,7 +184,7 @@ void ResourceManager::InitGame(void)
 	std::unique_ptr<Resource> res;
 
 	//“G
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician.mv1");
 	resourcesMap_.emplace(SRC::ENEMY, std::move(res));
 
 	//“G‚Ì’e

@@ -82,6 +82,9 @@ public:
 	//XŽ²‰ñ“]
 	static VECTOR RotYZPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad);
 
+	//ZŽ²‰ñ“]
+	static VECTOR RotXYPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad);
+
 	//ƒxƒNƒgƒ‹‚Ì’·‚³
 	static double Magnitude(const Vector2& v);
 	static double Magnitude(const VECTOR& v);

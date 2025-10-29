@@ -27,8 +27,8 @@ namespace
 	static const std::string KEY_DAMAGE = "Damage";
 	static const std::string KEY_DOWN = "Down";
 	static const std::string KEY_DEATH = "Death";
-
-	const float TIME_ROT = 1.3f;
+	//回転にかける時間
+	const float TIME_ROT = 0.3f;
 	//敵の基本パラメータ
 	const float HP_MAX = 100.0f;	//最大HP	
 	const float MOVE_SPEED = 13.0f;	//移動速度
@@ -86,19 +86,6 @@ Enemy::~Enemy(void)
 
 void Enemy::Init(void)
 {
-	//モデルの基本設定
-	//transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-	//	ResourceManager::SRC::PLAYER));
-	//MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
-	//	175.0f/255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
-	//const float scl = 1.0f;
-	//transform_.scl = { scl ,scl ,scl };
-	//transform_.pos = { -60.0f, 0.0f, 250.0f };
-	//transform_.quaRot = Quaternion();
-	//transform_.quaRotLocal =
-	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
-	//transform_.Update();
-
 	//3Dモデルの初期化
 	Init3DModel();
 
@@ -192,8 +179,7 @@ void Enemy::Draw(void)
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
 	// 現在HP（赤）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(255, 0, 0), TRUE);
-
-
+	
 #endif // _DEBUG
 
 }
@@ -228,7 +214,7 @@ void Enemy::Init3DModel(void)
 
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-		ResourceManager::SRC::PLAYER));
+		ResourceManager::SRC::ENEMY));
 	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
 		175.0f / 255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
 	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
@@ -304,7 +290,6 @@ void Enemy::Damage(void)
 
 void Enemy::Move(void)
 {
-
 	if(CheckPlayerDistance() > PLAYER_DISTANCE)
 	{
 		animationController_->Play((int)ANIM_TYPE::WALK);
@@ -381,13 +366,13 @@ void Enemy::FollowPlayer(VECTOR& pos)
 
 	//敵とプレイヤーの位置ベクトルを作成
 	//プレイヤーの座標から敵の座標を引く
-	VECTOR posE2P;
-	posE2P = VSub(playerPos, pos);
+	VECTOR lookAt;
+	lookAt = VSub(playerPos, transform_.pos);
 
 	//位置ベクトルを正規化して方向ベクトルを作る
 	// posE2P → direction
 	//大きさ √をとる関数 sqrt    float用  sqrtf
-	float size = sqrtf(posE2P.x * posE2P.x + posE2P.z * posE2P.z);
+	float size = sqrtf(lookAt.x * lookAt.x + lookAt.z * lookAt.z);
 
 	//敵の移動処理
 	if (size < MOVE_SPEED)
@@ -402,11 +387,11 @@ void Enemy::FollowPlayer(VECTOR& pos)
 	{
 
 		//正規化　位置ベクトルを大きさで割る
-		VECTOR direction = { posE2P.x / size, posE2P.y / size,posE2P.z / size };
+		VECTOR dirNorm = { lookAt.x / size, lookAt.y / size,lookAt.z / size };
 
 		//位置ベクトルを使って敵を移動
-		pos.x += static_cast<float>(direction.x * MOVE_SPEED);
-		pos.z += static_cast<float>(direction.z * MOVE_SPEED);
+		pos.x += static_cast<float>(dirNorm.x * MOVE_SPEED);
+		pos.z += static_cast<float>(dirNorm.z * MOVE_SPEED);
 
 		//向き画像を決める
 		//水平か鉛直を選択する
@@ -414,10 +399,10 @@ void Enemy::FollowPlayer(VECTOR& pos)
 
 		VECTOR dir = CommonUtility::VECTOR_ZERO;
 
-		if (abs(direction.x) < abs(direction.y))
+		if (abs(dirNorm.x) < abs(dirNorm.y))
 		{
 			//鉛直の向き(UP or DOWN)
-			if (direction.y < 0.0F)
+			if (dirNorm.y < 0.0F)
 			{
 				dir = CommonUtility::DIR_F;
 			}
@@ -429,7 +414,7 @@ void Enemy::FollowPlayer(VECTOR& pos)
 		else
 		{
 			//水平の向き(RIHGT or LEFT)
-			if (direction.x < 0.0F)
+			if (dirNorm.x < 0.0F)
 			{
 				dir = CommonUtility::DIR_L;
 			}
@@ -439,9 +424,8 @@ void Enemy::FollowPlayer(VECTOR& pos)
 			}
 		}
 
-		VECTOR targetlPos = { playerPos.x,playerPos.y,playerPos.z };
 		//敵からプレイヤーへの位置ベクトルを作成
-		float angle = atan2(posE2P.x, posE2P.z);
+		float angle = atan2(lookAt.x, lookAt.z);
 		float angleDegrees = CommonUtility::Rad2DegF(angle);
 		SetGoalRotate(angle);
 	}
@@ -467,23 +451,41 @@ void Enemy::CreateBullet(const int createNum)
 	}
 
 	//弾の初期位置を調整
-	VECTOR localPos = { -80.0f, 185.0f, 0.0f };
-	int bulletNum = 0;
-	//敵の回転に合わせて弾の位置を回転させる
-	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[bulletNum]->SetLocalPos(localPos);
+	//VECTOR localPos = { -80.0f, 185.0f, 0.0f };
+	//int bulletNum = 0;
+	////敵の回転に合わせて弾の位置を回転させる
+	//localPos = transform_.quaRot.PosAxis(localPos);
+	//bullets_[bulletNum]->SetLocalPos(localPos);
 
-	localPos = { 80.0f, 185.0f, 0.0f };
-	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[++bulletNum]->SetLocalPos(localPos);
+	//localPos = { 80.0f, 185.0f, 0.0f };
+	//localPos = transform_.quaRot.PosAxis(localPos);
+	//bullets_[++bulletNum]->SetLocalPos(localPos);
 
-	localPos = { -30.0f, 230.0f, 0.0f };
-	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[++bulletNum]->SetLocalPos(localPos);
+	//localPos = { -30.0f, 230.0f, 0.0f };
+	//localPos = transform_.quaRot.PosAxis(localPos);
+	//bullets_[++bulletNum]->SetLocalPos(localPos);
 
-	localPos = { 30.0f, 230.0f, 0.0f };
-	localPos = transform_.quaRot.PosAxis(localPos);
-	bullets_[++bulletNum]->SetLocalPos(localPos);
+	//localPos = { 30.0f, 230.0f, 0.0f };
+	//localPos = transform_.quaRot.PosAxis(localPos);
+	//bullets_[++bulletNum]->SetLocalPos(localPos);
+
+	VECTOR headPos = capsule_->GetPosTop();
+	const float leftOffset = -40.0f;
+	VECTOR startPos = VGet(-leftOffset, 0.0f, 0.0f);
+	
+	for (int i = 0; i < createNum; ++i)
+	{
+		//座標を回転させる
+		startPos = CommonUtility::RotXYPos(
+			headPos, startPos, CommonUtility::Deg2RadF(30.0f * i));
+		//座標設定
+		bullets_[i]->SetLocalPos(startPos);
+
+		//敵の回転に合わせて弾の位置を回転させる
+		//startPos = transform_.quaRot.PosAxis(startPos);
+		//bullets_[i]->SetLocalPos(startPos);
+	}
+
 	bullets_.resize(createNum);
 }
 
@@ -521,12 +523,16 @@ void Enemy::Rotate(void)
 
 void Enemy::RotateToPlayer(void)
 {
-	//敵からターゲットへの位置ベクトルを作成
-	VECTOR posE2T = VSub(player_.GetTransform().pos, transform_.pos);
-
-	//atan2 で角度を計算
-	float angle = atan2(posE2T.x, posE2T.z);
+	//プレイヤーの座標から敵の座標を引く
+	VECTOR lookAt;
+	lookAt = VSub(player_.GetTransform().pos, transform_.pos);
+	//敵からプレイヤーへの位置ベクトルを作成
+	float angle = atan2(lookAt.x, lookAt.z);
+	float angleDegrees = CommonUtility::Rad2DegF(angle);
 	SetGoalRotate(angle);
+
+	//回転処理
+	Rotate();
 }
 
 bool Enemy::CheckBulletReady(void)
@@ -642,8 +648,7 @@ void Enemy::UpdateMove(void)
 	//移動処理
 	Move();
 
-	//回転処理
-	Rotate();
+	RotateToPlayer();
 
 	//すごく離れていたら追従状態に遷移
 	if(CheckPlayerDistance() > FOLLOW_DISTANCE)

@@ -168,6 +168,10 @@ private:
 	/// <param name=""></param>
 	void FollowPlayer(VECTOR& pos);
 
+	/// <summary>
+	/// ’e‚Ì¶¬
+	/// </summary>
+	/// <param name="createNum">¶¬‚·‚é”</param>
 	void CreateBullet(const int createNum);
 
 	//‰ñ“]--------------------------------------------------------
@@ -175,7 +179,7 @@ private:
 	/// <summary>
 	/// –Ú•W‰ñ“]Šp“x‚Ìİ’è
 	/// </summary>
-	/// <param name="rotRad"></param>
+	/// <param name="rotRad">–Ú•W‰ñ“]Šp“x</param>
 	void SetGoalRotate(double rotRad);
 
 	/// <summary>
@@ -183,6 +187,10 @@ private:
 	/// </summary>
 	void Rotate(void);
 
+	/// <summary>
+	/// ƒvƒŒƒCƒ„[‚Ì•ûŒü‚Ö‰ñ“]‚·‚éˆ—
+	/// </summary>
+	/// <param name=""></param>
 	void RotateToPlayer(void);
 
 	//’e--------------------------------------------------------

@@ -315,6 +315,13 @@ VECTOR CommonUtility::RotYZPos(const VECTOR& centerPos, const VECTOR& radiusPos,
     return VGet(centerPos.x, radiusPos.y + y, centerPos.z + z);
 }
 
+VECTOR CommonUtility::RotXYPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad)
+{
+    float x = ((radiusPos.x - centerPos.x) * cosf(rad)) - ((radiusPos.y - centerPos.y) * sinf(rad));
+    float y = ((radiusPos.x - centerPos.x) * sinf(rad)) + ((radiusPos.y - centerPos.y) * cosf(rad));
+    return VGet(centerPos.x + x, radiusPos.y + y, centerPos.z);
+}
+
 double CommonUtility::Magnitude(const Vector2& v)
 {
     return sqrt((v.x * v.x) + (v.y * v.y));
