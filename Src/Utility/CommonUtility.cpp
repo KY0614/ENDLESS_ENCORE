@@ -319,7 +319,7 @@ VECTOR CommonUtility::RotXYPos(const VECTOR& centerPos, const VECTOR& radiusPos,
 {
     float x = ((radiusPos.x - centerPos.x) * cosf(rad)) - ((radiusPos.y - centerPos.y) * sinf(rad));
     float y = ((radiusPos.x - centerPos.x) * sinf(rad)) + ((radiusPos.y - centerPos.y) * cosf(rad));
-    return VGet(centerPos.x + x, radiusPos.y + y, centerPos.z);
+    return VGet(centerPos.x + x, centerPos.y + y, radiusPos.z);
 }
 
 double CommonUtility::Magnitude(const Vector2& v)

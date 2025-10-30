@@ -179,7 +179,7 @@ void Enemy::Draw(void)
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
 	// 現在HP（赤）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(255, 0, 0), TRUE);
-	
+	capsule_->Draw();
 #endif // _DEBUG
 
 }
@@ -236,9 +236,9 @@ void Enemy::InitCollider(void)
 {
 	//カプセルコライダ
 	capsule_ = std::make_unique<Capsule>(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
+	capsule_->SetLocalPosTop({ 0.0f, 140.0f, 0.0f });
 	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
-	capsule_->SetRadius(20.0f);
+	capsule_->SetRadius(30.0f);
 
 	//近接攻撃用の球体コライダ
 	sphereNear_ = std::make_unique<Sphere>(transform_);
@@ -470,20 +470,21 @@ void Enemy::CreateBullet(const int createNum)
 	//bullets_[++bulletNum]->SetLocalPos(localPos);
 
 	VECTOR headPos = capsule_->GetPosTop();
-	const float leftOffset = -40.0f;
-	VECTOR startPos = VGet(-leftOffset, 0.0f, 0.0f);
-	
+	const float radius = 80.0f;
+	//VECTOR startPos = VGet(-leftOffset, 0.0f, 0.0f);
+	VECTOR startPos = VAdd(headPos,VGet(-radius, 0.0f, 0.0f));
+	float angleStepDeg = 360.0f / createNum;
 	for (int i = 0; i < createNum; ++i)
 	{
-		//座標を回転させる
-		startPos = CommonUtility::RotXYPos(
-			headPos, startPos, CommonUtility::Deg2RadF(30.0f * i));
-		//座標設定
-		bullets_[i]->SetLocalPos(startPos);
-
 		//敵の回転に合わせて弾の位置を回転させる
 		//startPos = transform_.quaRot.PosAxis(startPos);
-		//bullets_[i]->SetLocalPos(startPos);
+		float currentAngleDeg = angleStepDeg * i;
+	
+		//座標を回転させる
+		startPos = CommonUtility::RotXYPos(
+			headPos, startPos, CommonUtility::Deg2RadF(currentAngleDeg));
+		//startPos = transform_.quaRot.PosAxis(startPos);
+		bullets_[i]->SetLocalPos(startPos);
 	}
 
 	bullets_.resize(createNum);
