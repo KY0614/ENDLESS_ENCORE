@@ -19,9 +19,9 @@ public:
 		FOLLOW,
 		MOVE,			//
 		ATTACK_NEAR,	//
-		ATTACK_NEAR_CHARGE,	//
 		SHOT_ONE,		//
 		SHOT_ALL,		//
+		ATTACK_CHARGE,	//
 		DOWN,			//
 		DEAD,			//
 	};
@@ -253,6 +253,7 @@ private:
 	void UpdateAttackNear(void);
 	void UpdateShotOne(void);
 	void UpdateShotAll(void);
+	void UpdateChargeAttack(void);
 	void UpdateDown(void);
 	void UpdateDead(void);
 

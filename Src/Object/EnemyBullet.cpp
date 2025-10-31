@@ -27,7 +27,7 @@ void EnemyBullet::Init(void)
 	transform_.pos = parentTran_.pos;
 	transform_.quaRot = parentTran_.quaRot;
 	transform_.quaRotLocal =
-		Quaternion::Euler({ CommonUtility::Deg2RadF(-90.0f), CommonUtility::Deg2RadF(180.0f), 0.0f });
+		Quaternion::Euler({ CommonUtility::Deg2RadF(-90.0f),0.0f, 0.0f });
 	transform_.Update();
 
 	//当たり判定用の球を生成
@@ -41,10 +41,12 @@ void EnemyBullet::Update(void)
 	if (!isAlive_)return;
 	//モデル情報の更新
 	transform_.Update();
+	//発射もしくは反射状態ではない場合は回転の同期を行う
 	if (GetState() == STATE::NONE ||
 		GetState() == STATE::READY)
 	{
-		Rotate();
+		//同期
+		SyncParentRotate();
 	}
 
 	//発射状態でなければ移動処理を行わない
@@ -62,7 +64,7 @@ void EnemyBullet::Draw(void)
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 	//当たり判定用の球の描画
-    sphere_->Draw();
+    sphere_->Draw(); 
 
 #ifdef _DEBUG
 
@@ -130,12 +132,14 @@ void EnemyBullet::Move(void)
 		VAdd(transform_.pos, VScale(downward, GRAVITY_POW));
 }
 
-void EnemyBullet::Rotate(void)
+void EnemyBullet::SyncParentRotate(void)
 {
-	VECTOR followPos = parentTran_.pos;
-	Quaternion followRot = parentTran_.quaRot;
-	VECTOR localPos = VSub(transform_.pos, followPos);
-	VECTOR relativePos = followRot.PosAxis(localPos_);
-
+	VECTOR parentPos = parentTran_.pos;
+	parentPos.y = 140.0f;
+	VECTOR localPos = VSub(transform_.pos, parentPos);
+	//親の回転を考慮したローカル座標を計算
+	VECTOR relativePos = parentTran_.quaRot.PosAxis(localPos);
+	//親の位置+ローカル座標
 	transform_.pos = VAdd(parentTran_.pos,relativePos);
+	transform_.quaRot = parentTran_.quaRot;
 }

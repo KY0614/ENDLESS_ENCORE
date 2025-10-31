@@ -285,6 +285,16 @@ void Camera::SetBeforeDrawTopFixed(void)
 
 void Camera::SetBeforeDrawFollow(void)
 {
+	static bool isStop = false;
+	if (SceneManager::GetInstance().GetSceneID() != SceneManager::SCENE_ID::GAME)
+	{
+		isStop = true;
+		SetMouseDispFlag(true);
+	}
+	else isStop = false;
+
+	if (isStop)return;
+
 	//ƒJƒƒ‰‘€ì
 	ProcessRot();
 

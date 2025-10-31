@@ -28,7 +28,7 @@ namespace
 	static const std::string KEY_DOWN = "Down";
 	static const std::string KEY_DEATH = "Death";
 	//回転にかける時間
-	const float TIME_ROT = 0.3f;
+	const float TIME_ROT = 0.1f;
 	//敵の基本パラメータ
 	const float HP_MAX = 100.0f;	//最大HP	
 	const float MOVE_SPEED = 13.0f;	//移動速度
@@ -130,6 +130,19 @@ void Enemy::Draw(void)
 	}
 
 #ifdef _DEBUG
+	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
+	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
+	VECTOR right = VScale(transform_.GetRight(), 120.0f);
+	forward.y += 150.0f;
+	right.y += 150.0f;
+	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
+	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+	
+	DrawSphere3D(VAdd(transform_.pos, right), 10.0f, 16, 0xFFFFFF, 0xFFFFFF, true);
+	if (!bullets_.empty()) {
+		DrawFormatString(0, 200, 0xffffff, L"E X: %.2f Y: %.2f Z: %.2f",
+			bullets_[0]->GetTransform().pos.x, bullets_[0]->GetTransform().pos.y, bullets_[0]->GetTransform().pos.z);
+	}
 	switch (state_)
 	{
 	case Enemy::STATE::NONE:
@@ -160,11 +173,6 @@ void Enemy::Draw(void)
 	}
 	DrawFormatString(0, 160, 0xffffff, L"E HP : %.2f", hp_);
 
-	//for (int i = 0; i < FAR_SPHERE_NUM; i++)
-	//{
-	//	spheresFar_[i]->Draw(0x0000ff);
-	//}
-
 	if(!isAttackedNear_)col_= 0x00ff00;
 	else col_ = 0xff0000;
 	sphereNear_->Draw(col_);
@@ -179,7 +187,7 @@ void Enemy::Draw(void)
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
 	// 現在HP（赤）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(255, 0, 0), TRUE);
-	capsule_->Draw();
+
 #endif // _DEBUG
 
 }
@@ -222,7 +230,7 @@ void Enemy::Init3DModel(void)
 	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	transform_.quaRot = Quaternion();
 	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
-	transform_.quaRotLocal =
+	transform_.quaRotLocal = 
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 
@@ -242,7 +250,7 @@ void Enemy::InitCollider(void)
 
 	//近接攻撃用の球体コライダ
 	sphereNear_ = std::make_unique<Sphere>(transform_);
-	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
+	sphereNear_->SetLocalPos({ 0.0f, 80.0f, -50.0f });
 	sphereNear_->SetRadius(30.0f);
 
 	col_ = 0x000000;
@@ -468,9 +476,8 @@ void Enemy::RotateToPlayer(void)
 	//プレイヤーの座標から敵の座標を引く
 	VECTOR lookAt;
 	lookAt = VSub(player_.GetTransform().pos, transform_.pos);
-	//敵からプレイヤーへの位置ベクトルを作成
+	//atan2 で角度を計算
 	float angle = atan2(lookAt.x, lookAt.z);
-	float angleDegrees = CommonUtility::Rad2DegF(angle);
 	SetGoalRotate(angle);
 
 	//回転処理
@@ -498,24 +505,28 @@ void Enemy::CreateBullet(const int createNum)
 	}
 
 	VECTOR headPos = capsule_->GetPosTop();
-	const float radius = 100.0f;
-	VECTOR localPos = { -radius, 0.0f, 0.0f };
-	VECTOR startPos = VAdd(headPos, localPos);
+	//敵から弾座標の距離
+	const float distance = 120.0f;
+	//敵から見て右側の座標を計算
+	VECTOR rightPos = VScale(transform_.GetRight(), distance);
+	rightPos.y = headPos.y;		//高さを敵の頭の高さに合わせる
+	//最初の弾は右側に配置(敵から見て)
+	rightPos = VAdd(transform_.pos, rightPos);
+	bullets_[0]->SetPos(rightPos);
+
+	//他の弾の座標を設定
 	const float angleStepDeg = 45.0f;
-	bullets_[0]->SetPos(startPos);
 	for (int i = 1; i < createNum; ++i)
 	{
-		//敵の回転に合わせて弾の位置を回転させる
-		float currentAngleDeg = angleStepDeg;
+		//１つ前の弾の座標を取得
 		VECTOR prevPos = bullets_[i - 1]->GetTransform().pos;
-		//座標を回転させる
-		startPos = CommonUtility::RotXYPos(
-			headPos, prevPos, CommonUtility::Deg2RadF(-currentAngleDeg));
+		//座標を回転させる(敵の頭座標を中心に前の弾から一定角度回転)
+		VECTOR rotPos = CommonUtility::RotXYPos(
+			headPos, prevPos, CommonUtility::Deg2RadF(-angleStepDeg));
 
-		//posAxis = transform_.quaRot.PosAxis(startPos);
-		bullets_[i]->SetPos(startPos);
+		bullets_[i]->SetPos(rotPos);
+
 	}
-	SyncBulletPosAxis();
 	bullets_.resize(createNum);
 }
 
@@ -723,6 +734,11 @@ void Enemy::UpdateShotOne(void)
 		return;
 	}
 
+	for (auto& bullet : bullets_)
+	{
+		bullet->Update();
+	}
+
 	//弾を順々に準備状態にする
 	const float bulletInterval = 0.7f;
 	for(auto& bullet : bullets_)
@@ -734,7 +750,6 @@ void Enemy::UpdateShotOne(void)
 			stateStep_ = 0.0f;
 		}
 	}
-
 	//弾が全部準備できたらプレイヤーに向けて発射する
 	for (const auto& bullet : bullets_)
 	{
@@ -747,7 +762,6 @@ void Enemy::UpdateShotOne(void)
 			stateStep_ = 0.0f;
 		}
 		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
-		bullet->Update();
 
 		//パリィ判定
 		if (CommonUtility::IsHitSpheres(
@@ -921,6 +935,10 @@ void Enemy::UpdateShotAll(void)
 		hitCount_ = 0;
 		return;
 	}
+}
+
+void Enemy::UpdateChargeAttack(void)
+{
 }
 
 void Enemy::UpdateDown(void)

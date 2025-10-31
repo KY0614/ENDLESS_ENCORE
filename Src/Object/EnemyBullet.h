@@ -54,6 +54,8 @@ public:
 	/// <returns></returns>
 	const Sphere& GetSphere(void)const { return *sphere_; }
 
+	const VECTOR& GetLocalPos(void)const { return localPos_; }
+
 	/// <summary>
 	/// 準備状態に設定
 	/// </summary>
@@ -82,6 +84,10 @@ public:
 	/// <param name="pos">指定するローカル座標</param>
 	void SetLocalPos(const VECTOR localPos);
 
+	/// <summary>
+	/// 座標を設定
+	/// </summary>
+	/// <param name="pos">座標</param>
 	void SetPos(const VECTOR pos) { transform_.pos = pos; }
 
 	/// <summary>
@@ -128,8 +134,8 @@ private:
 	void Move(void);
 
 	/// <summary>
-	/// 回転処理
+	/// 相対座標を親の回転に同期させる
 	/// </summary>
-	void Rotate(void);
+	void SyncParentRotate(void);
 };
 
