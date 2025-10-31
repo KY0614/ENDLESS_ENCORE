@@ -41,8 +41,13 @@ void EnemyBullet::Update(void)
 	if (!isAlive_)return;
 	//モデル情報の更新
 	transform_.Update();
+	if (GetState() == STATE::NONE ||
+		GetState() == STATE::READY)
+	{
+		Rotate();
+	}
 
-	//発射状態でなければ更新しない
+	//発射状態でなければ移動処理を行わない
 	if (!CheckStateShot() && !CheckStateReverse())return;
 
 	//弾の移動処理
@@ -129,6 +134,8 @@ void EnemyBullet::Rotate(void)
 {
 	VECTOR followPos = parentTran_.pos;
 	Quaternion followRot = parentTran_.quaRot;
-
+	VECTOR localPos = VSub(transform_.pos, followPos);
 	VECTOR relativePos = followRot.PosAxis(localPos_);
+
+	transform_.pos = VAdd(parentTran_.pos,relativePos);
 }

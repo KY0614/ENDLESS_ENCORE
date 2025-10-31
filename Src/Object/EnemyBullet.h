@@ -82,6 +82,8 @@ public:
 	/// <param name="pos">指定するローカル座標</param>
 	void SetLocalPos(const VECTOR localPos);
 
+	void SetPos(const VECTOR pos) { transform_.pos = pos; }
+
 	/// <summary>
 	/// 発射する
 	/// </summary>
@@ -129,6 +131,5 @@ private:
 	/// 回転処理
 	/// </summary>
 	void Rotate(void);
-
 };
 

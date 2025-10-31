@@ -168,12 +168,6 @@ private:
 	/// <param name=""></param>
 	void FollowPlayer(VECTOR& pos);
 
-	/// <summary>
-	/// ’e‚Ì¶¬
-	/// </summary>
-	/// <param name="createNum">¶¬‚·‚é”</param>
-	void CreateBullet(const int createNum);
-
 	//‰ñ“]--------------------------------------------------------
 
 	/// <summary>
@@ -196,6 +190,12 @@ private:
 	//’e--------------------------------------------------------
 	
 	/// <summary>
+	/// ’e‚Ì¶¬
+	/// </summary>
+	/// <param name="createNum">¶¬‚·‚é”</param>
+	void CreateBullet(const int createNum);
+
+	/// <summary>
 	/// ¶¬‚µ‚½’e‘S‚Ä‚ª€”õó‘Ô‚©ƒ`ƒFƒbƒN‚·‚é
 	/// </summary>
 	/// <param name=""></param>
@@ -208,6 +208,8 @@ private:
 	/// <param name=""></param>
 	/// <returns>true:‘S‚Ä”jŠüó‘Ô@false:–¢”jŠü</returns>
 	bool CheckBulletDestroy(void);
+
+	void SyncBulletPosAxis(void);
 
 	//ó‘Ô‘JˆÚ--------------------------------------------------------
 
