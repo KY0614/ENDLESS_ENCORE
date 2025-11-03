@@ -46,7 +46,7 @@ void EnemyBullet::Update(void)
 		GetState() == STATE::READY)
 	{
 		//“¯Šú
-		SyncParentRotate();
+		//SyncParentRotate();
 	}
 
 	//”­Ëó‘Ô‚Å‚È‚¯‚ê‚ÎˆÚ“®ˆ—‚ğs‚í‚È‚¢

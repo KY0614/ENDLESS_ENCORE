@@ -238,6 +238,10 @@ private:
 	/// </summary>
 	void ChangeStateShotAll(void);
 	/// <summary>
+	/// ó‘Ô‘JˆÚFATTACK_CHARGE
+	/// </summary>
+	void ChangeStateAttackCharge(void);
+	/// <summary>
 	/// ó‘Ô‘JˆÚFDOWN
 	/// </summary>
 	void ChangeStateDown(void);

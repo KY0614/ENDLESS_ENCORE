@@ -35,12 +35,14 @@ namespace
 	//距離の基準値
 	const float ATTACK_NEAR_DISTANCE = 350.0f;	//近距離攻撃判定距離
 	const float ATTACK_FAR_DISTANCE = 800.0f;	//遠距離攻撃判定距離
-	const float PLAYER_DISTANCE = 500.0f;		//維持するプレイヤーとの距離
+	const float PLAYER_DISTANCE = 600.0f;		//維持するプレイヤーとの距離
 	const float FOLLOW_DISTANCE = 800.0f;		//追従距離
 	//重力加速度
+	const float FOLLOW_TIME = 5.0f;
 	const float MOVE_TIME = 3.0f;
 	const float ATTACK_TIME = 1.0f;
 	const float ATTACK_FAR_TIME = 15.0f;
+	const float ATTACK_CHARGE_TIME = 30.0f;
 
 	const float ATTACK_DAMAGE = 10.0f;
 
@@ -107,6 +109,13 @@ void Enemy::Update(void)
 		hitCount_ = 0;
 		bullets_.clear();
 		ChangeState(STATE::DEAD);
+	}
+
+	static bool isCharge = false;	
+	if(hp_ <= maxHp_ / 2 && !isCharge)
+	{
+		isCharge = true;
+		ChangeState(STATE::ATTACK_CHARGE);
 	}
 
 	//更新ステップ
@@ -250,7 +259,7 @@ void Enemy::InitCollider(void)
 
 	//近接攻撃用の球体コライダ
 	sphereNear_ = std::make_unique<Sphere>(transform_);
-	sphereNear_->SetLocalPos({ 0.0f, 80.0f, -50.0f });
+	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
 	sphereNear_->SetRadius(30.0f);
 
 	col_ = 0x000000;
@@ -260,7 +269,7 @@ void Enemy::InitCollider(void)
 void Enemy::InitAnimation(void)
 {
 	auto& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
+	//Jsonデータ取得w
 	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
 	const auto& param = data[KEY_ENEMY];
 	//データが含まれていない場合はエラーメッセージを出す
@@ -300,9 +309,9 @@ void Enemy::Move(void)
 {
 	if(CheckPlayerDistance() > PLAYER_DISTANCE)
 	{
-		animationController_->Play((int)ANIM_TYPE::WALK);
 		//プレイヤーに近づく
 		FollowPlayer(transform_.pos);
+		ChangeState(STATE::FOLLOW);
 	}
 	else
 	{
@@ -369,6 +378,8 @@ float Enemy::CheckPlayerDistance(void)
 
 void Enemy::FollowPlayer(VECTOR& pos)
 {
+	animationController_->Play((int)ANIM_TYPE::WALK);
+
 	// プレイヤーの位置
 	VECTOR playerPos = player_.GetTransform().pos;
 
@@ -600,6 +611,13 @@ void Enemy::ChangeStateShotAll(void)
 	stateUpdate_ = std::bind(&Enemy::UpdateShotAll, this);
 }
 
+void Enemy::ChangeStateAttackCharge(void)
+{
+	sphereNear_->SetRadius(80.0f);
+	sphereNear_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
+	stateUpdate_ = std::bind(&Enemy::UpdateChargeAttack, this);
+}
+
 void Enemy::ChangeStateDown(void)
 {
 	animationController_->Play((int)ANIM_TYPE::DOWN, true, 0.0f,9.0f);
@@ -614,11 +632,21 @@ void Enemy::ChangeStateDead(void)
 }
 
 void Enemy::UpdateNone(void)
-{
+{//何もしない
 }
 
 void Enemy::UpdateFollow(void)
 {
+	//状態時間更新
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	if (stateStep_ > FOLLOW_TIME)
+	{
+		stateStep_ = 0.0f;
+		hitCount_ = 0;
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
 	FollowPlayer(transform_.pos);
 	Rotate();
 
@@ -682,7 +710,7 @@ void Enemy::UpdateAttackNear(void)
 	}
 	isAttackedNear_ = true;
 
-	//
+	//状態時間更新
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (animationController_->IsEnd())
 	{
@@ -691,7 +719,10 @@ void Enemy::UpdateAttackNear(void)
 		ChangeState(STATE::MOVE);
 		return;
 	}
+
+	//攻撃アニメーション再生
 	animationController_->Play((int)ANIM_TYPE::ATTACK_NEAR,false);
+
 	//パリィ判定
 	if (CommonUtility::IsHitSpheres(sphereNear_->GetPos(),sphereNear_->GetRadius(),
 		player_.GetSphere().GetPos(),player_.GetSphere().GetRadius()))
@@ -939,6 +970,16 @@ void Enemy::UpdateShotAll(void)
 
 void Enemy::UpdateChargeAttack(void)
 {
+	//溜め攻撃の状態
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	if (stateStep_ > ATTACK_FAR_TIME)
+	{
+		stateStep_ = 0.0f;
+		hitCount_ = 0;
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
 }
 
 void Enemy::UpdateDown(void)
