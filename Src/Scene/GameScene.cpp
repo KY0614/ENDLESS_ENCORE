@@ -8,7 +8,6 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
-#include "../Object/ItemPrevew.h"
 #include "PauseScene.h"
 #include "GameScene.h"
 
@@ -35,15 +34,11 @@ void GameScene::Init(void)
 	enemy_ = std::make_unique<Enemy>(*player_);
 	enemy_->Init();
 
-	//プレイヤー
-	item_ = std::make_unique<ItemPrevew>();
-	item_->Init();
-
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->SetTarget(&enemy_->GetTransform());
+	//mainCamera->ChangeMode(Camera::MODE::MOUSE);
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
-
 
 	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::FLOOR));
@@ -56,7 +51,6 @@ void GameScene::Init(void)
 	floor_.MakeCollider(Collider::TYPE::STAGE);
 	floor_.Update();
 	player_->AddCollider(floor_.collider);
-
 }
 
 void GameScene::Update(void)
@@ -101,6 +95,15 @@ void GameScene::UpdateGame(void)
 		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::RESULT);
 	}
 
+ 	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
+	{
+		if (player_->GetIsParry())
+		{
+			player_->ChangeState(Player::STATE::BACKSTAB);
+			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
+		}
+	}
+
 	floor_.Update();
 }
 
@@ -117,7 +120,6 @@ void GameScene::DrawGame(void)
 	{
 		player_->DrawVictory();
 	}
-	item_->Draw();
 }
 
 void GameScene::DrawDebug(void)

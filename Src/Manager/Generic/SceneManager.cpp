@@ -6,6 +6,7 @@
 #include "../../Utility/CommonUtility.h"
 #include "../../Common/Fader.h"
 #include "../../Scene/TitleScene.h"
+#include "../../Scene/DebugScene.h"
 #include "../../Scene/AdvertiseScene.h"
 #include "../../Scene/MovieScene.h"
 #include "../../Scene/SelectScene.h"
@@ -76,7 +77,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//èâä˙ÉVÅ[ÉìÇÃê›íË
-	DoChangeScene(SCENE_ID::GAME);
+	DoChangeScene(SCENE_ID::DEBUG);
 
 }
 
@@ -390,6 +391,12 @@ void SceneManager::MakeScene(SCENE_ID sceneId)
 		resM.InitTitle();
 		break;
 	
+	case SceneManager::SCENE_ID::DEBUG:
+		scene = std::make_unique<DebugScene>();
+		resM.InitGame();
+		jsonM.InitGame();
+		break;
+	
 	case SceneManager::SCENE_ID::ADVERTISE:
 		scene = std::make_unique<AdvertiseScene>();
 		break;
@@ -468,6 +475,12 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 	case SceneManager::SCENE_ID::TITLE:
 		scene = std::make_unique<TitleScene>();
 		resM.InitTitle();
+		break;
+
+	case SceneManager::SCENE_ID::DEBUG:
+		scene = std::make_unique<DebugScene>();
+		resM.InitGame();
+		jsonM.InitGame();
 		break;
 
 	case SceneManager::SCENE_ID::ADVERTISE:

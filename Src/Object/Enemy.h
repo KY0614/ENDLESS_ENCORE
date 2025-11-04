@@ -22,6 +22,7 @@ public:
 		SHOT_ONE,		//
 		SHOT_ALL,		//
 		ATTACK_CHARGE,	//
+		BACKSTAB,			//
 		DOWN,			//
 		DEAD,			//
 	};
@@ -33,8 +34,14 @@ public:
 		WALK,
 		RUN,
 		ATTACK_NEAR,
+		MAGIC_ILDE,
+		CAST_SPELL,
+		ATTACK_FAR_ONE,
+		ATTACK_FAR_ALL,
 		ATTACK_NEAR_CHARGE,
 		DAMAGE,
+		BACKSTAB,
+		STAND_UP,
 		DOWN,
 		DEATH,
 	};
@@ -59,6 +66,8 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	void DebugUpdate(void);
+
 	/// <summary>
 	/// 状態変更
 	/// </summary>
@@ -66,10 +75,23 @@ public:
 	void ChangeState(const STATE state);
 
 	/// <summary>
+	/// ダウンしているかどうかを取得
+	/// </summary>
+	/// <returns>true:死亡　false:生存</returns>
+	const bool GetIsDown(void)const { return state_ == STATE::DOWN; }
+
+	/// <summary>
 	/// 死亡しているかどうかを取得
 	/// </summary>
 	/// <returns>true:死亡　false:生存</returns>
 	const bool GetIsDead(void)const;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	bool CheckBackstab(void);
 
 private:
 
@@ -101,6 +123,7 @@ private:
 	float maxHp_;
 
 	bool isAttackedNear_;
+	bool isCast_;
 
 	//回転
 	Quaternion enemyRotY_;		//Y軸回転
@@ -162,6 +185,8 @@ private:
 	/// <returns>プレイヤーと敵の距離</returns>
 	float CheckPlayerDistance(void);
 
+	bool IsCastSpell(void);
+
 	/// <summary>
 	/// プレイヤーを追従する処理
 	/// </summary>
@@ -209,8 +234,6 @@ private:
 	/// <returns>true:全て破棄状態　false:未破棄</returns>
 	bool CheckBulletDestroy(void);
 
-	void SyncBulletPosAxis(void);
-
 	//状態遷移--------------------------------------------------------
 
 	/// <summary>
@@ -242,6 +265,10 @@ private:
 	/// </summary>
 	void ChangeStateAttackCharge(void);
 	/// <summary>
+	/// 状態遷移：BACKSTAB
+	/// </summary>
+	void ChangeStateBackstab(void);
+	/// <summary>
 	/// 状態遷移：DOWN
 	/// </summary>
 	void ChangeStateDown(void);
@@ -258,6 +285,7 @@ private:
 	void UpdateShotOne(void);
 	void UpdateShotAll(void);
 	void UpdateChargeAttack(void);
+	void UpdateBackstab(void);
 	void UpdateDown(void);
 	void UpdateDead(void);
 
@@ -266,9 +294,10 @@ private:
 	/// </summary>
 	void UpdateDebugImGui(void);
 
+	void DrawDebug(void);
+
 	float stateStep_;
 
 	int col_;
-
 };
 

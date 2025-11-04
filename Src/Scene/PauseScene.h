@@ -12,9 +12,20 @@ public:
 	PauseScene(void);
 	~PauseScene(void);
 
-	void Init(void)override;
-	void Update(void)override;
-	void Draw(void)override;
+	/// <summary>
+	/// ‰Šú‰»ˆ—
+	/// </summary>
+	void Init(void) override;
+
+	/// <summary>
+	/// XVˆ—
+	/// </summary>
+	void Update(void) override;
+
+	/// <summary>
+	/// •`‰æˆ—
+	/// </summary>
+	void Draw(void) override;
 
 private:
 

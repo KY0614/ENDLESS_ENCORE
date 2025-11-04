@@ -12,14 +12,21 @@
       "Idle": "Idle.mv1",
       "Walk": "Walk.mv1",
       "Run": "Run.mv1",
-      "Attack_Neaer": "Kick.mv1",
+      "Attack_Near": "Kick.mv1",
+      "Attack_Far_One": "Magic Attack.mv1",
+      "Attack_Far_All": "Magic Attack All.mv1",
       "Damage": "Impact.mv1",
+      "Backstab": "Backstab.mv1",
       "Down": "Standing.mv1",
-      "Death" : "Death.mv1"
+      "Death" : "Death.mv1",
+      "Magic Idle": "Magician Idle.mv1",
+      "Cast Spell": "Cast Spell.mv1",
+      "Stand Up": "Stand Up.mv1"
      },
     "Parameter":
     {
-      "hp": 100.0
+      "hp": 60.0,
+      "maxHp":100.0
     }
     }
 }

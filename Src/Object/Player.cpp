@@ -61,6 +61,7 @@ Player::Player(void)
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
+	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
 
 	gravHitPosDown_ = CommonUtility::VECTOR_ZERO;
@@ -155,6 +156,19 @@ void Player::Draw(void)
 
 	DrawDead();
 #endif // _DEBUG
+}
+
+void Player::DebugUpdate(void)
+{
+	//更新ステップ
+	stateUpdate_();
+
+	//アニメーション再生
+	animationController_->Update();
+
+	transform_.Update();
+
+	UpdateDebugImGui();
 }
 
 void Player::DrawDead(void)
@@ -332,13 +346,18 @@ void Player::ChangeStatePlay(void)
 	stateUpdate_ = std::bind(&Player::UpdatePlay, this);
 }
 
+void Player::ChangeStateBackstab(void)
+{
+	stateUpdate_ = std::bind(&Player::UpdateBackstab, this);
+}
+
 void Player::ChangeStateDead(void)
 {
 	stateUpdate_ = std::bind(&Player::UpdateDead, this);
 }
 
 void Player::UpdateNone(void)
-{
+{//何もしない
 }
 
 void Player::UpdatePlay(void)
@@ -378,6 +397,10 @@ void Player::UpdatePlay(void)
 	//重力方向に沿って回転させる
 	transform_.quaRot = Quaternion::Quaternion();
 	transform_.quaRot = transform_.quaRot.Mult(playerRotY_);
+}
+
+void Player::UpdateBackstab(void)
+{
 }
 
 void Player::UpdateDead(void)
@@ -903,14 +926,6 @@ void Player::UpdateDebugImGui(void)
 	{
 		isJumpUnlimited_ = true;
 	}
-
-	////位置
-	//ImGui::Text("localF2TPos");
-	////構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	//ImGui::InputFloat3("localF2TPos", &localF2TPos_.x);
-	//ImGui::SliderFloat("localF2TPosX", &localF2TPos_.x, -800.0f, 1000.0f);
-	//ImGui::SliderFloat("localF2TPosY", &localF2TPos_.y, -800.0f, 1000.0f);
-	//ImGui::SliderFloat("localF2TPosZ", &localF2TPos_.z, -800.0f, 1000.0f);
 
 	//終了処理
 	ImGui::End();

@@ -23,6 +23,7 @@ public:
 	{
 		NONE,
 		TITLE,
+		DEBUG,
 		ADVERTISE,
 		MOVIE,
 		SELECT,

@@ -26,6 +26,7 @@ public:
 	{
 		NONE,	//初期化前
 		PLAY,	//操作可能
+		BACKSTAB,	//バックスタブ
 		DEAD,	//死亡
 	};
 
@@ -62,6 +63,8 @@ public:
 	/// 描画処理
 	/// </summary>
 	void Draw(void) override;
+
+	void DebugUpdate(void);
 
 	void DrawDead(void);
 	void DrawVictory(void);
@@ -247,6 +250,11 @@ private:
 	/// <param name=""></param>
 	void ChangeStatePlay(void);
 	/// <summary>
+	/// 状態遷移：BACKSTAB
+	/// </summary>
+	/// <param name=""></param>
+	void ChangeStateBackstab(void);
+	/// <summary>
 	/// 状態遷移：DEAD
 	/// </summary>
 	/// <param name=""></param>
@@ -255,6 +263,7 @@ private:
 	//更新ステップ
 	void UpdateNone(void);
 	void UpdatePlay(void);
+	void UpdateBackstab(void);
 	void UpdateDead(void);
 
 	/// <summary>

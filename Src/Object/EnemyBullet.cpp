@@ -46,7 +46,7 @@ void EnemyBullet::Update(void)
 		GetState() == STATE::READY)
 	{
 		//同期
-		//SyncParentRotate();
+		SyncParentRotate();
 	}
 
 	//発射状態でなければ移動処理を行わない
@@ -83,12 +83,17 @@ void EnemyBullet::Destroy(void)
 	SetIsAlive(false);
 }
 
-void EnemyBullet::SetLocalPos(const VECTOR localPos)
+void EnemyBullet::SetOffsetPos(const VECTOR offset)
+{
+	offsetPos_ = offset;
+}
+
+void EnemyBullet::SetLocalPos(const VECTOR local)
 {
 	//親の位置+ローカル座標
-	localPos_ = localPos;
-	transform_.pos = VAdd(parentTran_.pos, localPos);
-	transform_.Update();
+	localPos_ = local;
+	//transform_.pos = VAdd(parentTran_.pos, local);
+	//transform_.Update();
 }
 
 void EnemyBullet::Shot(void)
@@ -141,5 +146,11 @@ void EnemyBullet::SyncParentRotate(void)
 	VECTOR relativePos = parentTran_.quaRot.PosAxis(localPos);
 	//親の位置+ローカル座標
 	transform_.pos = VAdd(parentTran_.pos,relativePos);
+	transform_.quaRot = parentTran_.quaRot;
+
+	//敵の頭あたりをイメージした座標
+	VECTOR basePos = VAdd(parentTran_.pos, offsetPos_);
+	//予め決めておいた敵の頭からの相対座標を敵の向きに応じて回転させる
+	transform_.pos = VAdd(basePos, parentTran_.quaRot.PosAxis(localPos_));
 	transform_.quaRot = parentTran_.quaRot;
 }

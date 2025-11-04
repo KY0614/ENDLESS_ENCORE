@@ -5,7 +5,6 @@
 
 class Player;
 class Enemy;
-class ItemPrevew;
 
 class GameScene : public SceneBase
 {
@@ -16,8 +15,19 @@ public:
 	//デストラクタ
 	~GameScene(void);
 
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
 	void Init(void) override;
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
 	void Update(void) override;
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
 	void Draw(void) override;
 
 private:
@@ -31,7 +41,6 @@ private:
 
 	std::unique_ptr<Player> player_;
 	std::unique_ptr<Enemy> enemy_;
-	std::unique_ptr<ItemPrevew> item_;
 
 	int RT_;
 

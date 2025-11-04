@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\DebugScene.cpp" />
     <ClCompile Include="Src\Object\ItemPrevew.cpp" />
     <ClCompile Include="Src\Object\GimmickObject.cpp" />
     <ClCompile Include="Src\Scene\PauseScene\CharacterScene.cpp" />
@@ -87,6 +88,7 @@
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\DebugScene.h" />
     <ClInclude Include="Src\Object\ItemPrevew.h" />
     <ClInclude Include="Src\Object\GimmickObject.h" />
     <ClInclude Include="Src\Scene\PauseScene\CharacterScene.h" />

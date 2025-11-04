@@ -1,16 +1,16 @@
 #pragma once
 #include <memory>
 #include "SceneBase.h"
+class Player;
+class Enemy;
 
-class SelectScene : public SceneBase
+class DebugScene : public SceneBase
 {
 public:
-
-	// コンストラクタ
-	SelectScene(void);
-
-	// デストラクタ
-	~SelectScene(void);
+	//コンストラクタ
+	DebugScene(void);
+	//デストラクタ
+	~DebugScene(void);
 
 	/// <summary>
 	/// 初期化処理
@@ -28,11 +28,11 @@ public:
 	void Draw(void) override;
 
 private:
-	//メニューの文字列リスト
-	std::vector<std::wstring> selectList_;
 
-	int currentIdx_;
+	//床
+	Transform floor_;
 
-	void DebugDraw(void);
+	std::unique_ptr<Player> player_;
+	std::unique_ptr<Enemy> enemy_;
 };
 

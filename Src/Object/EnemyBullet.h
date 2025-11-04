@@ -79,10 +79,16 @@ public:
 	void SetTargetPos(const VECTOR targetPos) { targetPos_ = targetPos; }
 
 	/// <summary>
+	/// オフセット座標を設定
+	/// </summary>
+	/// <param name="pos">指定するローカル座標</param>
+	void SetOffsetPos(const VECTOR offset);
+
+	/// <summary>
 	/// ローカル座標を設定
 	/// </summary>
 	/// <param name="pos">指定するローカル座標</param>
-	void SetLocalPos(const VECTOR localPos);
+	void SetLocalPos(const VECTOR local);
 
 	/// <summary>
 	/// 座標を設定
@@ -120,6 +126,7 @@ private:
 	Transform& parentTran_;
 
 	VECTOR localPos_;
+	VECTOR offsetPos_;
 	VECTOR targetPos_;
 
 	//生存状態
