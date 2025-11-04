@@ -127,6 +127,8 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
+
+	UpdateDebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -310,7 +312,7 @@ void Enemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::ATTACK_FAR_ONE, path + animPath.value(KEY_ATK_FAR_ONE, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_FAR_ALL, path + animPath.value(KEY_ATK_FAR_ALL, KEY_EMPTY),
-		60.0f);
+		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::DAMAGE, path + animPath.value(KEY_DAMAGE, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::BACKSTAB, path + animPath.value(KEY_BACKSTAB, KEY_EMPTY),
@@ -577,6 +579,7 @@ void Enemy::CreateBullet(const int createNum)
 			bullets_.back()->Init();
 		}
 	}
+	bullets_.resize(createNum);
 	//破棄済みの弾を探して再利用する
 	for (const auto& bullet : bullets_)
 	{
@@ -616,7 +619,7 @@ void Enemy::CreateBullet(const int createNum)
 			VAdd(headPos, transform_.quaRot.PosAxis(rotLocalPos)));
 	}
 	
-	bullets_.resize(createNum);
+	//bullets_.resize(createNum);
 }
 
 bool Enemy::CheckBulletReady(void)
@@ -858,10 +861,9 @@ void Enemy::UpdateShotOne(void)
 	for (const auto& bullet : bullets_)
 	{
 		if (CheckBulletDestroy())break;
+		if(CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
 		if (stateStep_ > bulletInterval && bullet->GetState() == EnemyBullet::STATE::READY)
 		{
-			animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
-
 			//ターゲットに発射
 			bullet->Shot();
 			bullet->SetTargetPos(player_.GetTransform().pos);
@@ -964,17 +966,18 @@ void Enemy::UpdateShotAll(void)
 		{
 			bullet->SetStateReady();
 			stateStep_ = 0.0f;
+			continue;
 		}
 	}
+	if(CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ALL, false);
 
 	//弾が全部準備できたらプレイヤーに向けて発射する
 	for (const auto& bullet : bullets_)
 	{
 		if (CheckBulletDestroy())break;
-		if (stateStep_ > bulletInterval && bullet->GetState() == EnemyBullet::STATE::READY)
+		if (stateStep_ > bulletInterval && 
+			bullet->GetState() == EnemyBullet::STATE::READY)
 		{
-			animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ALL, false);
-
 			//ターゲットに発射
 			bullet->Shot();
 			bullet->SetTargetPos(player_.GetTransform().pos);
@@ -1105,6 +1108,9 @@ void Enemy::UpdateDebugImGui(void)
 	//HP用スライダー
 	ImGui::SliderFloat("HP", &hp_, 0.0f,maxHp_);
 
+	static int bulletNum = 0;
+	ImGui::SliderInt("Bullet Num", &bulletNum, 0, 10);
+
 	if (ImGui::Button("Kick"))
 	{
 		ChangeState(STATE::ATTACK_NEAR);
@@ -1112,11 +1118,13 @@ void Enemy::UpdateDebugImGui(void)
 
 	if (ImGui::Button("Shot One"))
 	{
+		CreateBullet(bulletNum);
 		ChangeState(STATE::SHOT_ONE);
 	}
 
 	if (ImGui::Button("Shot All"))
 	{
+		CreateBullet(bulletNum);
 		ChangeState(STATE::SHOT_ALL);
 	}
 
