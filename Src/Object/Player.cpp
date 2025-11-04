@@ -30,6 +30,7 @@ namespace
 	static const std::string KEY_RUN = "Run";
 	static const std::string KEY_JUMP = "Jump";
 	static const std::string KEY_DODGE = "Dodge";
+	static const std::string KEY_BACKSTAB = "Backstab";
 	static const std::string KEY_DEATH = "Death";
 
 	//ジャンプ力
@@ -320,6 +321,9 @@ void Player::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value(KEY_DODGE, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 
+	animationController_->Add((int)ANIM_TYPE::BACKSTAB, path + animPath.value(KEY_BACKSTAB, KEY_EMPTY),
+		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
 		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
 	//初期アニメーションはアイドルを再生
@@ -348,6 +352,7 @@ void Player::ChangeStatePlay(void)
 
 void Player::ChangeStateBackstab(void)
 {
+
 	stateUpdate_ = std::bind(&Player::UpdateBackstab, this);
 }
 
@@ -401,6 +406,7 @@ void Player::UpdatePlay(void)
 
 void Player::UpdateBackstab(void)
 {
+	animationController_->Play((int)ANIM_TYPE::BACKSTAB,false);
 }
 
 void Player::UpdateDead(void)

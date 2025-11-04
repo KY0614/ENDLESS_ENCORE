@@ -40,6 +40,7 @@ public:
 		PARRY,		//パリィ
 		DODGE,		//回避
 		DEATH,		//死亡
+		BACKSTAB,
 		USE_ITEM,	//アイテム使用
 	};
 

@@ -1068,7 +1068,7 @@ void Enemy::UpdateChargeAttack(void)
 
 void Enemy::UpdateBackstab(void)
 {
-
+	animationController_->Play((int)ANIM_TYPE::BACKSTAB,false);
 }
 
 void Enemy::UpdateDown(void)
@@ -1108,7 +1108,7 @@ void Enemy::UpdateDebugImGui(void)
 	//HP用スライダー
 	ImGui::SliderFloat("HP", &hp_, 0.0f,maxHp_);
 
-	static int bulletNum = 0;
+	static int bulletNum = 5;
 	ImGui::SliderInt("Bullet Num", &bulletNum, 0, 10);
 
 	if (ImGui::Button("Kick"))

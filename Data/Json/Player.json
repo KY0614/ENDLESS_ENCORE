@@ -14,6 +14,7 @@
       "Run": "Running.mv1",
       "Jump": "Jump.mv1",
       "Dodge": "Dash.mv1",
+      "Backstab": "Backstab.mv1",
       "Death": "Death.mv1"
      },
     "Parameter":
