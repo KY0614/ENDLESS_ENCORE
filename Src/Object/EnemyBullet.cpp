@@ -139,15 +139,6 @@ void EnemyBullet::Move(void)
 
 void EnemyBullet::SyncParentRotate(void)
 {
-	VECTOR parentPos = parentTran_.pos;
-	parentPos.y = 140.0f;
-	VECTOR localPos = VSub(transform_.pos, parentPos);
-	//親の回転を考慮したローカル座標を計算
-	VECTOR relativePos = parentTran_.quaRot.PosAxis(localPos);
-	//親の位置+ローカル座標
-	transform_.pos = VAdd(parentTran_.pos,relativePos);
-	transform_.quaRot = parentTran_.quaRot;
-
 	//敵の頭あたりをイメージした座標
 	VECTOR basePos = VAdd(parentTran_.pos, offsetPos_);
 	//予め決めておいた敵の頭からの相対座標を敵の向きに応じて回転させる

@@ -47,6 +47,8 @@ private:
 	int shakeFrame_;
 	float shakeRate_;
 
+	VECTOR targetPos_;
+
 	/// <summary>
 	/// ƒQ[ƒ€’†‚ÌXVˆ—
 	/// </summary>

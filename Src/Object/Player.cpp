@@ -87,7 +87,6 @@ Player::Player(void)
 	stepParry_ = 0.0f;
 	imgShadow_ = -1;
 	isJumpUnlimited_ = false;
-	jumpVelocity_ = CommonUtility::VECTOR_ZERO;
 	isDodge_ = false;
 	isDecelerate_ = false;
 	stepDodge_ = 0.0f;
@@ -352,7 +351,10 @@ void Player::ChangeStatePlay(void)
 
 void Player::ChangeStateBackstab(void)
 {
-
+	transform_.quaRotLocal =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-90.0f), 0.0f });
+	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false,0.0f,26.0f);
+	//animationController_->SetEndLoop(25.0f, 28.0f, 5.0f);
 	stateUpdate_ = std::bind(&Player::UpdateBackstab, this);
 }
 
@@ -406,7 +408,15 @@ void Player::UpdatePlay(void)
 
 void Player::UpdateBackstab(void)
 {
-	animationController_->Play((int)ANIM_TYPE::BACKSTAB,false);
+	static float stateStep_ = 0.0f;
+	Rotate();
+	if (animationController_->IsEnd())
+	{
+		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	}
+
+	//if (!stateStep_ > 1.0f)return;
+	//animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, -1.0f, false, true);
 }
 
 void Player::UpdateDead(void)
@@ -951,25 +961,17 @@ void Player::DebugDraw(void)
 	// 現在HP（緑）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
 
-
 	DebugDrawFormat::FormatString(L"P HP : %.2f",
 		hp_,
 		lineH);
-	//DebugDrawFormat::FormatString(L"stepWalk : %.2f",
-	//	stepWalk_,
-	//	lineH);
-	//DebugDrawFormat::FormatString(L"stepDodge : %.2f",
-	//	stepDodge_,
-	//	lineH);
-	//DebugDrawFormat::FormatString(L"speed : %.2f",
-	//	speed_,
-	//	lineH);
-	//DebugDrawFormat::FormatString(L"isDodge : %d",
-	//	isDodge_,
-	//	lineH);
-	//DebugDrawFormat::FormatString(L"moveDir : %.2f,%.2f",
-	//	moveDir_.x,moveDir_.z,
-	//	lineH);
+
+	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
+	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
+	VECTOR right = VScale(transform_.GetRight(), 120.0f);
+	forward.y += 150.0f;
+	right.y += 150.0f;
+	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
+	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
 
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);

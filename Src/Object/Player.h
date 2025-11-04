@@ -90,6 +90,12 @@ public:
 	/// <param name=""></param>
 	/// <returns></returns>
 	const Capsule& GetCapsule(void) const;
+
+	/// <summary>
+	/// 衝突用球体の取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
 	const Sphere& GetSphere(void) const;
 
 	/// <summary>
@@ -105,10 +111,11 @@ public:
 	/// <param name="state">変更する状態</param>
 	void ChangeState(STATE state);
 
-	void Damage(float subHp) 
-	{ 
-		hp_ -= subHp; 
-	}
+	/// <summary>
+	/// ダメージを与える
+	/// </summary>
+	/// <param name="subHp">ダメージ量</param>
+	void Damage(float subHp) { hp_ -= subHp; }
 
 	/// <summary>
 	/// 回避中かどうかを取得する
@@ -121,6 +128,16 @@ public:
 	/// </summary>
 	/// <returns>true:パリィ中　false:パリィしてない</returns>
 	const bool& GetIsParry(void)const  { return isParry_; }
+
+	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
+
+	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY; }
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="pos"></param>
+	void SetBackstabPos(const VECTOR& pos) { backstabTarget_ = pos; }
 
 private:
 
@@ -154,10 +171,6 @@ private:
 
 	float stepWalk_;	//歩きモーション完了までの時間経過
 
-	////加速度、減速度
-	//VECTOR velocity_;	//現在の速度
-	//VECTOR accelation_;	//加速度
-
 	//回転
 	Quaternion playerRotY_;		//Y軸回転
 	Quaternion goalQuaRot_;		//目標回転
@@ -182,9 +195,13 @@ private:
 	int effectSmokePlayId_;	//エフェクト再生ID
 	float stepFootSmoke_;	//足煙エフェクト発生までの時間経過
 
+	//バックスタブ位置
+	VECTOR backstabTarget_;	
+
 	//フレームごとの移動値
 	VECTOR moveDiff_;
 
+	//ジャンプ用
 	//ジャンプ量
 	VECTOR jumpPow_;
 
@@ -193,9 +210,6 @@ private:
 
 	//無限ジャンプ
 	bool isJumpUnlimited_;
-
-	//ジャンプ用
-	VECTOR jumpVelocity_;	//現在の速度
 
 	//ジャンプの入力受付時間
 	float stepJump_;

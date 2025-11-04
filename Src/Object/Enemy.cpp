@@ -220,6 +220,8 @@ void Enemy::DebugUpdate(void)
 
 void Enemy::ChangeState(const STATE state)
 {
+	stateStep_ = 0.0f;
+
 	//状態変更
 	state_ = state;
 
@@ -685,6 +687,7 @@ void Enemy::ChangeStateAttackCharge(void)
 
 void Enemy::ChangeStateBackstab(void)
 {
+	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 0.0f, 26.0f);
 	stateUpdate_ = std::bind(&Enemy::UpdateBackstab, this);
 }
 
@@ -711,7 +714,6 @@ void Enemy::UpdateFollow(void)
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > FOLLOW_TIME)
 	{
-		stateStep_ = 0.0f;
 		hitCount_ = 0;
 		ChangeState(STATE::MOVE);
 		return;
@@ -733,7 +735,6 @@ void Enemy::UpdateMove(void)
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > MOVE_TIME)
 	{
-		stateStep_ = 0.0f;
 		//プレイヤーとの距離を測り、一定以上離れていたら遠距離攻撃
 		//それ以外は近距離攻撃
 		if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
@@ -786,7 +787,6 @@ void Enemy::UpdateAttackNear(void)
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (animationController_->IsEnd())
 	{
-		stateStep_ = 0.0f;
 		isAttackedNear_ = false;
 		ChangeState(STATE::MOVE);
 		return;
@@ -835,7 +835,6 @@ void Enemy::UpdateShotOne(void)
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > ATTACK_FAR_TIME)
 	{
-		stateStep_ = 0.0f;
 		hitCount_ = 0;
 		ChangeState(STATE::MOVE);
 		return;
@@ -930,7 +929,6 @@ void Enemy::UpdateShotOne(void)
 	//生成した弾が全部消滅したら移動遷移
 	if (CheckBulletDestroy())
 	{
-		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
 		hitCount_ = 0;
 		return;
@@ -951,7 +949,6 @@ void Enemy::UpdateShotAll(void)
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > ATTACK_FAR_TIME)
 	{
-		stateStep_ = 0.0f;
 		hitCount_ = 0;
 		ChangeState(STATE::MOVE);
 		return;
@@ -1037,6 +1034,7 @@ void Enemy::UpdateShotAll(void)
 	//全弾命中でダウン状態へ
 	if (hitCount_ >= static_cast<int>(bullets_.size()))
 	{
+		stateStep_ = 0.0f;
 		ChangeState(STATE::DOWN);
 		hitCount_ = 0;
 		return;
@@ -1045,7 +1043,6 @@ void Enemy::UpdateShotAll(void)
 	//生成した弾が全部消滅したら移動遷移
 	if (CheckBulletDestroy())
 	{
-		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
 		hitCount_ = 0;
 		return;
@@ -1058,7 +1055,6 @@ void Enemy::UpdateChargeAttack(void)
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > ATTACK_FAR_TIME)
 	{
-		stateStep_ = 0.0f;
 		hitCount_ = 0;
 		ChangeState(STATE::MOVE);
 		return;
@@ -1068,7 +1064,12 @@ void Enemy::UpdateChargeAttack(void)
 
 void Enemy::UpdateBackstab(void)
 {
-	animationController_->Play((int)ANIM_TYPE::BACKSTAB,false);
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+
+	if (animationController_->IsEnd())
+	{
+		animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 27.0f, -1.0f, false, true);
+	}
 }
 
 void Enemy::UpdateDown(void)
