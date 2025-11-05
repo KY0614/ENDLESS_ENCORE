@@ -123,14 +123,6 @@ void Enemy::Init(void)
 
 void Enemy::Update(void)
 {
-	//死亡判定
-	if(hp_ <= 0.0f)
-	{
-		hitCount_ = 0;
-		bullets_.clear();
-		ChangeState(STATE::DEAD);
-	}
-
 	//更新ステップ
 	stateUpdate_();
 
@@ -199,7 +191,6 @@ void Enemy::Draw(void)
 	default:
 		break;
 	}
-	DrawFormatString(0, 160, 0xffffff, L"E HP : %.2f", hp_);
 
 	sphereNear_->Draw(col_);
 
@@ -244,16 +235,16 @@ void Enemy::DebugUpdate(void)
 void Enemy::ChangeState(const STATE state)
 {
 	stateStep_ = 0.0f;
-
+	isStepActioned_ = false;
 	//状態変更
 	state_ = state;
-
-	//if (!isChargeAtk_ &&
-	//	hp_ <= maxHp_ / 2.0f &&
-	//	state != STATE::BACKSTAB)
-	//{
-	//	state_ = STATE::CHARGE;
-	//}
+	//死亡判定
+	if (hp_ <= 0.0f)
+	{
+		hitCount_ = 0;
+		bullets_.clear();
+		state_ = STATE::DEAD;
+	}
 
 	//各状態遷移の初期処理
 	stateChanges_[state_]();
@@ -768,6 +759,13 @@ void Enemy::UpdateMove(void)
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (stateStep_ > MOVE_TIME)
 	{
+		if (!isChargeAtk_ &&
+			hp_ <= maxHp_ / 2.0f)
+		{
+			isChargeAtk_ = true;
+			ChangeState(STATE::CHARGE);
+			return;
+		}
 		//プレイヤーとの距離を測り、一定以上離れていたら遠距離攻撃
 		//それ以外は近距離攻撃
 		if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
@@ -819,7 +817,6 @@ void Enemy::UpdateAttackNear(void)
 	if (animationController_->IsEnd())
 	{
 		col_ = 0x00ff00;
-		isStepActioned_ = false;
 		ChangeState(STATE::MOVE);
 		return;
 	}
@@ -1149,8 +1146,6 @@ void Enemy::UpdateBackstab(void)
 
 	if (isBackstab_ && animationController_->IsEnd())
 	{
-		isBackstab_ = false;
-		stateStep_ = 0.0f;
 		ChangeState(STATE::MOVE);
 		return;
 	}
@@ -1240,7 +1235,6 @@ void Enemy::UpdateDebugImGui(void)
 
 void Enemy::DrawDebug(void)
 {
-
 	//ラジアンに変換
 	float viewRad = CommonUtility::Deg2RadF(VIEW_ANGLE);
 
@@ -1278,10 +1272,6 @@ void Enemy::DrawDebug(void)
 	leftPos.x -= leftX * VIEW_RANGE;
 	leftPos.z -= leftZ * VIEW_RANGE;
 
-	//DrawSphere3D(backPos, 10.0f, 10, 0x00ff00, 0x00ff00, true);
-	//DrawSphere3D(forwardPos, 20.0f, 10, 0x00ff00, 0x00ff00, true);
-	//DrawSphere3D(rightPos, 10.0f, 10, 0x00ff00, 0x00ff00, true);
-	//DrawSphere3D(leftPos, 10.0f, 10, 0x00ff00, 0x00ff00, true);
 	DrawTriangle3D(backPos, centerPos, leftPos, 0xffdead, true);
 	DrawTriangle3D(centerPos, backPos, rightPos, 0xffdead, true);
 
