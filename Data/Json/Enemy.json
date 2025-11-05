@@ -2,7 +2,7 @@
     "Enemy": {
     "Transform": 
     {
-      "position": [-60.0, 1.0, 250.0],
+      "position": [-60.0, 10.0, 250.0],
       "scale": 1.0,
       "localRotY": 180.0
     },
@@ -15,6 +15,7 @@
       "Attack_Near": "Kick.mv1",
       "Attack_Far_One": "Magic Attack.mv1",
       "Attack_Far_All": "Magic Attack All.mv1",
+      "Attack_Charge": "Casting.mv1",
       "Damage": "Impact.mv1",
       "Backstab": "Backstab.mv1",
       "Down": "Standing.mv1",

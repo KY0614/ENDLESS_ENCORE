@@ -73,12 +73,6 @@ public:
 	void DrawResultString(const std::wstring& str,int col);
 
 	/// <summary>
-	/// 衝突判定に用いられるコライダーを追加する
-	/// </summary>
-	/// <param name="collider"></param>
-	void AddCollider(std::weak_ptr<Collider> collider);
-
-	/// <summary>
 	/// コライダーの削除
 	/// </summary>
 	/// <param name=""></param>
@@ -177,14 +171,11 @@ private:
 	float stepRotTime_;			//回転完了までの時間経過
 	
 	//衝突判定に用いられるコライダ
-	std::vector<std::weak_ptr<Collider>> colliders_;
+	//std::vector<std::weak_ptr<Collider>> colliders_;
 
 	//衝突チェック	
 	VECTOR gravHitPosDown_;	//重力方向の当たり判定位置
 	VECTOR gravHitPosUp_;	//重力と逆方向の当たり判定位置
-	
-	//丸影
-	int imgShadow_;
 
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
@@ -280,11 +271,6 @@ private:
 	void UpdatePlay(void);
 	void UpdateBackstab(void);
 	void UpdateDead(void);
-
-	/// <summary>
-	/// 影の描画処理
-	/// </summary>
-	void DrawShadow(void);
 
 	//移動------------------------------------------------------------
 

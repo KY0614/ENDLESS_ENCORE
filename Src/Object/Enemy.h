@@ -21,6 +21,7 @@ public:
 		ATTACK_NEAR,	//
 		SHOT_ONE,		//
 		SHOT_ALL,		//
+		CHARGE,	//
 		ATTACK_CHARGE,	//
 		BACKSTAB,			//
 		DOWN,			//
@@ -38,7 +39,7 @@ public:
 		CAST_SPELL,
 		ATTACK_FAR_ONE,
 		ATTACK_FAR_ALL,
-		ATTACK_NEAR_CHARGE,
+		ATTACK_CHARGE,
 		DAMAGE,
 		BACKSTAB,
 		STAND_UP,
@@ -66,6 +67,9 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// デバッグシーン用の更新処理
+	/// </summary>
 	void DebugUpdate(void);
 
 	/// <summary>
@@ -91,6 +95,8 @@ public:
 	/// </summary>
 	/// <returns>true:可能　false:不可能</returns>
 	bool CheckBackstab(void);
+
+	const STATE& GetState(void)const { return state_; }
 
 private:
 
@@ -137,7 +143,12 @@ private:
 	int hitCount_;			//ヒット回数(ダウンまでのカウント)
 	float stepDownTime_;	//ダウン中の時間経過
 
-	VECTOR moveDir_;	//移動方向
+	bool isStepActioned_;
+
+	bool isBackstab_;
+
+	bool isChargeAtk_;
+	float charge_;
 
 	/// <summary>
 	/// 3Dモデル初期化
@@ -261,6 +272,10 @@ private:
 	/// </summary>
 	void ChangeStateShotAll(void);
 	/// <summary>
+	/// 状態遷移：CHARGE
+	/// </summary>
+	void ChangeStateCharge(void);
+	/// <summary>
 	/// 状態遷移：ATTACK_CHARGE
 	/// </summary>
 	void ChangeStateAttackCharge(void);
@@ -284,6 +299,7 @@ private:
 	void UpdateAttackNear(void);
 	void UpdateShotOne(void);
 	void UpdateShotAll(void);
+	void UpdateCharge(void);
 	void UpdateChargeAttack(void);
 	void UpdateBackstab(void);
 	void UpdateDown(void);

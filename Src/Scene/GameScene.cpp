@@ -51,6 +51,7 @@ void GameScene::Init(void)
 	floor_.MakeCollider(Collider::TYPE::STAGE);
 	floor_.Update();
 	player_->AddCollider(floor_.collider);
+	enemy_->AddCollider(floor_.collider);
 }
 
 void GameScene::Update(void)

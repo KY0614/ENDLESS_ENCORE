@@ -26,6 +26,7 @@ namespace
 	static const std::string KEY_ATK_NEAR = "Attack_Near";
 	static const std::string KEY_ATK_FAR_ONE = "Attack_Far_One";
 	static const std::string KEY_ATK_FAR_ALL = "Attack_Far_All";
+	static const std::string KEY_ATK_CHARGE = "Attack_Charge";
 	static const std::string KEY_DAMAGE = "Damage";
 	static const std::string KEY_DOWN = "Down";
 	static const std::string KEY_BACKSTAB = "Backstab";
@@ -75,13 +76,17 @@ Enemy::Enemy(Player& player):player_(player)
 	isAttackedNear_ = false;
 	isCast_ = false;
 	isDown_ = false;
+	isStepActioned_ = false;
+	isBackstab_ = false;
+	isChargeAtk_ = false;
 	hitCount_ = 0;
 	currentAngle_ = 0.0f;               // 初期角度は適当に設定 (atan2で初期化しても良い)
 	stepDownTime_ = 0.0f;
 	// 例: 1秒で 90度（π/2 ラジアン）回転する速度
 	circlingSpeedRad_ = DX_PI_F / 2.0f  * 0.1f;
-	moveDir_ = CommonUtility::VECTOR_ZERO;
+
 	stepRotTime_ = 0.0f;
+	charge_ = 0.0f;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
@@ -90,6 +95,7 @@ Enemy::Enemy(Player& player):player_(player)
 	stateChanges_.emplace(STATE::ATTACK_NEAR, std::bind(&Enemy::ChangeStateAttackNear, this));
 	stateChanges_.emplace(STATE::SHOT_ONE, std::bind(&Enemy::ChangeStateShotOne, this));
 	stateChanges_.emplace(STATE::SHOT_ALL, std::bind(&Enemy::ChangeStateShotAll, this));
+	stateChanges_.emplace(STATE::CHARGE, std::bind(&Enemy::ChangeStateCharge, this));
 	stateChanges_.emplace(STATE::ATTACK_CHARGE, std::bind(&Enemy::ChangeStateAttackCharge, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Enemy::ChangeStateBackstab, this));
 	stateChanges_.emplace(STATE::DOWN, std::bind(&Enemy::ChangeStateDown, this));
@@ -146,6 +152,8 @@ void Enemy::Draw(void)
 		bullet->Draw();
 	}
 
+	DrawShadow();
+
 #ifdef _DEBUG
 	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
 	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
@@ -179,6 +187,9 @@ void Enemy::Draw(void)
 	case Enemy::STATE::SHOT_ALL:
 		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ALL");
 		break;
+	case Enemy::STATE::CHARGE:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"CHARGE");
+		break;
 	case Enemy::STATE::ATTACK_CHARGE:
 		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_CHARGE");
 		break;
@@ -190,8 +201,6 @@ void Enemy::Draw(void)
 	}
 	DrawFormatString(0, 160, 0xffffff, L"E HP : %.2f", hp_);
 
-	if(!isAttackedNear_)col_= 0x00ff00;
-	else col_ = 0xff0000;
 	sphereNear_->Draw(col_);
 
 	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
@@ -238,6 +247,13 @@ void Enemy::ChangeState(const STATE state)
 
 	//状態変更
 	state_ = state;
+
+	//if (!isChargeAtk_ &&
+	//	hp_ <= maxHp_ / 2.0f &&
+	//	state != STATE::BACKSTAB)
+	//{
+	//	state_ = STATE::CHARGE;
+	//}
 
 	//各状態遷移の初期処理
 	stateChanges_[state_]();
@@ -329,6 +345,8 @@ void Enemy::InitAnimation(void)
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_FAR_ALL, path + animPath.value(KEY_ATK_FAR_ALL, KEY_EMPTY),
 		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::ATTACK_CHARGE, path + animPath.value(KEY_ATK_CHARGE, KEY_EMPTY),
+		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::DAMAGE, path + animPath.value(KEY_DAMAGE, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::BACKSTAB, path + animPath.value(KEY_BACKSTAB, KEY_EMPTY),
@@ -362,15 +380,6 @@ void Enemy::Move(void)
 	else
 	{
 		animationController_->Play((int)ANIM_TYPE::IDLE);
-	}
-
-	static float stepTime = 0.0f;
-	stepTime += SceneManager::GetInstance().GetDeltaTime();
-
-	if(stepTime > 2.0f)
-	{
-		stepTime = 0.0f;
-		moveDir_ = CommonUtility::DIR_R;
 	}
 
 	//// 1. 角度を更新する
@@ -692,10 +701,19 @@ void Enemy::ChangeStateShotAll(void)
 	stateUpdate_ = std::bind(&Enemy::UpdateShotAll, this);
 }
 
+void Enemy::ChangeStateCharge(void)
+{
+	sphereNear_->SetRadius(0.0f);
+	sphereNear_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
+	//アニメーションを途中まで再生
+	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 0.0f, 26.0f);
+	stateUpdate_ = std::bind(&Enemy::UpdateCharge, this);
+}
+
 void Enemy::ChangeStateAttackCharge(void)
 {
-	sphereNear_->SetRadius(80.0f);
-	sphereNear_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
+	//アニメーションを途中から再生
+	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 26.0f,-1.0f,false,true);
 	stateUpdate_ = std::bind(&Enemy::UpdateChargeAttack, this);
 }
 
@@ -792,17 +810,16 @@ void Enemy::UpdateAttackNear(void)
 	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
 	if (VSize(distance) > ATTACK_NEAR_DISTANCE)
 	{
-		isAttackedNear_ = false;
+		col_ = 0x00ff00;
 		FollowPlayer(transform_.pos);
 		return;
 	}
-	isAttackedNear_ = true;
+	col_ = 0xff0000;
 
-	//状態時間更新
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 	if (animationController_->IsEnd())
 	{
-		isAttackedNear_ = false;
+		col_ = 0x00ff00;
+		isStepActioned_ = false;
 		ChangeState(STATE::MOVE);
 		return;
 	}
@@ -811,28 +828,36 @@ void Enemy::UpdateAttackNear(void)
 	animationController_->Play((int)ANIM_TYPE::ATTACK_NEAR,false);
 
 	//パリィ判定
-	if (CommonUtility::IsHitSpheres(sphereNear_->GetPos(),sphereNear_->GetRadius(),
-		player_.GetSphere().GetPos(),player_.GetSphere().GetRadius()))
+	if (CommonUtility::IsHitSpheres(
+		sphereNear_->GetPos(),
+		sphereNear_->GetRadius(),
+		player_.GetSphere().GetPos(),
+		player_.GetSphere().GetRadius()))
 	{
 		if (player_.GetIsParry())
 		{
 			ChangeState(STATE::DOWN);
 			Damage(NORMAL_DAMAGE);
-			isAttackedNear_ = false;
+			col_ = 0x00ff00;
 			return;
 		}
 	}
 
+	if (isStepActioned_)return;
+
 	//当たり判定
-	if(CommonUtility::IsHitSphereCapsule(sphereNear_->GetPos(),
-		sphereNear_->GetRadius(),player_.GetCapsule().GetPosTop(),
-		player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
+	if(CommonUtility::IsHitSphereCapsule(
+		sphereNear_->GetPos(),
+		sphereNear_->GetRadius(),
+		player_.GetCapsule().GetPosTop(),
+		player_.GetCapsule().GetPosDown(),
+		player_.GetCapsule().GetRadius()))
 	{
 		//回避中だったらダメージを受けない
 		if (player_.GetIsDodge())return;
 		player_.Damage(ATTACK_DAMAGE);
 		SceneManager::GetInstance().SetShakeScreen(true);
-		ChangeState(STATE::MOVE);
+		isStepActioned_ = true;
 	}
 }
 
@@ -848,12 +873,12 @@ void Enemy::UpdateShotOne(void)
 
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > ATTACK_FAR_TIME)
-	{
-		hitCount_ = 0;
-		ChangeState(STATE::MOVE);
-		return;
-	}
+	//if (stateStep_ > ATTACK_FAR_TIME)
+	//{
+	//	hitCount_ = 0;
+	//	ChangeState(STATE::MOVE);
+	//	return;
+	//}
 
 	for (auto& bullet : bullets_)
 	{
@@ -962,12 +987,12 @@ void Enemy::UpdateShotAll(void)
 
 	//遠距離攻撃の状態
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > ATTACK_FAR_TIME)
-	{
-		hitCount_ = 0;
-		ChangeState(STATE::MOVE);
-		return;
-	}
+	//if (stateStep_ > ATTACK_FAR_TIME)
+	//{
+	//	hitCount_ = 0;
+	//	ChangeState(STATE::MOVE);
+	//	return;
+	//}
 
 	//弾を順々に準備状態にする
 	const float bulletInterval = 0.4f;
@@ -1064,22 +1089,49 @@ void Enemy::UpdateShotAll(void)
 	}
 }
 
+void Enemy::UpdateCharge(void)
+{
+	//チャージで範囲を大きくする
+	charge_ += 1.5f;
+	sphereNear_->SetRadius(charge_);
+	const float chargeRad = 250.0f;
+	if (charge_ > chargeRad)
+	{
+		charge_ = chargeRad;
+		ChangeState(STATE::ATTACK_CHARGE);
+		return;
+	}
+}
+
 void Enemy::UpdateChargeAttack(void)
 {
-	//溜め攻撃の状態
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > ATTACK_FAR_TIME)
+	col_ = 0x000000;
+	if (CommonUtility::IsHitSphereCapsule(
+		sphereNear_->GetPos(),
+		sphereNear_->GetRadius(),
+		player_.GetCapsule().GetPosTop(),
+		player_.GetCapsule().GetPosDown(),
+		player_.GetCapsule().GetRadius()))
 	{
-		hitCount_ = 0;
+		//回避中だったらダメージを受けない
+		if (!player_.GetIsDodge())
+		{
+			col_ = 0xFFFFFF;
+		}
+	}
+
+	if (animationController_->IsEnd())
+	{
+		charge_ = 0.0f;
+		sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
+		sphereNear_->SetRadius(30.0f);
 		ChangeState(STATE::MOVE);
 		return;
 	}
-
 }
 
 void Enemy::UpdateBackstab(void)
 {
-	static bool isDamage = false;
 	//続きを再生させるための待ち時間
 	const float stopTime = 0.1f;
 	//途中までの再生が終わったら経過時間まで待ち、
@@ -1087,15 +1139,20 @@ void Enemy::UpdateBackstab(void)
 	if (animationController_->IsEnd())
 	{
 		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-
-		if (stateStep_ > stopTime)
+		if (stateStep_ > stopTime && !isBackstab_)
 		{
-			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, -1.0f, false, true);
-
-			if (isDamage)return;
+			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 110.0f, false, true);
 			Damage(BACKSTAB_DAMAGE);
-			isDamage = true;
+			isBackstab_ = true;
 		}
+	}
+
+	if (isBackstab_ && animationController_->IsEnd())
+	{
+		isBackstab_ = false;
+		stateStep_ = 0.0f;
+		ChangeState(STATE::MOVE);
+		return;
 	}
 }
 
@@ -1109,12 +1166,6 @@ void Enemy::UpdateDown(void)
 	if (animationController_->IsEnd())
 	{
 		stepDownTime_ = 0.0f;
-
-		if (hp_ <= maxHp_ / 2)
-		{
-			ChangeState(STATE::ATTACK_CHARGE);
-			return;
-		}
 
 		ChangeState(STATE::MOVE);
 		return;
@@ -1161,6 +1212,10 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		CreateBullet(bulletNum);
 		ChangeState(STATE::SHOT_ALL);
+	}
+	if (ImGui::Button("Charge"))
+	{
+		ChangeState(STATE::CHARGE);
 	}
 	if (ImGui::Button("Charge Attack"))
 	{
