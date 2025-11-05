@@ -357,10 +357,12 @@ void Player::ChangeStatePlay(void)
 
 void Player::ChangeStateBackstab(void)
 {
+	//敵と同じ方向を向く
 	transform_.quaRotLocal =
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-90.0f), 0.0f });
+
+	//アニメーションを途中まで再生
 	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false,0.0f,26.0f);
-	//animationController_->SetEndLoop(25.0f, 28.0f, 5.0f);
 	stateUpdate_ = std::bind(&Player::UpdateBackstab, this);
 }
 
@@ -414,15 +416,38 @@ void Player::UpdatePlay(void)
 
 void Player::UpdateBackstab(void)
 {
-	static float stateStep_ = 0.0f;
-	Rotate();
+	JsonManager& jsonM = JsonManager::GetInstance();
+	//続きを再生させるための待ち時間
+	const float stopTime = 0.6f;
+	//
+	static bool isPlay = false;
+	//経過時間
+	static float stateStep_ = 0.0f;	
+	//途中までの再生が終わったら経過時間まで待ち、
+	//残りのアニメーションを再生する
 	if (animationController_->IsEnd())
 	{
 		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-		if (stateStep_ > 0.5f)
+		if (stateStep_ > stopTime && !isPlay)
 		{
-			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, -1.0f, false, true);
+			isPlay = true;
+			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 100.0f, false, true);
 		}
+	}
+
+	if (isPlay && animationController_->IsEnd())
+	{
+		//Jsonデータ取得
+		const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+		const auto& param = data[KEY_PLAYER];
+		const auto& transformData = param[JsonManager::KEY_TRANSFORM];
+		const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
+		transform_.quaRotLocal =
+			Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+		isPlay = false;
+		stateStep_ = 0.0f;
+		ChangeState(STATE::PLAY);
+		return;
 	}
 }
 
@@ -987,10 +1012,6 @@ void Player::DebugDraw(void)
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
 	// 現在HP（緑）
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
-
-	DebugDrawFormat::FormatString(L"P HP : %.2f",
-		hp_,
-		lineH);
 
 	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
 	VECTOR forward = VScale(transform_.GetForward(), 100.0f);

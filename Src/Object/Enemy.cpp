@@ -51,7 +51,10 @@ namespace
 	const float ATTACK_FAR_TIME = 15.0f;
 	const float ATTACK_CHARGE_TIME = 30.0f;
 
+	//ダメージ
 	const float ATTACK_DAMAGE = 10.0f;
+	const float NORMAL_DAMAGE = 10.0f;
+	const float BACKSTAB_DAMAGE = 50.0f;
 
 	//アニメーション再生速度
 	const float ANIM_SPEED = 30.0f;
@@ -191,16 +194,27 @@ void Enemy::Draw(void)
 	else col_ = 0xff0000;
 	sphereNear_->Draw(col_);
 
-	const int HP_BAR_X = pos.x;         // HPバーの左上X座標
-	const int HP_BAR_Y = pos.z + 100.0f;         // HPバーの左上Y座標
-	const int HP_BAR_WIDTH = 200;    // HPバーの最大幅
-	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
-	float hp = hp_ / HP_MAX;
+	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
+	const int HP_BAR_Y = pos.z + 100.0f;// HPバーの左上Y座標
+
+	const int HP_BAR_WIDTH = maxHp_;    // HPバーの最大幅
+	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
+	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
+	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
+	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
 	// 背景（グレー）
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
+	DrawBox(posX,
+		posY,
+		posX + HP_BAR_WIDTH,
+		posY + HP_BAR_HEIGHT,
+		GetColor(100, 100, 100), TRUE);
 	// 現在HP（赤）
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(255, 0, 0), TRUE);
+	DrawBox(posX,
+		posY,
+		posX + barWidth,
+		posY + HP_BAR_HEIGHT,
+		GetColor(255, 0, 0), TRUE);
 
 	DrawDebug();
 #endif // _DEBUG
@@ -331,10 +345,10 @@ void Enemy::InitAnimation(void)
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
 
-void Enemy::Damage(void)
+void Enemy::Damage(const float damage)
 {
 	//ダメージ処理
-	hp_ -= 10.0f;
+	hp_ -= damage;
 }
 
 void Enemy::Move(void)
@@ -687,6 +701,7 @@ void Enemy::ChangeStateAttackCharge(void)
 
 void Enemy::ChangeStateBackstab(void)
 {
+	//アニメーションを途中まで再生
 	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 0.0f, 26.0f);
 	stateUpdate_ = std::bind(&Enemy::UpdateBackstab, this);
 }
@@ -802,7 +817,7 @@ void Enemy::UpdateAttackNear(void)
 		if (player_.GetIsParry())
 		{
 			ChangeState(STATE::DOWN);
-			Damage();
+			Damage(NORMAL_DAMAGE);
 			isAttackedNear_ = false;
 			return;
 		}
@@ -911,7 +926,7 @@ void Enemy::UpdateShotOne(void)
 		{
 			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
-			Damage();
+			Damage(NORMAL_DAMAGE);
 			bullet->Destroy();
 			hitCount_++;
 			continue;
@@ -1024,7 +1039,7 @@ void Enemy::UpdateShotAll(void)
 		{
 			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
-			Damage();
+			Damage(NORMAL_DAMAGE);
 			bullet->Destroy();
 			hitCount_++;
 			continue;
@@ -1064,11 +1079,23 @@ void Enemy::UpdateChargeAttack(void)
 
 void Enemy::UpdateBackstab(void)
 {
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-
+	static bool isDamage = false;
+	//続きを再生させるための待ち時間
+	const float stopTime = 0.1f;
+	//途中までの再生が終わったら経過時間まで待ち、
+	//残りのアニメーションを再生する
 	if (animationController_->IsEnd())
 	{
-		animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 27.0f, -1.0f, false, true);
+		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+
+		if (stateStep_ > stopTime)
+		{
+			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, -1.0f, false, true);
+
+			if (isDamage)return;
+			Damage(BACKSTAB_DAMAGE);
+			isDamage = true;
+		}
 	}
 }
 

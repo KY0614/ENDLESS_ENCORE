@@ -99,19 +99,13 @@ void GameScene::UpdateGame(void)
 	float distance = 60.0f;
 	VECTOR target = VAdd(enemy_->GetTransform().pos, VScale(backDir, distance));
 	targetPos_ = target;
-
+	//ダウン中のバックスタブ判定
 	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
 	{
 		if (player_->GetIsParry())
 		{
-			//プレイヤーの座標から敵の座標を引く
-			VECTOR lookAt;
-			lookAt = VSub(player_->GetTransform().pos, enemy_->GetTransform().pos);
-			//atan2 で角度を計算
-			float angle = atan2(lookAt.x, lookAt.z);
 			player_->SetPos(target);
 			player_->SetRotateY(enemy_->GetTransform().quaRot);
-			//player_->SetBackstabPos(enemy_->GetTransform().pos);
 			player_->ChangeState(Player::STATE::BACKSTAB);
 			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
 		}

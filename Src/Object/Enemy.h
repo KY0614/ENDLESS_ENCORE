@@ -77,7 +77,7 @@ public:
 	/// <summary>
 	/// ダウンしているかどうかを取得
 	/// </summary>
-	/// <returns>true:死亡　false:生存</returns>
+	/// <returns>true:ダウン中　false:ダウンではない</returns>
 	const bool GetIsDown(void)const { return state_ == STATE::DOWN; }
 
 	/// <summary>
@@ -87,10 +87,9 @@ public:
 	const bool GetIsDead(void)const;
 
 	/// <summary>
-	/// 
+	/// バックスタブ可能範囲を判断
 	/// </summary>
-	/// <param name=""></param>
-	/// <returns></returns>
+	/// <returns>true:可能　false:不可能</returns>
 	bool CheckBackstab(void);
 
 private:
@@ -168,9 +167,10 @@ private:
 	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
 	/// <summary>
-	/// ダメージ処理
+	/// ダメージを与える
 	/// </summary>
-	void Damage(void);
+	/// <param name="damage">ダメージ量</param>
+	void Damage(const float damage);
 
 	/// <summary>
 	/// 移動処理
