@@ -1109,46 +1109,48 @@ void Enemy::UpdateDebugImGui(void)
 	//HP用スライダー
 	ImGui::SliderFloat("HP", &hp_, 0.0f,maxHp_);
 
+	static float maxHpMax_ = 100.0f;
+	//最大HP用の最大値
+	ImGui::InputFloat("MaxHP Max", &maxHpMax_, 0.0f);
+
+	//最大HP用スライダー
+	ImGui::SliderFloat("MaxHP", &maxHp_, 0.0f, maxHpMax_);
+
+	//弾数用スライダー
 	static int bulletNum = 5;
 	ImGui::SliderInt("Bullet Num", &bulletNum, 0, 10);
 
+	//状態変更ボタン
 	if (ImGui::Button("Kick"))
 	{
 		ChangeState(STATE::ATTACK_NEAR);
 	}
-
 	if (ImGui::Button("Shot One"))
 	{
 		CreateBullet(bulletNum);
 		ChangeState(STATE::SHOT_ONE);
 	}
-
 	if (ImGui::Button("Shot All"))
 	{
 		CreateBullet(bulletNum);
 		ChangeState(STATE::SHOT_ALL);
 	}
-
 	if (ImGui::Button("Charge Attack"))
 	{
 		ChangeState(STATE::ATTACK_CHARGE);
 	}
-
 	if (ImGui::Button("Backstab"))
 	{
 		ChangeState(STATE::BACKSTAB);
 	}
-
 	if (ImGui::Button("Down"))
 	{
 		ChangeState(STATE::DOWN);
 	}
-
 	if (ImGui::Button("Dead"))
 	{
 		ChangeState(STATE::DEAD);
 	}
-
 
 	//終了処理
 	ImGui::End();

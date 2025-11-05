@@ -125,7 +125,7 @@ void Input::ResetTable()
 {
 	inputTable_ = {
 	{"Back",{
-		{PeripheralType::KEYBOARD,KEY_INPUT_RETURN},
+		{PeripheralType::KEYBOARD,KEY_INPUT_0},
 		{PeripheralType::GAMEPAD,PAD_INPUT_L},//selectボタン
 		//{PeripheralType::mouse,MOUSE_INPUT_LEFT}}//左クリック	
 		}

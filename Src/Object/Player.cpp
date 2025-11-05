@@ -127,6 +127,12 @@ void Player::Init(void)
 
 void Player::Update(void)
 {
+	//HP制限(HPが最大HPを超えないようにする)
+	if (hp_ > maxHp_)
+	{
+		hp_ = maxHp_;
+	}
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -271,7 +277,7 @@ void Player::Init3DModel(void)
 	//HPを設定
 	const auto& paramData = param[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
-	SetMaxHP(paramData.value(JsonManager::KEY_HP, 0.0f));
+	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 }
 
 void Player::InitCollider(void)
@@ -413,10 +419,11 @@ void Player::UpdateBackstab(void)
 	if (animationController_->IsEnd())
 	{
 		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+		if (stateStep_ > 0.5f)
+		{
+			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, -1.0f, false, true);
+		}
 	}
-
-	//if (!stateStep_ > 1.0f)return;
-	//animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, -1.0f, false, true);
 }
 
 void Player::UpdateDead(void)
@@ -933,14 +940,34 @@ void Player::UpdateDebugImGui(void)
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Player");
 
+	//HP用スライダー
+	ImGui::SliderFloat("HP", &hp_, 0.0f, maxHp_);
+
+	static float maxHpMax_ = 100.0f;
+	//最大HP用の最大値
+	ImGui::InputFloat("MaxHP Max", &maxHpMax_, 0.0f);
+
+	//最大HP用スライダー
+	ImGui::SliderFloat("MaxHP", &maxHp_, 0.0f, maxHpMax_);
+
+	//通常ジャンプ・無限ジャンプ切り替えボタン
 	if (ImGui::Button("Normal Jump"))
 	{
 		isJumpUnlimited_ = false;
 	}
-
 	if (ImGui::Button("Unlimited Jump"))
 	{
 		isJumpUnlimited_ = true;
+	}
+
+	//状態変更ボタン
+	if (ImGui::Button("Play"))
+	{
+		ChangeState(STATE::PLAY);
+	}
+	if (ImGui::Button("Dead"))
+	{
+		ChangeState(STATE::DEAD);
 	}
 
 	//終了処理
