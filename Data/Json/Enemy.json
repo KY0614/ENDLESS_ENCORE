@@ -11,6 +11,8 @@
       "defaultSpeed":30.0,
       "Idle": "Idle.mv1",
       "Walk": "Walk.mv1",
+      "Walk Right": "Right Walking.mv1",
+      "Walk Left": "Left Walking.mv1",
       "Run": "Run.mv1",
       "Attack_Near": "Kick.mv1",
       "Attack_Far_One": "Magic Attack.mv1",

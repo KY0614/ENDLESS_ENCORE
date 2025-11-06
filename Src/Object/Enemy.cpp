@@ -22,6 +22,8 @@ namespace
 	static const std::string KEY_ENEMY = "Enemy";
 	static const std::string KEY_IDLE = "Idle";
 	static const std::string KEY_WALK = "Walk";
+	static const std::string KEY_WALK_RIGHT = "Walk Right";
+	static const std::string KEY_WALK_LEFT = "Walk Left";
 	static const std::string KEY_RUN = "Run";
 	static const std::string KEY_ATK_NEAR = "Attack_Near";
 	static const std::string KEY_ATK_FAR_ONE = "Attack_Far_One";
@@ -39,15 +41,15 @@ namespace
 	const float TIME_ROT = 0.1f;
 	//敵の基本パラメータ
 	const float HP_MAX = 100.0f;	//最大HP	
-	const float MOVE_SPEED = 13.0f;	//移動速度
+	const float MOVE_SPEED = 8.0f;	//移動速度
 	//距離の基準値
 	const float ATTACK_NEAR_DISTANCE = 350.0f;	//近距離攻撃判定距離
 	const float ATTACK_FAR_DISTANCE = 800.0f;	//遠距離攻撃判定距離
-	const float PLAYER_DISTANCE = 600.0f;		//維持するプレイヤーとの距離
-	const float FOLLOW_DISTANCE = 800.0f;		//追従距離
-	//重力加速度
-	const float FOLLOW_TIME = 5.0f;
-	const float MOVE_TIME = 3.0f;
+	const float PLAYER_DISTANCE = 750.0f;		//維持するプレイヤーとの距離
+	const float FOLLOW_DISTANCE = 900.0f;		//追従距離
+	//状態ごとの時間
+	const float FOLLOW_TIME = 3.0f;
+	const float MOVE_TIME = 5.0f;
 	const float ATTACK_TIME = 1.0f;
 	const float ATTACK_FAR_TIME = 15.0f;
 	const float ATTACK_CHARGE_TIME = 30.0f;
@@ -71,10 +73,11 @@ Enemy::Enemy(Player& player):player_(player)
 	hp_ = 0.0f;
 	maxHp_ = 0.0f;
 	stateStep_ = 0.0f;
+	changeDirStep_ = 0.0f;
 	state_ = STATE::NONE;
+	prevState_ = STATE::NONE;
 	col_ = 0xff0000;
 	isAttackedNear_ = false;
-	isCast_ = false;
 	isDown_ = false;
 	isStepActioned_ = false;
 	isBackstab_ = false;
@@ -237,6 +240,7 @@ void Enemy::ChangeState(const STATE state)
 	stateStep_ = 0.0f;
 	isStepActioned_ = false;
 	//状態変更
+	prevState_ = state_;
 	state_ = state;
 	//死亡判定
 	if (hp_ <= 0.0f)
@@ -324,6 +328,10 @@ void Enemy::InitAnimation(void)
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::WALK_RIGHT, path + animPath.value(KEY_WALK_RIGHT, KEY_EMPTY),
+		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::WALK_LEFT, path + animPath.value(KEY_WALK_LEFT, KEY_EMPTY),
+		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value(KEY_RUN, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_NEAR, path + animPath.value(KEY_ATK_NEAR, KEY_EMPTY),
@@ -362,55 +370,32 @@ void Enemy::Damage(const float damage)
 
 void Enemy::Move(void)
 {
-	if(CheckPlayerDistance() > PLAYER_DISTANCE)
+	//移動方向変更の経過時間
+	changeDirStep_ += SceneManager::GetInstance().GetDeltaTime();
+	//一定時間経過したら移動方向をランダムで変更
+	const float change_Dir_Interval = 1.5f;
+	if (changeDirStep_ >= change_Dir_Interval)
 	{
-		//プレイヤーに近づく
-		FollowPlayer(transform_.pos);
-		ChangeState(STATE::FOLLOW);
+		changeDirStep_ = 0.0f;
+		std::vector<VECTOR> moveDir =
+		{ transform_.GetRight(), transform_.GetLeft() };
+		// 乱数生成器の初期化
+		std::random_device rd; //非決定的な乱数生成器
+		std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
+		std::shuffle(moveDir.begin(), moveDir.end(), engine);
+		moveDir_ = moveDir[0];
+		if (CommonUtility::Equals(moveDir_, transform_.GetLeft()))
+		{
+			animationController_->Play((int)ANIM_TYPE::WALK_LEFT);
+		}
+		if (CommonUtility::Equals(moveDir_, transform_.GetRight()))
+		{
+			animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
+		}
 	}
-	else
-	{
-		animationController_->Play((int)ANIM_TYPE::IDLE);
-	}
-
-	//// 1. 角度を更新する
-	////時間経過で角度を変化させます。プレイヤーの周りを右回り（時計回り）で動く。
-	//currentAngle_ += circlingSpeedRad_ * SceneManager::GetInstance().GetDeltaTime();
-
-	//// 角度が一周したらリセット (省略可)
-	//if (currentAngle_ > DX_PI_F * 2.0f)
-	//{
-	//	currentAngle_ -= DX_PI_F * 2.0f;
-	//}
-
-	//// 2. プレイヤーの周りの円上の座標を計算する
-	//VECTOR playerPos = player_.GetTransform().pos;
-
-	//// X-Z平面での円運動の計算 (極座標からデカルト座標への変換)
-	//// X = R * sin(θ)
-	//// Z = R * cos(θ)
-
-	//// プレイヤーからの相対位置
-	//VECTOR relativePos;
-	//relativePos.x = PLAYER_DISTANCE * sinf(currentAngle_);
-	//relativePos.y = 0.0f; // プレイヤーの高さと合わせる
-	//relativePos.z = PLAYER_DISTANCE * cosf(currentAngle_);
-
-	////3. 敵のワールド座標を決定する
-	////プレイヤーの位置 + プレイヤーからの相対位置
-	//transform_.pos = VAdd(playerPos, relativePos);
-
-	////4.プレイヤーの方を向く処理
-	////移動した新しい位置からプレイヤーの方を向くように回転角度を計算し直す
-
-	////敵からプレイヤーへのベクトル (このベクトルは原点(0,0,0)を向くベクトルと180度ずれている)
-	////正しいターゲット方向ベクトルは relativePos の逆ベクトルになる
-	//VECTOR posE2P = VScale(relativePos, -1.0f);
-
-	////atan2 で角度を計算
-	//float angle = atan2(posE2P.x, posE2P.z);
-
-	//SetGoalRotate(angle);
+	//移動方向をスピード分加算
+	const float speed = 2.0f;
+	transform_.pos = VAdd(transform_.pos, VScale(moveDir_, speed));
 }
 
 float Enemy::CheckPlayerDistance(void)
@@ -466,7 +451,8 @@ bool Enemy::CheckBackstab(void)
 
 void Enemy::FollowPlayer(VECTOR& pos)
 {
-	animationController_->Play((int)ANIM_TYPE::WALK);
+	//歩きアニメーション再生
+	animationController_->Play((int)ANIM_TYPE::RUN);
 
 	// プレイヤーの位置
 	VECTOR playerPos = player_.GetTransform().pos;
@@ -492,7 +478,6 @@ void Enemy::FollowPlayer(VECTOR& pos)
 	}
 	else
 	{
-
 		//正規化　位置ベクトルを大きさで割る
 		VECTOR dirNorm = { lookAt.x / size, lookAt.y / size,lookAt.z / size };
 
@@ -674,6 +659,22 @@ void Enemy::ChangeStateFollow(void)
 
 void Enemy::ChangeStateMove(void)
 {
+	std::vector<VECTOR> moveDir =
+	{ transform_.GetRight(), transform_.GetLeft()};
+	// 乱数生成器の初期化
+	std::random_device rd; //非決定的な乱数生成器
+	std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
+	std::shuffle(moveDir.begin(), moveDir.end(), engine);
+	moveDir_ = moveDir[0];
+	if (CommonUtility::Equals(moveDir_, transform_.GetLeft()))
+	{
+		animationController_->Play((int)ANIM_TYPE::WALK_LEFT);
+	}
+	else if (CommonUtility::Equals(moveDir_, transform_.GetRight()))
+	{
+		animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
+	}
+
 	stateUpdate_ = std::bind(&Enemy::UpdateMove, this);
 }
 
@@ -725,6 +726,10 @@ void Enemy::ChangeStateDown(void)
 
 void Enemy::ChangeStateDead(void)
 {
+	//死亡アニメーション再生
+	animationController_->Play((int)ANIM_TYPE::DEATH, false);
+	//バックスタブからの遷移だったら倒れたままのアニメーションを再生
+	if (prevState_ == STATE::BACKSTAB)animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 110.0f, -1.0f);
 	stateUpdate_ = std::bind(&Enemy::UpdateDead, this);
 }
 
@@ -743,15 +748,10 @@ void Enemy::UpdateFollow(void)
 		return;
 	}
 
+	//追従処理
 	FollowPlayer(transform_.pos);
+	//回転処理
 	Rotate();
-
-	//プレイヤーとの距離を測り、一定以上近づいたら追従をやめる
-	if (CheckPlayerDistance() < PLAYER_DISTANCE)
-	{
-		ChangeState(STATE::MOVE);
-		return;
-	}
 }
 
 void Enemy::UpdateMove(void)
@@ -777,8 +777,8 @@ void Enemy::UpdateMove(void)
 			animationController_->Play((int)ANIM_TYPE::CAST_SPELL, false);
 			std::vector<STATE> attackState = { STATE::SHOT_ONE, STATE::SHOT_ALL };
 			// 乱数生成器の初期化
-			std::random_device rd; // 非決定的な乱数生成器
-			std::mt19937 engine(rd()); // メルセンヌ・ツイスタ法による乱数生成器
+			std::random_device rd; //非決定的な乱数生成器
+			std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
 			std::shuffle(attackState.begin(), attackState.end(), engine);
 			//遠距離攻撃
 			const int bulletNum = 5;
@@ -791,9 +791,10 @@ void Enemy::UpdateMove(void)
 	//移動処理
 	Move();
 
+	//プレイヤーがいる方向を見続ける
 	RotateToPlayer();
 
-	//すごく離れていたら追従状態に遷移
+	//離れていたら追従状態に遷移
 	if(CheckPlayerDistance() > FOLLOW_DISTANCE)
 	{
 		animationController_->Play((int)ANIM_TYPE::RUN);
@@ -1170,8 +1171,7 @@ void Enemy::UpdateDown(void)
 }
 
 void Enemy::UpdateDead(void)
-{
-	animationController_->Play((int)ANIM_TYPE::DEATH,false);
+{//何もしない
 }
 
 void Enemy::UpdateDebugImGui(void)
@@ -1228,6 +1228,11 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
+
+	ImGui::InputFloat3("moveDir", &moveDir_.x);
+	ImGui::SliderFloat3("moveDir", &moveDir_.x, -1.0f, 1.0f);
+	ImGui::SliderFloat3("moveDir", &moveDir_.y, -1.0f, 1.0f);
+	ImGui::SliderFloat3("moveDir", &moveDir_.z, -1.0f, 1.0f);
 
 	//終了処理
 	ImGui::End();

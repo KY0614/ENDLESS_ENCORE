@@ -557,7 +557,7 @@ void Player::ProcessDodge(void)
 	bool isHit = ins.IsInputTriggered("Dodge");
 
 	//回避
-	if (isHit && !isJump_ /*(!isDodge_ || IsEndDodge()) */)
+	if (isHit && !isJump_)
 	{
 		//回避中はスピードを早くする
 		isDodge_ = true;
@@ -579,6 +579,7 @@ void Player::ProcessDodge(void)
 		isDecelerate_ = true;
 		animationController_->Play((int)ANIM_TYPE::DODGE,true,4.0f,-1.0f,false,true);
 	}
+	//速度減速処理
 	if (isDecelerate_)
 	{
 		stepWalk_ = STEP_WALK2RUN;

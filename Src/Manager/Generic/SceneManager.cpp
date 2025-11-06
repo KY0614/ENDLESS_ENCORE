@@ -1,3 +1,4 @@
+#include <ranges>
 #include <chrono>
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
@@ -78,7 +79,6 @@ void SceneManager::Init(void)
 
 	//‰ŠúƒV[ƒ“‚ÌÝ’è
 	DoChangeScene(SCENE_ID::GAME);
-
 }
 
 void SceneManager::Init3D(void)
@@ -158,7 +158,7 @@ void SceneManager::Draw(void)
 
 	//•`‰æ
 	//scene_->Draw();
-	for (auto& scene : scenes_) 
+	for (auto& scene : scenes_ | std::ranges::views::reverse)
 	{
 		scene->Draw();
 	}
@@ -253,7 +253,7 @@ void SceneManager::PushScene(SCENE_ID _scene)
 {
 	sceneId_ = _scene;
 	//V‚µ‚­Ï‚Þ‚Ì‚Å‚à‚Æ‚à‚Æ“ü‚Á‚Ä‚¢‚é“z‚Í‚Ü‚¾íœ‚³‚ê‚È‚¢
-	scenes_.push_back(std::move(CreateScene(_scene)));
+	scenes_.push_front(std::move(CreateScene(_scene)));
 	scenes_.back()->Init();
 }
 

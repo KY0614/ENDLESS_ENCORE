@@ -33,6 +33,8 @@ public:
 	{
 		IDLE,
 		WALK,
+		WALK_RIGHT,
+		WALK_LEFT,
 		RUN,
 		ATTACK_NEAR,
 		MAGIC_ILDE,
@@ -104,7 +106,8 @@ private:
 	std::unique_ptr<AnimationController> animationController_;
 
 	//状態管理
-	STATE state_;
+	STATE state_;		//現在の状態
+	STATE prevState_;	//遷移する前の状態
 
 	//状態管理(状態遷移時初期処理)
 	std::map<STATE, std::function<void(void)>> stateChanges_;
@@ -123,12 +126,13 @@ private:
 	//当たり判定用カプセル
 	Player& player_;
 
+	VECTOR moveDir_;
+
 	//体力
 	float hp_;
 	float maxHp_;
 
 	bool isAttackedNear_;
-	bool isCast_;
 
 	//回転
 	Quaternion enemyRotY_;		//Y軸回転
@@ -313,6 +317,7 @@ private:
 	void DrawDebug(void);
 
 	float stateStep_;
+	float changeDirStep_;
 
 	int col_;
 };
