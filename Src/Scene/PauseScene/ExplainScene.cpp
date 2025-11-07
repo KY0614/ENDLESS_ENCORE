@@ -26,6 +26,10 @@ ExplainScene::~ExplainScene(void)
 {
 }
 
+void ExplainScene::LoadData(void)
+{
+}
+
 void ExplainScene::Init(void)
 {
 

@@ -8,6 +8,11 @@ public:
 	KeyConfigScene(void);
 	~KeyConfigScene(void);
 
+	/// <summary>
+	/// ƒf[ƒ^“Çˆ—
+	/// </summary>
+	void LoadData(void) override;
+
 	void Init(void)override;
 	void Update(void)override;
 	void Draw(void)override;

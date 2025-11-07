@@ -23,6 +23,10 @@ InventoryScene::~InventoryScene(void)
 {
 }
 
+void InventoryScene::LoadData(void)
+{
+}
+
 void InventoryScene::Init(void)
 {
 }

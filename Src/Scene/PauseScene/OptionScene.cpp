@@ -22,6 +22,10 @@ OptionScene::~OptionScene(void)
 {
 }
 
+void OptionScene::LoadData(void)
+{
+}
+
 void OptionScene::Init(void)
 {
 }

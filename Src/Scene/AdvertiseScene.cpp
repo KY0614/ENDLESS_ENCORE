@@ -14,6 +14,10 @@ AdvertiseScene::~AdvertiseScene(void)
 	DeleteGraph(movieHandle_);
 }
 
+void AdvertiseScene::LoadData(void)
+{
+}
+
 void AdvertiseScene::Init(void)
 {
 	//ムービーをロードして再生する

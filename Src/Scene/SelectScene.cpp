@@ -19,6 +19,10 @@ SelectScene::~SelectScene(void)
 {
 }
 
+void SelectScene::LoadData(void)
+{
+}
+
 void SelectScene::Init(void)
 {
 }

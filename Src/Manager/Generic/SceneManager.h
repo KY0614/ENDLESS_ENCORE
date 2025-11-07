@@ -122,6 +122,7 @@ private:
 	int shakeFrame_;
 	float shakeRate_;
 	
+	int nowLoadCnt;
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする
 	SceneManager(void);
@@ -139,17 +140,11 @@ private:
 	// フェード
 	void Fade(void);
 
-	void MakeScene(SCENE_ID sceneId);
-
 	void ShakeScreen(void);
 
 	//SCENE_IDからシーンを生成する
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
-
-	//SCENE_IDからシーンを生成する
-	template<typename T = SceneBase>
-	SCENE_ID SerchScene(std::unique_ptr<T> scene);
 
 	void UpdateDebugImGui(void);
 };

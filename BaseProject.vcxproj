@@ -88,6 +88,7 @@
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
     <ClCompile Include="Src\Object\State\Enemy\EnemyStateBase.cpp" />
     <ClCompile Include="Src\Object\State\Enemy\StateMove.cpp" />
+    <ClCompile Include="Src\Object\Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Scene\DebugScene.h" />
@@ -206,6 +207,7 @@
     <ClInclude Include="Src\Manager\Transition\WipeTransitor.h" />
     <ClInclude Include="Src\Object\State\Enemy\EnemyStateBase.h" />
     <ClInclude Include="Src\Object\State\Enemy\StateMove.h" />
+    <ClInclude Include="Src\Object\Stage.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />

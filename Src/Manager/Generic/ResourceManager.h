@@ -34,6 +34,7 @@ public:
 
 		//ステージオブジェクト
 		FLOOR,
+		STAGE,
 
 		//音
 		TITLE_BGM,

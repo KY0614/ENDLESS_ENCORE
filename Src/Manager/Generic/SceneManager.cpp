@@ -74,6 +74,7 @@ void SceneManager::Init(void)
 	shakeFrame_ = 0;
 	shakeRate_ = 0.0f;
 	screenPos_ = { 0,0 };
+	nowLoadCnt = 0;
 	//3D—p‚ÌÝ’è
 	Init3D();
 
@@ -111,6 +112,12 @@ void SceneManager::Init3D(void)
 
 void SceneManager::Update(void)
 {
+	// ”ñ“¯Šú“Ç‚Ýž‚Ý’†‚Ìˆ—”‚ªƒ[ƒ‚É‚È‚é‚Ü‚Åˆ—‚µ‚È‚¢
+	if (GetASyncLoadNum() != 0)
+	{
+		return;
+	}
+	//‰æ–Ê—h‚ç‚µ
 	ShakeScreen();
 	ChangeLightTypeDir(lightDir_);
 	if (scenes_.empty())
@@ -143,6 +150,14 @@ void SceneManager::Update(void)
 
 void SceneManager::Draw(void)
 {
+	// ”ñ“¯Šú“Ç‚Ýž‚Ý’†‚Ìˆ—”‚ªƒ[ƒ‚É‚È‚é‚Ü‚Åˆ—‚µ‚È‚¢
+	if (GetASyncLoadNum() != 0)
+	{
+		std::wstring nowloadStr = L"Now Loading...";
+		DrawString(100, 100, nowloadStr.substr(0, nowLoadCnt).c_str(), 0xffffff);
+		nowLoadCnt = (nowLoadCnt + 1) % nowloadStr.length();
+		return;
+	}
 	//•`‰ææƒOƒ‰ƒtƒBƒbƒN—Ìˆæ‚ÌŽw’è
 	//(‚R‚c•`‰æ‚ÅŽg—p‚·‚éƒJƒƒ‰‚ÌÝ’è‚È‚Ç‚ªƒŠƒZƒbƒg‚³‚ê‚é)
 	//SetDrawScreen(DX_SCREEN_BACK);
@@ -158,7 +173,8 @@ void SceneManager::Draw(void)
 
 	//•`‰æ
 	//scene_->Draw();
-	for (auto& scene : scenes_ | std::ranges::views::reverse)
+	//for (auto& scene : scenes_ | std::ranges::views::reverse)
+	for (auto& scene : scenes_)
 	{
 		scene->Draw();
 	}
@@ -253,7 +269,7 @@ void SceneManager::PushScene(SCENE_ID _scene)
 {
 	sceneId_ = _scene;
 	//V‚µ‚­Ï‚Þ‚Ì‚Å‚à‚Æ‚à‚Æ“ü‚Á‚Ä‚¢‚é“z‚Í‚Ü‚¾íœ‚³‚ê‚È‚¢
-	scenes_.push_front(std::move(CreateScene(_scene)));
+	scenes_.push_back(std::move(CreateScene(_scene)));
 	scenes_.back()->Init();
 }
 
@@ -324,8 +340,6 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	{
 		scene_.reset();
 	}
-	
-	//MakeScene(sceneId);
 
 	if (scenes_.empty())
 	{
@@ -376,76 +390,6 @@ void SceneManager::Fade(void)
 
 }
 
-void SceneManager::MakeScene(SCENE_ID sceneId)
-{
-	auto& resM = ResourceManager::GetInstance();
-	auto& jsonM = JsonManager::GetInstance();
-	std::unique_ptr<SceneBase> scene;
-	switch (sceneId)
-	{
-	case SceneManager::SCENE_ID::NONE:
-		break;
-	
-	case SceneManager::SCENE_ID::TITLE:
-		scene = std::make_unique<TitleScene>();
-		resM.InitTitle();
-		break;
-	
-	case SceneManager::SCENE_ID::DEBUG:
-		scene = std::make_unique<DebugScene>();
-		resM.InitGame();
-		jsonM.InitGame();
-		break;
-	
-	case SceneManager::SCENE_ID::ADVERTISE:
-		scene = std::make_unique<AdvertiseScene>();
-		break;
-	
-	
-	case SceneManager::SCENE_ID::MOVIE:
-		scene = std::make_unique<MovieScene>();
-		break;
-	
-	case SceneManager::SCENE_ID::SELECT:
-		scene = std::make_unique<SelectScene>();
-		break;
-	
-	case SceneManager::SCENE_ID::TUTORIAL:
-		scene = std::make_unique<TutorialScene>();
-		resM.InitTutorial();
-		break;
-	
-	case SceneManager::SCENE_ID::GAME:
-		scene = std::make_unique<GameScene>();
-		resM.InitGame();
-		jsonM.InitGame();
-		break;
-	
-	case SceneManager::SCENE_ID::PAUSE:
-		scene = std::make_unique<PauseScene>();
-		break;
-
-	case SceneManager::SCENE_ID::RESULT:
-		scene = std::make_unique<ResultScene>();
-		resM.InitResult();
-		break;
-	
-	default:
-		break;
-	}
-
-	if (scenes_.empty())
-	{
-		//‹ó‚¾‚Á‚½‚çV‚µ‚­“ü‚ê‚é
-		scenes_.push_back(std::move(scene));
-	}
-	else
-	{
-		//––”ö‚Ì‚à‚Ì‚ðV‚µ‚¢•¨‚É“ü‚ê‘Ö‚¦‚é
-		scenes_.back() = std::move(scene);
-	}
-}
-
 void SceneManager::ShakeScreen(void)
 {
 	if (shakeFrame_ > 0)
@@ -466,6 +410,7 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 
 	auto& resM = ResourceManager::GetInstance();
 	auto& jsonM = JsonManager::GetInstance();
+
 	std::unique_ptr<SceneBase> scene;
 	switch (sceneId)
 	{
@@ -504,6 +449,7 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 		scene = std::make_unique<GameScene>();
 		resM.InitGame();
 		jsonM.InitGame();
+		
 		break;
 
 	case SceneManager::SCENE_ID::PAUSE:
@@ -532,13 +478,6 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 	}
 	return scene;
 }
-
-template<typename T>
-SceneManager::SCENE_ID SceneManager::SerchScene(std::unique_ptr<T> scene)
-{
-	return SCENE_ID();
-}
-
 
 void SceneManager::UpdateDebugImGui(void)
 {

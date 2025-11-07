@@ -23,6 +23,10 @@ KeyConfigScene::~KeyConfigScene(void)
 {
 }
 
+void KeyConfigScene::LoadData(void)
+{
+}
+
 void KeyConfigScene::Init(void)
 {
 

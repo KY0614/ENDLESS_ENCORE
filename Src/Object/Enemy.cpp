@@ -40,8 +40,7 @@ namespace
 	//回転にかける時間
 	const float TIME_ROT = 0.1f;
 	//敵の基本パラメータ
-	const float HP_MAX = 100.0f;	//最大HP	
-	const float MOVE_SPEED = 8.0f;	//移動速度
+	const float MOVE_SPEED = 5.0f;	//移動速度
 	//距離の基準値
 	const float ATTACK_NEAR_DISTANCE = 350.0f;	//近距離攻撃判定距離
 	const float ATTACK_FAR_DISTANCE = 800.0f;	//遠距離攻撃判定距離
@@ -49,7 +48,7 @@ namespace
 	const float FOLLOW_DISTANCE = 900.0f;		//追従距離
 	//状態ごとの時間
 	const float FOLLOW_TIME = 3.0f;
-	const float MOVE_TIME = 5.0f;
+	const float MOVE_TIME = 3.0f;
 	const float ATTACK_TIME = 1.0f;
 	const float ATTACK_FAR_TIME = 15.0f;
 	const float ATTACK_CHARGE_TIME = 30.0f;
@@ -90,6 +89,7 @@ Enemy::Enemy(Player& player):player_(player)
 
 	stepRotTime_ = 0.0f;
 	charge_ = 0.0f;
+	moveDir_ = CommonUtility::VECTOR_ZERO;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
@@ -147,6 +147,7 @@ void Enemy::Draw(void)
 		bullet->Draw();
 	}
 
+	//丸影描画
 	DrawShadow();
 
 #ifdef _DEBUG
@@ -281,8 +282,10 @@ void Enemy::Init3DModel(void)
 	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
 	transform_.scl = { scale ,scale ,scale };
 	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
-	transform_.quaRot = Quaternion();
 	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
+	transform_.quaRot = //Quaternion();
+	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+	//const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 	transform_.quaRotLocal = 
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
@@ -373,8 +376,9 @@ void Enemy::Move(void)
 	//移動方向変更の経過時間
 	changeDirStep_ += SceneManager::GetInstance().GetDeltaTime();
 	//一定時間経過したら移動方向をランダムで変更
-	const float change_Dir_Interval = 1.5f;
-	if (changeDirStep_ >= change_Dir_Interval)
+	const float changeInterval = 1.0f;
+
+	if (changeDirStep_ >= changeInterval)
 	{
 		changeDirStep_ = 0.0f;
 		std::vector<VECTOR> moveDir =
@@ -384,6 +388,7 @@ void Enemy::Move(void)
 		std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
 		std::shuffle(moveDir.begin(), moveDir.end(), engine);
 		moveDir_ = moveDir[0];
+		//移動方向に応じて歩行アニメーションを変更
 		if (CommonUtility::Equals(moveDir_, transform_.GetLeft()))
 		{
 			animationController_->Play((int)ANIM_TYPE::WALK_LEFT);
@@ -659,27 +664,15 @@ void Enemy::ChangeStateFollow(void)
 
 void Enemy::ChangeStateMove(void)
 {
-	std::vector<VECTOR> moveDir =
-	{ transform_.GetRight(), transform_.GetLeft()};
-	// 乱数生成器の初期化
-	std::random_device rd; //非決定的な乱数生成器
-	std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
-	std::shuffle(moveDir.begin(), moveDir.end(), engine);
-	moveDir_ = moveDir[0];
-	if (CommonUtility::Equals(moveDir_, transform_.GetLeft()))
-	{
-		animationController_->Play((int)ANIM_TYPE::WALK_LEFT);
-	}
-	else if (CommonUtility::Equals(moveDir_, transform_.GetRight()))
-	{
-		animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
-	}
-
+	moveDir_ = transform_.GetRight();
+	animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
 	stateUpdate_ = std::bind(&Enemy::UpdateMove, this);
 }
 
 void Enemy::ChangeStateAttackNear(void)
 {
+	//攻撃アニメーション再生
+	animationController_->Play((int)ANIM_TYPE::ATTACK_NEAR, false);
 	stateUpdate_ = std::bind(&Enemy::UpdateAttackNear, this);
 }
 
@@ -757,8 +750,16 @@ void Enemy::UpdateFollow(void)
 void Enemy::UpdateMove(void)
 {
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+
+	//プレイヤーがいる方向を見続ける
+	RotateToPlayer();
+
+	//移動処理
+	Move();
+
 	if (stateStep_ > MOVE_TIME)
 	{
+		//HPが最大の半分以下になっていたらチャージ攻撃状態に遷移
 		if (!isChargeAtk_ &&
 			hp_ <= maxHp_ / 2.0f)
 		{
@@ -788,12 +789,6 @@ void Enemy::UpdateMove(void)
 		}
 	}
 
-	//移動処理
-	Move();
-
-	//プレイヤーがいる方向を見続ける
-	RotateToPlayer();
-
 	//離れていたら追従状態に遷移
 	if(CheckPlayerDistance() > FOLLOW_DISTANCE)
 	{
@@ -806,15 +801,16 @@ void Enemy::UpdateAttackNear(void)
 {
 	Rotate();
 	//プレイヤーとの距離を測り、一定以上離れていたら近づく
-	VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
-	if (VSize(distance) > ATTACK_NEAR_DISTANCE)
-	{
-		col_ = 0x00ff00;
-		FollowPlayer(transform_.pos);
-		return;
-	}
+	//VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
+	//if (VSize(distance) > ATTACK_NEAR_DISTANCE)
+	//{
+	//	col_ = 0x00ff00;
+	//	FollowPlayer(transform_.pos);
+	//	return;
+	//}
 	col_ = 0xff0000;
 
+	//アニメーションが終わったら移動状態へ戦記
 	if (animationController_->IsEnd())
 	{
 		col_ = 0x00ff00;
@@ -822,10 +818,7 @@ void Enemy::UpdateAttackNear(void)
 		return;
 	}
 
-	//攻撃アニメーション再生
-	animationController_->Play((int)ANIM_TYPE::ATTACK_NEAR,false);
-
-	//パリィ判定
+	//パリィされたらダメージを受けてダウン状態へ遷移
 	if (CommonUtility::IsHitSpheres(
 		sphereNear_->GetPos(),
 		sphereNear_->GetRadius(),
@@ -834,13 +827,14 @@ void Enemy::UpdateAttackNear(void)
 	{
 		if (player_.GetIsParry())
 		{
-			ChangeState(STATE::DOWN);
 			Damage(NORMAL_DAMAGE);
+			ChangeState(STATE::DOWN);
 			col_ = 0x00ff00;
 			return;
 		}
 	}
 
+	//既に行動済みだったら処理しない
 	if (isStepActioned_)return;
 
 	//当たり判定
@@ -854,6 +848,7 @@ void Enemy::UpdateAttackNear(void)
 		//回避中だったらダメージを受けない
 		if (player_.GetIsDodge())return;
 		player_.Damage(ATTACK_DAMAGE);
+		//画面揺らし
 		SceneManager::GetInstance().SetShakeScreen(true);
 		isStepActioned_ = true;
 	}
@@ -932,10 +927,7 @@ void Enemy::UpdateShotOne(void)
 			//破棄状態の弾は無視
 			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
 			//回避中だったらダメージを受けない
-			if (player_.GetIsDodge())
-			{
-				continue;
-			}
+			if (player_.GetIsDodge())continue;
 			//ダメージ処理(当たった弾は破棄)
 			player_.Damage(ATTACK_DAMAGE);
 			SceneManager::GetInstance().SetShakeScreen(true);
@@ -1228,11 +1220,11 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
-
+	VECTOR right = transform_.GetRight();
+	VECTOR left = transform_.GetLeft();
 	ImGui::InputFloat3("moveDir", &moveDir_.x);
-	ImGui::SliderFloat3("moveDir", &moveDir_.x, -1.0f, 1.0f);
-	ImGui::SliderFloat3("moveDir", &moveDir_.y, -1.0f, 1.0f);
-	ImGui::SliderFloat3("moveDir", &moveDir_.z, -1.0f, 1.0f);
+	ImGui::SliderFloat3("RightDir", &right.x, -1.0f, 1.0f);
+	ImGui::SliderFloat3("LeftDir", &left.x, -1.0f, 1.0f);
 
 	//終了処理
 	ImGui::End();

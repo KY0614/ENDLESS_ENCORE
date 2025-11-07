@@ -11,6 +11,11 @@ public:
 	// デストラクタ
 	~ExplainScene(void);
 
+	/// <summary>
+	/// データ読込処理
+	/// </summary>
+	void LoadData(void) override;
+
 	// 初期化処理
 	void Init(void)override;
 

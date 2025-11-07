@@ -17,6 +17,13 @@ public:
 	//デストラクタ
 	~TutorialScene(void);
 
+
+	/// <summary>
+	/// データ読込処理
+	/// </summary>
+	void LoadData(void) override;
+
+
 	void Init(void) override;
 	void Update(void) override;
 	void Draw(void) override;

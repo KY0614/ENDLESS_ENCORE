@@ -8,6 +8,7 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
+#include "../Object/Stage.h"
 #include "PauseScene.h"
 #include "GameScene.h"
 
@@ -24,8 +25,16 @@ GameScene::~GameScene(void)
 {
 }
 
+void GameScene::LoadData(void)
+{
+}
+
 void GameScene::Init(void)
 {
+	//プレイヤー
+	stage_ = std::make_unique<Stage>();
+	stage_->Init();
+
 	//プレイヤー
 	player_ = std::make_unique<Player>();
 	player_->Init();
@@ -40,18 +49,20 @@ void GameScene::Init(void)
 	//mainCamera->ChangeMode(Camera::MODE::MOUSE);
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
-	floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-		ResourceManager::SRC::FLOOR));
-	float scale = 1.0f;
-	floor_.scl = { scale,scale,scale };
-	floor_.pos = { 0.0f, 0.0f, 0.0f };
-	floor_.quaRot = Quaternion();
-	floor_.quaRotLocal =
-		Quaternion::Euler({ 0.0f,0.0f, 0.0f });
-	floor_.MakeCollider(Collider::TYPE::STAGE);
-	floor_.Update();
-	player_->AddCollider(floor_.collider);
-	enemy_->AddCollider(floor_.collider);
+	//floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
+	//	ResourceManager::SRC::FLOOR));
+	//float scale = 10.0f;
+	//floor_.scl = { scale,scale,scale };
+	//floor_.pos = { 0.0f, 0.0f, 0.0f };
+	//floor_.quaRot = Quaternion();
+	//floor_.quaRotLocal =
+	//	Quaternion::Euler({ 0.0f,0.0f, 0.0f });
+	//floor_.MakeCollider(Collider::TYPE::STAGE);
+	//floor_.Update();
+	//player_->AddCollider(floor_.collider);
+	//enemy_->AddCollider(floor_.collider);
+	player_->AddCollider(stage_->GetTransform().collider);
+	enemy_->AddCollider(stage_->GetTransform().collider);
 }
 
 void GameScene::Update(void)
@@ -72,7 +83,7 @@ void GameScene::UpdateGame(void)
 	enemy_->Update();
 
 #ifdef _DEBUG
-	if (ins.IsInputTriggered("Reset"))
+	if (ins.IsInputPressed("Reset"))
 	{
 		this->Init();
 	}
@@ -119,10 +130,13 @@ void GameScene::DrawGame(void)
 {
 	MV1DrawModel(floor_.modelId);
 
-	//敵描画
-	enemy_->Draw();	
+	//プレイヤー描画
+	stage_->Draw();
+
 	//プレイヤー描画
 	player_->Draw();
+	//敵描画
+	enemy_->Draw();
 
 	if(enemy_->GetIsDead())
 	{

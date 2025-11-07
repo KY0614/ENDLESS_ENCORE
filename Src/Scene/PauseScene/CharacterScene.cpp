@@ -12,6 +12,10 @@ CharacterScene::~CharacterScene(void)
 {
 }
 
+void CharacterScene::LoadData(void)
+{
+}
+
 void CharacterScene::Init(void)
 {
 }

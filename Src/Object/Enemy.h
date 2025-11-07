@@ -190,7 +190,6 @@ private:
 	/// <summary>
 	/// ˆÚ“®ˆ—
 	/// </summary>
-	/// <param name=""></param>
 	void Move(void);
 
 	/// <summary>

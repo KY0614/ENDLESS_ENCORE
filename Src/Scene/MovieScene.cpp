@@ -10,6 +10,10 @@ MovieScene::~MovieScene(void)
 {
 }
 
+void MovieScene::LoadData(void)
+{
+}
+
 void MovieScene::Init(void)
 {
 }

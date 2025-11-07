@@ -14,6 +14,10 @@ DebugScene::~DebugScene(void)
 {
 }
 
+void DebugScene::LoadData(void)
+{
+}
+
 void DebugScene::Init(void)
 {
 	//ƒvƒŒƒCƒ„[

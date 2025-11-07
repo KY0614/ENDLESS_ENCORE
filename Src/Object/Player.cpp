@@ -85,7 +85,6 @@ Player::Player(void)
 	goalQuaRot_ = Quaternion::Quaternion();
 	stepRotTime_ = 0.0f;
 	stepParry_ = 0.0f;
-	imgShadow_ = -1;
 	isJumpUnlimited_ = false;
 	isDodge_ = false;
 	isDecelerate_ = false;
@@ -238,6 +237,10 @@ bool Player::IsPlay(void) const
 {
 	//状態がPLAYかどうかを返す
 	return state_ == STATE::PLAY;
+}
+
+void Player::LoadData(void)
+{
 }
 
 void Player::Init3DModel(void)
@@ -866,6 +869,8 @@ void Player::UpdateDebugImGui(void)
 {
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Player");
+
+	ImGui::InputFloat3("pos", &transform_.pos.x);
 
 	//HP用スライダー
 	ImGui::SliderFloat("HP", &hp_, 0.0f, maxHp_);

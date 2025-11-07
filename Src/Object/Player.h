@@ -216,6 +216,8 @@ private:
 
 	int stringAlpha_;	//結果表示用文字列のアルファ値
 
+	void LoadData(void);
+
 	/// <summary>
 	/// 3Dモデル初期化
 	/// </summary>

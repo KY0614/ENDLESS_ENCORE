@@ -17,6 +17,10 @@ TutorialScene::~TutorialScene(void)
 
 }
 
+void TutorialScene::LoadData(void)
+{
+}
+
 void TutorialScene::Init(void)
 {
 }

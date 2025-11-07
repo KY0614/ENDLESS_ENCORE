@@ -108,6 +108,10 @@ PauseScene::~PauseScene(void)
 {
 }
 
+void PauseScene::LoadData(void)
+{
+}
+
 void PauseScene::Init(void)
 {
 }

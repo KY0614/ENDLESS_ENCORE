@@ -183,6 +183,10 @@ void ResourceManager::InitGame(void)
 
 	std::unique_ptr<Resource> res;
 
+	//ステージ
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Stage_.mv1");
+	resourcesMap_.emplace(SRC::STAGE, std::move(res));
+
 	//敵
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician.mv1");
 	resourcesMap_.emplace(SRC::ENEMY, std::move(res));
@@ -192,7 +196,7 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::ENEMY_BULLET, std::move(res));
 
 	//プレイヤー
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Model.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
 	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
 
 	//プレイヤー影

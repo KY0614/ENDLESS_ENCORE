@@ -12,6 +12,10 @@ ResultScene::~ResultScene(void)
 {
 }
 
+void ResultScene::LoadData(void)
+{
+}
+
 void ResultScene::Init(void)
 {
 }

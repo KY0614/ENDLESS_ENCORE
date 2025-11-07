@@ -5,6 +5,7 @@
 
 class Player;
 class Enemy;
+class Stage;
 
 class GameScene : public SceneBase
 {
@@ -14,6 +15,11 @@ public:
 
 	//デストラクタ
 	~GameScene(void);
+
+	/// <summary>
+	/// データ読込処理
+	/// </summary>
+	void LoadData(void) override;
 
 	/// <summary>
 	/// 初期化処理
@@ -41,6 +47,7 @@ private:
 
 	std::unique_ptr<Player> player_;
 	std::unique_ptr<Enemy> enemy_;
+	std::unique_ptr<Stage> stage_;
 
 	int RT_;
 
@@ -48,6 +55,8 @@ private:
 	float shakeRate_;
 
 	VECTOR targetPos_;
+
+	void UpdateCutIn(void);
 
 	/// <summary>
 	/// ゲーム中の更新処理

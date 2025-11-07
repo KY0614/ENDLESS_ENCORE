@@ -2,7 +2,7 @@
     "Player": {
     "Transform": 
     {
-      "position": [-60.0, 1.0, 30.0],
+      "position": [-800.0, 1.0, 80.0],
       "scale": 0.7,
       "localRotY": 180.0
     },

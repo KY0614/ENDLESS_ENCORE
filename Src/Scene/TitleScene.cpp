@@ -28,6 +28,10 @@ TitleScene::~TitleScene(void)
 
 }
 
+void TitleScene::LoadData(void)
+{
+}
+
 void TitleScene::Init(void)
 {
 	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
