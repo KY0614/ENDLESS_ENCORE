@@ -56,7 +56,9 @@ private:
 
 	VECTOR targetPos_;
 
-	void UpdateCutIn(void);
+	void UpdateBattleStart(void);
+
+	void DrawBattleStart(void);
 
 	/// <summary>
 	/// ゲーム中の更新処理
@@ -72,10 +74,4 @@ private:
 
 	//床
 	Transform floor_;
-	
-	/// <summary>
-	/// デバッグ用の描画処理
-	/// </summary>
-	void DrawDebug(void);
-
 };

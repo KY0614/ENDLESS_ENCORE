@@ -53,6 +53,7 @@ public:
 	enum class MODE
 	{
 		NONE,
+		CRANE_UP,	//カメラを上昇させる
 		FIXED_POINT,//固定カメラ
 		TOP_FIXED,	//上部固定
 		FOLLOW,		//追従
@@ -85,6 +86,8 @@ public:
 
 	//カメラモードの変更
 	void ChangeMode(MODE mode);
+
+	void SetPoint(const VECTOR& startPos, const VECTOR& endPos);
 
 	//追従対象の設定
 	void SetFollow(const Transform* follow);

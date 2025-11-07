@@ -75,6 +75,14 @@ void GameScene::Draw(void)
 	(this->*draw_)();
 }
 
+void GameScene::UpdateBattleStart(void)
+{
+}
+
+void GameScene::DrawBattleStart(void)
+{
+}
+
 void GameScene::UpdateGame(void)
 {
 	InputManager& ins = InputManager::GetInstance();
@@ -144,9 +152,4 @@ void GameScene::DrawGame(void)
 	}
 
 	DrawSphere3D(targetPos_, 10.0f, 16, 0x0000FF, 0x0000FF, true);
-}
-
-void GameScene::DrawDebug(void)
-{
-	
 }
