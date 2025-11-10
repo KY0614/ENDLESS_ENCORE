@@ -31,10 +31,10 @@ void Sphere::Draw(void)
 	DrawSphere3D(pos, radius_, 5, COLOR, COLOR, false);
 }
 
-void Sphere::Draw(int col)
+void Sphere::Draw(int col,bool fill)
 {
 	VECTOR pos = GetPos();
-	DrawSphere3D(pos, radius_, 5, col, col, false);
+	DrawSphere3D(pos, radius_, 5, col, col, fill);
 }
 
 VECTOR Sphere::GetRotPos(const VECTOR& localPos) const

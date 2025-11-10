@@ -45,33 +45,56 @@ private:
 	UpdateFunc_t update_;
 	DrawFunc_t draw_;
 
+	//プレイヤー
 	std::unique_ptr<Player> player_;
+	//敵
 	std::unique_ptr<Enemy> enemy_;
+	//ステージ
 	std::unique_ptr<Stage> stage_;
 
-	int RT_;
+	//メッセージクラスみたいなクラスを作って分けてもいいかも
+	//選択肢文字列リスト
+	std::vector<std::wstring> selectList_;
+	//選択肢関数テーブル
+	using SelectFunc_t = std::function<void()>;
+	std::map<std::wstring, SelectFunc_t> selectFuncTable_;
+	//現在選択しているもの
+	int cursorIdx_;
 
-	int shakeFrame_;
-	float shakeRate_;
+	//触れているかどうか
+	bool isToutch_;
 
-	VECTOR targetPos_;
+	/// <summary>
+	/// 探索フェーズの更新処理
+	/// </summary>
+	void UpdateExplore(void);
 
-	void UpdateBattleStart(void);
+	/// <summary>
+	/// 探索フェーズの描画処理
+	/// </summary>
+	void DrawExplore(void);
 
-	void DrawBattleStart(void);
+	/// <summary>
+	/// 選択中の更新処理
+	/// </summary>
+	void UpdateSelect(void);
+
+	/// <summary>
+	/// 選択中の描画処理
+	/// </summary>
+	void DrawSelect(void);
 
 	/// <summary>
 	/// ゲーム中の更新処理
 	/// </summary>
-	/// <param name="">ゲーム中の処理</param>
 	void UpdateGame(void);
 
 	/// <summary>
 	/// ゲーム中の描画
 	/// </summary>
-	/// <param name="">カウントダウン、カウントアップ以外の描画</param>
 	void DrawGame(void);
 
-	//床
-	Transform floor_;
+	void DrawMessage(void);
+
+	void UpdateDebugImGui(void);
 };

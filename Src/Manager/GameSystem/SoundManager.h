@@ -21,6 +21,9 @@ public:
 		//‚±‚±‚ÉŽg—p‚·‚é‰¹Šy‚âŒø‰Ê‰¹‚È‚Ç‚ð—…—ñ
 		NONE,
 
+		EXPLORE,
+		BATTLE,
+
 		TITLE,
 		PUSH_SPACE,
 

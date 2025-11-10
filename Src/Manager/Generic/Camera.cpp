@@ -342,3 +342,16 @@ void Camera::SetBeforeDrawMouse(void)
 	//追従
 	SyncFollow();
 }
+
+void Camera::UpdateDebugImGui(void)
+{
+	//ウィンドウタイトル&開始処理
+	ImGui::Begin("Camera");
+
+	ImGui::SliderFloat("positionX", &pos_.x, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("positionY", &pos_.y, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("positionZ", &pos_.z, -10000.0f, 10000.0f);
+
+	//終了処理
+	ImGui::End();
+}

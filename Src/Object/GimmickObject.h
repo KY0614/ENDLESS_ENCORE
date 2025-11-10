@@ -1,7 +1,8 @@
 #pragma once
+#include "Common/Transform.h"
 #include "ActorBase.h"
 
-class GimmickObject : public ActorBase
+class GimmickObject
 {
 public:
 	//コンストラクタ
@@ -12,19 +13,20 @@ public:
 	/// <summary>
 	///	初期化
 	/// </summary>
-	void Init(void) override;
+	void Init(void);
 
 	/// <summary>
 	///	更新処理
 	/// </summary>
-	void Update(void) override;
+	void Update(void);
 
 	/// <summary>
 	/// 描画処理
 	/// </summary>
-	void Draw(void) override;
+	void Draw(void);
 
 private:
-
+	//モデル情報
+	Transform transform_;
 };
 

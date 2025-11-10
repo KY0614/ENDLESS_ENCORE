@@ -25,6 +25,7 @@ public:
 	enum class STATE
 	{
 		NONE,	//初期化前
+		SELECT,	//選択
 		PLAY,	//操作可能
 		BACKSTAB,	//バックスタブ
 		DEAD,	//死亡
@@ -250,26 +251,27 @@ private:
 	/// <summary>
 	/// 状態遷移：NONE
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateNone(void);
+	/// <summary>
+	/// 状態遷移：SELECT
+	/// </summary>
+	void ChangeStateSelect(void);
 	/// <summary>
 	/// 状態遷移：PLAY
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStatePlay(void);
 	/// <summary>
 	/// 状態遷移：BACKSTAB
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateBackstab(void);
 	/// <summary>
 	/// 状態遷移：DEAD
 	/// </summary>
-	/// <param name=""></param>
 	void ChangeStateDead(void);
 
 	//更新ステップ
 	void UpdateNone(void);
+	void UpdateSelect(void);
 	void UpdatePlay(void);
 	void UpdateBackstab(void);
 	void UpdateDead(void);

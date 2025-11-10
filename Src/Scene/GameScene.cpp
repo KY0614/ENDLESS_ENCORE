@@ -1,24 +1,33 @@
 #include <DxLib.h>
 #include "../Application.h"
+#include "../Libs/ImGui/imgui.h"
 #include "../Utility/DrawUtiity.h"
 #include "../Utility/CommonUtility.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/ResourceManager.h"
+#include "../Object/Common/Geometry/Sphere.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
 #include "PauseScene.h"
 #include "GameScene.h"
 
-GameScene::GameScene(void) : 
-	update_(&GameScene::UpdateGame),
-	draw_(&GameScene::DrawGame)
+GameScene::GameScene(void)
 {
-	shakeFrame_ = 0;
-	shakeRate_ = 0.0f;
-	RT_ = -1;
+	update_ = &GameScene::UpdateExplore;
+	draw_ = &GameScene::DrawExplore;
+	player_ = nullptr;
+	enemy_ = nullptr;
+	stage_ = nullptr;
+
+	selectList_ = {
+	L"触れる",
+	L"見つめる"
+	};
+	cursorIdx_ = 0;
 }
 
 GameScene::~GameScene(void)
@@ -31,6 +40,14 @@ void GameScene::LoadData(void)
 
 void GameScene::Init(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 256 / 3);
+	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::BATTLE, 256 / 3);
+	sound.Play(SoundManager::SOUND::EXPLORE);
 	//プレイヤー
 	stage_ = std::make_unique<Stage>();
 	stage_->Init();
@@ -43,30 +60,42 @@ void GameScene::Init(void)
 	enemy_ = std::make_unique<Enemy>(*player_);
 	enemy_->Init();
 
+	//選択肢テーブルごとの処理
+	selectFuncTable_ = {
+	{L"触れる",[this]()
+		{
+			SoundManager& sound = SoundManager::GetInstance();
+			sound.Stop(SoundManager::SOUND::EXPLORE);
+			sound.Play(SoundManager::SOUND::BATTLE);
+			stage_->ChangeType(Stage::TYPE::BATTLE);
+			player_->Init();
+			player_->AddCollider(stage_->GetTransform().collider);
+			enemy_->AddCollider(stage_->GetTransform().collider);
+			update_ = &GameScene::UpdateGame;
+			draw_ = &GameScene::DrawGame;
+		}
+	},
+	{L"見つめる",[this]()
+		{
+			player_->ChangeState(Player::STATE::PLAY);
+			update_ = &GameScene::UpdateExplore;
+			draw_ = &GameScene::DrawExplore;
+		}
+	},
+	};
+
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->SetTarget(&enemy_->GetTransform());
-	//mainCamera->ChangeMode(Camera::MODE::MOUSE);
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
-	//floor_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-	//	ResourceManager::SRC::FLOOR));
-	//float scale = 10.0f;
-	//floor_.scl = { scale,scale,scale };
-	//floor_.pos = { 0.0f, 0.0f, 0.0f };
-	//floor_.quaRot = Quaternion();
-	//floor_.quaRotLocal =
-	//	Quaternion::Euler({ 0.0f,0.0f, 0.0f });
-	//floor_.MakeCollider(Collider::TYPE::STAGE);
-	//floor_.Update();
-	//player_->AddCollider(floor_.collider);
-	//enemy_->AddCollider(floor_.collider);
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 }
 
 void GameScene::Update(void)
 {
+	UpdateDebugImGui();
 	(this->*update_)();
 }
 
@@ -75,12 +104,88 @@ void GameScene::Draw(void)
 	(this->*draw_)();
 }
 
-void GameScene::UpdateBattleStart(void)
+void GameScene::UpdateExplore(void)
 {
+	InputManager& ins = InputManager::GetInstance();
+	if (ins.IsInputTriggered("Pause"))
+	{
+		//ポーズボタンが押されたらポーズシーンへ遷移
+		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
+		return;
+	}
+
+	player_->Update();
+	stage_->Update();
+	isToutch_ = false;
+	if (CommonUtility::IsHitSpheres(
+		stage_->GetSphere().GetPos(),
+		stage_->GetSphere().GetRadius(),
+		player_->GetSphere().GetPos(),
+		player_->GetSphere().GetRadius()
+	))
+	{
+		isToutch_ = true;
+	}
+
+	if (isToutch_ &&
+		ins.IsInputTriggered("Parry"))
+	{
+		player_->ChangeState(Player::STATE::NONE);
+		update_ = &GameScene::UpdateSelect;
+		draw_ = &GameScene::DrawSelect;
+	}
 }
 
-void GameScene::DrawBattleStart(void)
+void GameScene::DrawExplore(void)
 {
+	//プレイヤー描画
+	stage_->Draw();
+
+	//プレイヤー描画
+	player_->Draw();
+	if (!isToutch_)
+	{
+		DrawFormatString(10, 60, 0xFF0000, L"[目標]水色の球体へ近づこう");
+	}
+	else
+	{
+		DrawFormatString(10, 60, 0xFF0000, L"[目標]BボタンかSPACEキーを押そう");
+	}
+}
+
+void GameScene::UpdateSelect(void)
+{
+	player_->Update();
+	stage_->Update();
+
+	InputManager& ins = InputManager::GetInstance();
+
+	if (ins.IsInputTriggered("Left"))
+	{
+		cursorIdx_ = (cursorIdx_ + 1) % selectList_.size();
+	}
+	if (ins.IsInputTriggered("Right"))
+	{
+		cursorIdx_ = (cursorIdx_ + selectList_.size() - 1) % selectList_.size();
+	}
+
+	if (ins.IsInputTriggered("Parry"))
+	{
+		auto selectedName = selectList_[cursorIdx_];
+		selectFuncTable_[selectedName]();
+		return;
+	}
+}
+
+void GameScene::DrawSelect(void)
+{
+	//プレイヤー描画
+	stage_->Draw();
+
+	//プレイヤー描画
+	player_->Draw();
+
+	DrawMessage();
 }
 
 void GameScene::UpdateGame(void)
@@ -89,7 +194,7 @@ void GameScene::UpdateGame(void)
 
 	player_->Update();
 	enemy_->Update();
-
+	stage_->Update();
 #ifdef _DEBUG
 	if (ins.IsInputPressed("Reset"))
 	{
@@ -110,15 +215,9 @@ void GameScene::UpdateGame(void)
 		return;
 	}
 
-	if (ins.IsInputTriggered("Back"))
-	{
-		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::RESULT);
-	}
-
 	VECTOR backDir = enemy_->GetTransform().GetBack();
 	float distance = 60.0f;
 	VECTOR target = VAdd(enemy_->GetTransform().pos, VScale(backDir, distance));
-	targetPos_ = target;
 	//ダウン中のバックスタブ判定
 	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
 	{
@@ -130,19 +229,16 @@ void GameScene::UpdateGame(void)
 			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
 		}
 	}
-
-	floor_.Update();
 }
 
 void GameScene::DrawGame(void)
 {
-	MV1DrawModel(floor_.modelId);
-
 	//プレイヤー描画
 	stage_->Draw();
 
 	//プレイヤー描画
 	player_->Draw();
+
 	//敵描画
 	enemy_->Draw();
 
@@ -151,5 +247,85 @@ void GameScene::DrawGame(void)
 		player_->DrawVictory();
 	}
 
-	DrawSphere3D(targetPos_, 10.0f, 16, 0x0000FF, 0x0000FF, true);
+	player_->DrawDead();
+
+	DrawFormatString(10, 60, 0xFF0000, L"[目標]敵を倒そう");
+}
+
+void GameScene::DrawMessage(void)
+{
+	const int boxWidth = Application::SCREEN_SIZE_X - 100;
+	const int boxHeight = 200;
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+	DrawBox(100,
+		Application::SCREEN_SIZE_Y / 2 - boxHeight / 2,
+		boxWidth,
+		Application::SCREEN_SIZE_Y / 2 + boxHeight / 2,
+		0x000000, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	std::wstring str = L"静かに浮かぶ何かがある...。";
+	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
+	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
+		Application::SCREEN_SIZE_Y / 2 - 32,
+		str.c_str(), 0xFFFFFF);
+
+	const int lineY = Application::SCREEN_SIZE_Y / 2 + 16;
+	int lineX = (Application::SCREEN_SIZE_X / 2 - 150);
+
+	//現在選択している行をずらす幅
+	const int currentLineOffset = 20;
+	//現在選択している行の文字列
+	std::wstring currentStr = selectList_[cursorIdx_];
+	for (auto& row : selectList_)
+	{
+		//文字列の幅を取得
+		int stringWidth = GetDrawStringWidth(row.c_str(), row.size());
+		unsigned int col = 0xFFFFFF;
+		if (row == currentStr)
+		{
+			DrawString(lineX - currentLineOffset, lineY, L"⇒", 0xFF0000);
+			col = 0xFF00FF;
+			//lineX += currentLineOffset;
+		}
+
+		DrawFormatString(lineX + 1, lineY + 1, 0x000000, L"%s", row.c_str());
+		DrawFormatString(lineX, lineY, col, L"%s", row.c_str());
+		lineX += 150 + stringWidth;
+	}
+}
+
+
+void GameScene::UpdateDebugImGui(void)
+{
+	ImGui::Begin("Operating");
+
+	ImGui::Text("\tMOVE");
+	ImGui::Text("WASD or LStikc");
+	ImGui::Text("");
+
+	ImGui::Text("\Camera");
+	ImGui::Text("Cursor Key or RStikc");
+	ImGui::Text("");
+
+	ImGui::Text("\tParry");
+	ImGui::Text("Space or B");
+	ImGui::Text("");
+
+	ImGui::Text("\tDodge");
+	ImGui::Text("LShift or A");
+	ImGui::Text("");
+
+	ImGui::Text("\tDash");
+	ImGui::Text("LControl or LTrigger");
+	ImGui::Text("");
+
+	ImGui::Text("\tJump");
+	ImGui::Text("F or LButton");
+	ImGui::Text("");
+
+	ImGui::Text("\tPause");
+	ImGui::Text("P or Start");
+
+	//終了処理
+	ImGui::End();
 }

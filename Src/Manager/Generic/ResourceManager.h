@@ -35,10 +35,12 @@ public:
 		//ステージオブジェクト
 		FLOOR,
 		STAGE,
+		THEATER,
 
 		//音
 		TITLE_BGM,
 		GAME_BGM,
+		EXPLORE_BGM,
 
 	};
 

@@ -40,7 +40,7 @@ namespace
 	//回転にかける時間
 	const float TIME_ROT = 0.1f;
 	//敵の基本パラメータ
-	const float MOVE_SPEED = 5.0f;	//移動速度
+	const float MOVE_SPEED = 7.0f;	//移動速度
 	//距離の基準値
 	const float ATTACK_NEAR_DISTANCE = 350.0f;	//近距離攻撃判定距離
 	const float ATTACK_FAR_DISTANCE = 800.0f;	//遠距離攻撃判定距離
@@ -57,6 +57,7 @@ namespace
 	const float ATTACK_DAMAGE = 10.0f;
 	const float NORMAL_DAMAGE = 10.0f;
 	const float BACKSTAB_DAMAGE = 50.0f;
+	const float CHARGE_DAMAGE = 100.0f;
 
 	//アニメーション再生速度
 	const float ANIM_SPEED = 30.0f;
@@ -126,13 +127,12 @@ void Enemy::Init(void)
 
 void Enemy::Update(void)
 {
+	if (hp_ <= 0.0f)hp_ = 0.0f;
 	//更新ステップ
 	stateUpdate_();
 
 	animationController_->Update();
 	transform_.Update();
-
-	UpdateDebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -156,47 +156,48 @@ void Enemy::Draw(void)
 	VECTOR right = VScale(transform_.GetRight(), 120.0f);
 	forward.y += 150.0f;
 	right.y += 150.0f;
-	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
-	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
-	
-	DrawSphere3D(VAdd(transform_.pos, right), 10.0f, 16, 0xFFFFFF, 0xFFFFFF, true);
-	if (!bullets_.empty()) {
-		DrawFormatString(0, 200, 0xffffff, L"E X: %.2f Y: %.2f Z: %.2f",
-			bullets_[0]->GetTransform().pos.x, bullets_[0]->GetTransform().pos.y, bullets_[0]->GetTransform().pos.z);
-	}
-	switch (state_)
-	{
-	case Enemy::STATE::NONE:
-		break;
-	case Enemy::STATE::FOLLOW:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
-		break;
-	case Enemy::STATE::MOVE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE");
-		break;
-	case Enemy::STATE::ATTACK_NEAR:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_NEAR");
-		break;
-	case Enemy::STATE::SHOT_ONE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ONE");
-		break;
-	case Enemy::STATE::SHOT_ALL:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ALL");
-		break;
-	case Enemy::STATE::CHARGE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"CHARGE");
-		break;
-	case Enemy::STATE::ATTACK_CHARGE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_CHARGE");
-		break;
-	case Enemy::STATE::DOWN:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN");
-		break;
-	default:
-		break;
-	}
-
+	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
+	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+	//
+	//DrawSphere3D(VAdd(transform_.pos, right), 10.0f, 16, 0xFFFFFF, 0xFFFFFF, true);
+	//if (!bullets_.empty()) {
+	//	DrawFormatString(0, 200, 0xffffff, L"E X: %.2f Y: %.2f Z: %.2f",
+	//		bullets_[0]->GetTransform().pos.x, bullets_[0]->GetTransform().pos.y, bullets_[0]->GetTransform().pos.z);
+	//}
+	//switch (state_)
+	//{
+	//case Enemy::STATE::NONE:
+	//	break;
+	//case Enemy::STATE::FOLLOW:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
+	//	break;
+	//case Enemy::STATE::MOVE:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE");
+	//	break;
+	//case Enemy::STATE::ATTACK_NEAR:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_NEAR");
+	//	break;
+	//case Enemy::STATE::SHOT_ONE:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ONE");
+	//	break;
+	//case Enemy::STATE::SHOT_ALL:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ALL");
+	//	break;
+	//case Enemy::STATE::CHARGE:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"CHARGE");
+	//	break;
+	//case Enemy::STATE::ATTACK_CHARGE:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_CHARGE");
+	//	break;
+	//case Enemy::STATE::DOWN:
+	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN");
+	//	break;
+	//default:
+	//	break;
+	//}
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 	sphereNear_->Draw(col_);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
 	const int HP_BAR_Y = pos.z + 100.0f;// HPバーの左上Y座標
@@ -227,6 +228,8 @@ void Enemy::Draw(void)
 
 void Enemy::DebugUpdate(void)
 {
+	transform_.pos = { -100.0f,0.0f,0.0f };
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -624,8 +627,6 @@ void Enemy::CreateBullet(const int createNum)
 		bullets_[i]->SetPos(
 			VAdd(headPos, transform_.quaRot.PosAxis(rotLocalPos)));
 	}
-	
-	//bullets_.resize(createNum);
 }
 
 bool Enemy::CheckBulletReady(void)
@@ -654,7 +655,7 @@ bool Enemy::CheckBulletDestroy(void)
 
 void Enemy::ChangeStateNone(void)
 {
-	stateUpdate_ = std::bind(&Enemy::UpdateDead, this);
+	stateUpdate_ = std::bind(&Enemy::UpdateNone, this);
 }
 
 void Enemy::ChangeStateFollow(void)
@@ -800,14 +801,7 @@ void Enemy::UpdateMove(void)
 void Enemy::UpdateAttackNear(void)
 {
 	Rotate();
-	//プレイヤーとの距離を測り、一定以上離れていたら近づく
-	//VECTOR distance = VSub(player_.GetTransform().pos, transform_.pos);
-	//if (VSize(distance) > ATTACK_NEAR_DISTANCE)
-	//{
-	//	col_ = 0x00ff00;
-	//	FollowPlayer(transform_.pos);
-	//	return;
-	//}
+
 	col_ = 0xff0000;
 
 	//アニメーションが終わったら移動状態へ戦記
@@ -866,12 +860,6 @@ void Enemy::UpdateShotOne(void)
 
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	//if (stateStep_ > ATTACK_FAR_TIME)
-	//{
-	//	hitCount_ = 0;
-	//	ChangeState(STATE::MOVE);
-	//	return;
-	//}
 
 	for (auto& bullet : bullets_)
 	{
@@ -1096,6 +1084,20 @@ void Enemy::UpdateCharge(void)
 void Enemy::UpdateChargeAttack(void)
 {
 	col_ = 0x000000;
+
+	if (animationController_->IsEnd())
+	{
+		charge_ = 0.0f;
+		//球体を近接用に戻す
+		sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
+		sphereNear_->SetRadius(30.0f);
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
+	//既に行動済みだったら処理しない
+	if (isStepActioned_)return;
+	//球体判定
 	if (CommonUtility::IsHitSphereCapsule(
 		sphereNear_->GetPos(),
 		sphereNear_->GetRadius(),
@@ -1108,15 +1110,8 @@ void Enemy::UpdateChargeAttack(void)
 		{
 			col_ = 0xFFFFFF;
 		}
-	}
-
-	if (animationController_->IsEnd())
-	{
-		charge_ = 0.0f;
-		sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
-		sphereNear_->SetRadius(30.0f);
-		ChangeState(STATE::MOVE);
-		return;
+		player_.Damage(CHARGE_DAMAGE);
+		isStepActioned_ = true;
 	}
 }
 
@@ -1139,6 +1134,7 @@ void Enemy::UpdateBackstab(void)
 
 	if (isBackstab_ && animationController_->IsEnd())
 	{
+		isBackstab_ = false;
 		ChangeState(STATE::MOVE);
 		return;
 	}
@@ -1186,6 +1182,10 @@ void Enemy::UpdateDebugImGui(void)
 	ImGui::SliderInt("Bullet Num", &bulletNum, 0, 10);
 
 	//状態変更ボタン
+	if (ImGui::Button("None"))
+	{
+		ChangeState(STATE::NONE);
+	}
 	if (ImGui::Button("Kick"))
 	{
 		ChangeState(STATE::ATTACK_NEAR);
@@ -1269,7 +1269,7 @@ void Enemy::DrawDebug(void)
 	leftPos.x -= leftX * VIEW_RANGE;
 	leftPos.z -= leftZ * VIEW_RANGE;
 
-	DrawTriangle3D(backPos, centerPos, leftPos, 0xffdead, true);
-	DrawTriangle3D(centerPos, backPos, rightPos, 0xffdead, true);
+	//DrawTriangle3D(backPos, centerPos, leftPos, 0xffdead, true);
+	//DrawTriangle3D(centerPos, backPos, rightPos, 0xffdead, true);
 
 }

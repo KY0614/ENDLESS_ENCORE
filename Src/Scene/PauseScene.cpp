@@ -254,32 +254,4 @@ void PauseScene::DrawMenuList(void)
 		DrawFormatString(lineX, lineY, col, L"%s", row.c_str());
 		lineX += (MENU_LIST_WIDTH + stringWidth) * aspectRatio;
 	}
-	
-
-	//for (int i = 0; i < menuList_.size();++i) 
-	//{
-	//	int lineX = 0;
-
-	//	//文字列の幅を取得
-	//	int stringWidth = GetDrawStringWidth(menuList_[i].c_str(), menuList_[i].size());
-
-	//	//カーソルのX座標を動的に計算
-	//	int cursor_X = ((Application::SCREEN_SIZE_X / 2 - line_start_X) - (stringWidth));
-
-	//	if (menuList_[i] == currentStr)
-	//	{
-	//		//DrawRotaGraph(cursor_X ,
-	//		//	lineY,
-	//		//	aspectRatio * 1.0f, 0.0f, menuCursorImg_, true
-	//		//);
-	//		lineX += SELECT_MENU_MARGINE * aspectRatio;
-	//	}
-
-	//	DrawRotaGraph(Application::SCREEN_SIZE_X / 2 + lineX * scale,
-	//		(MENU_START_Y * scale) + (MENU_SCALE * size * scale * i),
-	//		scale * size, 0.0f, menuListImg_[i], true
-	//	);
-
-	//	lineY += MENU_SCALE  * aspectRatio;
-	//}
 }

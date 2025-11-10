@@ -34,7 +34,7 @@ namespace
 	static const std::string KEY_DEATH = "Death";
 
 	//ジャンプ力
-	const float JUMP_POW = 7.5f; 
+	const float JUMP_POW = 9.0f; 
 	//重力加速度
 	const float GRAVITY_POW = 15.0f;
 
@@ -61,6 +61,7 @@ Player::Player(void)
 	maxHp_ = 0.0f;
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
+	stateChanges_.emplace(STATE::SELECT, std::bind(&Player::ChangeStateSelect, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
@@ -100,6 +101,7 @@ Player::~Player(void)
 
 void Player::Init(void)
 {
+	colliders_.clear();
 	//3Dモデルの初期化
 	Init3DModel();
 
@@ -127,7 +129,8 @@ void Player::Update(void)
 	{
 		hp_ = maxHp_;
 	}
-
+	//下限設定
+	if (hp_ <= 0.0f)hp_ = 0.0f;
 	//更新ステップ
 	stateUpdate_();
 
@@ -135,12 +138,6 @@ void Player::Update(void)
 	animationController_->Update();
 
 	transform_.Update();
-
-#ifdef _DEBUG
-
-	UpdateDebugImGui();
-
-#endif // _DEBUG
 }
 
 void Player::Draw(void)
@@ -154,13 +151,20 @@ void Player::Draw(void)
 #ifdef _DEBUG
 
 	DebugDraw();
-
-	DrawDead();
 #endif // _DEBUG
 }
 
 void Player::DebugUpdate(void)
 {
+	//HP制限(HPが最大HPを超えないようにする)
+	if (hp_ > maxHp_)
+	{
+		hp_ = maxHp_;
+	}
+
+	transform_.pos.x = 100.0f;
+	transform_.pos.z = 0.0f;
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -344,6 +348,11 @@ void Player::ChangeStateNone(void)
 	stateUpdate_ = std::bind(&Player::UpdateNone, this);
 }
 
+void Player::ChangeStateSelect(void)
+{
+	stateUpdate_ = std::bind(&Player::UpdateSelect, this);
+}
+
 void Player::ChangeStatePlay(void)
 {
 	stateUpdate_ = std::bind(&Player::UpdatePlay, this);
@@ -367,6 +376,10 @@ void Player::ChangeStateDead(void)
 
 void Player::UpdateNone(void)
 {//何もしない
+}
+
+void Player::UpdateSelect(void)
+{
 }
 
 void Player::UpdatePlay(void)
@@ -893,6 +906,10 @@ void Player::UpdateDebugImGui(void)
 	}
 
 	//状態変更ボタン
+	if (ImGui::Button("None"))
+	{
+		ChangeState(STATE::NONE);
+	}
 	if (ImGui::Button("Play"))
 	{
 		ChangeState(STATE::PLAY);
@@ -925,9 +942,10 @@ void Player::DebugDraw(void)
 	VECTOR right = VScale(transform_.GetRight(), 120.0f);
 	forward.y += 150.0f;
 	right.y += 150.0f;
-	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
-	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
-
+	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
+	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }

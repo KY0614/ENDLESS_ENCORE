@@ -151,6 +151,7 @@ private:
 
 	bool isBackstab_;
 
+	//ƒ`ƒƒ[ƒWUŒ‚
 	bool isChargeAtk_;
 	float charge_;
 

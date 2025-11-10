@@ -1,3 +1,4 @@
+#include "../Application.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "AdvertiseScene.h"
@@ -52,6 +53,9 @@ void AdvertiseScene::Draw(void)
 	DrawString(0, 0, L"AdvertiseScene", 0xffffffff);
 
 	DrawGraph(0, 0, movieHandle_, true);
+
+	DrawString(Application::SCREEN_SIZE_X / 2,
+		Application::SCREEN_SIZE_Y / 2, L"Push Key", 0xFFFFFF);
 }
 
 void AdvertiseScene::PlayDemoUpdate(void)

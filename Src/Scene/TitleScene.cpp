@@ -42,9 +42,9 @@ void TitleScene::Init(void)
 void TitleScene::Update(void)
 {
 	InputManager& ins = InputManager::GetInstance();
-	if (ins.IsInputTriggered("Back"))
+	if (ins.IsInputTriggered("Enter"))
 	{
-		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TUTORIAL);
+		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::SELECT);
 	}
 
 	if(--toAdvertiseLoopTimer_ <= 0)
@@ -59,7 +59,7 @@ void TitleScene::Draw(void)
 {
 	DrawString(0, 0, L"Title", 0xFFFFFF);
 	DrawString(Application::SCREEN_SIZE_X/2, 
-		Application::SCREEN_SIZE_Y / 2, L"Push Enter", 0xFFFFFF);
+		Application::SCREEN_SIZE_Y / 2, L"Push Enter or B", 0xFFFFFF);
 
 	////ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
 	//SetDrawMode(DX_DRAWMODE_BILINEAR);
@@ -95,13 +95,4 @@ void TitleScene::InitMaterial(void)
 
 	renderer_ = std::make_unique<ModelRenderer>(graoundTran_.modelId, *material_);
 
-}
-
-void TitleScene::UpdateDebugImGui(void)
-{
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("cafe");
-
-	//終了処理
-	ImGui::End();
 }

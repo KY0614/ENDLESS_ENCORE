@@ -20,7 +20,7 @@ public:
 
 	//•`‰æ
 	void Draw(void);
-	void Draw(int col);
+	void Draw(int col,bool fill = false);
 
 	//eTransform‚©‚ç‚Ì‘Š‘ÎˆÊ’u‚ğæ“¾
 	VECTOR GetLocalPos(void) const { return localPos_; }

@@ -9,9 +9,24 @@ SelectScene::SelectScene(void)
 	currentIdx_ = 0;
 
 	selectList_ = {
-	L"EASY",
-	L"NORMAL",
-	L"HARD"
+	L"GAME",
+	L"DEBUG"
+	};
+
+	//選択肢テーブルごとの処理
+	selectFuncTable_ = {
+	{L"GAME",[this]()
+		{
+			SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::GAME);
+			return;
+		}
+	},
+	{L"DEBUG",[this]()
+		{
+			SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::DEBUG);
+			return;
+		}
+	},
 	};
 }
 
@@ -29,12 +44,7 @@ void SelectScene::Init(void)
 
 void SelectScene::Update(void)
 {
-	//シーン遷移
 	InputManager& ins = InputManager::GetInstance();
-	if (ins.IsInputTriggered("Back"))
-	{
-		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TUTORIAL);
-	}
 
 	if (ins.IsInputTriggered("Down"))
 	{
@@ -45,16 +55,26 @@ void SelectScene::Update(void)
 		currentIdx_ = (currentIdx_ + selectList_.size() - 1) % selectList_.size();
 	}
 
+	if (ins.IsInputTriggered("Enter"))
+	{
+		auto selectedName = selectList_[currentIdx_];
+		selectFuncTable_[selectedName]();
+		return;
+	}
 }
 
 void SelectScene::Draw(void)
 {
-	DrawString(0, 0, L"難易度選択", 0xFFFFFF);
+	DrawString(0, 0, L"SELECT", 0xFFFFFF);
 
 #ifdef _DEBUG
 	SetFontSize(32);
 	DebugDraw();
 	SetFontSize(16);
+
+	DrawString(Application::SCREEN_SIZE_X / 2,
+		Application::SCREEN_SIZE_Y / 2 + 64, L"Push Enter or B", 0xFFFFFF);
+
 #endif // _DEBUG
 	
 }

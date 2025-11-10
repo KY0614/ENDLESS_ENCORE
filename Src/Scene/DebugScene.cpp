@@ -1,3 +1,4 @@
+#include "../Application.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/InputManager.h"
@@ -49,8 +50,14 @@ void DebugScene::Init(void)
 
 void DebugScene::Update(void)
 {
+	InputManager& ins = InputManager::GetInstance();
 	player_->DebugUpdate();
 	enemy_->DebugUpdate();
+
+	if (ins.IsInputTriggered("Enter"))
+	{
+		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::SELECT);
+	}
 
 	floor_.Update();
 }
@@ -68,4 +75,9 @@ void DebugScene::Draw(void)
 	{
 		player_->DrawVictory();
 	}
+
+	DrawString(0, 0, L"DEBUG", 0xFFFFFF);
+
+	DrawString(Application::SCREEN_SIZE_X / 2,
+		Application::SCREEN_SIZE_Y / 2, L"Push Enter or B‚Å–ß‚é", 0xFFFFFF);
 }

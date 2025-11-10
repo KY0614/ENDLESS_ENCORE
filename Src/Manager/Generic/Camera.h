@@ -151,5 +151,10 @@ private:
 
 	VECTOR localF2CPos_;
 	VECTOR localF2TPos_;
+
+	/// <summary>
+	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
+	/// </summary>
+	void UpdateDebugImGui(void);
 };
 

@@ -33,8 +33,13 @@ public:
 	void Draw(void) override;
 
 private:
-	//メニューの文字列リスト
+	//選択肢文字列リスト
 	std::vector<std::wstring> selectList_;
+	//選択肢関数テーブル
+	using SelectFunc_t = std::function<void()>;
+	std::map<std::wstring, SelectFunc_t> selectFuncTable_;
+	//現在選択しているもの
+	int cursorIdx_;
 
 	int currentIdx_;
 
