@@ -149,7 +149,6 @@ void Player::Draw(void)
 	DrawShadow();
 
 #ifdef _DEBUG
-
 	DebugDraw();
 #endif // _DEBUG
 }

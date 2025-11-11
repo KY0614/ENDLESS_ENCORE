@@ -125,6 +125,7 @@ public:
 	const bool& GetIsParry(void)const  { return isParry_; }
 
 	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
+	void SetHP(const float hp) { hp_ = hp; }
 
 	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY; }
 
@@ -238,7 +239,7 @@ private:
 	/// HPÇê›íË
 	/// </summary>
 	/// <param name="hp">HP</param>
-	void SetHP(const float hp) { hp_ = hp; }
+	//void SetHP(const float hp) { hp_ = hp; }
 
 	/// <summary>
 	/// ç≈ëÂHPÇê›íË

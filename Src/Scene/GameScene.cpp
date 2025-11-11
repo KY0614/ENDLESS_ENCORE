@@ -192,14 +192,19 @@ void GameScene::UpdateGame(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
+	if(player_->GetTransform().pos.y < -50.0f)
+	{
+		player_->SetHP(0.0f);
+	}
+
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
 #ifdef _DEBUG
-	if (ins.IsInputPressed("Reset"))
-	{
-		this->Init();
-	}
+	//if (ins.IsInputPressed("Reset"))
+	//{
+	//	this->Init();
+	//}
 
 	if (ins.IsInputTriggered("CameraShake"))
 	{

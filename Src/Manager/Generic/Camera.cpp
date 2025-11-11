@@ -219,7 +219,7 @@ void Camera::ProcessRot(void)
 	InputManager& ins = InputManager::GetInstance();
 
 	//‰ñ“]²‚Æ—Ê‚ğŒˆ‚ß‚é
-	float rotPow = 1.0f * DX_PI_F / 180.0f;
+	float rotPow = 1.5f * DX_PI_F / 180.0f;
 	//‰ñ“]ˆ—
 	if (ins.IsInputPressed("CameraUp")) { angles_.x += rotPow; }
 	if (ins.IsInputPressed("CameraDown")) { angles_.x -= rotPow; }
