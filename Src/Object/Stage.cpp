@@ -4,7 +4,7 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
-#include "Common/Geometry/Sphere.h"
+#include "Common/Geometry/Cube.h"
 #include "Stage.h"
 
 Stage::Stage(void)
@@ -18,12 +18,12 @@ Stage::~Stage(void)
 
 void Stage::Init(void)
 {
-	sphere_ = std::make_unique<Sphere>(stageTransform_[type_]);
-	sphere_->SetLocalPos({0.0f,-80.0f,2100.0f});
-	sphere_->SetRadius(50.0f);
-
 	//3Dƒ‚ƒfƒ‹‰Šú‰»
 	Init3DModel();
+
+	cube_ = std::make_unique<Cube>(stageTransform_[type_].pos, stageTransform_[type_].quaRot,
+		VGet(-1375.0f,-219.0f,834.0f), VGet(-1375.0f, -219.0f, 3375.0f));
+
 }
 
 void Stage::Update(void)
@@ -35,9 +35,6 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	MV1DrawModel(stageTransform_[type_].modelId);
-
-	if (type_ != TYPE::EXPLORE)return;
-	sphere_->Draw(0x00FFFF,true);
 }
 
 void Stage::UpdateDebugImGui(void)
@@ -52,11 +49,6 @@ void Stage::UpdateDebugImGui(void)
 
 	//I—¹ˆ—
 	ImGui::End();
-}
-
-const Sphere& Stage::GetSphere(void)const
-{
-	return *sphere_;
 }
 
 void Stage::Init3DModel(void)

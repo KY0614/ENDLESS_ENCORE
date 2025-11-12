@@ -22,12 +22,12 @@ GameScene::GameScene(void)
 	player_ = nullptr;
 	enemy_ = nullptr;
 	stage_ = nullptr;
-
-	selectList_ = {
-	L"触れる",
-	L"見つめる"
-	};
-	cursorIdx_ = 0;
+	//isToutch_ = false;
+	//selectList_ = {
+	//L"触れる",
+	//L"見つめる"
+	//};
+	//cursorIdx_ = 0;
 }
 
 GameScene::~GameScene(void)
@@ -61,28 +61,25 @@ void GameScene::Init(void)
 	enemy_->Init();
 
 	//選択肢テーブルごとの処理
-	selectFuncTable_ = {
-	{L"触れる",[this]()
-		{
-			SoundManager& sound = SoundManager::GetInstance();
-			sound.Stop(SoundManager::SOUND::EXPLORE);
-			sound.Play(SoundManager::SOUND::BATTLE);
-			stage_->ChangeType(Stage::TYPE::BATTLE);
-			player_->Init();
-			player_->AddCollider(stage_->GetTransform().collider);
-			enemy_->AddCollider(stage_->GetTransform().collider);
-			update_ = &GameScene::UpdateGame;
-			draw_ = &GameScene::DrawGame;
-		}
-	},
-	{L"見つめる",[this]()
-		{
-			player_->ChangeState(Player::STATE::PLAY);
-			update_ = &GameScene::UpdateExplore;
-			draw_ = &GameScene::DrawExplore;
-		}
-	},
-	};
+	//selectFuncTable_ = {
+	//{L"触れる",[this]()
+	//	{
+	//		stage_->ChangeType(Stage::TYPE::BATTLE);
+	//		player_->Init();
+	//		player_->AddCollider(stage_->GetTransform().collider);
+	//		enemy_->AddCollider(stage_->GetTransform().collider);
+	//		update_ = &GameScene::UpdateGame;
+	//		draw_ = &GameScene::DrawGame;
+	//	}
+	//},
+	//{L"見つめる",[this]()
+	//	{
+	//		player_->ChangeState(Player::STATE::PLAY);
+	//		update_ = &GameScene::UpdateExplore;
+	//		draw_ = &GameScene::DrawExplore;
+	//	}
+	//},
+	//};
 
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
@@ -95,7 +92,6 @@ void GameScene::Init(void)
 
 void GameScene::Update(void)
 {
-	UpdateDebugImGui();
 	(this->*update_)();
 }
 
@@ -116,24 +112,25 @@ void GameScene::UpdateExplore(void)
 
 	player_->Update();
 	stage_->Update();
-	isToutch_ = false;
-	if (CommonUtility::IsHitSpheres(
-		stage_->GetSphere().GetPos(),
-		stage_->GetSphere().GetRadius(),
-		player_->GetSphere().GetPos(),
-		player_->GetSphere().GetRadius()
-	))
-	{
-		isToutch_ = true;
-	}
 
-	if (isToutch_ &&
-		ins.IsInputTriggered("Parry"))
-	{
-		player_->ChangeState(Player::STATE::NONE);
-		update_ = &GameScene::UpdateSelect;
-		draw_ = &GameScene::DrawSelect;
-	}
+	//isToutch_ = false;
+	//if (CommonUtility::IsHitSpheres(
+	//	stage_->GetSphere().GetPos(),
+	//	stage_->GetSphere().GetRadius(),
+	//	player_->GetSphere().GetPos(),
+	//	player_->GetSphere().GetRadius()
+	//))
+	//{
+	//	isToutch_ = true;
+	//}
+
+	//if (isToutch_ &&
+	//	ins.IsInputTriggered("Parry"))
+	//{
+	//	player_->ChangeState(Player::STATE::NONE);
+	//	update_ = &GameScene::UpdateSelect;
+	//	draw_ = &GameScene::DrawSelect;
+	//}
 }
 
 void GameScene::DrawExplore(void)
@@ -143,14 +140,15 @@ void GameScene::DrawExplore(void)
 
 	//プレイヤー描画
 	player_->Draw();
-	if (!isToutch_)
-	{
-		DrawFormatString(10, 60, 0xFF0000, L"[目標]水色の球体へ近づこう");
-	}
-	else
-	{
-		DrawFormatString(10, 60, 0xFF0000, L"[目標]BボタンかSPACEキーを押そう");
-	}
+
+	//if (!isToutch_)
+	//{
+	//	DrawFormatString(10, 60, 0xFF0000, L"[目標]水色の球体へ近づこう");
+	//}
+	//else
+	//{
+	//	DrawFormatString(10, 60, 0xFF0000, L"[目標]BボタンかSPACEキーを押そう");
+	//}
 }
 
 void GameScene::UpdateSelect(void)
@@ -160,21 +158,21 @@ void GameScene::UpdateSelect(void)
 
 	InputManager& ins = InputManager::GetInstance();
 
-	if (ins.IsInputTriggered("Left"))
-	{
-		cursorIdx_ = (cursorIdx_ + 1) % selectList_.size();
-	}
-	if (ins.IsInputTriggered("Right"))
-	{
-		cursorIdx_ = (cursorIdx_ + selectList_.size() - 1) % selectList_.size();
-	}
+	//if (ins.IsInputTriggered("Left"))
+	//{
+	//	cursorIdx_ = (cursorIdx_ + 1) % selectList_.size();
+	//}
+	//if (ins.IsInputTriggered("Right"))
+	//{
+	//	cursorIdx_ = (cursorIdx_ + selectList_.size() - 1) % selectList_.size();
+	//}
 
-	if (ins.IsInputTriggered("Parry"))
-	{
-		auto selectedName = selectList_[cursorIdx_];
-		selectFuncTable_[selectedName]();
-		return;
-	}
+	//if (ins.IsInputTriggered("Parry"))
+	//{
+	//	auto selectedName = selectList_[cursorIdx_];
+	//	selectFuncTable_[selectedName]();
+	//	return;
+	//}
 }
 
 void GameScene::DrawSelect(void)
@@ -192,10 +190,10 @@ void GameScene::UpdateGame(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
-	if(player_->GetTransform().pos.y < -50.0f)
-	{
-		player_->SetHP(0.0f);
-	}
+	//if(player_->GetTransform().pos.y < -50.0f)
+	//{
+	//	player_->SetHP(0.0f);
+	//}
 
 	player_->Update();
 	enemy_->Update();
@@ -280,23 +278,23 @@ void GameScene::DrawMessage(void)
 	//現在選択している行をずらす幅
 	const int currentLineOffset = 20;
 	//現在選択している行の文字列
-	std::wstring currentStr = selectList_[cursorIdx_];
-	for (auto& row : selectList_)
-	{
-		//文字列の幅を取得
-		int stringWidth = GetDrawStringWidth(row.c_str(), row.size());
-		unsigned int col = 0xFFFFFF;
-		if (row == currentStr)
-		{
-			DrawString(lineX - currentLineOffset, lineY, L"⇒", 0xFF0000);
-			col = 0xFF00FF;
-			//lineX += currentLineOffset;
-		}
+	//std::wstring currentStr = selectList_[cursorIdx_];
+	//for (auto& row : selectList_)
+	//{
+	//	//文字列の幅を取得
+	//	int stringWidth = GetDrawStringWidth(row.c_str(), row.size());
+	//	unsigned int col = 0xFFFFFF;
+	//	if (row == currentStr)
+	//	{
+	//		DrawString(lineX - currentLineOffset, lineY, L"⇒", 0xFF0000);
+	//		col = 0xFF00FF;
+	//		//lineX += currentLineOffset;
+	//	}
 
-		DrawFormatString(lineX + 1, lineY + 1, 0x000000, L"%s", row.c_str());
-		DrawFormatString(lineX, lineY, col, L"%s", row.c_str());
-		lineX += 150 + stringWidth;
-	}
+	//	DrawFormatString(lineX + 1, lineY + 1, 0x000000, L"%s", row.c_str());
+	//	DrawFormatString(lineX, lineY, col, L"%s", row.c_str());
+	//	lineX += 150 + stringWidth;
+	//}
 }
 
 

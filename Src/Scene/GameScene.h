@@ -54,15 +54,15 @@ private:
 
 	//メッセージクラスみたいなクラスを作って分けてもいいかも
 	//選択肢文字列リスト
-	std::vector<std::wstring> selectList_;
-	//選択肢関数テーブル
-	using SelectFunc_t = std::function<void()>;
-	std::map<std::wstring, SelectFunc_t> selectFuncTable_;
-	//現在選択しているもの
-	int cursorIdx_;
+	//std::vector<std::wstring> selectList_;
+	////選択肢関数テーブル
+	//using SelectFunc_t = std::function<void()>;
+	//std::map<std::wstring, SelectFunc_t> selectFuncTable_;
+	////現在選択しているもの
+	//int cursorIdx_;
 
-	//触れているかどうか
-	bool isToutch_;
+	////触れているかどうか
+	//bool isToutch_;
 
 	/// <summary>
 	/// 探索フェーズの更新処理

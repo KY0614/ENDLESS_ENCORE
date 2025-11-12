@@ -2,7 +2,7 @@
 #include <map>
 #include "Common/Transform.h"
 
-class Sphere;
+class Cube;
 
 class Stage
 {
@@ -49,21 +49,12 @@ public:
 	/// </summary>
 	/// <returns>現在のステージモデル情報</returns>
 	const Transform& GetTransform(void){ return stageTransform_[type_]; }
-
-	/// <summary>
-	/// 衝突用球体の取得
-	/// </summary>
-	/// <param name=""></param>
-	/// <returns></returns>
-	const Sphere& GetSphere(void) const;
-
 private:
 	TYPE type_;
 
 	std::unordered_map<TYPE, Transform> stageTransform_;
 
-	//球体
-	std::unique_ptr<Sphere> sphere_;
+	std::unique_ptr<Cube> cube_;
 
 	/// <summary>
 	/// 3Dモデル初期化

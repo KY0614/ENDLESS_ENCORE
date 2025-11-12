@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Common\Geometry\GeometryBase.cpp" />
     <ClCompile Include="Src\Scene\DebugScene.cpp" />
     <ClCompile Include="Src\Object\ItemPrevew.cpp" />
     <ClCompile Include="Src\Object\GimmickObject.cpp" />
@@ -91,6 +92,7 @@
     <ClCompile Include="Src\Object\Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Common\Geometry\GeometryBase.h" />
     <ClInclude Include="Src\Scene\DebugScene.h" />
     <ClInclude Include="Src\Object\ItemPrevew.h" />
     <ClInclude Include="Src\Object\GimmickObject.h" />

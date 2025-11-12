@@ -208,6 +208,13 @@ private:
 	/// <param name=""></param>
 	void FollowPlayer(VECTOR& pos);
 
+	//Õ“Ë”»’è--------------------------------------------------------
+	
+	/// <summary>
+	/// d—Í•ûŒü‚ÌÕ“Ë”»’èˆ—
+	/// </summary>
+	void CollisionGravity(void);
+
 	//‰ñ“]--------------------------------------------------------
 
 	/// <summary>

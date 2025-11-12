@@ -66,6 +66,10 @@ namespace
 
 	const float VIEW_ANGLE = 40.0f;
 	const float VIEW_RANGE = 100.0f;
+
+	//重力加速度
+	const float GRAVITY_POW = 15.0f;
+
 }
 
 Enemy::Enemy(Player& player):player_(player)
@@ -133,6 +137,8 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
+
+	UpdateDebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -151,75 +157,6 @@ void Enemy::Draw(void)
 	DrawShadow();
 
 #ifdef _DEBUG
-	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
-	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
-	VECTOR right = VScale(transform_.GetRight(), 120.0f);
-	forward.y += 150.0f;
-	right.y += 150.0f;
-	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
-	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
-	//
-	//DrawSphere3D(VAdd(transform_.pos, right), 10.0f, 16, 0xFFFFFF, 0xFFFFFF, true);
-	//if (!bullets_.empty()) {
-	//	DrawFormatString(0, 200, 0xffffff, L"E X: %.2f Y: %.2f Z: %.2f",
-	//		bullets_[0]->GetTransform().pos.x, bullets_[0]->GetTransform().pos.y, bullets_[0]->GetTransform().pos.z);
-	//}
-	//switch (state_)
-	//{
-	//case Enemy::STATE::NONE:
-	//	break;
-	//case Enemy::STATE::FOLLOW:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
-	//	break;
-	//case Enemy::STATE::MOVE:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE");
-	//	break;
-	//case Enemy::STATE::ATTACK_NEAR:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_NEAR");
-	//	break;
-	//case Enemy::STATE::SHOT_ONE:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ONE");
-	//	break;
-	//case Enemy::STATE::SHOT_ALL:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ALL");
-	//	break;
-	//case Enemy::STATE::CHARGE:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"CHARGE");
-	//	break;
-	//case Enemy::STATE::ATTACK_CHARGE:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_CHARGE");
-	//	break;
-	//case Enemy::STATE::DOWN:
-	//	DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN");
-	//	break;
-	//default:
-	//	break;
-	//}
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-	sphereNear_->Draw(col_);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
-	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
-	const int HP_BAR_Y = pos.z + 100.0f;// HPバーの左上Y座標
-
-	const int HP_BAR_WIDTH = maxHp_;    // HPバーの最大幅
-	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
-	float hp = hp_ / maxHp_;
-	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
-	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
-	// 背景（グレー）
-	DrawBox(posX,
-		posY,
-		posX + HP_BAR_WIDTH,
-		posY + HP_BAR_HEIGHT,
-		GetColor(100, 100, 100), TRUE);
-	// 現在HP（赤）
-	DrawBox(posX,
-		posY,
-		posX + barWidth,
-		posY + HP_BAR_HEIGHT,
-		GetColor(255, 0, 0), TRUE);
 
 	DrawDebug();
 #endif // _DEBUG
@@ -529,6 +466,34 @@ void Enemy::FollowPlayer(VECTOR& pos)
 		float angleDegrees = CommonUtility::Rad2DegF(angle);
 		SetGoalRotate(angle);
 	}
+}
+
+void Enemy::CollisionGravity(void)
+{
+	// 重力方向
+	VECTOR dirGravity = CommonUtility::DIR_D;
+
+	// 重力方向の反対
+	VECTOR dirUpGravity = CommonUtility::DIR_U;
+
+	// 重力の強さ
+	float gravityPow = GRAVITY_POW;
+
+	//float checkPow = 10.0f;
+	//gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
+	//gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
+	//for (const auto c : colliders_)
+	//{
+	//	//地面との衝突
+	//	auto hit = MV1CollCheck_Line(
+	//		c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
+
+	//	if (hit.HitFlag > 0 && VDot(dirGravity, CommonUtility::VECTOR_ZERO) > 0.9f)
+	//	{
+	//		// 衝突地点から、少し上に移動
+	//		movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
+	//	}
+	//}
 }
 
 void Enemy::SetGoalRotate(double rotRad)
@@ -1232,6 +1197,79 @@ void Enemy::UpdateDebugImGui(void)
 
 void Enemy::DrawDebug(void)
 {
+	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
+	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
+	VECTOR right = VScale(transform_.GetRight(), 120.0f);
+	forward.y += 150.0f;
+	right.y += 150.0f;
+	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
+	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+
+	DrawSphere3D(VAdd(transform_.pos, right), 10.0f, 16, 0xFFFFFF, 0xFFFFFF, true);
+	if (!bullets_.empty()) {
+		DrawFormatString(0, 200, 0xffffff, L"E X: %.2f Y: %.2f Z: %.2f",
+			bullets_[0]->GetTransform().pos.x, bullets_[0]->GetTransform().pos.y, bullets_[0]->GetTransform().pos.z);
+	}
+
+	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
+
+	switch (state_)
+	{
+	case Enemy::STATE::NONE:
+		break;
+	case Enemy::STATE::FOLLOW:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
+		break;
+	case Enemy::STATE::MOVE:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE");
+		break;
+	case Enemy::STATE::ATTACK_NEAR:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_NEAR");
+		break;
+	case Enemy::STATE::SHOT_ONE:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ONE");
+		break;
+	case Enemy::STATE::SHOT_ALL:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ALL");
+		break;
+	case Enemy::STATE::CHARGE:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"CHARGE");
+		break;
+	case Enemy::STATE::ATTACK_CHARGE:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_CHARGE");
+		break;
+	case Enemy::STATE::DOWN:
+		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN");
+		break;
+	default:
+		break;
+	}
+
+	sphereNear_->Draw(col_);
+
+	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
+	const int HP_BAR_Y = pos.z + 100.0f;// HPバーの左上Y座標
+
+	const int HP_BAR_WIDTH = maxHp_;    // HPバーの最大幅
+	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
+	float hp = hp_ / maxHp_;
+	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
+	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
+	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
+	// 背景（グレー）
+	DrawBox(posX,
+		posY,
+		posX + HP_BAR_WIDTH,
+		posY + HP_BAR_HEIGHT,
+		GetColor(100, 100, 100), TRUE);
+	// 現在HP（赤）
+	DrawBox(posX,
+		posY,
+		posX + barWidth,
+		posY + HP_BAR_HEIGHT,
+		GetColor(255, 0, 0), TRUE);
+
+
 	//ラジアンに変換
 	float viewRad = CommonUtility::Deg2RadF(VIEW_ANGLE);
 

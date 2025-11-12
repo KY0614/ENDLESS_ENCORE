@@ -112,6 +112,11 @@ public:
 		const VECTOR& sphPos, float sphRadius, 
 		const VECTOR& capPos1, const VECTOR& capPos2, float capRadius);
 
+	//ÉJÉvÉZÉãÇ∆óßï˚ëÃÇÃè’ìÀîªíË
+	static bool IsHitCapsuleBox(
+		const VECTOR& capPos1, const VECTOR& capPos2, float capRadius,
+		const VECTOR& boxPos ,const VECTOR& boxMinPos, const VECTOR& boxMaxPos);
+
 	//î‰är
 	static bool Equals(const VECTOR& v1, const VECTOR& v2);
 	static bool EqualsVZero(const VECTOR& v1);

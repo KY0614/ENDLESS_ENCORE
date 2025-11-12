@@ -79,7 +79,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::TITLE);
+	DoChangeScene(SCENE_ID::GAME);
 }
 
 void SceneManager::Init3D(void)
@@ -101,7 +101,6 @@ void SceneManager::Init3D(void)
 	SetUseLighting(true);
 	
 	//ライトの設定
-	//ChangeLightTypeDir({ 0.3f, -0.7f, 0.8f });
 	ChangeLightTypeDir(lightDir_);
 
 	//フォグ設定

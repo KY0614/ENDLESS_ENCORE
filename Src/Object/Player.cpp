@@ -138,6 +138,8 @@ void Player::Update(void)
 	animationController_->Update();
 
 	transform_.Update();
+
+	UpdateDebugImGui();
 }
 
 void Player::Draw(void)
@@ -887,7 +889,7 @@ void Player::UpdateDebugImGui(void)
 	//HP用スライダー
 	ImGui::SliderFloat("HP", &hp_, 0.0f, maxHp_);
 
-	static float maxHpMax_ = 100.0f;
+	static float maxHpMax_ = 500.0f;
 	//最大HP用の最大値
 	ImGui::InputFloat("MaxHP Max", &maxHpMax_, 0.0f);
 
@@ -941,10 +943,9 @@ void Player::DebugDraw(void)
 	VECTOR right = VScale(transform_.GetRight(), 120.0f);
 	forward.y += 150.0f;
 	right.y += 150.0f;
-	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
-	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
+	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
