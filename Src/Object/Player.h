@@ -25,7 +25,7 @@ public:
 	enum class STATE
 	{
 		NONE,	//初期化前
-		SELECT,	//選択
+		ENCOUNT,//エンカウント
 		PLAY,	//操作可能
 		BACKSTAB,	//バックスタブ
 		DEAD,	//死亡
@@ -256,7 +256,7 @@ private:
 	/// <summary>
 	/// 状態遷移：SELECT
 	/// </summary>
-	void ChangeStateSelect(void);
+	void ChangeStateEncount(void);
 	/// <summary>
 	/// 状態遷移：PLAY
 	/// </summary>
@@ -272,7 +272,7 @@ private:
 
 	//更新ステップ
 	void UpdateNone(void);
-	void UpdateSelect(void);
+	void UpdateEncount(void);
 	void UpdatePlay(void);
 	void UpdateBackstab(void);
 	void UpdateDead(void);

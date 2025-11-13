@@ -61,7 +61,7 @@ Player::Player(void)
 	maxHp_ = 0.0f;
 	//èÛë‘ä«óù
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
-	stateChanges_.emplace(STATE::SELECT, std::bind(&Player::ChangeStateSelect, this));
+	stateChanges_.emplace(STATE::SELECT, std::bind(&Player::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
@@ -349,9 +349,9 @@ void Player::ChangeStateNone(void)
 	stateUpdate_ = std::bind(&Player::UpdateNone, this);
 }
 
-void Player::ChangeStateSelect(void)
+void Player::ChangeStateEncount(void)
 {
-	stateUpdate_ = std::bind(&Player::UpdateSelect, this);
+	stateUpdate_ = std::bind(&Player::UpdateEncount, this);
 }
 
 void Player::ChangeStatePlay(void)
@@ -379,7 +379,7 @@ void Player::UpdateNone(void)
 {//âΩÇ‡ÇµÇ»Ç¢
 }
 
-void Player::UpdateSelect(void)
+void Player::UpdateEncount(void)
 {
 }
 

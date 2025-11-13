@@ -121,6 +121,9 @@ void SceneManager::Update(void)
 	}
 	//‰æ–Ê—h‚ç‚µ
 	ShakeScreen();
+
+	FadeTransitor::GetInstance().Update();
+
 	ChangeLightTypeDir(lightDir_);
 	if (scenes_.empty())
 	{
@@ -209,6 +212,8 @@ void SceneManager::Draw(void)
 		pos.y = 0;
 		DrawGraph(pos.x, 0, mainScreen_, false);
 	}
+
+	FadeTransitor::GetInstance().Draw();
 }
 
 void SceneManager::Destroy(void)

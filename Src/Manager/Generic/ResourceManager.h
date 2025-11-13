@@ -36,6 +36,7 @@ public:
 		FLOOR,
 		STAGE,
 		THEATER,
+		ROCK,
 
 		//‰¹
 		TITLE_BGM,

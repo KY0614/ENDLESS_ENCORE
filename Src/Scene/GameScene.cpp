@@ -115,22 +115,23 @@ void GameScene::UpdateExplore(void)
 	player_->Update();
 	stage_->Update();
 
-	if(ins.IsInputTriggered("Next"))
-	{
-		update_ = &GameScene::UpdateEncount;
-		draw_ = &GameScene::DrawEncount;
-	}
-	//FadeTransitor& fade = FadeTransitor::GetInstance();
-	//if (stage_->GetStageCube().IsHit(player_->GetCapsule()))
-	//{
-	//	fade.Start();
-	//	fade.Update();
-	//}
-	//if (fade.IsEnd())
+	//if(ins.IsInputTriggered("Next"))
 	//{
 	//	update_ = &GameScene::UpdateEncount;
 	//	draw_ = &GameScene::DrawEncount;
 	//}
+	FadeTransitor& fade = FadeTransitor::GetInstance();
+	if (ins.IsInputTriggered("Next"))
+	{
+		fade.Start();
+	}
+	
+		
+	if (fade.IsEnd())
+	{
+		update_ = &GameScene::UpdateEncount;
+		draw_ = &GameScene::DrawEncount;
+	}
 
 	//isToutch_ = false;
 	//if (CommonUtility::IsHitSpheres(
@@ -159,6 +160,8 @@ void GameScene::DrawExplore(void)
 
 	//プレイヤー描画
 	player_->Draw();
+
+	DrawString(0, 60, L"探索ステージ", 0xAAAAAA);
 }
 
 void GameScene::UpdateEncount(void)
@@ -222,7 +225,7 @@ void GameScene::DrawEncount(void)
 	}
 
 	player_->DrawDead();
-
+	DrawString(0, 60, L"エンカウント", 0xAAAAAA);
 }
 
 void GameScene::UpdateGame(void)

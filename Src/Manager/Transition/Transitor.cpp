@@ -7,7 +7,8 @@ Transitor::Transitor(int interval) :
 	interval_(interval),
 	oldRT_(0),
 	newRT_(0),
-	frame_(0)
+	frame_(0),
+	isStart_(false)
 {
 }
 
@@ -27,4 +28,5 @@ void Transitor::Start(void)
 	//現在表示中の画面をoldRT_にコピー
 	int result = GetDrawScreenGraph(0, 0, size.width_, size.height_,oldRT_);
 	frame_ = 0;
+	isStart_ = true;
 }

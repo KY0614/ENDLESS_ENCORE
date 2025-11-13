@@ -23,6 +23,8 @@ FadeTransitor::FadeTransitor(int interval) :
 
 void FadeTransitor::Update(void)
 {
+	if (!isStart_)return;
+
 	if (frame_ < interval_) {
 		++frame_;
 		SetDrawScreen(newRT_);

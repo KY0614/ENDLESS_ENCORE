@@ -27,5 +27,7 @@ protected:
 
 	int interval_;
 	int frame_;
+
+	bool isStart_;
 };
 
