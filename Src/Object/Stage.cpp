@@ -5,6 +5,7 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
 #include "Common/Geometry/Cube.h"
+#include "Common/Geometry/Box.h"
 #include "Stage.h"
 
 Stage::Stage(void)
@@ -21,9 +22,18 @@ void Stage::Init(void)
 	//3Dƒ‚ƒfƒ‹‰Šú‰»
 	Init3DModel();
 
-	cube_ = std::make_unique<Cube>(stageTransform_[type_].pos, stageTransform_[type_].quaRot,
-		VGet(-1375.0f,-219.0f,834.0f), VGet(-1375.0f, -219.0f, 3375.0f));
+	//cube_ = std::make_unique<Cube>(stageTransform_[type_].pos,
+	// stageTransform_[type_].quaRot,
+	//	VGet(-1375.0f, -219.0f, 2000.0f),
+	//	VGet(1430.0f, 219.0f, 4375.0f));
 
+	//cube_ = std::make_unique<Cube>(stageTransform_[type_].pos,
+	//	stageTransform_[type_].quaRot,
+	//	VGet(2700.0f,430.0f,2600.0f));
+
+	cube_ = std::make_unique<Box>(stageTransform_[type_]);
+	cube_->SetLocalCenter(VGet(0.0f, 215.0f, 2000.0f));
+	cube_->SetSize(VGet(2700.0f/2.0f, 430.0f / 2.0f, 1000.0f));
 }
 
 void Stage::Update(void)
@@ -35,6 +45,7 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	MV1DrawModel(stageTransform_[type_].modelId);
+	//cube_->Draw();
 }
 
 void Stage::UpdateDebugImGui(void)

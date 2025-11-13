@@ -2,13 +2,16 @@
 #include "../Transform.h"
 #include "Sphere.h"
 
-Sphere::Sphere(const Transform& parent) : transformParent_(parent)
+Sphere::Sphere(const Transform& parent) : 
+	transformParent_(parent)
 {
 	radius_ = 0.0f;
 	localPos_ = { 0.0f, 0.0f, 0.0f };
 }
 
-Sphere::Sphere(const VECTOR& parentPos,const Transform& parent) : parentPos_(parentPos), transformParent_(parent)
+Sphere::Sphere(const VECTOR& parentPos,const Transform& parent) : 
+	parentPos_(parentPos),
+	transformParent_(parent)
 {
 	radius_ = 0.0f;
 	localPos_ = { 0.0f, 0.0f, 0.0f };

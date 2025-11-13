@@ -19,6 +19,7 @@
 #include "../../Scene/GameScene.h"
 #include "../../Scene/ResultScene.h"
 #include "../GameSystem/SoundManager.h"
+#include "../Transition/FadeTransitor.h"
 #include "JsonManager.h"
 #include "Camera.h"
 #include "ResourceManager.h"
@@ -49,6 +50,8 @@ void SceneManager::Init(void)
 {
 	SoundManager::CreateInstance();
 	JsonManager::CreateInstance();
+	JsonManager::CreateInstance();
+	FadeTransitor::CreateInstance();
 	//UIManager::CreateInstance();
 
 	sceneId_ = SCENE_ID::NONE;

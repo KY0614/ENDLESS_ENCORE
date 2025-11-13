@@ -28,8 +28,6 @@ public:
 	//親Transformからの相対位置をセット
 	void SetLocalPos(const VECTOR& pos) { localPos_ = pos; }
 
-	void SetPos(const VECTOR& pos) { localPos_ = pos; }
-
 	//ワールド座標を取得
 	VECTOR GetPos(void) const { return GetRotPos(localPos_); }
 

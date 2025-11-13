@@ -84,7 +84,7 @@ public:
 	/// </summary>
 	/// <param name=""></param>
 	/// <returns></returns>
-	const Capsule& GetCapsule(void) const;
+	Capsule& GetCapsule(void) const;
 
 	/// <summary>
 	/// Õ“Ë—p‹…‘Ì‚Ìæ“¾

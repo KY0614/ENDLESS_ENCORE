@@ -2,7 +2,7 @@
     "Enemy": {
     "Transform": 
     {
-      "position": [-800.0, 10.0, 250.0],
+      "position": [85.0, -219.0, 3055.0],
       "scale": 1.0,
       "localRotY": 180.0
     },

@@ -1,6 +1,25 @@
 #include <DxLib.h>
 #include "FadeTransitor.h"
 
+FadeTransitor* FadeTransitor::instance_ = nullptr;
+
+void FadeTransitor::CreateInstance()
+{
+	if (instance_ == nullptr)
+	{
+		instance_ = new FadeTransitor();
+	}
+}
+
+FadeTransitor& FadeTransitor::GetInstance(void)
+{
+	return *instance_;
+}
+
+FadeTransitor::FadeTransitor(int interval) :
+	Transitor(interval)
+{
+}
 
 void FadeTransitor::Update(void)
 {

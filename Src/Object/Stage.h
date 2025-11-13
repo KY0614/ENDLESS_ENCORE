@@ -3,6 +3,7 @@
 #include "Common/Transform.h"
 
 class Cube;
+class Box;
 
 class Stage
 {
@@ -33,6 +34,8 @@ public:
 	/// </summary>
 	void Draw(void);
 
+	//Cube& GetStageCube(void) { return *cube_; }
+
 	/// <summary>
 	/// ステージを変更する
 	/// </summary>
@@ -54,7 +57,8 @@ private:
 
 	std::unordered_map<TYPE, Transform> stageTransform_;
 
-	std::unique_ptr<Cube> cube_;
+	//std::unique_ptr<Cube> cube_;
+	std::unique_ptr<Box> cube_;
 
 	/// <summary>
 	/// 3Dモデル初期化

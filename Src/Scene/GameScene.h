@@ -75,14 +75,14 @@ private:
 	void DrawExplore(void);
 
 	/// <summary>
-	/// 選択中の更新処理
+	/// エンカウント中の更新処理
 	/// </summary>
-	void UpdateSelect(void);
+	void UpdateEncount(void);
 
 	/// <summary>
-	/// 選択中の描画処理
+	/// エンカウント中の描画処理
 	/// </summary>
-	void DrawSelect(void);
+	void DrawEncount(void);
 
 	/// <summary>
 	/// ゲーム中の更新処理

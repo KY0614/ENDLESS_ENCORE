@@ -228,7 +228,7 @@ void Player::ClearCollider(void)
 	colliders_.clear();
 }
 
-const Capsule& Player::GetCapsule(void) const
+Capsule& Player::GetCapsule(void) const
 {
 	return *capsule_;
 }

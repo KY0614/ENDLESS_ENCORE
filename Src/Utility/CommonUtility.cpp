@@ -502,6 +502,11 @@ bool CommonUtility::IsHitSphereCapsule(
 
 }
 
+bool CommonUtility::IsHitCapsuleBox(const VECTOR& capPos1, const VECTOR& capPos2, float capRadius, const VECTOR& boxPos, const VECTOR& boxMinPos, const VECTOR& boxMaxPos)
+{
+    return false;
+}
+
 bool CommonUtility::Equals(const VECTOR& v1, const VECTOR& v2)
 {
     if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)

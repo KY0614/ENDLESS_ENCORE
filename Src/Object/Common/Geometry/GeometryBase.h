@@ -22,19 +22,24 @@ public:
 	virtual void Draw(void) = 0;
 
 	//各種当たり判定
-	virtual const bool IsHit(GeometryBase& _geometry) = 0;
-	virtual const bool IsHit(Model& _model) = 0;
-	virtual const bool IsHit(Cube& _cube) = 0;
-	virtual const bool IsHit(Sphere& _sphere) = 0;
-	virtual const bool IsHit(Capsule& _capsule) = 0;
-	virtual const bool IsHit(Line& _line) = 0;
+	virtual bool IsHit(GeometryBase& _geometry) = 0;
+	virtual bool IsHit(Model& _model) = 0;
+	virtual bool IsHit(Cube& _cube) = 0;
+	virtual bool IsHit(Sphere& _sphere) = 0;
+	virtual bool IsHit(Capsule& _capsule) = 0;
+	virtual bool IsHit(Line& _line) = 0;
 
 	//ヒット後の処理
 	virtual void HitAfter(void);
 
+	//親Transformからの相対位置をセット
+	void SetLocalPos(const VECTOR& pos) { localPos_ = pos; }
+
 	//親情報を返す
-	inline const VECTOR& GetColParentPos(void)const { return parentPos_; }
-	inline const Quaternion& GetColParentRot(void)const { return parentQuaRot_; }
+	//ワールド座標を取得
+	VECTOR GetPos(void) const { return GetRotPos(localPos_); }
+	const VECTOR& GetColParentPos(void)const { return parentPos_; }
+	const Quaternion& GetColParentRot(void)const { return parentQuaRot_; }
 
 protected:
 
@@ -50,5 +55,9 @@ protected:
 
 	const VECTOR& parentPos_;			//親の座標
 	const Quaternion& parentQuaRot_;	//親の回転
+
+	//親Transformからの相対位置
+	VECTOR localPos_;
+
 };
 

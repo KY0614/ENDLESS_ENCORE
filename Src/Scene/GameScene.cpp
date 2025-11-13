@@ -8,7 +8,9 @@
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/ResourceManager.h"
+#include "../Manager/Transition/FadeTransitor.h"
 #include "../Object/Common/Geometry/Sphere.h"
+#include "../Object/Common/Geometry/Cube.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
@@ -113,6 +115,23 @@ void GameScene::UpdateExplore(void)
 	player_->Update();
 	stage_->Update();
 
+	if(ins.IsInputTriggered("Next"))
+	{
+		update_ = &GameScene::UpdateEncount;
+		draw_ = &GameScene::DrawEncount;
+	}
+	//FadeTransitor& fade = FadeTransitor::GetInstance();
+	//if (stage_->GetStageCube().IsHit(player_->GetCapsule()))
+	//{
+	//	fade.Start();
+	//	fade.Update();
+	//}
+	//if (fade.IsEnd())
+	//{
+	//	update_ = &GameScene::UpdateEncount;
+	//	draw_ = &GameScene::DrawEncount;
+	//}
+
 	//isToutch_ = false;
 	//if (CommonUtility::IsHitSpheres(
 	//	stage_->GetSphere().GetPos(),
@@ -140,23 +159,27 @@ void GameScene::DrawExplore(void)
 
 	//プレイヤー描画
 	player_->Draw();
-
-	//if (!isToutch_)
-	//{
-	//	DrawFormatString(10, 60, 0xFF0000, L"[目標]水色の球体へ近づこう");
-	//}
-	//else
-	//{
-	//	DrawFormatString(10, 60, 0xFF0000, L"[目標]BボタンかSPACEキーを押そう");
-	//}
 }
 
-void GameScene::UpdateSelect(void)
+void GameScene::UpdateEncount(void)
 {
-	player_->Update();
-	stage_->Update();
-
 	InputManager& ins = InputManager::GetInstance();
+	//if (ins.IsInputTriggered("Next"))
+	//{
+	//	update_ = &GameScene::UpdateEncount;
+	//	draw_ = &GameScene::DrawEncount;
+	//}
+	player_->Update();
+	enemy_->Update();
+	stage_->Update();
+}
+
+//void GameScene::UpdateSelect(void)
+//{
+//	player_->Update();
+//	stage_->Update();
+//
+//	InputManager& ins = InputManager::GetInstance();
 
 	//if (ins.IsInputTriggered("Left"))
 	//{
@@ -173,17 +196,33 @@ void GameScene::UpdateSelect(void)
 	//	selectFuncTable_[selectedName]();
 	//	return;
 	//}
-}
+//}
 
-void GameScene::DrawSelect(void)
+//void GameScene::DrawSelect(void)
+//{
+//	//プレイヤー描画
+//	stage_->Draw();
+//
+//	//プレイヤー描画
+//	player_->Draw();
+//
+//	DrawMessage();
+//}
+
+void GameScene::DrawEncount(void)
 {
-	//プレイヤー描画
 	stage_->Draw();
 
-	//プレイヤー描画
 	player_->Draw();
+	enemy_->Draw();
 
-	DrawMessage();
+	if (enemy_->GetIsDead())
+	{
+		player_->DrawVictory();
+	}
+
+	player_->DrawDead();
+
 }
 
 void GameScene::UpdateGame(void)
@@ -251,8 +290,6 @@ void GameScene::DrawGame(void)
 	}
 
 	player_->DrawDead();
-
-	DrawFormatString(10, 60, 0xFF0000, L"[目標]敵を倒そう");
 }
 
 void GameScene::DrawMessage(void)

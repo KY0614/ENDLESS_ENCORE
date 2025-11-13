@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <algorithm>
 #include <vector>
 #include"../../../Common/Quaternion.h"
@@ -14,6 +15,18 @@ Cube::Cube(const VECTOR& pos,
 {
     boudingBox_.vMin = min;
     boudingBox_.vMax = max;
+    UpdateBoudingBoxAxis();
+}
+
+Cube::Cube(const VECTOR& pos,
+    const Quaternion& rot,
+    const VECTOR halfSize) :
+    GeometryBase(pos, rot)
+{
+    boudingBox_.vMin = VScale(halfSize, -1.0f);
+    boudingBox_.vMax = halfSize;
+
+    UpdateBoudingBoxAxis();
 }
 
 Cube::Cube(const Cube& copyBase,
@@ -27,32 +40,32 @@ Cube::~Cube(void)
 {
 }
 
-const bool Cube::IsHit(GeometryBase& geometry)
+bool Cube::IsHit(GeometryBase& geometry)
 {
     return false;
 }
 
-const bool Cube::IsHit(Model& model)
+bool Cube::IsHit(Model& model)
 {
     return false;
 }
 
-const bool Cube::IsHit(Cube& cube)
+bool Cube::IsHit(Cube& cube)
 {
     return false;
 }
 
-const bool Cube::IsHit(Sphere& sphere)
+bool Cube::IsHit(Sphere& sphere)
 {
     return false;
 }
 
-const bool Cube::IsHit(Capsule& capsule)
+bool Cube::IsHit(Capsule& capsule)
 {
-    // OBB のローカル中心
+    // BoudingBoxのローカル中心
     VECTOR localCenter = VScale(VAdd(boudingBox_.vMin, boudingBox_.vMax), 0.5f);
 
-    // OBB のワールド中心
+    // BoudingBoxのワールド中心
     VECTOR worldCenter = VAdd(
         VAdd(
             VAdd(
@@ -64,7 +77,7 @@ const bool Cube::IsHit(Capsule& capsule)
         parentPos_
     );
 
-    // カプセル線分をOBBのローカル空間に変換
+    // カプセル線分をBoudingBoxのローカル空間に変換
     VECTOR rel1 = VSub(capsule.GetPosTop(), worldCenter);
     VECTOR rel2 = VSub(capsule.GetPosDown(), worldCenter);
 
@@ -81,7 +94,7 @@ const bool Cube::IsHit(Capsule& capsule)
     };
 
     // スラブ法で最近接点を見つける
-    // AABBとして処理する（OBBローカル空間内で）
+    // AABBとして処理する（BoudingBoxローカル空間内で）
 
     float distSq = ClosestSegmentAABB(local1, local2, boudingBox_.vMin, boudingBox_.vMax);
 
@@ -89,7 +102,7 @@ const bool Cube::IsHit(Capsule& capsule)
 
 }
 
-const bool Cube::IsHit(Line& _line)
+bool Cube::IsHit(Line& line)
 {
     return false;
 }
@@ -98,7 +111,6 @@ void Cube::Draw(void)
 {
     VECTOR vertices[8];
     CalculateVertices(vertices);
-
     // 12本のエッジのインデックス
     static const int edges[12][2] = {
         {0,1},{0,2},{0,4}, {1,3},{1,5},
@@ -116,12 +128,41 @@ inline void Cube::SetHalfSize(const VECTOR& _halfSize)
 {
 }
 
-void Cube::UpdateObbAxis(void)
+void Cube::UpdateBoudingBoxAxis(void)
 {
+    MATRIX rotMat;
+    rotMat = parentQuaRot_.ToMatrix();
+
+    boudingBox_.axis[0] = VTransform(VGet(1, 0, 0), rotMat); // Right
+    boudingBox_.axis[1] = VTransform(VGet(0, 1, 0), rotMat); // Up
+    boudingBox_.axis[2] = VTransform(VGet(0, 0, 1), rotMat); // Forward
+
 }
 
 void Cube::CalculateVertices(VECTOR outVertices[8]) const
 {
+    MATRIX rotMat;
+    rotMat = parentQuaRot_.ToMatrix();
+
+    int idx = 0;
+    for (int x = 0; x <= 1; ++x)
+    {
+        for (int y = 0; y <= 1; ++y)
+        {
+            for (int z = 0; z <= 1; ++z)
+            {
+                VECTOR local;
+                local.x = (x == 0) ? boudingBox_.vMin.x : boudingBox_.vMax.x;
+                local.y = (y == 0) ? boudingBox_.vMin.y : boudingBox_.vMax.y;
+                local.z = (z == 0) ? boudingBox_.vMin.z : boudingBox_.vMax.z;
+
+                VECTOR world = VTransform(local, rotMat);
+                world = VAdd(world, parentPos_);
+
+                outVertices[idx++] = world;
+            }
+        }
+    }
 }
 
 float Cube::ClosestSegmentAABB(const VECTOR& segA, const VECTOR& segB, const VECTOR& aabbMin, const VECTOR& aabbMax)

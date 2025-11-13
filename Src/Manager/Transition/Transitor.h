@@ -10,7 +10,7 @@ public:
 		RIGHT
 	};
 
-	Transitor(void);
+	Transitor(int interval = 60);
 	~Transitor(void);
 
 	virtual void Update(void) = 0;
@@ -18,7 +18,7 @@ public:
 
 	void Start(void);
 
-	bool IsEnd(void) const { return isEnd_; }
+	bool IsEnd(void) const { return frame_ >= interval_; }
 
 protected:
 
@@ -27,7 +27,5 @@ protected:
 
 	int interval_;
 	int frame_;
-
-	bool isEnd_;
 };
 

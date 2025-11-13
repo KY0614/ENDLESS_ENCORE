@@ -8,7 +8,8 @@ GeometryBase::GeometryBase(
 	const VECTOR& pos,
 	const Quaternion& rot) : 
 	parentPos_(pos),
-	parentQuaRot_(rot)
+	parentQuaRot_(rot),
+	localPos_(VGet(0.0f,0.0f,0.0f))
 {
 }
 

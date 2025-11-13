@@ -3,16 +3,18 @@
 #include "Transitor.h"
 #include "FadeTransitor.h"
 
-Transitor::Transitor(void)
+Transitor::Transitor(int interval) :
+	interval_(interval),
+	oldRT_(0),
+	newRT_(0),
+	frame_(0)
 {
 }
 
 Transitor::~Transitor(void)
 {
-}
-
-FadeTransitor::FadeTransitor(void)
-{
+	DeleteGraph(oldRT_);
+	DeleteGraph(newRT_);
 }
 
 void Transitor::Start(void)
@@ -23,6 +25,6 @@ void Transitor::Start(void)
 	newRT_ = MakeScreen(size.width_, size.height_);
 
 	//現在表示中の画面をoldRT_にコピー
-	//int result = GetDrawScreen(0, 0, size.width_, size.height_,oldRT_);
+	int result = GetDrawScreenGraph(0, 0, size.width_, size.height_,oldRT_);
 	frame_ = 0;
 }

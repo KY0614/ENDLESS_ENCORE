@@ -141,6 +141,10 @@ void Input::ResetTable()
 							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
 
+	inputTable_["Next"] = { {PeripheralType::KEYBOARD,KEY_INPUT_N},
+							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
+							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
+
 	inputTable_["Decide"] = { {PeripheralType::KEYBOARD,KEY_INPUT_SPACE},
 							{PeripheralType::GAMEPAD, PAD_INPUT_B},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
