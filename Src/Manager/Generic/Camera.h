@@ -6,7 +6,6 @@ class Planet;
 
 class Camera
 {
-
 public:
 
 	//カメラスピード(度)
@@ -19,11 +18,9 @@ public:
 	static constexpr float CAMERA_FAR = 30000.0f;
 
 	//追従位置からカメラ位置までの相対座標
-	//static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 50.0f, -400.0f };
 	static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 90.0f, -340.0f };
 
 	//追従位置から注視点までの相対座標
-	//static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, -500.0f, 500.0f };
 	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, -60.0f, 575.0f };
 
 	//カメラ座標関連の定数---------------------------------------------------------------------
@@ -54,6 +51,7 @@ public:
 	{
 		NONE,
 		CRANE_UP,	//カメラを上昇させる
+		TRACK,		//移動させる(向き固定)
 		FIXED_POINT,//固定カメラ
 		TOP_FIXED,	//上部固定
 		FOLLOW,		//追従
@@ -87,7 +85,21 @@ public:
 	//カメラモードの変更
 	void ChangeMode(MODE mode);
 
-	void SetPoint(const VECTOR& startPos, const VECTOR& endPos);
+	void SetFixedPointPos(const VECTOR& pos,const VECTOR& targetPos);
+
+	//カメラの上昇開始位置と移動距離の設定
+	void SetCraneUpPos(const VECTOR& startPos, const float& distance,const VECTOR& targetPos);
+
+	/// <summary>
+	/// トラックカメラ(回転せずに直線移動するカメラ)の設定
+	/// </summary>
+	/// <param name="startPos">移動開始地点</param>
+	/// <param name="endPos">移動終了地点</param>
+	/// <param name="moveDir">移動方向</param>
+	/// <param name="moveSpeed">移動速度</param>
+	void SetTrackCamera(const VECTOR& startPos,
+		const VECTOR& endPos,
+		const float& moveSpeed);
 
 	//追従対象の設定
 	void SetFollow(const Transform* follow);
@@ -125,6 +137,16 @@ private:
 	//カメラの上方向
 	VECTOR cameraUp_;
 
+	VECTOR craneUpStartPos_;
+	VECTOR craneUpTargetPos_;
+	float craneUpDistance_;
+
+	VECTOR trackStartPos_;
+	VECTOR trackEndPos_;
+	VECTOR trackDir_;
+	float trackDistance_;
+	float trackSpeed_;
+
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
 
@@ -140,6 +162,8 @@ private:
 	void ProcessMouseMove(void);
 
 	//モード別更新ステップ
+	void SetBeforeDrawCraneUp(void);
+	void SetBeforeDrawTrack(void);
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);

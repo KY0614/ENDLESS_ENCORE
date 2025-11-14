@@ -1,6 +1,7 @@
 #include <DxLib.h>
 #include "../Application.h"
 #include "../Libs/ImGui/imgui.h"
+#include "../Common/Fader.h"
 #include "../Utility/DrawUtiity.h"
 #include "../Utility/CommonUtility.h"
 #include "../Manager/GameSystem/SoundManager.h"
@@ -24,6 +25,7 @@ GameScene::GameScene(void)
 	player_ = nullptr;
 	enemy_ = nullptr;
 	stage_ = nullptr;
+	isFaseChange_ = false;
 	//isToutch_ = false;
 	//selectList_ = {
 	//L"触れる",
@@ -100,6 +102,15 @@ void GameScene::Update(void)
 void GameScene::Draw(void)
 {
 	(this->*draw_)();
+	//start
+	DrawSphere3D(VGet(10.0f, -219.0f, 900.0f), 15.0f, 16, 0xffffff, 0xffffff, false);
+	//goal
+	DrawSphere3D(VGet(10.0f, -219.0f, 1150.0f), 15.0f, 16, 0x00ff00, 0x00ff00, false);
+	//camera
+	DrawSphere3D(VGet(-200.0f, -219.0f, 1150.0f), 15.0f, 16, 0x0000ff, 0x0000ff, false);
+
+	//enemy
+	DrawSphere3D(VGet(10.0f, -219.0f, 3100.0f), 15.0f, 16, 0xff0000, 0xff0000, false);
 }
 
 void GameScene::UpdateExplore(void)
@@ -123,16 +134,33 @@ void GameScene::UpdateExplore(void)
 	FadeTransitor& fade = FadeTransitor::GetInstance();
 	if (ins.IsInputTriggered("Next"))
 	{
-		fade.Start();
+		isFaseChange_ = true;
+		SceneManager::GetInstance().SetFadeOut();
 	}
-	
-		
-	if (fade.IsEnd())
+	if (SceneManager::GetInstance().GetFade().IsEnd() &&
+		isFaseChange_)
 	{
+		enemy_->ChangeState(Enemy::STATE::ENCOUNT);
+		player_->ChangeState(Player::STATE::ENCOUNT);
+		//const float distance = 100.0f;
+		//VECTOR dir = VAdd(player_->GetTransform().GetLeft(), player_->GetTransform().GetForward());
+		//VECTOR startPos = VAdd(player_->GetTransform().pos, VScale(dir, distance));
+		//mainCamera->SetCraneUpPos(startPos, 200.0f, player_->GetTransform().pos);
+		//mainCamera->ChangeMode(Camera::MODE:::CRANE_UP);
+
+		//mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
+		//VECTOR pos = VGet(-50.0f, -210.0f, 1150.0f);
+		//mainCamera->SetFixedPointPos(pos, VGet(10.0f, -210.0f, 1150.0f));
+
+		VECTOR startPos = VGet(-50.0f, -210.0f, 1350.0f);
+		VECTOR endPos = VGet(-50.0f, -210.0f, 1150.0f);
+		mainCamera->SetTrackCamera(startPos, endPos,0.8f);
+		mainCamera->ChangeMode(Camera::MODE::TRACK);
 		update_ = &GameScene::UpdateEncount;
 		draw_ = &GameScene::DrawEncount;
+		SceneManager::GetInstance().SetFadeIn();
+		isFaseChange_ = false;
 	}
-
 	//isToutch_ = false;
 	//if (CommonUtility::IsHitSpheres(
 	//	stage_->GetSphere().GetPos(),
@@ -162,55 +190,19 @@ void GameScene::DrawExplore(void)
 	player_->Draw();
 
 	DrawString(0, 60, L"探索ステージ", 0xAAAAAA);
+
 }
 
 void GameScene::UpdateEncount(void)
 {
 	InputManager& ins = InputManager::GetInstance();
-	//if (ins.IsInputTriggered("Next"))
-	//{
-	//	update_ = &GameScene::UpdateEncount;
-	//	draw_ = &GameScene::DrawEncount;
-	//}
+	
+
+
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
 }
-
-//void GameScene::UpdateSelect(void)
-//{
-//	player_->Update();
-//	stage_->Update();
-//
-//	InputManager& ins = InputManager::GetInstance();
-
-	//if (ins.IsInputTriggered("Left"))
-	//{
-	//	cursorIdx_ = (cursorIdx_ + 1) % selectList_.size();
-	//}
-	//if (ins.IsInputTriggered("Right"))
-	//{
-	//	cursorIdx_ = (cursorIdx_ + selectList_.size() - 1) % selectList_.size();
-	//}
-
-	//if (ins.IsInputTriggered("Parry"))
-	//{
-	//	auto selectedName = selectList_[cursorIdx_];
-	//	selectFuncTable_[selectedName]();
-	//	return;
-	//}
-//}
-
-//void GameScene::DrawSelect(void)
-//{
-//	//プレイヤー描画
-//	stage_->Draw();
-//
-//	//プレイヤー描画
-//	player_->Draw();
-//
-//	DrawMessage();
-//}
 
 void GameScene::DrawEncount(void)
 {
@@ -241,10 +233,6 @@ void GameScene::UpdateGame(void)
 	enemy_->Update();
 	stage_->Update();
 #ifdef _DEBUG
-	//if (ins.IsInputPressed("Reset"))
-	//{
-	//	this->Init();
-	//}
 
 	if (ins.IsInputTriggered("CameraShake"))
 	{
@@ -337,38 +325,44 @@ void GameScene::DrawMessage(void)
 	//}
 }
 
-
 void GameScene::UpdateDebugImGui(void)
 {
-	ImGui::Begin("Operating");
-
-	ImGui::Text("\tMOVE");
-	ImGui::Text("WASD or LStikc");
-	ImGui::Text("");
-
-	ImGui::Text("\Camera");
-	ImGui::Text("Cursor Key or RStikc");
-	ImGui::Text("");
-
-	ImGui::Text("\tParry");
-	ImGui::Text("Space or B");
-	ImGui::Text("");
-
-	ImGui::Text("\tDodge");
-	ImGui::Text("LShift or A");
-	ImGui::Text("");
-
-	ImGui::Text("\tDash");
-	ImGui::Text("LControl or LTrigger");
-	ImGui::Text("");
-
-	ImGui::Text("\tJump");
-	ImGui::Text("F or LButton");
-	ImGui::Text("");
-
-	ImGui::Text("\tPause");
-	ImGui::Text("P or Start");
-
 	//終了処理
 	ImGui::End();
 }
+
+
+//void GameScene::UpdateSelect(void)
+//{
+//	player_->Update();
+//	stage_->Update();
+//
+//	InputManager& ins = InputManager::GetInstance();
+
+	//if (ins.IsInputTriggered("Left"))
+	//{
+	//	cursorIdx_ = (cursorIdx_ + 1) % selectList_.size();
+	//}
+	//if (ins.IsInputTriggered("Right"))
+	//{
+	//	cursorIdx_ = (cursorIdx_ + selectList_.size() - 1) % selectList_.size();
+	//}
+
+	//if (ins.IsInputTriggered("Parry"))
+	//{
+	//	auto selectedName = selectList_[cursorIdx_];
+	//	selectFuncTable_[selectedName]();
+	//	return;
+	//}
+//}
+
+//void GameScene::DrawSelect(void)
+//{
+//	//プレイヤー描画
+//	stage_->Draw();
+//
+//	//プレイヤー描画
+//	player_->Draw();
+//
+//	DrawMessage();
+//}

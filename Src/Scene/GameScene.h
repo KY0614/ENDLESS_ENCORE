@@ -10,6 +10,20 @@ class Stage;
 class GameScene : public SceneBase
 {
 public:
+	// 演出のサブステートを定義
+	enum class ENCOUNT_STATE
+	{
+		NONE,                   // 初期状態
+		CAMERA_TRACK_START,     // 1. トラックカメラ開始 (プレイヤーへ移動)
+		PLAYER_ANIM_WALK,       // 2. プレイヤー前進
+		FADE_TO_BLACK,          // 3. 暗転開始
+		FADE_TO_SCENE,          // 4. 明転開始 (カメラ固定位置へ)
+		PLAYER_ANIM_LOOK_AROUND,// 5. プレイヤーアニメーション
+		SPOTLIGHT_ON,           // 6. スポットライト点灯
+		ENEMY_CAMERA_CRANE_UP,  // 7. 敵へクレーンアップ
+		FINISHED                // 終了
+	};
+
 	//コンストラクタ
 	GameScene(void);
 
@@ -44,6 +58,9 @@ private:
 
 	UpdateFunc_t update_;
 	DrawFunc_t draw_;
+
+	//フェーズ管理
+	bool isFaseChange_;
 
 	//プレイヤー
 	std::unique_ptr<Player> player_;

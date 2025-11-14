@@ -21,6 +21,7 @@ namespace
 	//JSONÉLÅ[ñºÇíËã`
 	static const std::string KEY_ENEMY = "Enemy";
 	static const std::string KEY_IDLE = "Idle";
+	static const std::string KEY_TURN = "Turn";
 	static const std::string KEY_WALK = "Walk";
 	static const std::string KEY_WALK_RIGHT = "Walk Right";
 	static const std::string KEY_WALK_LEFT = "Walk Left";
@@ -98,6 +99,7 @@ Enemy::Enemy(Player& player):player_(player)
 
 	//èÛë‘ä«óù
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
+	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&Enemy::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::FOLLOW, std::bind(&Enemy::ChangeStateFollow, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Enemy::ChangeStateMove, this));
 	stateChanges_.emplace(STATE::ATTACK_NEAR, std::bind(&Enemy::ChangeStateAttackNear, this));
@@ -269,6 +271,8 @@ void Enemy::InitAnimation(void)
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::TURN, path + animPath.value(KEY_TURN, KEY_EMPTY),
+		animSpeed - 10.0f);
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::WALK_RIGHT, path + animPath.value(KEY_WALK_RIGHT, KEY_EMPTY),
@@ -623,6 +627,12 @@ void Enemy::ChangeStateNone(void)
 	stateUpdate_ = std::bind(&Enemy::UpdateNone, this);
 }
 
+void Enemy::ChangeStateEncount(void)
+{
+	animationController_->Play((int)ANIM_TYPE::TURN,false);
+	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
+}
+
 void Enemy::ChangeStateFollow(void)
 {
 	stateUpdate_ = std::bind(&Enemy::UpdateFollow, this);
@@ -694,6 +704,10 @@ void Enemy::ChangeStateDead(void)
 
 void Enemy::UpdateNone(void)
 {//âΩÇ‡ÇµÇ»Ç¢
+}
+
+void Enemy::UpdateEncount(void)
+{
 }
 
 void Enemy::UpdateFollow(void)

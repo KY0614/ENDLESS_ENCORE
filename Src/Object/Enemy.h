@@ -16,22 +16,24 @@ public:
 	enum class STATE
 	{
 		NONE,
-		FOLLOW,
-		MOVE,			//
-		ATTACK_NEAR,	//
-		SHOT_ONE,		//
-		SHOT_ALL,		//
-		CHARGE,	//
-		ATTACK_CHARGE,	//
-		BACKSTAB,			//
-		DOWN,			//
-		DEAD,			//
+		ENCOUNT,		//エンカウント(登場）
+		FOLLOW,			//追跡
+		MOVE,			//移動(左右に)
+		ATTACK_NEAR,	//近接攻撃
+		SHOT_ONE,		//遠距離攻撃(１つずつ発射）
+		SHOT_ALL,		//遠距離攻撃(全弾同時発射)
+		CHARGE,			//チャージ
+		ATTACK_CHARGE,	//ため攻撃
+		BACKSTAB,		//バックスタブ(致命攻撃)され中
+		DOWN,			//ダウン中
+		DEAD,			//死
 	};
 
 	//アニメーションタイプ
 	enum class ANIM_TYPE
 	{
 		IDLE,
+		TURN,
 		WALK,
 		WALK_RIGHT,
 		WALK_LEFT,
@@ -263,6 +265,10 @@ private:
 	/// </summary>
 	void ChangeStateNone(void);
 	/// <summary>
+	/// 状態遷移：ENCOUNT
+	/// </summary>
+	void ChangeStateEncount(void);
+	/// <summary>
 	/// 状態遷移：FOLLOW
 	/// </summary>
 	void ChangeStateFollow(void);
@@ -305,6 +311,7 @@ private:
 
 	//更新ステップ
 	void UpdateNone(void);
+	void UpdateEncount(void);
 	void UpdateFollow(void);
 	void UpdateMove(void);
 	void UpdateAttackNear(void);

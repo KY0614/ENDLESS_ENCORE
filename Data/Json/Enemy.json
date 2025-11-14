@@ -10,6 +10,7 @@
     {
       "defaultSpeed":30.0,
       "Idle": "Idle.mv1",
+      "Turn": "Turn.mv1",
       "Walk": "Walk.mv1",
       "Walk Right": "Right Walking.mv1",
       "Walk Left": "Left Walking.mv1",

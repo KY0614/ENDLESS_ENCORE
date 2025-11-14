@@ -25,6 +25,7 @@ public:
 	enum class STATE
 	{
 		NONE,	//初期化前
+		STAGE_WALK,	//ステージ上を歩く
 		ENCOUNT,//エンカウント
 		PLAY,	//操作可能
 		BACKSTAB,	//バックスタブ
@@ -35,6 +36,7 @@ public:
 	enum class ANIM_TYPE
 	{
 		IDLE,		//通常
+		WALK_SLOW,		//歩き
 		WALK,		//歩き
 		RUN,		//走り
 		JUMP,		//ジャンプ

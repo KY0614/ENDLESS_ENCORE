@@ -19,7 +19,6 @@
 #include "../../Scene/GameScene.h"
 #include "../../Scene/ResultScene.h"
 #include "../GameSystem/SoundManager.h"
-#include "../Transition/FadeTransitor.h"
 #include "JsonManager.h"
 #include "Camera.h"
 #include "ResourceManager.h"
@@ -51,7 +50,6 @@ void SceneManager::Init(void)
 	SoundManager::CreateInstance();
 	JsonManager::CreateInstance();
 	JsonManager::CreateInstance();
-	FadeTransitor::CreateInstance();
 	//UIManager::CreateInstance();
 
 	sceneId_ = SCENE_ID::NONE;
@@ -73,11 +71,9 @@ void SceneManager::Init(void)
 	lightDir_ = LIGHT_DIR;
 
 	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
-	//mainScreen_ = MakeScreen(300, 300);
 	shakeFrame_ = 0;
 	shakeRate_ = 0.0f;
-	screenPos_ = { 0,0 };
-	nowLoadCnt = 0;
+
 	//3D用の設定
 	Init3D();
 
@@ -122,8 +118,6 @@ void SceneManager::Update(void)
 	//画面揺らし
 	ShakeScreen();
 
-	FadeTransitor::GetInstance().Update();
-
 	ChangeLightTypeDir(lightDir_);
 	if (scenes_.empty())
 	{
@@ -155,14 +149,6 @@ void SceneManager::Update(void)
 
 void SceneManager::Draw(void)
 {
-	// 非同期読み込み中の処理数がゼロになるまで処理しない
-	if (GetASyncLoadNum() != 0)
-	{
-		std::wstring nowloadStr = L"Now Loading...";
-		DrawString(100, 100, nowloadStr.substr(0, nowLoadCnt).c_str(), 0xffffff);
-		nowLoadCnt = (nowLoadCnt + 1) % nowloadStr.length();
-		return;
-	}
 	//描画先グラフィック領域の指定
 	//(３Ｄ描画で使用するカメラの設定などがリセットされる)
 	//SetDrawScreen(DX_SCREEN_BACK);
@@ -212,8 +198,6 @@ void SceneManager::Draw(void)
 		pos.y = 0;
 		DrawGraph(pos.x, 0, mainScreen_, false);
 	}
-
-	FadeTransitor::GetInstance().Draw();
 }
 
 void SceneManager::Destroy(void)
@@ -304,9 +288,47 @@ void SceneManager::SetShakeScreen(bool isShake)
 	}
 }
 
+bool SceneManager::CheckFade(void)
+{
+	bool ret = false;
+	Fader::STATE fState = fader_->GetState();
+	switch (fState)
+	{
+	case Fader::STATE::FADE_IN:
+		//明転中
+		if (fader_->IsEnd())
+		{
+			//明転が終了したら、フェード処理終了
+			fader_->SetFade(Fader::STATE::NONE);
+			ret = true;
+		}
+		break;
+	case Fader::STATE::FADE_OUT:
+		//暗転中
+		if (fader_->IsEnd())
+		{
+			//暗転から明転へ
+			fader_->SetFade(Fader::STATE::FADE_IN);
+		}
+		break;
+	}
+	return ret;
+}
+
+void SceneManager::SetFadeOut(void)
+{
+	//フェードアウト(暗転)を開始する
+	fader_->SetFade(Fader::STATE::FADE_OUT);
+}
+
+void SceneManager::SetFadeIn(void)
+{
+	//フェードアウト(暗転)を開始する
+	fader_->SetFade(Fader::STATE::FADE_IN);
+}
+
 SceneManager::SceneManager(void)
 {
-
 	sceneId_ = SCENE_ID::NONE;
 	waitSceneId_ = SCENE_ID::NONE;
 
@@ -370,7 +392,6 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 
 void SceneManager::Fade(void)
 {
-
 	Fader::STATE fState = fader_->GetState();
 	switch (fState)
 	{
@@ -394,7 +415,6 @@ void SceneManager::Fade(void)
 		}
 		break;
 	}
-
 }
 
 void SceneManager::ShakeScreen(void)

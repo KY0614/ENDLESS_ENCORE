@@ -84,6 +84,11 @@ public:
 
 	void SetShakeScreen(bool isShake);
 
+	bool CheckFade(void);
+	void SetFadeOut(void);
+	void SetFadeIn(void);
+	const Fader& GetFade(void) const { return *fader_; }
+
 	void SceneID2Game(void) { sceneId_ = SCENE_ID::GAME; }
 
 private:
@@ -95,11 +100,11 @@ private:
 	SCENE_ID sceneId_;		//現在のシーンID
 	SCENE_ID waitSceneId_;	//待ち（次の）シーンID
 
-	// フェード
+	// 各種
 	std::unique_ptr<SceneBase> scene_;
 	std::list<std::unique_ptr<SceneBase>>scenes_;
 
-	// 各種シーン
+	// フェード
 	std::unique_ptr<Fader> fader_;
 
 	// カメラ
@@ -116,13 +121,12 @@ private:
 	VECTOR lightDir_;
 
 	//シーンのレンダーターゲット
-	int mainScreen_;	
-	Vector2 screenPos_;
+	int mainScreen_;
 
-	int shakeFrame_;
+	//画面揺らし用
+	int shakeFrame_;	//
 	float shakeRate_;
-	
-	int nowLoadCnt;
+
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする
 	SceneManager(void);

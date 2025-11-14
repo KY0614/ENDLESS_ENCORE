@@ -45,6 +45,7 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	MV1DrawModel(stageTransform_[type_].modelId);
+
 	//cube_->Draw();
 }
 

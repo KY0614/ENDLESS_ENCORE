@@ -61,7 +61,7 @@ Player::Player(void)
 	maxHp_ = 0.0f;
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
-	stateChanges_.emplace(STATE::SELECT, std::bind(&Player::ChangeStateEncount, this));
+	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&Player::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
@@ -309,27 +309,31 @@ void Player::InitAnimation(void)
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Player/";
 	const char* KEY_EMPTY = "";
+	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
+
+	animationController_->Add((int)ANIM_TYPE::WALK_SLOW, path + animPath.value(KEY_WALK, KEY_EMPTY),
+		animSpeed - 15.0f);
 
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
 
 	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value(KEY_RUN, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
 
 	animationController_->Add((int)ANIM_TYPE::JUMP, path + animPath.value(KEY_JUMP, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
 
 	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value(KEY_DODGE, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
 
 	animationController_->Add((int)ANIM_TYPE::BACKSTAB, path + animPath.value(KEY_BACKSTAB, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
 
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
-		animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f));
+		animSpeed);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
@@ -351,6 +355,10 @@ void Player::ChangeStateNone(void)
 
 void Player::ChangeStateEncount(void)
 {
+	animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
+	transform_.pos = VGet(10.0f, -217.0f, 900.0f);
+	transform_.quaRotLocal =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
 	stateUpdate_ = std::bind(&Player::UpdateEncount, this);
 }
 
@@ -381,6 +389,22 @@ void Player::UpdateNone(void)
 
 void Player::UpdateEncount(void)
 {
+	const float moveEndZ = 1150.0f;
+	if(transform_.pos.z <= moveEndZ)
+	{
+		//ゆっくり歩く処理
+		const float walkSpeed = 1.0f;
+		movePow_ = VScale(transform_.GetForward(), walkSpeed);
+		movedPos_ = VAdd(transform_.pos, movePow_);
+	}
+	else
+	{
+		movePow_ = CommonUtility::VECTOR_ZERO;
+		animationController_->Play((int)ANIM_TYPE::IDLE);
+	}
+
+	//衝突判定
+	Collision();
 }
 
 void Player::UpdatePlay(void)
@@ -945,6 +969,10 @@ void Player::DebugDraw(void)
 	right.y += 150.0f;
 	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
 	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+
+	//VECTOR dir = VAdd(transform_.GetLeft(), transform_.GetForward());
+	//VECTOR pos = VAdd(transform_.pos, VScale(dir,30.0f));
+	//DrawSphere3D(pos,15.0f,16,0x00ff00,0x00ff00,true);
 
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);
