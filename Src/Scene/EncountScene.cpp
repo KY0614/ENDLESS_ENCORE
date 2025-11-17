@@ -132,7 +132,7 @@ void EncountScene::ChangeStatePlayerWalk(void)
 	player_.ChangeState(Player::STATE::ENCOUNT);
 	VECTOR startPos = VGet(-50.0f, -210.0f, 1350.0f);
 	VECTOR endPos = VGet(-50.0f, -210.0f, 1150.0f);
-	mainCamera->SetTrackCamera(startPos, endPos,5.0f);
+	mainCamera->SetTrackCamera(startPos, endPos,1.0f);
 	mainCamera->ChangeMode(Camera::MODE::TRACK);
 	stateUpdate_ = std::bind(&EncountScene::UpdatePlayerWalk, this);
 }
@@ -202,15 +202,15 @@ void EncountScene::UpdatePlayerAttention(void)
 		fader_->SetFade(Fader::STATE::FADE_IN);
 
 		//相対距離
-		const float distance = 100.0f;
+		const float distance = 80.0f;
 		//プレイヤーから見て左斜め前方向
 		VECTOR dir = VAdd(player_.GetTransform().GetLeft(), player_.GetTransform().GetForward());
 		VECTOR startPos = VAdd(player_.GetTransform().pos, VScale(dir, distance));
 		VECTOR endPos = VGet(startPos.x, startPos.y + 100.0f, startPos.z);
-		const float moveistance = 200.0f;
+		const float moveDistance = 100.0f;
 		VECTOR target = player_.GetTransform().pos;
-		target.y += 50.0f;
-		mainCamera->SetCraneUpPos(startPos, moveistance, target);
+		target.y += 80.0f;
+		mainCamera->SetCraneUpPos(startPos, moveDistance, target);
 		mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
 		return;
 	}
