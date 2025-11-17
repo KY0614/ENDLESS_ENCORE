@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\EncountScene.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\GeometryBase.cpp" />
     <ClCompile Include="Src\Scene\DebugScene.cpp" />
@@ -93,6 +94,7 @@
     <ClCompile Include="Src\Object\Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\EncountScene.h" />
     <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
     <ClInclude Include="Src\Object\Common\Geometry\GeometryBase.h" />
     <ClInclude Include="Src\Scene\DebugScene.h" />

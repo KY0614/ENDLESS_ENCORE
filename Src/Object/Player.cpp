@@ -2,8 +2,8 @@
 #include<EffekseerForDXLib.h>
 #include "../Application.h"
 #include "../Libs/nlohmann/json.hpp"
-#include "../Utility/CommonUtility.h"
 #include "../Libs/ImGui/imgui.h"
+#include "../Utility/CommonUtility.h"
 #include "../Common/DebugDrawFormat.h"
 #include "../Common/FpsController.h"
 #include "../Common/Easing.h"
@@ -355,6 +355,7 @@ void Player::ChangeStateNone(void)
 
 void Player::ChangeStateEncount(void)
 {
+	//ゆっくり歩くアニメーションに変更
 	animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
 	transform_.pos = VGet(10.0f, -217.0f, 900.0f);
 	transform_.quaRotLocal =

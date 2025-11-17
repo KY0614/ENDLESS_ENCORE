@@ -5,6 +5,7 @@
 #include "../../Application.h"
 #include "../../Libs/ImGui/imgui.h"
 #include "../../Common/Vector2.h"
+#include "../../Common/Easing.h"
 #include "../../Utility/CommonUtility.h"
 #include "../Generic/InputManager.h"
 #include "../Generic/SceneManager.h"
@@ -24,12 +25,13 @@ Camera::Camera(void)
 	mode_ = MODE::NONE;
 	pos_ = CommonUtility::VECTOR_ZERO;
 	targetPos_ = CommonUtility::VECTOR_ZERO;
+	fixedPointPos_ = CommonUtility::VECTOR_ZERO;
+	fixedPointTargetPos_ = CommonUtility::VECTOR_ZERO;
 	craneUpStartPos_ = CommonUtility::VECTOR_ZERO;
 	craneUpTargetPos_ = CommonUtility::VECTOR_ZERO;
 	craneUpDistance_ = 0.0f;
 	trackStartPos_ = CommonUtility::VECTOR_ZERO;
 	trackDir_ = CommonUtility::VECTOR_ZERO;
-	trackDistance_ = 0.0f;
 	trackSpeed_ = 0.0f;
 	followTransform_ = nullptr;
 	targetTransform_ = nullptr;
@@ -38,6 +40,7 @@ Camera::Camera(void)
 	localF2CPos_ = CommonUtility::VECTOR_ZERO;
 	localF2TPos_ = CommonUtility::VECTOR_ZERO;
 	isLockOn_ = false;
+	isActionEnd_ = false;
 }
 
 Camera::~Camera(void)
@@ -167,6 +170,10 @@ void Camera::ChangeMode(MODE mode)
 	//変更時の初期化処理
 	switch (mode_)
 	{
+	case Camera::MODE::FIXED_POINT:
+		pos_ = fixedPointPos_;
+		targetPos_ = fixedPointTargetPos_;
+		break;
 	case Camera::MODE::CRANE_UP:
 		pos_ = craneUpStartPos_;
 		targetPos_ = craneUpTargetPos_;
@@ -188,8 +195,8 @@ void Camera::ChangeMode(MODE mode)
 
 void Camera::SetFixedPointPos(const VECTOR& pos, const VECTOR& targetPos)
 {
-	pos_ = pos;
-	targetPos_ = targetPos;
+	fixedPointPos_ = pos;
+	fixedPointTargetPos_ = targetPos;
 }
 
 void Camera::SetCraneUpPos(
@@ -202,8 +209,6 @@ void Camera::SetCraneUpPos(
 	//注視点(通常重力でいうところのY値を追従対象と同じにする)
 	VECTOR localPos = rotOutX_.PosAxis(VSub(targetPos,startPos));
 	craneUpTargetPos_ = VAdd(startPos, localPos);
-
-	//targetPos_ = targetPos;
 }
 
 void Camera::SetTrackCamera(
@@ -213,8 +218,24 @@ void Camera::SetTrackCamera(
 {
 	trackStartPos_ = startPos;
 	trackEndPos_ = endPos;
-	trackDistance_ = VSize(VSub(endPos, startPos));
 	trackDir_ = VNorm(VSub(endPos, startPos));
+	trackSpeed_ = moveSpeed;
+
+	// 総移動距離から総移動時間を計算
+	float totalDistance = VSize(VSub(endPos, startPos));
+	trackTotalTime_ = totalDistance / moveSpeed;
+	trackElapsedTime_ = 0.0f;
+}
+
+void Camera::SetTrackCamera(
+	const VECTOR& startPos,
+	const VECTOR& moveDir,
+	const float& moveDistance,
+	const float& moveSpeed)
+{
+	trackStartPos_ = startPos;
+	trackEndPos_ = VAdd(startPos,VScale(startPos,moveDistance));
+	trackDir_ = moveDir;
 	trackSpeed_ = moveSpeed;
 }
 
@@ -234,6 +255,7 @@ void Camera::SetDefault(void)
 	angles_.z = 0.0f;
 
 	rot_ = Quaternion();
+	isActionEnd_ = false;
 }
 
 void Camera::SyncFollow(void)
@@ -326,24 +348,45 @@ void Camera::ProcessMouseMove(void)
 
 void Camera::SetBeforeDrawCraneUp(void)
 {
+	//スタート座標から現在座標までの距離を取得
+	VECTOR endPos = VAdd(craneUpStartPos_, VScale(cameraUp_, craneUpDistance_));
+	float pos2StartPos = VSize(VSub(endPos, pos_));
+	const float distance = 0.5f;
+	isActionEnd_ = pos2StartPos <= distance;
+
+	if (isActionEnd_) return;
+
 	const float craneUpSpeed = 0.5f;
 	pos_ = VAdd(pos_, VScale(cameraUp_, craneUpSpeed));
-	VECTOR endPos = VAdd(craneUpStartPos_, VScale(cameraUp_, craneUpDistance_));
-	//if( VSize(VSub(pos_, endPos)) <= craneUpDistance_)
-	//{
-	//	ChangeMode(MODE::FIXED_POINT);
-	//}
 }
 
 void Camera::SetBeforeDrawTrack(void)
 {
+	//スタート座標から現在座標までの距離を取得
 	float pos2StartPos = VSize(VSub(trackEndPos_, pos_));
-	//座標が終了地点を超えたら固定点カメラに変更
-	if (pos2StartPos >= 1.0f)
-	{
-		pos_ = VAdd(pos_, VScale(trackDir_, trackSpeed_));
-		targetPos_ = VAdd(pos_, VScale(CommonUtility::DIR_R, 50.0f));
-	}
+	float start2End = VSize(VSub(pos_, trackStartPos_));
+	const float distance = 1.0f;
+	isActionEnd_ = pos2StartPos <= distance;
+
+	if (isActionEnd_)return;
+	// 経過時間を更新
+	trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	//trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+
+	// イージングで現在の進行度(0.0～1.0)を計算
+	float progress = Easing::QuadOut(
+		trackElapsedTime_,
+		1.0f,
+		trackSpeed_,
+		0.1f
+	);
+	progress = std::clamp(progress, 0.1f, trackSpeed_);
+	//開始座標から終了座標まで移動(縦移動無し)
+	pos_ = VAdd(pos_, VScale(trackDir_, progress));
+	const float lookDistance = 50.0f;
+	//垂直ベクトルを計算して注視点を設定
+	targetPos_ = VAdd(pos_, VScale(
+		VGet(-trackDir_.z, trackDir_.y, -trackDir_.x), lookDistance));
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)

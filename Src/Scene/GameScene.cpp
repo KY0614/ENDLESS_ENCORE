@@ -16,6 +16,7 @@
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
 #include "PauseScene.h"
+#include "EncountScene.h"
 #include "GameScene.h"
 
 GameScene::GameScene(void)
@@ -53,16 +54,20 @@ void GameScene::Init(void)
 	sound.AdjustVolume(SoundManager::SOUND::BATTLE, 256 / 3);
 	sound.Play(SoundManager::SOUND::EXPLORE);
 	//プレイヤー
-	stage_ = std::make_unique<Stage>();
+	stage_ = std::make_shared<Stage>();
 	stage_->Init();
 
 	//プレイヤー
-	player_ = std::make_unique<Player>();
+	player_ = std::make_shared<Player>();
 	player_->Init();
 
 	//敵
-	enemy_ = std::make_unique<Enemy>(*player_);
+	enemy_ = std::make_shared<Enemy>(*player_);
 	enemy_->Init();
+
+	//敵
+	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
+	encountScene_->Init();
 
 	//選択肢テーブルごとの処理
 	//selectFuncTable_ = {
@@ -125,7 +130,7 @@ void GameScene::UpdateExplore(void)
 
 	player_->Update();
 	stage_->Update();
-
+	encountScene_->Update();
 	//if(ins.IsInputTriggered("Next"))
 	//{
 	//	update_ = &GameScene::UpdateEncount;
@@ -134,14 +139,16 @@ void GameScene::UpdateExplore(void)
 	FadeTransitor& fade = FadeTransitor::GetInstance();
 	if (ins.IsInputTriggered("Next"))
 	{
-		isFaseChange_ = true;
-		SceneManager::GetInstance().SetFadeOut();
+		update_ = &GameScene::UpdateEncount;
+		draw_ = &GameScene::DrawEncount;
+		encountScene_->Start();
 	}
-	if (SceneManager::GetInstance().GetFade().IsEnd() &&
-		isFaseChange_)
-	{
-		enemy_->ChangeState(Enemy::STATE::ENCOUNT);
-		player_->ChangeState(Player::STATE::ENCOUNT);
+	//if (SceneManager::GetInstance().GetFade().IsEnd() &&
+	//	isFaseChange_)
+	//{
+		//enemy_->ChangeState(Enemy::STATE::ENCOUNT);
+		//player_->ChangeState(Player::STATE::ENCOUNT);
+		// 
 		//const float distance = 100.0f;
 		//VECTOR dir = VAdd(player_->GetTransform().GetLeft(), player_->GetTransform().GetForward());
 		//VECTOR startPos = VAdd(player_->GetTransform().pos, VScale(dir, distance));
@@ -152,15 +159,14 @@ void GameScene::UpdateExplore(void)
 		//VECTOR pos = VGet(-50.0f, -210.0f, 1150.0f);
 		//mainCamera->SetFixedPointPos(pos, VGet(10.0f, -210.0f, 1150.0f));
 
-		VECTOR startPos = VGet(-50.0f, -210.0f, 1350.0f);
-		VECTOR endPos = VGet(-50.0f, -210.0f, 1150.0f);
-		mainCamera->SetTrackCamera(startPos, endPos,0.8f);
-		mainCamera->ChangeMode(Camera::MODE::TRACK);
-		update_ = &GameScene::UpdateEncount;
-		draw_ = &GameScene::DrawEncount;
-		SceneManager::GetInstance().SetFadeIn();
-		isFaseChange_ = false;
-	}
+		//VECTOR startPos = VGet(-50.0f, -210.0f, 1350.0f);
+		//VECTOR endPos = VGet(-50.0f, -210.0f, 1150.0f);
+		//mainCamera->SetTrackCamera(startPos, endPos,0.8f);
+		//mainCamera->ChangeMode(Camera::MODE::TRACK);
+		//SceneManager::GetInstance().SetFadeIn();
+		//isFaseChange_ = false;
+	//}
+	
 	//isToutch_ = false;
 	//if (CommonUtility::IsHitSpheres(
 	//	stage_->GetSphere().GetPos(),
@@ -196,9 +202,22 @@ void GameScene::DrawExplore(void)
 void GameScene::UpdateEncount(void)
 {
 	InputManager& ins = InputManager::GetInstance();
-	
 
-
+	//if (mainCamera->IsActionEnd())
+	//{
+	//	//相対距離
+	//	const float distance = 100.0f;
+	//	//プレイヤーから見て左斜め前方向
+	//	VECTOR dir = VAdd(player_->GetTransform().GetLeft(), player_->GetTransform().GetForward());
+	//	VECTOR startPos = VAdd(player_->GetTransform().pos, VScale(dir, distance));
+	//	VECTOR endPos = VGet(startPos.x, startPos.y + 100.0f, startPos.z);
+	//	const float moveistance = 200.0f;
+	//	VECTOR target = player_->GetTransform().pos;
+	//	target.y += 50.0f;
+	//	mainCamera->SetCraneUpPos(startPos, moveistance, target);
+	//	mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
+	//}
+	encountScene_->Update();
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
@@ -217,6 +236,9 @@ void GameScene::DrawEncount(void)
 	}
 
 	player_->DrawDead();
+
+	encountScene_->Draw();
+
 	DrawString(0, 60, L"エンカウント", 0xAAAAAA);
 }
 
@@ -232,6 +254,7 @@ void GameScene::UpdateGame(void)
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
+	
 #ifdef _DEBUG
 
 	if (ins.IsInputTriggered("CameraShake"))

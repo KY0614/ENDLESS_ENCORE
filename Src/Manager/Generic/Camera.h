@@ -50,8 +50,8 @@ public:
 	enum class MODE
 	{
 		NONE,
-		CRANE_UP,	//カメラを上昇させる
-		TRACK,		//移動させる(向き固定)
+		CRANE_UP,	//カメラを上昇させる(向き固定)
+		TRACK,		//左右に移動させる(向き固定)
 		FIXED_POINT,//固定カメラ
 		TOP_FIXED,	//上部固定
 		FOLLOW,		//追従
@@ -82,6 +82,10 @@ public:
 	//カメラの前方方向
 	VECTOR GetForward(void) const;
 
+	MODE GetMode(void)const { return mode_; }
+
+	const bool& IsActionEnd() const { return isActionEnd_; }
+
 	//カメラモードの変更
 	void ChangeMode(MODE mode);
 
@@ -99,6 +103,18 @@ public:
 	/// <param name="moveSpeed">移動速度</param>
 	void SetTrackCamera(const VECTOR& startPos,
 		const VECTOR& endPos,
+		const float& moveSpeed);
+
+	/// <summary>
+	/// トラックカメラ(回転せずに直線移動するカメラ)の設定
+	/// </summary>
+	/// <param name="startPos">移動開始地点</param>
+	/// <param name="moveDir">移動方向</param>
+	/// <param name="moveDistance">移動距離</param>
+	/// <param name="moveSpeed">移動速度</param>
+	void SetTrackCamera(const VECTOR& startPos,
+		const VECTOR& moveDir,
+		const float& moveDistance,
 		const float& moveSpeed);
 
 	//追従対象の設定
@@ -137,6 +153,9 @@ private:
 	//カメラの上方向
 	VECTOR cameraUp_;
 
+	VECTOR fixedPointPos_;
+	VECTOR fixedPointTargetPos_;
+
 	VECTOR craneUpStartPos_;
 	VECTOR craneUpTargetPos_;
 	float craneUpDistance_;
@@ -144,11 +163,14 @@ private:
 	VECTOR trackStartPos_;
 	VECTOR trackEndPos_;
 	VECTOR trackDir_;
-	float trackDistance_;
 	float trackSpeed_;
+	float trackTotalTime_;     // 総移動時間
+	float trackElapsedTime_;   // 経過時間
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
+
+	bool isActionEnd_;
 
 	//カメラを初期位置に戻す
 	void SetDefault(void);
