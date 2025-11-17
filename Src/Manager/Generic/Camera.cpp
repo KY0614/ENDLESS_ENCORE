@@ -370,19 +370,19 @@ void Camera::SetBeforeDrawTrack(void)
 
 	if (isActionEnd_)return;
 	// 経過時間を更新
-	trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	
 	//trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
 
 	// イージングで現在の進行度(0.0～1.0)を計算
-	float progress = Easing::QuadOut(
-		trackElapsedTime_,
-		1.0f,
-		trackSpeed_,
-		0.1f
-	);
-	progress = std::clamp(progress, 0.1f, trackSpeed_);
+	//float progress = Easing::QuadOut(
+	//	trackElapsedTime_,
+	//	1.0f,
+	//	trackSpeed_,
+	//	0.1f
+	//);
+	//progress = std::clamp(progress, 0.1f, trackSpeed_);
 	//開始座標から終了座標まで移動(縦移動無し)
-	pos_ = VAdd(pos_, VScale(trackDir_, progress));
+	pos_ = VAdd(pos_, VScale(trackDir_, trackSpeed_));
 	const float lookDistance = 50.0f;
 	//垂直ベクトルを計算して注視点を設定
 	targetPos_ = VAdd(pos_, VScale(
