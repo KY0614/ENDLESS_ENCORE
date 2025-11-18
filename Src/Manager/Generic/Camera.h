@@ -95,27 +95,29 @@ public:
 	void SetCraneUpPos(const VECTOR& startPos, const float& distance,const VECTOR& targetPos);
 
 	/// <summary>
-	/// トラックカメラ(回転せずに直線移動するカメラ)の設定
+	/// トラックカメラの設定(一定速度)
 	/// </summary>
 	/// <param name="startPos">移動開始地点</param>
 	/// <param name="endPos">移動終了地点</param>
 	/// <param name="moveDir">移動方向</param>
 	/// <param name="moveSpeed">移動速度</param>
-	void SetTrackCamera(const VECTOR& startPos,
+	void SetTrackCamera(
+		const VECTOR& startPos,
 		const VECTOR& endPos,
 		const float& moveSpeed);
 
 	/// <summary>
-	/// トラックカメラ(回転せずに直線移動するカメラ)の設定
+	/// トラックカメラの設定（イージングQuadOut)
 	/// </summary>
 	/// <param name="startPos">移動開始地点</param>
+	/// <param name="startPos">移動終了地点</param>
 	/// <param name="moveDir">移動方向</param>
 	/// <param name="moveDistance">移動距離</param>
 	/// <param name="moveSpeed">移動速度</param>
-	void SetTrackCamera(const VECTOR& startPos,
-		const VECTOR& moveDir,
-		const float& moveDistance,
-		const float& moveSpeed);
+	void SetTrackCameraQuadOut(
+		const VECTOR& startPos,
+		const VECTOR& endPos,
+		const float& totalMoveTime = 1.0f);
 
 	//追従対象の設定
 	void SetFollow(const Transform* follow);
@@ -164,8 +166,9 @@ private:
 	VECTOR trackEndPos_;
 	VECTOR trackDir_;
 	float trackSpeed_;
-	float trackTotalTime_;     // 総移動時間
-	float trackElapsedTime_;   // 経過時間
+	float speed_;
+	float trackTotalTime_;     //総移動時間
+	float trackElapsedTime_;   //経過時間
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;

@@ -24,20 +24,21 @@ public:
 	//状態
 	enum class STATE
 	{
-		NONE,	//初期化前
+		NONE,		//初期化前
 		STAGE_WALK,	//ステージ上を歩く
-		ENCOUNT,//エンカウント
-		PLAY,	//操作可能
+		LOOK_AROUND,//周りを見渡す
+		ENCOUNT,	//エンカウント
+		PLAY,		//操作可能
 		BACKSTAB,	//バックスタブ
-		DEAD,	//死亡
+		DEAD,		//死亡
 	};
 
 	//アニメーション種別
 	enum class ANIM_TYPE
 	{
 		IDLE,		//通常
-		WALK_SLOW,		//歩き
-		WALK,		//歩き
+		WALK_SLOW,	//ゆっくり歩く
+		WALK,		//歩く
 		RUN,		//走り
 		JUMP,		//ジャンプ
 		PARRY,		//パリィ
@@ -101,6 +102,8 @@ public:
 	/// <param name=""></param>
 	/// <returns>true:状態がPLAYの場合　false:それ以外</returns>
 	bool IsPlay(void) const;
+
+	bool IsActoinEnd(void)const { return isActionEnd_; }
 
 	/// <summary>
 	/// 状態を変更する
@@ -220,6 +223,8 @@ private:
 
 	int stringAlpha_;	//結果表示用文字列のアルファ値
 
+	bool isActionEnd_;
+
 	void LoadData(void);
 
 	/// <summary>
@@ -256,6 +261,14 @@ private:
 	/// </summary>
 	void ChangeStateNone(void);
 	/// <summary>
+	/// 状態遷移：STAGE_WALK
+	/// </summary>
+	void ChangeStateStageWalk(void);
+	/// <summary>
+	/// 状態遷移：LOOK_AROUND
+	/// </summary>
+	void ChangeStateLookAround(void);
+	/// <summary>
 	/// 状態遷移：SELECT
 	/// </summary>
 	void ChangeStateEncount(void);
@@ -274,6 +287,8 @@ private:
 
 	//更新ステップ
 	void UpdateNone(void);
+	void UpdateStageWalk(void);
+	void UpdateLookAround(void);
 	void UpdateEncount(void);
 	void UpdatePlay(void);
 	void UpdateBackstab(void);

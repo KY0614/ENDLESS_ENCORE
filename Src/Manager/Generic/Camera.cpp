@@ -33,6 +33,7 @@ Camera::Camera(void)
 	trackStartPos_ = CommonUtility::VECTOR_ZERO;
 	trackDir_ = CommonUtility::VECTOR_ZERO;
 	trackSpeed_ = 0.0f;
+	speed_ = 0.0f;
 	followTransform_ = nullptr;
 	targetTransform_ = nullptr;
 	cameraNear_ = 0.0f;
@@ -220,23 +221,20 @@ void Camera::SetTrackCamera(
 	trackEndPos_ = endPos;
 	trackDir_ = VNorm(VSub(endPos, startPos));
 	trackSpeed_ = moveSpeed;
-
-	// 総移動距離から総移動時間を計算
-	float totalDistance = VSize(VSub(endPos, startPos));
-	trackTotalTime_ = totalDistance / moveSpeed;
-	trackElapsedTime_ = 0.0f;
 }
 
-void Camera::SetTrackCamera(
+void Camera::SetTrackCameraQuadOut(
 	const VECTOR& startPos,
-	const VECTOR& moveDir,
-	const float& moveDistance,
-	const float& moveSpeed)
+	const VECTOR& endPos,
+	const float& totalMoveTime)
 {
 	trackStartPos_ = startPos;
-	trackEndPos_ = VAdd(startPos,VScale(startPos,moveDistance));
-	trackDir_ = moveDir;
-	trackSpeed_ = moveSpeed;
+	trackEndPos_ = endPos;
+	trackDir_ = VNorm(VSub(endPos, startPos));
+	// 総移動距離から総移動時間を計算
+	float totalDistance = VSize(VSub(endPos, startPos));
+	trackTotalTime_ = totalMoveTime;
+	trackElapsedTime_ = 0.0f;
 }
 
 void Camera::SetDefault(void)
@@ -364,25 +362,19 @@ void Camera::SetBeforeDrawTrack(void)
 {
 	//スタート座標から現在座標までの距離を取得
 	float pos2StartPos = VSize(VSub(trackEndPos_, pos_));
-	float start2End = VSize(VSub(pos_, trackStartPos_));
 	const float distance = 1.0f;
 	isActionEnd_ = pos2StartPos <= distance;
 
 	if (isActionEnd_)return;
-	// 経過時間を更新
-	
-	//trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
 
-	// イージングで現在の進行度(0.0～1.0)を計算
-	//float progress = Easing::QuadOut(
-	//	trackElapsedTime_,
-	//	1.0f,
-	//	trackSpeed_,
-	//	0.1f
-	//);
-	//progress = std::clamp(progress, 0.1f, trackSpeed_);
-	//開始座標から終了座標まで移動(縦移動無し)
-	pos_ = VAdd(pos_, VScale(trackDir_, trackSpeed_));
+	//経過時間
+	trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	// 各軸ごとにQuadOutイージングで補間
+	pos_.x = Easing::QuadOut(trackElapsedTime_, trackTotalTime_, trackStartPos_.x, trackEndPos_.x);
+	pos_.y = Easing::QuadOut(trackElapsedTime_, trackTotalTime_, trackStartPos_.y, trackEndPos_.y);
+	pos_.z = Easing::QuadOut(trackElapsedTime_, trackTotalTime_, trackStartPos_.z, trackEndPos_.z);
+
+	//注視座標はカメラの正面に設置
 	const float lookDistance = 50.0f;
 	//垂直ベクトルを計算して注視点を設定
 	targetPos_ = VAdd(pos_, VScale(
@@ -452,13 +444,15 @@ void Camera::UpdateDebugImGui(void)
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Camera");
 
-	ImGui::SliderFloat("positionX", &pos_.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("positionY", &pos_.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("positionZ", &pos_.z, -10000.0f, 10000.0f);
+	//ImGui::SliderFloat("positionX", &pos_.x, -10000.0f, 10000.0f);
+	//ImGui::SliderFloat("positionY", &pos_.y, -10000.0f, 10000.0f);
+	//ImGui::SliderFloat("positionZ", &pos_.z, -10000.0f, 10000.0f);
 
-	ImGui::SliderFloat("targetX", &targetPos_.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("targetY", &targetPos_.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("targetZ", &targetPos_.z, -10000.0f, 10000.0f);
+	//ImGui::SliderFloat("targetX", &targetPos_.x, -10000.0f, 10000.0f);
+	//ImGui::SliderFloat("targetY", &targetPos_.y, -10000.0f, 10000.0f);
+	//ImGui::SliderFloat("targetZ", &targetPos_.z, -10000.0f, 10000.0f);
+	//
+	ImGui::SliderFloat("speed", &speed_, -10000.0f, 10000.0f);
 
 	//終了処理
 	ImGui::End();

@@ -128,11 +128,11 @@ void EncountScene::ChangeStateFade(void)
 
 void EncountScene::ChangeStatePlayerWalk(void)
 {
-	enemy_.ChangeState(Enemy::STATE::ENCOUNT);
-	player_.ChangeState(Player::STATE::ENCOUNT);
+	player_.ChangeState(Player::STATE::STAGE_WALK);
 	VECTOR startPos = VGet(-50.0f, -210.0f, 1350.0f);
 	VECTOR endPos = VGet(-50.0f, -210.0f, 1150.0f);
-	mainCamera->SetTrackCamera(startPos, endPos,1.0f);
+	const float& moveTotalTime = 3.0f;
+	mainCamera->SetTrackCameraQuadOut(startPos, endPos, moveTotalTime);
 	mainCamera->ChangeMode(Camera::MODE::TRACK);
 	stateUpdate_ = std::bind(&EncountScene::UpdatePlayerWalk, this);
 }
@@ -144,6 +144,18 @@ void EncountScene::ChangeStatePlayerAttention(void)
 
 void EncountScene::ChangeStateBlackOut(void)
 {
+	const VECTOR& playerBackLeft = VAdd(
+		player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
+	VECTOR pPos = VAdd(
+		player_.GetTransform().pos,
+		VScale(VNorm(playerBackLeft),100.0f));
+	const float cameraOffsetY = 100.0f;
+	pPos.y += cameraOffsetY;
+	const VECTOR& pos = VGet(-50.0f, -210.0f, 1350.0f);
+	VECTOR targetPos = player_.GetTransform().pos;
+	targetPos.y += cameraOffsetY;
+	mainCamera->SetFixedPointPos(pPos, targetPos);
+	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateBlackOut, this);
 }
 
@@ -154,6 +166,7 @@ void EncountScene::ChangeStateLookAround(void)
 
 void EncountScene::ChangeStateEnemySpotlight(void)
 {
+	enemy_.ChangeState(Enemy::STATE::ENCOUNT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemySpotlight, this);
 }
 
@@ -179,7 +192,8 @@ void EncountScene::UpdateFade(void)
 
 void EncountScene::UpdatePlayerWalk(void)
 {
-	if (mainCamera->IsActionEnd())
+	if (mainCamera->IsActionEnd() &&
+		player_.IsActoinEnd())
 	{
 		intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 		const float intervalTime = 1.0f;
@@ -219,7 +233,8 @@ void EncountScene::UpdatePlayerAttention(void)
 		fader_->IsEnd();
 
 	if (fadeInEnd &&
-		mainCamera->IsActionEnd())
+		mainCamera->IsActionEnd() &&
+		player_.IsActoinEnd())
 	{
 		ChangeState(STATE::BLACK_OUT);
 		return;
@@ -228,24 +243,12 @@ void EncountScene::UpdatePlayerAttention(void)
 
 void EncountScene::UpdateBlackOut(void)
 {
-	const bool fadeOutEnd = fader_->GetState() == Fader::STATE::FADE_OUT &&
-		fader_->IsEnd();
-	if (fadeOutEnd)
+	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	if (intervalTimer_ >= 1.0f)
 	{
-		fader_->SetFade(Fader::STATE::FADE_IN);
-
-		//相対距離
-		const float distance = 100.0f;
-		//プレイヤーから見て左斜め前方向
-		VECTOR dir = VAdd(player_.GetTransform().GetLeft(), player_.GetTransform().GetForward());
-		VECTOR startPos = VAdd(player_.GetTransform().pos, VScale(dir, distance));
-		VECTOR endPos = VGet(startPos.x, startPos.y + 100.0f, startPos.z);
-		const float moveistance = 200.0f;
-		VECTOR target = player_.GetTransform().pos;
-		target.y += 50.0f;
-		mainCamera->SetCraneUpPos(startPos, moveistance, target);
-		mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
-		return;
+		SetFogEnable(true);
+		SetFogColor(5, 5, 5);
+		SetFogStartEnd(100.0f, 2000.0f);
 	}
 }
 

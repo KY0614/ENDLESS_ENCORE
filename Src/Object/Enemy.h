@@ -157,6 +157,8 @@ private:
 	bool isChargeAtk_;
 	float charge_;
 
+	bool isEncount_;
+
 	/// <summary>
 	/// 3Dƒ‚ƒfƒ‹‰Šú‰»
 	/// </summary>

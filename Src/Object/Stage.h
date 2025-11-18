@@ -5,6 +5,9 @@
 class Cube;
 class Box;
 
+class ModelRenderer;
+class ModelMaterial;
+
 class Stage
 {
 public:
@@ -53,6 +56,9 @@ public:
 	/// <returns>現在のステージモデル情報</returns>
 	const Transform& GetTransform(void){ return stageTransform_[type_]; }
 private:
+	std::unique_ptr<ModelMaterial> material_;
+	std::unique_ptr<ModelRenderer> renderer_;
+
 	TYPE type_;
 
 	std::unordered_map<TYPE, Transform> stageTransform_;

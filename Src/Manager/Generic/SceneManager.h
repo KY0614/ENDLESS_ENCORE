@@ -117,6 +117,10 @@ private:
 	std::chrono::system_clock::time_point preTime_;
 	float deltaTime_;
 
+	//フォグ
+	float fogStart;	//開始位置
+	float fogEnd;	//終了位置
+
 	//ライトの方向
 	VECTOR lightDir_;
 

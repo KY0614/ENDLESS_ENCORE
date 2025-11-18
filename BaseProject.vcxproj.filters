@@ -651,8 +651,6 @@
   <ItemGroup>
     <FxCompile Include="Src\Shader\Model\StdModelPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\StdModelVS.hlsl" />
-    <FxCompile Include="Src\Shader\Model\OutLineVS.hlsl" />
-    <FxCompile Include="Src\Shader\Model\OutLinePS.hlsl" />
     <FxCompile Include="Src\Shader\Model\ToonPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\PS.hlsl" />
   </ItemGroup>

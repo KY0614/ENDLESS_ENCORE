@@ -67,6 +67,10 @@ void SceneManager::Init(void)
 	//デルタタイム
 	preTime_ = std::chrono::system_clock::now();
 
+	//フォグ
+	fogStart = 10000.0f;
+	fogEnd = 20000.0f;
+
 	//ライトの向き
 	lightDir_ = LIGHT_DIR;
 
@@ -105,7 +109,8 @@ void SceneManager::Init3D(void)
 	//フォグ設定
 	SetFogEnable(true);
 	SetFogColor(5, 5, 5);
-	SetFogStartEnd(10000.0f, 20000.0f);
+	SetFogStartEnd(fogStart, fogEnd);
+	//SetFogStartEnd(100.0f, 2000.0f);
 }
 
 void SceneManager::Update(void)

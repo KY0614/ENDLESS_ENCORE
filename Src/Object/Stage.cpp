@@ -1,6 +1,9 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Utility/CommonUtility.h"
+#include "../Renderer/ModelRenderer.h"
+#include "../Renderer/ModelMaterial.h"
+#include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
@@ -22,6 +25,35 @@ void Stage::Init(void)
 	//3Dモデル初期化
 	Init3DModel();
 
+	//モデル描画用
+	material_ = std::make_unique<ModelMaterial>(
+		"StdModelVS.cso", 2,
+		"StdModelPS.cso", 4
+	);
+	//カメラ座標
+	VECTOR CameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->AddConstBufVS({ CameraPos.x,CameraPos.y,CameraPos.z,0.0f });
+	//フォグ座標
+	float fogStart, fogEnd = 0.0f;
+	GetFogStartEnd(&fogStart, &fogEnd);
+	material_->AddConstBufVS({ fogStart,fogEnd,0.0f,0.0f });
+
+	//ピクセルシェーダーの定数バッファ設定
+	material_->AddConstBufPS({ 1.0f,1.0f,1.0f,1.0f });
+
+	VECTOR lightDir = GetLightDirection();
+	material_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,0.0f });
+
+	float anbientCol = 0.0f;
+	material_->AddConstBufPS({ anbientCol,anbientCol,anbientCol,1.0f });
+
+	int fogColorR, fogColorG, fogColorB;
+	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
+	//material_->AddConstBufPS({ (float)(fogColorR / 255),(float)(fogColorG / 255),(float)(fogColorB / 255),0.0f });
+	material_->AddConstBufPS({ 0.1f,0.1f,0.1f,1.0f });
+
+	renderer_ = std::make_unique<ModelRenderer>(stageTransform_[type_].modelId, *material_);
+
 	//cube_ = std::make_unique<Cube>(stageTransform_[type_].pos,
 	// stageTransform_[type_].quaRot,
 	//	VGet(-1375.0f, -219.0f, 2000.0f),
@@ -38,29 +70,33 @@ void Stage::Init(void)
 
 void Stage::Update(void)
 {
+	//カメラ座標
+	VECTOR CameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->SetConstBufVS(0, { CameraPos.x,CameraPos.y,CameraPos.z,0.0f });
+	//フォグ座標
+	float fogStart, fogEnd = 0.0f;
+	GetFogStartEnd(&fogStart, &fogEnd);
+	material_->SetConstBufVS(1, { fogStart,fogEnd,0.0f,0.0f });
+
+	//フォグの色
+	int fogColorR, fogColorG, fogColorB;
+	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
+	material_->SetConstBufPS(3, { 0.0f,0.0f,0.0f,0.0f });
+
 	stageTransform_[type_].Update();
-	//UpdateDebugImGui();
 }
 
 void Stage::Draw(void)
 {
-	MV1DrawModel(stageTransform_[type_].modelId);
+	renderer_->Draw();
+	//MV1DrawModel(stageTransform_[type_].modelId);
 
 	//cube_->Draw();
 }
 
 void Stage::UpdateDebugImGui(void)
 {
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("Stage");
 
-	ImGui::InputFloat3("position", &stageTransform_[type_].pos.x);
-	ImGui::SliderFloat("positionX", &stageTransform_[type_].pos.x,-10000.0f,10000.0f);
-	ImGui::SliderFloat("positionY", &stageTransform_[type_].pos.y,-10000.0f,10000.0f);
-	ImGui::SliderFloat("positionZ", &stageTransform_[type_].pos.z,-10000.0f,10000.0f);
-
-	//終了処理
-	ImGui::End();
 }
 
 void Stage::Init3DModel(void)

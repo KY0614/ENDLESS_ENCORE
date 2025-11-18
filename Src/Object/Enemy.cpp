@@ -96,6 +96,7 @@ Enemy::Enemy(Player& player):player_(player)
 	stepRotTime_ = 0.0f;
 	charge_ = 0.0f;
 	moveDir_ = CommonUtility::VECTOR_ZERO;
+	isEncount_ = false;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
@@ -128,7 +129,7 @@ void Enemy::Init(void)
 	InitAnimation();
 
 	//初期の状態を設定
-	ChangeState(STATE::MOVE);
+	ChangeState(STATE::NONE);
 }
 
 void Enemy::Update(void)
@@ -145,6 +146,9 @@ void Enemy::Update(void)
 
 void Enemy::Draw(void)
 {
+	//プレイヤーとエンカウントしていなかったら描画しない
+	if (!isEncount_)return;
+
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 
@@ -629,6 +633,7 @@ void Enemy::ChangeStateNone(void)
 
 void Enemy::ChangeStateEncount(void)
 {
+	isEncount_ = true;
 	animationController_->Play((int)ANIM_TYPE::TURN,false);
 	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
 }

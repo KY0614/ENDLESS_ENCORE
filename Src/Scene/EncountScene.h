@@ -71,6 +71,8 @@ private:
 
 	float intervalTimer_;		//インターバルタイマー
 
+	bool isNotice_;
+
 	/// <summary>
 	/// フェードアウトが終了したかどうか
 	/// </summary>

@@ -15,8 +15,9 @@ struct VertexToPixelLit
 	float3 normal       : TEXCOORD2;	// 法線( ビュー座標 )
 	float4 diffuse      : COLOR0;		// ディフューズカラー
 	float3 lightDir     : TEXCOORD3;	// ライト方向(ローカル)
-	float3 lightAtPos   : TEXCOORD4;	// ライトから見た座標
-	float3 worldPos		: TEXCOORD5;	// ワールド座標
+	//float3 lightAtPos   : TEXCOORD4;	// ライトから見た座標
+	float3 worldPos		: TEXCOORD4;	// ワールド座標
+	float3 fogFactor		: TEXCOORD5;	// フォグの強さ
 };
 
 struct VertexToPixelShadow

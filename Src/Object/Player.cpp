@@ -61,6 +61,8 @@ Player::Player(void)
 	maxHp_ = 0.0f;
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
+	stateChanges_.emplace(STATE::STAGE_WALK, std::bind(&Player::ChangeStateStageWalk, this));
+	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&Player::ChangeStateLookAround, this));
 	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&Player::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
@@ -93,6 +95,7 @@ Player::Player(void)
 	isParry_ = false;
 	stepWalk_ = 0.0f;
 	stringAlpha_ = 0;
+	isActionEnd_ = false;
 }
 
 Player::~Player(void)
@@ -340,12 +343,13 @@ void Player::InitAnimation(void)
 
 void Player::ChangeState(STATE state)
 {
+	//行動終了判定をリセット
+	isActionEnd_ = false;
 	//状態変更
 	state_ = state;
 
 	//各状態遷移の初期処理
 	stateChanges_[state_]();
-
 }
 
 void Player::ChangeStateNone(void)
@@ -353,13 +357,23 @@ void Player::ChangeStateNone(void)
 	stateUpdate_ = std::bind(&Player::UpdateNone, this);
 }
 
-void Player::ChangeStateEncount(void)
+void Player::ChangeStateStageWalk(void)
 {
 	//ゆっくり歩くアニメーションに変更
 	animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
 	transform_.pos = VGet(10.0f, -217.0f, 900.0f);
-	transform_.quaRotLocal =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
+	transform_.quaRot =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(0.0f), 0.0f });
+	stateUpdate_ = std::bind(&Player::UpdateStageWalk, this);
+}
+
+void Player::ChangeStateLookAround(void)
+{
+	stateUpdate_ = std::bind(&Player::UpdateLookAround, this);
+}
+
+void Player::ChangeStateEncount(void)
+{
 	stateUpdate_ = std::bind(&Player::UpdateEncount, this);
 }
 
@@ -388,10 +402,11 @@ void Player::UpdateNone(void)
 {//何もしない
 }
 
-void Player::UpdateEncount(void)
+void Player::UpdateStageWalk(void)
 {
+	//目標座標
 	const float moveEndZ = 1150.0f;
-	if(transform_.pos.z <= moveEndZ)
+	if (transform_.pos.z <= moveEndZ)
 	{
 		//ゆっくり歩く処理
 		const float walkSpeed = 1.0f;
@@ -402,10 +417,20 @@ void Player::UpdateEncount(void)
 	{
 		movePow_ = CommonUtility::VECTOR_ZERO;
 		animationController_->Play((int)ANIM_TYPE::IDLE);
+		isActionEnd_ = true;
 	}
 
 	//衝突判定
 	Collision();
+}
+
+void Player::UpdateLookAround(void)
+{
+}
+
+void Player::UpdateEncount(void)
+{
+
 }
 
 void Player::UpdatePlay(void)

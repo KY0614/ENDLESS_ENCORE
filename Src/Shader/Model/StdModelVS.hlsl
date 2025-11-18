@@ -12,7 +12,12 @@
 // 定数バッファ：スロット7番目(b7と書く)
 cbuffer cbParam : register(b7)
 {
-    float4 g_uv_scale;  //タイリング用UVスケール値
+    float3 g_camera_pos;  //カメラ座標
+    float dummy;
+    
+    float g_fog_start;
+    float g_fog_end;
+    float2 dummy2;
 }
 
 VS_OUTPUT main(VS_INPUT VSInput)
@@ -41,13 +46,19 @@ VS_OUTPUT main(VS_INPUT VSInput)
     
     // ビュー座標を射影座標に変換
     ret.svPos = mul(lViewPosition, g_base.projectionMatrix);
+    
+    // 1. カメラから頂点までのワールド空間での距離を計算
+    float distance = length(lWorldPosition.xyz - g_camera_pos);
+    float fog = (g_fog_end - distance) /(g_fog_end - g_fog_start);
+    fog = saturate(fog);
+    ret.fogFactor = float3(fog, fog, fog);
    
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 終了 )
    
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 開始 )
     // UV座標
-    ret.uv.x = VSInput.uv0.x * g_uv_scale;
-    ret.uv.y = VSInput.uv0.y * g_uv_scale;
+    ret.uv.x = VSInput.uv0.x;
+    ret.uv.y = VSInput.uv0.y;
     
     // 法線
     ret.normal = normalize(
@@ -58,9 +69,6 @@ VS_OUTPUT main(VS_INPUT VSInput)
     
     // ライト方向(ローカル)
     ret.lightDir = float3(0.0f, 0.0f, 0.0f);
-    
-    // ライトから見た座標
-    ret.lightAtPos = float3(0.0f, 0.0f, 0.0f);
     
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 終了 )
     // 出力パラメータを返す
