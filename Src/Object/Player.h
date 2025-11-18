@@ -38,6 +38,7 @@ public:
 	{
 		IDLE,		//’Êí
 		WALK_SLOW,	//‚ä‚Á‚­‚è•à‚­
+		LOOK_AROUND,	//‚ä‚Á‚­‚è•à‚­
 		WALK,		//•à‚­
 		RUN,		//‘–‚è
 		JUMP,		//ƒWƒƒƒ“ƒv

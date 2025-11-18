@@ -426,11 +426,12 @@ void Player::UpdateStageWalk(void)
 
 void Player::UpdateLookAround(void)
 {
+	animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
 }
 
 void Player::UpdateEncount(void)
 {
-
+	
 }
 
 void Player::UpdatePlay(void)

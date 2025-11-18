@@ -139,17 +139,17 @@ void GameScene::Draw(void)
 
 	// ポストエフェクト(ブラー)
 	//-----------------------------------------
-	
-	SetDrawScreen(postEffectScreen_);
+	//
+	//SetDrawScreen(postEffectScreen_);
 
-	// 画面を初期化
-	ClearDrawScreen();
+	//// 画面を初期化
+	//ClearDrawScreen();
 
-	blurRenderer_->Draw();
+	//blurRenderer_->Draw();
 
-	// メインに戻す
-	SetDrawScreen(mainScreen);
-	DrawGraph(0, 0, postEffectScreen_, false);
+	//// メインに戻す
+	//SetDrawScreen(mainScreen);
+	//DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
 }
 

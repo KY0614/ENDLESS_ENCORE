@@ -221,6 +221,13 @@ void EncountScene::UpdateBlackOut(void)
 	{
 		SetFogStartEnd(100.0f, 2000.0f);
 		isBlackOutNotice_ = true;
+		intervalTimer_ = 0.0f;
+	}
+
+	if (intervalTimer_ >= 0.8f &&
+		isBlackOutNotice_)
+	{
+		player_.ChangeState(Player::STATE::LOOK_AROUND);
 	}
 }
 
