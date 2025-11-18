@@ -3,6 +3,8 @@
 #include "../Object/Common/Transform.h"
 #include "SceneBase.h"
 
+class PixelMaterial;
+class PixelRenderer;
 class Player;
 class Enemy;
 class Stage;
@@ -39,6 +41,12 @@ public:
 	void Draw(void) override;
 
 private:
+	// ポストエフェクト用スクリーン
+	int postEffectScreen_;
+
+	// ポストエフェクト用(ブラー)
+	std::unique_ptr<PixelMaterial> blurMaterial_;
+	std::unique_ptr<PixelRenderer> blurRenderer_;
 
 	//関数ポインタ（カウントダウン、ゲーム中、タイムアップ）
 	using UpdateFunc_t = void(GameScene::*)();

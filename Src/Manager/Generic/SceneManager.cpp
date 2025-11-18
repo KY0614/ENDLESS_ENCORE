@@ -293,45 +293,6 @@ void SceneManager::SetShakeScreen(bool isShake)
 	}
 }
 
-bool SceneManager::CheckFade(void)
-{
-	bool ret = false;
-	Fader::STATE fState = fader_->GetState();
-	switch (fState)
-	{
-	case Fader::STATE::FADE_IN:
-		//明転中
-		if (fader_->IsEnd())
-		{
-			//明転が終了したら、フェード処理終了
-			fader_->SetFade(Fader::STATE::NONE);
-			ret = true;
-		}
-		break;
-	case Fader::STATE::FADE_OUT:
-		//暗転中
-		if (fader_->IsEnd())
-		{
-			//暗転から明転へ
-			fader_->SetFade(Fader::STATE::FADE_IN);
-		}
-		break;
-	}
-	return ret;
-}
-
-void SceneManager::SetFadeOut(void)
-{
-	//フェードアウト(暗転)を開始する
-	fader_->SetFade(Fader::STATE::FADE_OUT);
-}
-
-void SceneManager::SetFadeIn(void)
-{
-	//フェードアウト(暗転)を開始する
-	fader_->SetFade(Fader::STATE::FADE_IN);
-}
-
 SceneManager::SceneManager(void)
 {
 	sceneId_ = SCENE_ID::NONE;

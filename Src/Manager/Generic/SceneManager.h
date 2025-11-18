@@ -84,12 +84,9 @@ public:
 
 	void SetShakeScreen(bool isShake);
 
-	bool CheckFade(void);
-	void SetFadeOut(void);
-	void SetFadeIn(void);
-	const Fader& GetFade(void) const { return *fader_; }
-
 	void SceneID2Game(void) { sceneId_ = SCENE_ID::GAME; }
+
+	int GetMainScreen(void) const { return mainScreen_; }
 
 private:
 

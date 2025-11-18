@@ -71,7 +71,7 @@ private:
 
 	float intervalTimer_;		//インターバルタイマー
 
-	bool isNotice_;
+	bool isBlackOutNotice_;
 
 	/// <summary>
 	/// フェードアウトが終了したかどうか
@@ -104,5 +104,7 @@ private:
 	void UpdateLookAround(void);
 	void UpdateEnemySpotlight(void);
 	void UpdateEnemyAttention(void);
+
+	void DebugDraw(void);
 };
 

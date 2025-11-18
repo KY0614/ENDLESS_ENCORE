@@ -23,6 +23,7 @@ EncountScene::EncountScene(
 	stateChanges_.emplace(STATE::ENEMY_ATTENTION, std::bind(&EncountScene::ChangeStateEnemyAttention, this));
 
 	intervalTimer_ = 0.0f;
+	isBlackOutNotice_ = false;
 }
 
 EncountScene::~EncountScene(void)
@@ -56,35 +57,7 @@ void EncountScene::Draw(void)
 	//ˆÃ“]E–¾“]
 	fader_->Draw();
 
-
-	switch (state_)
-	{
-	case EncountScene::STATE::NONE:
-		break;
-	case EncountScene::STATE::FADE:
-		DrawFormatString(0, 100, 0xFFFFFF, L"FADE");
-		break;
-	case EncountScene::STATE::PLAYER_WALK:
-		DrawFormatString(0, 100, 0xFFFFFF, L"PLAYER_WALK");
-		break;
-	case EncountScene::STATE::PLAYER_ATTENTION:
-		DrawFormatString(0, 100, 0xFFFFFF, L"PLAYER_ATTENTION");
-		break;
-	case EncountScene::STATE::BLACK_OUT:
-		DrawFormatString(0, 100, 0xFFFFFF, L"BLACK_OUT");
-		break;
-	case EncountScene::STATE::LOOK_AROUND:
-		DrawFormatString(0, 100, 0xFFFFFF, L"LOOK_AROUND");
-		break;
-	case EncountScene::STATE::ENEMY_SPOTLIGHT:
-		DrawFormatString(0, 100, 0xFFFFFF, L"ENEMY_SPOTLIGHT");
-		break;
-	case EncountScene::STATE::ENEMY_ATTENTION:
-		DrawFormatString(0, 100, 0xFFFFFF, L"ENEMY_ATTENTION");
-		break;
-	default:
-		break;
-	}
+	DebugDraw();
 }
 
 void EncountScene::Start(void)
@@ -246,9 +219,8 @@ void EncountScene::UpdateBlackOut(void)
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	if (intervalTimer_ >= 1.0f)
 	{
-		SetFogEnable(true);
-		SetFogColor(5, 5, 5);
 		SetFogStartEnd(100.0f, 2000.0f);
+		isBlackOutNotice_ = true;
 	}
 }
 
@@ -262,4 +234,36 @@ void EncountScene::UpdateEnemySpotlight(void)
 
 void EncountScene::UpdateEnemyAttention(void)
 {
+}
+
+void EncountScene::DebugDraw(void)
+{
+	switch (state_)
+	{
+	case EncountScene::STATE::NONE:
+		break;
+	case EncountScene::STATE::FADE:
+		DrawFormatString(0, 100, 0xFFFFFF, L"FADE");
+		break;
+	case EncountScene::STATE::PLAYER_WALK:
+		DrawFormatString(0, 100, 0xFFFFFF, L"PLAYER_WALK");
+		break;
+	case EncountScene::STATE::PLAYER_ATTENTION:
+		DrawFormatString(0, 100, 0xFFFFFF, L"PLAYER_ATTENTION");
+		break;
+	case EncountScene::STATE::BLACK_OUT:
+		DrawFormatString(0, 100, 0xFFFFFF, L"BLACK_OUT");
+		break;
+	case EncountScene::STATE::LOOK_AROUND:
+		DrawFormatString(0, 100, 0xFFFFFF, L"LOOK_AROUND");
+		break;
+	case EncountScene::STATE::ENEMY_SPOTLIGHT:
+		DrawFormatString(0, 100, 0xFFFFFF, L"ENEMY_SPOTLIGHT");
+		break;
+	case EncountScene::STATE::ENEMY_ATTENTION:
+		DrawFormatString(0, 100, 0xFFFFFF, L"ENEMY_ATTENTION");
+		break;
+	default:
+		break;
+	}
 }

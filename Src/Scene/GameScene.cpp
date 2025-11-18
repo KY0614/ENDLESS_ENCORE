@@ -4,6 +4,8 @@
 #include "../Common/Fader.h"
 #include "../Utility/DrawUtiity.h"
 #include "../Utility/CommonUtility.h"
+#include "../Renderer/PixelMaterial.h"
+#include "../Renderer/PixelRenderer.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
@@ -37,6 +39,7 @@ GameScene::GameScene(void)
 
 GameScene::~GameScene(void)
 {
+	DeleteGraph(postEffectScreen_);
 }
 
 void GameScene::LoadData(void)
@@ -97,6 +100,21 @@ void GameScene::Init(void)
 
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
+
+	// ポストエフェクト用スクリーン
+	postEffectScreen_ = MakeScreen(
+		Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, true);
+
+	// ポストエフェクト用(ブラー)
+	blurMaterial_ = std::make_unique<PixelMaterial>("Blur.cso", 1);
+	blurMaterial_->AddConstBuf({ 1.0f, 1.0f, 1.0f, 1.0f });
+	blurMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	blurRenderer_ = std::make_unique<PixelRenderer>(*blurMaterial_);
+	blurRenderer_->MakeSquereVertex(
+		Vector2(0, 0),
+		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
+	);
+
 }
 
 void GameScene::Update(void)
@@ -116,6 +134,23 @@ void GameScene::Draw(void)
 
 	//enemy
 	DrawSphere3D(VGet(10.0f, -219.0f, 3100.0f), 15.0f, 16, 0xff0000, 0xff0000, false);
+
+	int mainScreen = SceneManager::GetInstance().GetMainScreen();
+
+	// ポストエフェクト(ブラー)
+	//-----------------------------------------
+	
+	SetDrawScreen(postEffectScreen_);
+
+	// 画面を初期化
+	ClearDrawScreen();
+
+	blurRenderer_->Draw();
+
+	// メインに戻す
+	SetDrawScreen(mainScreen);
+	DrawGraph(0, 0, postEffectScreen_, false);
+	//-----------------------------------------
 }
 
 void GameScene::UpdateExplore(void)
