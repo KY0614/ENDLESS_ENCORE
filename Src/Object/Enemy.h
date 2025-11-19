@@ -17,6 +17,7 @@ public:
 	{
 		NONE,
 		ENCOUNT,		//エンカウント(登場）
+		TURN,			//振り向く
 		FOLLOW,			//追跡
 		MOVE,			//移動(左右に)
 		ATTACK_NEAR,	//近接攻撃
@@ -271,6 +272,10 @@ private:
 	/// </summary>
 	void ChangeStateEncount(void);
 	/// <summary>
+	/// 状態遷移：TURN
+	/// </summary>
+	void ChangeStateTurn(void);
+	/// <summary>
 	/// 状態遷移：FOLLOW
 	/// </summary>
 	void ChangeStateFollow(void);
@@ -314,6 +319,7 @@ private:
 	//更新ステップ
 	void UpdateNone(void);
 	void UpdateEncount(void);
+	void UpdateTurn(void);
 	void UpdateFollow(void);
 	void UpdateMove(void);
 	void UpdateAttackNear(void);

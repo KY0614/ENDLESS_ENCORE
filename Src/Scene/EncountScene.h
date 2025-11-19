@@ -21,7 +21,8 @@ public:
 		BLACK_OUT,				//照明消灯
 		LOOK_AROUND,			//周りを見渡す
 		ENEMY_SPOTLIGHT,		//敵をスポットライトで照らす
-		ENEMY_ATTENTION,        //敵が振り向く
+		ENEMY_ATTENTION,        //敵が出現
+		ENEMY_TURN,				//敵が振り向く
 		FINISHED                //終了
 	};
 
@@ -71,8 +72,6 @@ private:
 
 	float intervalTimer_;		//インターバルタイマー
 
-	bool isBlackOutNotice_;
-
 	/// <summary>
 	/// フェードアウトが終了したかどうか
 	/// </summary>
@@ -85,24 +84,80 @@ private:
 	/// <returns>true: 終了 false : 終了していない</returns>
 	bool IsFadeInEnd(void);
 
+	/// <summary>
+	/// 状態遷移
+	/// </summary>
+	/// <param name="state">遷移させる状態</param>
 	void ChangeState(STATE state);
 
+	//状態遷移処理----------------------------------------------------------
+
+	/// <summary>
+	/// 状態遷移：NONE
+	/// </summary>
 	void ChangeStateNone(void);
+	/// <summary>
+	/// 状態遷移：FADE
+	/// </summary>
 	void ChangeStateFade(void);
+	/// <summary>
+	/// 状態遷移：PLAYER_WALK
+	/// </summary>
 	void ChangeStatePlayerWalk(void);
+	/// <summary>
+	/// 状態遷移：PLAYER_ATTENTION
+	/// </summary>
 	void ChangeStatePlayerAttention(void);
+	/// <summary>
+	/// 状態遷移：BLACK_OUT
+	/// </summary>
 	void ChangeStateBlackOut(void);
+	/// <summary>
+	/// 状態遷移：LOOK_AROUND
+	///	</summary>
 	void ChangeStateLookAround(void);
+	/// <summary>
+	/// 状態遷移：ENEMY_SPOTLIGHT
+	/// </summary>
 	void ChangeStateEnemySpotlight(void);
+	/// <summary>
+	/// 状態遷移：ENEMY_ATTENTION
+	/// </summary>
 	void ChangeStateEnemyAttention(void);
 
+	//状態更新処理----------------------------------------------------------
+
+	/// <summary>
+	/// 更新：NONE
+	/// </summary>
 	void UpdateNone(void);
+	/// <summary>
+	/// 更新：FADE
+	/// </summary>
 	void UpdateFade(void);
+	/// <summary>
+	/// 更新：PLAYER_WALK
+	/// </summary>
 	void UpdatePlayerWalk(void);
+	/// <summary>
+	/// 更新：PLAYER_ATTENTION
+	/// </summary>
 	void UpdatePlayerAttention(void);
+	/// <summary>
+	/// 更新：BLACK_OUT
+	/// </summary>
 	void UpdateBlackOut(void);
+	/// <summary>
+	/// 更新：LOOK_AROUND
+	/// </summary>
 	void UpdateLookAround(void);
+	/// <summary>
+	/// 更新：ENEMY_SPOTLIGHT
+	/// </summary>
 	void UpdateEnemySpotlight(void);
+	/// <summary>
+	/// 更新：ENEMY_ATTENTION
+	/// </summary>
 	void UpdateEnemyAttention(void);
 
 	void DebugDraw(void);

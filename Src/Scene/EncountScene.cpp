@@ -23,7 +23,6 @@ EncountScene::EncountScene(
 	stateChanges_.emplace(STATE::ENEMY_ATTENTION, std::bind(&EncountScene::ChangeStateEnemyAttention, this));
 
 	intervalTimer_ = 0.0f;
-	isBlackOutNotice_ = false;
 }
 
 EncountScene::~EncountScene(void)
@@ -81,6 +80,7 @@ bool EncountScene::IsFadeInEnd(void)
 
 void EncountScene::ChangeState(STATE state)
 {
+	intervalTimer_ = 0.0f;
 	//状態変更
 	state_ = state;
 
@@ -140,11 +140,33 @@ void EncountScene::ChangeStateLookAround(void)
 void EncountScene::ChangeStateEnemySpotlight(void)
 {
 	enemy_.ChangeState(Enemy::STATE::ENCOUNT);
+	VECTOR pPos = VAdd(
+		player_.GetTransform().pos,
+		VScale(VNorm(player_.GetTransform().GetBack()), 70.0f));
+	const float cameraOffsetY = 100.0f;
+	pPos.x += -30.0f;
+	pPos.y += cameraOffsetY;
+	const VECTOR& pos = VGet(-50.0f, -210.0f, 1350.0f);
+	VECTOR targetPos = enemy_.GetTransform().pos;
+	targetPos.y += cameraOffsetY;
+	mainCamera->SetFixedPointPos(pPos, targetPos);
+	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemySpotlight, this);
 }
 
 void EncountScene::ChangeStateEnemyAttention(void)
 {
+	VECTOR pPos = VAdd(
+		player_.GetTransform().pos,
+		VScale(VNorm(player_.GetTransform().GetBack()), 70.0f));
+	const float cameraOffsetY = 100.0f;
+	pPos.x += -30.0f;
+	pPos.y += cameraOffsetY;
+	const VECTOR& pos = VGet(-50.0f, -210.0f, 1350.0f);
+	VECTOR targetPos = enemy_.GetTransform().pos;
+	targetPos.y += cameraOffsetY;
+	mainCamera->SetDollyInQuadOut(pPos, targetPos, 100.0f, 5.0f);
+	mainCamera->ChangeMode(Camera::MODE::DOLLY_IN);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttention, this);
 }
 
@@ -166,7 +188,7 @@ void EncountScene::UpdateFade(void)
 void EncountScene::UpdatePlayerWalk(void)
 {
 	if (mainCamera->IsActionEnd() &&
-		player_.IsActoinEnd())
+		player_.IsActionEnd())
 	{
 		intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 		const float intervalTime = 1.0f;
@@ -182,10 +204,12 @@ void EncountScene::UpdatePlayerWalk(void)
 
 void EncountScene::UpdatePlayerAttention(void)
 {
+	//フェードアウトが終わった判定
 	const bool fadeOutEnd = fader_->GetState() == Fader::STATE::FADE_OUT &&
 		fader_->IsEnd();
 	if (fadeOutEnd)
 	{
+		//フェードイン開始
 		fader_->SetFade(Fader::STATE::FADE_IN);
 
 		//相対距離
@@ -199,40 +223,67 @@ void EncountScene::UpdatePlayerAttention(void)
 		target.y += 80.0f;
 		mainCamera->SetCraneUpPos(startPos, moveDistance, target);
 		mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
+		intervalTimer_ = 0.0f;
 		return;
 	}
 
+	//フェードインが終わった判定
 	const bool fadeInEnd = fader_->GetState() == Fader::STATE::FADE_IN &&
 		fader_->IsEnd();
 
+	//フェードイン終了後、カメラのクレーンアップが終わったら
+	//インターバル時間を経過させる
 	if (fadeInEnd &&
-		mainCamera->IsActionEnd() &&
-		player_.IsActoinEnd())
+		mainCamera->IsActionEnd())
 	{
-		ChangeState(STATE::BLACK_OUT);
+		//一定時間経過
+		intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	}
+
+	//一定時間経ったら状態遷移
+	const float intervalCraneUp = 0.9f;
+	if (intervalTimer_ >= intervalCraneUp)
+	{
+		ChangeState(STATE::BLACK_OUT);	//ブラックアウト状態へ遷移
 		return;
 	}
 }
 
 void EncountScene::UpdateBlackOut(void)
 {
+	//一定時間経ったら暗転
+	const float intervalBlackOut = 1.0f;
+	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
-	if (intervalTimer_ >= 1.0f)
+	if (intervalTimer_ >= intervalBlackOut)
 	{
 		SetFogStartEnd(100.0f, 2000.0f);
-		isBlackOutNotice_ = true;
 		intervalTimer_ = 0.0f;
-	}
-
-	if (intervalTimer_ >= 0.8f &&
-		isBlackOutNotice_)
-	{
-		player_.ChangeState(Player::STATE::LOOK_AROUND);
+		ChangeState(STATE::LOOK_AROUND);
+		return;
 	}
 }
 
 void EncountScene::UpdateLookAround(void)
 {
+	//一定時間経過
+	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	//プレイヤーが周りをキョロキョロする状態へ移行するまでの時間
+	const float intervalLookAround = 0.7f;
+	if (intervalTimer_ >= intervalLookAround &&
+		player_.GetState() != Player::STATE::LOOK_AROUND)
+	{
+		intervalTimer_ = 0.0f;
+		player_.ChangeState(Player::STATE::LOOK_AROUND);
+	}
+
+	//キョロキョロが終わったら次の状態へ
+	if (intervalTimer_ >= 1.5f &&
+		player_.GetState() == Player::STATE::LOOK_AROUND)
+	{
+		ChangeState(STATE::ENEMY_SPOTLIGHT);
+		return;
+	}
 }
 
 void EncountScene::UpdateEnemySpotlight(void)

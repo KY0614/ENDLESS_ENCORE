@@ -18,6 +18,9 @@ cbuffer cbParam : register(b4)
     float4 g_ambient_color; // ŠÂ‹«Œõ‚ÌF
     
     float4 g_fog_color;
+    
+    float3 g_pointlight_pos;
+    float g_light_range; //Œõ‚ÌÅ‘å‹——£
 }
 
 float4 main(PS_INPUT PSInput) : SV_TARGET
@@ -33,9 +36,22 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     
     float3 normal = PSInput.normal;
     float lihgt = dot(normal, -g_light_dir);
+    float dis = length(PSInput.worldPos - g_pointlight_pos);
+    float lightPow;
+    float4 lightCol = float4(1.0f, 1.0f, 0.1f, 1.0f);
+    if (dis > g_light_range)
+    {
+        lightPow = 0.0f;
+    }
+    else
+    {
+        lightPow = 1.0 - saturate(dis / g_light_range);
+    }
+    lightCol.rgb = (lightCol.rgb * saturate(lightPow));
+    
     float fogFactor = PSInput.fogFactor.x;
     float3 fogCol = g_fog_color;
-    float3 rgb = (((color.rgb * lihgt)) + g_ambient_color.rgb);
+    float3 rgb = (color.rgb * g_color.rgb *lihgt) +g_ambient_color.rgb + lightCol.rgb;
     float3 finalColor = lerp(fogCol, rgb, fogFactor);
     return float4(finalColor, color.a);
     

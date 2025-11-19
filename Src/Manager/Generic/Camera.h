@@ -52,6 +52,7 @@ public:
 		NONE,
 		CRANE_UP,	//カメラを上昇させる(向き固定)
 		TRACK,		//左右に移動させる(向き固定)
+		DOLLY_IN,	//
 		FIXED_POINT,//固定カメラ
 		TOP_FIXED,	//上部固定
 		FOLLOW,		//追従
@@ -89,10 +90,23 @@ public:
 	//カメラモードの変更
 	void ChangeMode(MODE mode);
 
+	/// <summary>
+	/// 固定カメラの設定
+	/// </summary>
+	/// <param name="pos">固定位置</param>
+	/// <param name="targetPos">カメラの注視座標</param>
 	void SetFixedPointPos(const VECTOR& pos,const VECTOR& targetPos);
 
-	//カメラの上昇開始位置と移動距離の設定
-	void SetCraneUpPos(const VECTOR& startPos, const float& distance,const VECTOR& targetPos);
+	/// <summary>
+	/// クレーンアップカメラの設定
+	/// </summary>
+	/// <param name="startPos">移動開始地点</param>
+	/// <param name="distance">移動距離</param>
+	/// <param name="targetPos">カメラの注視座標</param>
+	void SetCraneUpPos(
+		const VECTOR& startPos,
+		const float& distance,
+		const VECTOR& targetPos);
 
 	/// <summary>
 	/// トラックカメラの設定(一定速度)
@@ -110,13 +124,24 @@ public:
 	/// トラックカメラの設定（イージングQuadOut)
 	/// </summary>
 	/// <param name="startPos">移動開始地点</param>
-	/// <param name="startPos">移動終了地点</param>
-	/// <param name="moveDir">移動方向</param>
-	/// <param name="moveDistance">移動距離</param>
-	/// <param name="moveSpeed">移動速度</param>
+	/// <param name="endPos">移動終了地点</param>
+	/// <param name="totalMoveTime">移動にかかる総時間</param>
 	void SetTrackCameraQuadOut(
 		const VECTOR& startPos,
 		const VECTOR& endPos,
+		const float& totalMoveTime = 1.0f);
+
+	/// <summary>
+	/// ドリーインカメラの設定
+	/// </summary>
+	/// <param name="startPos">移動開始地点</param>
+	/// <param name="objectPos">被写体の座標</param>
+	/// <param name="object2CameraDistance">カメラから被写体までの距離</param>
+	/// <param name="totalMoveTime">移動にかかる総時間</param>
+	void SetDollyInQuadOut(
+		const VECTOR& startPos,
+		const VECTOR& objectPos,
+		const float& object2CameraDistance,
 		const float& totalMoveTime = 1.0f);
 
 	//追従対象の設定
@@ -155,20 +180,28 @@ private:
 	//カメラの上方向
 	VECTOR cameraUp_;
 
-	VECTOR fixedPointPos_;
-	VECTOR fixedPointTargetPos_;
+	//固定カメラ用座標
+	VECTOR fixedPointPos_;			//カメラ位置
+	VECTOR fixedPointTargetPos_;	//注視点
 
-	VECTOR craneUpStartPos_;
-	VECTOR craneUpTargetPos_;
-	float craneUpDistance_;
+	//クレーンアップ用座標
+	VECTOR craneUpStartPos_;	//開始位置
+	VECTOR craneUpTargetPos_;	//注視点
+	float craneUpDistance_;		//移動距離
 
-	VECTOR trackStartPos_;
-	VECTOR trackEndPos_;
-	VECTOR trackDir_;
-	float trackSpeed_;
-	float speed_;
-	float trackTotalTime_;     //総移動時間
-	float trackElapsedTime_;   //経過時間
+	//トラックカメラ用座標
+	VECTOR trackStartPos_;		//開始位置
+	VECTOR trackEndPos_;		//終了位置
+	VECTOR trackDir_;			//移動方向
+	float trackSpeed_;			//移動速度
+	float trackTotalTime_;		//総移動時間
+	float trackElapsedTime_;	//経過時間
+
+	VECTOR dollyInStartPos_;	//開始位置
+	VECTOR dollyInObjectPos_;	//被写体の座標
+	float object2CameraDistance_;	//カメラから被写体までの距離
+	float dollyInTotalTime_;		//総移動時間
+	float dollyInElapsedTime_;		//経過時間
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
@@ -189,6 +222,7 @@ private:
 	//モード別更新ステップ
 	void SetBeforeDrawCraneUp(void);
 	void SetBeforeDrawTrack(void);
+	void SetBeforeDrawDollyIn(void);
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);

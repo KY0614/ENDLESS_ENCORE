@@ -276,6 +276,9 @@
     <ClCompile Include="Src\Scene\EncountScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Object\PointLight.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Common\Fader.h">
@@ -638,6 +641,9 @@
     <ClInclude Include="Src\Scene\EncountScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Object\PointLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />
@@ -653,5 +659,7 @@
     <FxCompile Include="Src\Shader\Model\StdModelVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\PS.hlsl" />
     <FxCompile Include="Src\Shader\PostEffect\Blur.hlsl" />
+    <FxCompile Include="Src\Shader\Model\PointLightVS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\PointLightPS.hlsl" />
   </ItemGroup>
 </Project>

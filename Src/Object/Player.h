@@ -104,7 +104,17 @@ public:
 	/// <returns>true:状態がPLAYの場合　false:それ以外</returns>
 	bool IsPlay(void) const;
 
-	bool IsActoinEnd(void)const { return isActionEnd_; }
+	/// <summary>
+	/// プレイヤーがアクションを終了したかどうか（エンカウント中のアニメーションや移動など)
+	/// </summary>
+	/// <returns>true:終了した　false:終了していない</returns>
+	bool IsActionEnd(void)const { return isActionEnd_; }
+
+	/// <summary>
+	/// 状態を取得する
+	/// </summary>
+	/// <returns>現在の状態</returns>
+	const STATE& GetState(void) const { return state_; }
 
 	/// <summary>
 	/// 状態を変更する
@@ -244,18 +254,12 @@ private:
 	void InitAnimation(void);
 
 	/// <summary>
-	/// HPを設定
-	/// </summary>
-	/// <param name="hp">HP</param>
-	//void SetHP(const float hp) { hp_ = hp; }
-
-	/// <summary>
 	/// 最大HPを設定
 	/// </summary>
 	/// <param name="maxHp">最大HP</param>
 	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
-	//状態遷移--------------------------------------------------------
+	//状態遷移処理--------------------------------------------------------
 
 	/// <summary>
 	/// 状態遷移：NONE
@@ -286,13 +290,35 @@ private:
 	/// </summary>
 	void ChangeStateDead(void);
 
-	//更新ステップ
+	//状態更新処理------------------------------------------------------
+
+	/// <summary>
+	/// 更新：NONE
+	/// </summary>
 	void UpdateNone(void);
+	/// <summary>
+	/// 更新：STAGE_WALK
+	/// </summary>
 	void UpdateStageWalk(void);
+	/// <summary>
+	/// 更新：LOOK_AROUND
+	/// </summary>
 	void UpdateLookAround(void);
+	/// <summary>
+	/// 更新：ENCOUNT
+	/// </summary>
 	void UpdateEncount(void);
+	/// <summary>
+	/// 更新：PLAY
+	/// </summary>
 	void UpdatePlay(void);
+	/// <summary>
+	/// 更新：BACKSTAB
+	/// </summary>
 	void UpdateBackstab(void);
+	/// <summary>
+	/// 更新：DEAD
+	/// </summary>
 	void UpdateDead(void);
 
 	//移動------------------------------------------------------------

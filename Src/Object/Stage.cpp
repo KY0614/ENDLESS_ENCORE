@@ -20,7 +20,7 @@ Stage::~Stage(void)
 {
 }
 
-void Stage::Init(void)
+void Stage::Init(VECTOR pos)
 {
 	//3Dモデル初期化
 	Init3DModel();
@@ -28,7 +28,7 @@ void Stage::Init(void)
 	//モデル描画用
 	material_ = std::make_unique<ModelMaterial>(
 		"StdModelVS.cso", 2,
-		"StdModelPS.cso", 4
+		"StdModelPS.cso", 5
 	);
 	//カメラ座標
 	VECTOR CameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
@@ -49,8 +49,10 @@ void Stage::Init(void)
 
 	int fogColorR, fogColorG, fogColorB;
 	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
-	//material_->AddConstBufPS({ (float)(fogColorR / 255),(float)(fogColorG / 255),(float)(fogColorB / 255),0.0f });
 	material_->AddConstBufPS({ 0.1f,0.1f,0.1f,1.0f });
+
+	//ポイントライト
+	material_->AddConstBufPS({ pos.x,pos.y,pos.z,500.0f });
 
 	renderer_ = std::make_unique<ModelRenderer>(stageTransform_[type_].modelId, *material_);
 

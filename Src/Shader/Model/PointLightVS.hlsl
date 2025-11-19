@@ -9,8 +9,17 @@
 #define VS_OUTPUT VertexToPixelLit
 #include "../Common/Vertex/VertexShader3DHeader.hlsli"
 
-VS_OUTPUT main(VS_INPUT VSInput)
+// 定数バッファ：スロット4番目(b4と書く)
+cbuffer cbParam : register(b7)
 {
+    float g_light_range;    //光の最大距離
+    float2 dummy;
+    float g_light_num;      //←配列の要素数を受け取る
+    float4 g_light_pos[30]; //←配列で受け取る
+}
+
+VS_OUTPUT main(VS_INPUT VSInput)
+{    
     VS_OUTPUT ret;
     
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 開始 )
@@ -25,18 +34,16 @@ VS_OUTPUT main(VS_INPUT VSInput)
     // ローカル座標をワールド座標に変換(剛体)
     lWorldPosition.w = 1.0f;
     lWorldPosition.xyz = mul(lLocalPosition, g_base.localWorldMatrix);
-    
-    ret.worldPos = lWorldPosition.xyz;
+    ret.worldPos = lWorldPosition.xyz; // ワールド座標をピクセルシェーダへ引き継ぐ
     
     // ワールド座標をビュー座標に変換
     lViewPosition.w = 1.0f;
     lViewPosition.xyz = mul(lWorldPosition, g_base.viewMatrix);
-    
+    // ビュー座標を射影座標に変換
     ret.vwPos.xyz = lViewPosition.xyz;
-    
     // ビュー座標を射影座標に変換
     ret.svPos = mul(lViewPosition, g_base.projectionMatrix);
-   
+    
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 終了 )
    
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 開始 )
@@ -54,8 +61,8 @@ VS_OUTPUT main(VS_INPUT VSInput)
     // ライト方向(ローカル)
     ret.lightDir = float3(0.0f, 0.0f, 0.0f);
     
-    // ライトから見た座標
-    //ret.lightAtPos = float3(0.0f, 0.0f, 0.0f);
+    //ライトから見た座標
+    ret.lightPow = float(0.0f);
     
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 終了 )
     // 出力パラメータを返す

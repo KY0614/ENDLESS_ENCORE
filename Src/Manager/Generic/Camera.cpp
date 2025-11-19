@@ -33,7 +33,11 @@ Camera::Camera(void)
 	trackStartPos_ = CommonUtility::VECTOR_ZERO;
 	trackDir_ = CommonUtility::VECTOR_ZERO;
 	trackSpeed_ = 0.0f;
-	speed_ = 0.0f;
+	dollyInStartPos_ = CommonUtility::VECTOR_ZERO;
+	dollyInObjectPos_ = CommonUtility::VECTOR_ZERO;
+	object2CameraDistance_ = 0.0f;
+	dollyInTotalTime_ = 0.0f;
+	dollyInElapsedTime_ = 0.0f;
 	followTransform_ = nullptr;
 	targetTransform_ = nullptr;
 	cameraNear_ = 0.0f;
@@ -82,6 +86,10 @@ void Camera::SetBeforeDraw(void)
 
 	case Camera::MODE::TRACK:
 		SetBeforeDrawTrack();
+		break;
+
+	case Camera::MODE::DOLLY_IN:
+		SetBeforeDrawDollyIn();
 		break;
 
 	case Camera::MODE::TOP_FIXED:
@@ -182,6 +190,10 @@ void Camera::ChangeMode(MODE mode)
 	case Camera::MODE::TRACK:
 		pos_ = trackStartPos_;
 		break;
+	case Camera::MODE::DOLLY_IN:
+		pos_ = dollyInStartPos_;
+		targetPos_ = dollyInObjectPos_;
+		break;
 	case Camera::MODE::TOP_FIXED:
 		//カメラの初期設定
 		pos_ = FIXEDTOP_CAMERA_POS;
@@ -207,9 +219,7 @@ void Camera::SetCraneUpPos(
 {
 	craneUpStartPos_ = startPos;
 	craneUpDistance_ = distance;
-	//注視点(通常重力でいうところのY値を追従対象と同じにする)
-	VECTOR localPos = rotOutX_.PosAxis(VSub(targetPos,startPos));
-	craneUpTargetPos_ = VAdd(startPos, localPos);
+	craneUpTargetPos_ = targetPos;
 }
 
 void Camera::SetTrackCamera(
@@ -235,6 +245,21 @@ void Camera::SetTrackCameraQuadOut(
 	float totalDistance = VSize(VSub(endPos, startPos));
 	trackTotalTime_ = totalMoveTime;
 	trackElapsedTime_ = 0.0f;
+}
+
+void Camera::SetDollyInQuadOut(
+	const VECTOR& startPos,
+	const VECTOR& objectPos,
+	const float& object2CameraDistance,
+	const float& totalMoveTime)
+{
+	dollyInStartPos_ = startPos;
+	dollyInObjectPos_ = objectPos;
+	object2CameraDistance_ = object2CameraDistance;
+	// 総移動距離から総移動時間を計算
+	float totalDistance = VSize(VSub(dollyInObjectPos_, startPos));
+	dollyInTotalTime_ = totalMoveTime;
+	dollyInElapsedTime_ = 0.0f;
 }
 
 void Camera::SetDefault(void)
@@ -360,7 +385,7 @@ void Camera::SetBeforeDrawCraneUp(void)
 
 void Camera::SetBeforeDrawTrack(void)
 {
-	//スタート座標から現在座標までの距離を取得
+	//終了座標から現在座標までの距離を取得
 	float pos2StartPos = VSize(VSub(trackEndPos_, pos_));
 	const float distance = 1.0f;
 	isActionEnd_ = pos2StartPos <= distance;
@@ -379,6 +404,30 @@ void Camera::SetBeforeDrawTrack(void)
 	//垂直ベクトルを計算して注視点を設定
 	targetPos_ = VAdd(pos_, VScale(
 		VGet(-trackDir_.z, trackDir_.y, -trackDir_.x), lookDistance));
+}
+
+void Camera::SetBeforeDrawDollyIn(void)
+{
+	//終了座標(目的位置)を計算
+	//被写体から距離を取った位置を終了座標とする
+	VECTOR endPos = VSub(
+		dollyInObjectPos_,
+		VScale(VNorm(VSub(dollyInObjectPos_, dollyInStartPos_)), object2CameraDistance_));
+
+	//終了座標から現在座標までの距離を取得
+	float pos2StartPos = VSize(VSub(dollyInObjectPos_, pos_));
+	//
+	const float distance = 1.0f;
+	isActionEnd_ = pos2StartPos <= distance;
+
+	if (isActionEnd_)return;
+
+	//経過時間
+	dollyInElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	// 各軸ごとにQuadOutイージングで補間
+	pos_.x = Easing::QuadOut(dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.x, endPos.x);
+	pos_.y = Easing::QuadOut(dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.y, endPos.y);
+	pos_.z = Easing::QuadOut(dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.z, endPos.z);
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)
@@ -444,15 +493,17 @@ void Camera::UpdateDebugImGui(void)
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Camera");
 
-	//ImGui::SliderFloat("positionX", &pos_.x, -10000.0f, 10000.0f);
-	//ImGui::SliderFloat("positionY", &pos_.y, -10000.0f, 10000.0f);
-	//ImGui::SliderFloat("positionZ", &pos_.z, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("angleX", &angles_.x, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("angleY", &angles_.y, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("angleZ", &angles_.z, -10000.0f, 10000.0f);
 
-	//ImGui::SliderFloat("targetX", &targetPos_.x, -10000.0f, 10000.0f);
-	//ImGui::SliderFloat("targetY", &targetPos_.y, -10000.0f, 10000.0f);
-	//ImGui::SliderFloat("targetZ", &targetPos_.z, -10000.0f, 10000.0f);
-	//
-	ImGui::SliderFloat("speed", &speed_, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("positionX", &pos_.x, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("positionY", &pos_.y, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("positionZ", &pos_.z, -10000.0f, 10000.0f);
+
+	ImGui::SliderFloat("targetX", &targetPos_.x, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("targetY", &targetPos_.y, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("targetZ", &targetPos_.z, -10000.0f, 10000.0f);
 
 	//終了処理
 	ImGui::End();

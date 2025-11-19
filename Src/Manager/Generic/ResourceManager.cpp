@@ -192,7 +192,7 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::THEATER, std::move(res));
 
 	//“G
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician_.mv1");
 	resourcesMap_.emplace(SRC::ENEMY, std::move(res));
 
 	//“G‚Ì’e

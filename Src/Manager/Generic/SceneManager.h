@@ -115,8 +115,8 @@ private:
 	float deltaTime_;
 
 	//フォグ
-	float fogStart;	//開始位置
-	float fogEnd;	//終了位置
+	float fogStart_;	//開始位置
+	float fogEnd_;	//終了位置
 
 	//ライトの方向
 	VECTOR lightDir_;

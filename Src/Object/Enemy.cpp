@@ -101,6 +101,7 @@ Enemy::Enemy(Player& player):player_(player)
 	//ó‘ÔŠÇ—
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&Enemy::ChangeStateEncount, this));
+	stateChanges_.emplace(STATE::TURN, std::bind(&Enemy::ChangeStateTurn, this));
 	stateChanges_.emplace(STATE::FOLLOW, std::bind(&Enemy::ChangeStateFollow, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Enemy::ChangeStateMove, this));
 	stateChanges_.emplace(STATE::ATTACK_NEAR, std::bind(&Enemy::ChangeStateAttackNear, this));
@@ -634,8 +635,13 @@ void Enemy::ChangeStateNone(void)
 void Enemy::ChangeStateEncount(void)
 {
 	isEncount_ = true;
-	animationController_->Play((int)ANIM_TYPE::TURN,false);
 	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
+}
+
+void Enemy::ChangeStateTurn(void)
+{
+	animationController_->Play((int)ANIM_TYPE::TURN, false);
+	stateUpdate_ = std::bind(&Enemy::UpdateTurn, this);
 }
 
 void Enemy::ChangeStateFollow(void)
@@ -712,6 +718,10 @@ void Enemy::UpdateNone(void)
 }
 
 void Enemy::UpdateEncount(void)
+{
+}
+
+void Enemy::UpdateTurn(void)
 {
 }
 

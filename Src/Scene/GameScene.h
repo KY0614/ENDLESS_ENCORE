@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <memory>
 #include "../Object/Common/Transform.h"
 #include "SceneBase.h"
@@ -9,6 +10,7 @@ class Player;
 class Enemy;
 class Stage;
 class EncountScene;
+class PointLight;
 
 class GameScene : public SceneBase
 {
@@ -40,6 +42,8 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	VECTOR GetPointLightPos();
+
 private:
 	// ポストエフェクト用スクリーン
 	int postEffectScreen_;
@@ -66,6 +70,8 @@ private:
 	std::shared_ptr<Stage> stage_;
 	//演出
 	std::unique_ptr<EncountScene> encountScene_;
+	// プレイヤー
+	std::vector<std::unique_ptr<PointLight>> pointLight_;
 
 	//メッセージクラスみたいなクラスを作って分けてもいいかも
 	//選択肢文字列リスト

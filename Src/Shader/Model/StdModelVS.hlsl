@@ -7,22 +7,22 @@
 
 // OUT
 #define VS_OUTPUT VertexToPixelLit
+//#define VS_OUTPUT_LIGHT VertexToPixelLight
 #include "../Common/Vertex/VertexShader3DHeader.hlsli"
 
 // 定数バッファ：スロット7番目(b7と書く)
 cbuffer cbParam : register(b7)
 {
     float3 g_camera_pos;  //カメラ座標
-    float dummy;
+    float dummy;          //ダミー
     
-    float g_fog_start;
-    float g_fog_end;
-    float2 dummy2;
+    float g_fog_start;  //フォグの開始座標
+    float g_fog_end;    //フォグの終了座標
+    float2 dummy2;      //ダミー
 }
 
 VS_OUTPUT main(VS_INPUT VSInput)
 {
-    
     VS_OUTPUT ret;
     
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 開始 )
@@ -37,6 +37,7 @@ VS_OUTPUT main(VS_INPUT VSInput)
     // ローカル座標をワールド座標に変換(剛体)
     lWorldPosition.w = 1.0f;
     lWorldPosition.xyz = mul(lLocalPosition, g_base.localWorldMatrix);
+    ret.worldPos = lWorldPosition.xyz; // ワールド座標をピクセルシェーダへ引き継ぐ
     
     // ワールド座標をビュー座標に変換
     lViewPosition.w = 1.0f;
@@ -69,6 +70,10 @@ VS_OUTPUT main(VS_INPUT VSInput)
     
     // ライト方向(ローカル)
     ret.lightDir = float3(0.0f, 0.0f, 0.0f);
+    
+    //ライトから見た座標
+    ret.lightPow = float(0.0f);
+    
     
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 終了 )
     // 出力パラメータを返す

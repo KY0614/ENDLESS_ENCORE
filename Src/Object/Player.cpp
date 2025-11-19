@@ -27,6 +27,7 @@ namespace
 	static const std::string KEY_PLAYER = "Player";
 	static const std::string KEY_IDLE = "Idle";
 	static const std::string KEY_WALK = "Walk";
+	static const std::string KEY_LOOK_AROUND = "LookAround";
 	static const std::string KEY_RUN = "Run";
 	static const std::string KEY_JUMP = "Jump";
 	static const std::string KEY_DODGE = "Dodge";
@@ -316,9 +317,12 @@ void Player::InitAnimation(void)
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
-
+	const float animSpeedSlow = animSpeed / 2.0f;
 	animationController_->Add((int)ANIM_TYPE::WALK_SLOW, path + animPath.value(KEY_WALK, KEY_EMPTY),
-		animSpeed - 15.0f);
+		animSpeedSlow);
+
+	animationController_->Add((int)ANIM_TYPE::LOOK_AROUND, path + animPath.value(KEY_LOOK_AROUND, KEY_EMPTY),
+		animSpeed);
 
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
@@ -369,11 +373,15 @@ void Player::ChangeStateStageWalk(void)
 
 void Player::ChangeStateLookAround(void)
 {
+	//周りを見渡すアニメーションに変更
+	animationController_->Play((int)ANIM_TYPE::LOOK_AROUND);
 	stateUpdate_ = std::bind(&Player::UpdateLookAround, this);
 }
 
 void Player::ChangeStateEncount(void)
 {
+	//待機アニメーションに変更
+	animationController_->Play((int)ANIM_TYPE::IDLE);
 	stateUpdate_ = std::bind(&Player::UpdateEncount, this);
 }
 
@@ -426,12 +434,14 @@ void Player::UpdateStageWalk(void)
 
 void Player::UpdateLookAround(void)
 {
-	animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
+	//if (animationController_->IsEnd())
+	//{
+	//	ChangeState(STATE::ENCOUNT);
+	//}
 }
 
 void Player::UpdateEncount(void)
 {
-	
 }
 
 void Player::UpdatePlay(void)

@@ -26,6 +26,7 @@
 
 namespace
 {
+	//画面揺らしのフレーム数
 	const int SHAKE_FRAME = 60;
 }
 
@@ -68,8 +69,8 @@ void SceneManager::Init(void)
 	preTime_ = std::chrono::system_clock::now();
 
 	//フォグ
-	fogStart = 10000.0f;
-	fogEnd = 20000.0f;
+	fogStart_ = 10000.0f;
+	fogEnd_ = 20000.0f;
 
 	//ライトの向き
 	lightDir_ = LIGHT_DIR;
@@ -109,7 +110,7 @@ void SceneManager::Init3D(void)
 	//フォグ設定
 	SetFogEnable(true);
 	SetFogColor(5, 5, 5);
-	SetFogStartEnd(fogStart, fogEnd);
+	SetFogStartEnd(fogStart_, fogEnd_);
 	//SetFogStartEnd(100.0f, 2000.0f);
 }
 
@@ -149,7 +150,7 @@ void SceneManager::Update(void)
 	//カメラ更新
 	camera_->Update();
 
-	//UpdateDebugImGui();
+	UpdateDebugImGui();
 }
 
 void SceneManager::Draw(void)
@@ -478,11 +479,12 @@ void SceneManager::UpdateDebugImGui(void)
 	ImGui::Begin("SceneM");
 
 	//位置
-	ImGui::Text("screenPosXOffset");
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	//ImGui::InputInt("XOffset", &screenPosXoffset_);
-	//ImGui::SliderInt("PosX", &screenPosXoffset_, -20, 20);
-
+	ImGui::InputFloat("Fog", &fogStart_);
+	ImGui::SliderFloat("Fog Start", &fogStart_, -20000.0f, 20000.0f);
+	
+	ImGui::InputFloat("Fog", &fogEnd_);
+	ImGui::SliderFloat("Fog End", &fogEnd_, -20000.0f, 20000.0f);
+	//SetFogStartEnd(fogStart_, fogEnd_);
 	//終了処理
 	ImGui::End();
 }

@@ -17,6 +17,7 @@
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
+#include "../Object/PointLight.h"
 #include "PauseScene.h"
 #include "EncountScene.h"
 #include "GameScene.h"
@@ -56,9 +57,16 @@ void GameScene::Init(void)
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::BATTLE, 256 / 3);
 	sound.Play(SoundManager::SOUND::EXPLORE);
-	//プレイヤー
+
+	// ポイントライト
+	std::unique_ptr<PointLight>light;
+	light = std::make_unique<PointLight>();
+	light->Init();
+	pointLight_.push_back(std::move(light));
+
+	//ステージ
 	stage_ = std::make_shared<Stage>();
-	stage_->Init();
+	stage_->Init(GetPointLightPos());
 
 	//プレイヤー
 	player_ = std::make_shared<Player>();
@@ -119,24 +127,31 @@ void GameScene::Init(void)
 
 void GameScene::Update(void)
 {
+	for (auto& light : pointLight_)
+	{
+		light->Update();
+	}
 	(this->*update_)();
 }
 
 void GameScene::Draw(void)
 {
 	(this->*draw_)();
-	//start
-	DrawSphere3D(VGet(10.0f, -219.0f, 900.0f), 15.0f, 16, 0xffffff, 0xffffff, false);
-	//goal
-	DrawSphere3D(VGet(10.0f, -219.0f, 1150.0f), 15.0f, 16, 0x00ff00, 0x00ff00, false);
-	//camera
-	DrawSphere3D(VGet(-200.0f, -219.0f, 1150.0f), 15.0f, 16, 0x0000ff, 0x0000ff, false);
+	////start
+	//DrawSphere3D(VGet(10.0f, -219.0f, 900.0f), 15.0f, 16, 0xffffff, 0xffffff, false);
+	////goal
+	//DrawSphere3D(VGet(10.0f, -219.0f, 1150.0f), 15.0f, 16, 0x00ff00, 0x00ff00, false);
+	////camera
+	//DrawSphere3D(VGet(-200.0f, -219.0f, 1150.0f), 15.0f, 16, 0x0000ff, 0x0000ff, false);
 
-	//enemy
-	DrawSphere3D(VGet(10.0f, -219.0f, 3100.0f), 15.0f, 16, 0xff0000, 0xff0000, false);
+	////enemy
+	//DrawSphere3D(VGet(10.0f, -219.0f, 3100.0f), 15.0f, 16, 0xff0000, 0xff0000, false);
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
-
+	for (auto& light : pointLight_)
+	{
+		light->Draw();
+	}
 	// ポストエフェクト(ブラー)
 	//-----------------------------------------
 	//
@@ -152,6 +167,12 @@ void GameScene::Draw(void)
 	//DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
 }
+
+VECTOR GameScene::GetPointLightPos()
+{
+	return pointLight_[0]->GetTransform().pos;
+}
+
 
 void GameScene::UpdateExplore(void)
 {
