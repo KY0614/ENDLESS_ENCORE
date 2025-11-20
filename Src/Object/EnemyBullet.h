@@ -3,6 +3,7 @@
 #include <map>
 #include "ShotBase.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 
 class Sphere;
 

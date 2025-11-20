@@ -452,8 +452,6 @@ void Player::UpdatePlay(void)
 		return;
 	}
 
-	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
-
 	//移動処理
 	ProcessMove();
 
@@ -674,11 +672,6 @@ void Player::ProcessDodge(void)
 			stepDodge_ = 0.0f;
 		}
 	}
-#ifdef _DEBUG
-	//モデルの色変更（見た目でわかりやすくするため）
-	if(isDodge_)MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
-#endif // _DEBUG
-
 }
 
 void Player::ProcessParry(void)

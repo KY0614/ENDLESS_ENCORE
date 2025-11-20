@@ -20,38 +20,56 @@ cbuffer cbParam : register(b4)
     float4 g_fog_color;
     
     float3 g_pointlight_pos;
-    float g_light_range; //光の最大距離
+    float g_pointlight_range; //光の最大距離
+    
+    //スポットライト
+    float3 g_spotlight_pos;
+    float g_spotlight_range; //光の最大距離
+    
+    float3 g_spotlight_dir; //ライトの方向
+    float g_spotlight_angle;
 }
 
 float4 main(PS_INPUT PSInput) : SV_TARGET
 {
     float4 color;
     color = diffuseMapTexture.Sample(diffuseMapSampler, PSInput.uv);
-    if (color.a < 0.01f)
-    {
-        discard; // アルファ値が0のピクセルは破棄)
-    }
+    if (color.a < 0.01f)discard; // アルファ値が0のピクセルは破棄)
     
     color *= g_color; // 定数バッファの色を乗算
     
     float3 normal = PSInput.normal;
+    //ライト
     float lihgt = dot(normal, -g_light_dir);
+    //ポイントライト
+    //距離
     float dis = length(PSInput.worldPos - g_pointlight_pos);
-    float lightPow;
-    float4 lightCol = float4(1.0f, 1.0f, 0.1f, 1.0f);
-    if (dis > g_light_range)
+    //float lightPow;
+    //ライトの色
+    float4 pointLightCol = float4(1.0f, 1.0f, 1.0f, 0.5f);
+    //影響力を計算
+    float pointLightAtten = 1.0f - 1.0f / g_pointlight_range * dis;
+    //影響力がマイナスなら0にする
+        if(pointLightAtten < 0.0f)
     {
-        lightPow = 0.0f;
+        pointLightAtten = 0.0f;
     }
-    else
-    {
-        lightPow = 1.0 - saturate(dis / g_light_range);
-    }
-    lightCol.rgb = (lightCol.rgb * saturate(lightPow));
+    //2乗して減衰を表現
+    pointLightAtten = pow(pointLightAtten, 2.0f);
+    //ライトの色に影響力をかける
+    pointLightCol.rgb = (pointLightCol.rgb * saturate(pointLightAtten));
+    
+    //スポットライト
+    float3 spotlightDir = normalize(g_spotlight_dir);
+    float3 toSpotLight = g_spotlight_pos - PSInput.worldPos;
+    float distanceToLight = length(toSpotLight);
+    float3 lightDir = normalize(toSpotLight);
+    
+    
     
     float fogFactor = PSInput.fogFactor.x;
     float3 fogCol = g_fog_color;
-    float3 rgb = (color.rgb * g_color.rgb *lihgt) +g_ambient_color.rgb + lightCol.rgb;
+    float3 rgb = (color.rgb * g_color.rgb * lihgt) + g_ambient_color.rgb + pointLightCol.rgb;
     float3 finalColor = lerp(fogCol, rgb, fogFactor);
     return float4(finalColor, color.a);
     

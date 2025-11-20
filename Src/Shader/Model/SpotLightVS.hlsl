@@ -10,7 +10,7 @@
 #include "../Common/Vertex/VertexShader3DHeader.hlsli"
 
 VS_OUTPUT main(VS_INPUT VSInput)
-{    
+{
     VS_OUTPUT ret;
     
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 開始 )

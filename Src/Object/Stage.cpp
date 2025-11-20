@@ -91,9 +91,6 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	renderer_->Draw();
-	//MV1DrawModel(stageTransform_[type_].modelId);
-
-	//cube_->Draw();
 }
 
 void Stage::UpdateDebugImGui(void)
@@ -110,7 +107,6 @@ void Stage::Init3DModel(void)
 	stageTransform_[TYPE::EXPLORE].pos = { 0.0f,0.0f,-1000.0f };
 	stageTransform_[TYPE::EXPLORE].quaRot = Quaternion();
 	stageTransform_[TYPE::EXPLORE].quaRotLocal = Quaternion();
-	//Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	stageTransform_[TYPE::EXPLORE].MakeCollider(Collider::TYPE::STAGE);
 	stageTransform_[TYPE::EXPLORE].Update();
 

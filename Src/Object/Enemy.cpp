@@ -224,15 +224,13 @@ void Enemy::Init3DModel(void)
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::ENEMY));
-	MV1SetMaterialDifColor(transform_.modelId, 0, GetColorF(
-		175.0f / 255.0f, 175.0f / 255.0f, 125.0f / 255.0f, 1.0f));
+	//モデルの大きさ(Jsonデータから取得できなかったら1.0f)
 	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
 	transform_.scl = { scale ,scale ,scale };
 	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 	transform_.quaRot = //Quaternion();
 	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
-	//const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 	transform_.quaRotLocal = 
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
@@ -245,16 +243,22 @@ void Enemy::Init3DModel(void)
 
 void Enemy::InitCollider(void)
 {
+	//カプセルコライダのパラメータ
+	const VECTOR cupsulePosTop = { 0.0f, 140.0f, 0.0f };
+	const VECTOR cupsulePosDown = { 0.0f, 20.0f, 0.0f };
+	const float cupsuleRadius = 30.0f;
 	//カプセルコライダ
 	capsule_ = std::make_unique<Capsule>(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 140.0f, 0.0f });
-	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
-	capsule_->SetRadius(30.0f);
+	capsule_->SetLocalPosTop(cupsulePosTop);
+	capsule_->SetLocalPosDown(cupsulePosDown);
+	capsule_->SetRadius(cupsuleRadius);
 
+	const VECTOR spherePos = { 0.0f, 80.0f, 50.0f };
+	const float sphereRadius = 30.0f;
 	//近接攻撃用の球体コライダ
 	sphereNear_ = std::make_unique<Sphere>(transform_);
-	sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
-	sphereNear_->SetRadius(30.0f);
+	sphereNear_->SetLocalPos(spherePos);
+	sphereNear_->SetRadius(sphereRadius);
 
 	col_ = 0x000000;
 }

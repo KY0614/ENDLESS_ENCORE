@@ -3,17 +3,17 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Renderer/ModelRenderer.h"
-#include "PointLight.h"
+#include "SpotLight.h"
 
-PointLight::PointLight(void)
+SpotLight::SpotLight(void)
 {
 }
 
-PointLight::~PointLight(void)
+SpotLight::~SpotLight(void)
 {
 }
 
-void PointLight::Init(void)
+void SpotLight::Init(void)
 {
 
 	// ÉÇÉfÉãÇÃäÓñ{èÓïÒ
@@ -21,13 +21,13 @@ void PointLight::Init(void)
 		ResourceManager::GetInstance().LoadModelDuplicate(
 			ResourceManager::SRC::COIN)
 	);
-	transform_.pos = { 1.0f,-30.0f,1.0f };
+	transform_.pos = { 1.0f,-30.0f,1830.0f };
 	transform_.scl = { 1.0f,1.0f,1.0f };
 	transform_.Update();
 
 	material_ = std::make_unique<ModelMaterial>(
-		"PointLightVS.cso", 0,
-		"PointLightPS.cso", 0
+		"SpotLightVS.cso", 0,
+		"SpotLightPS.cso", 0
 	);
 
 	renderer_ = std::make_unique<ModelRenderer>(
@@ -35,12 +35,12 @@ void PointLight::Init(void)
 	);
 }
 
-void PointLight::Update(void)
+void SpotLight::Update(void)
 {
 	transform_.Update();
 }
 
-void PointLight::Draw(void)
+void SpotLight::Draw(void)
 {
 	renderer_->Draw();
 }
