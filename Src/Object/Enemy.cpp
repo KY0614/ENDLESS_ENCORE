@@ -231,8 +231,8 @@ void Enemy::Init3DModel(void)
 	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 	transform_.quaRot = //Quaternion();
 	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
-	transform_.quaRotLocal = 
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+	transform_.quaRotLocal = Quaternion();
+		//Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 
 	//HP‚ðÝ’è
@@ -281,7 +281,7 @@ void Enemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::TURN, path + animPath.value(KEY_TURN, KEY_EMPTY),
-		animSpeed - 10.0f);
+		animSpeed - 15.0f);
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::WALK_RIGHT, path + animPath.value(KEY_WALK_RIGHT, KEY_EMPTY),

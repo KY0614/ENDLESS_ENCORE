@@ -156,6 +156,7 @@ void EncountScene::ChangeStateEnemySpotlight(void)
 
 void EncountScene::ChangeStateEnemyAttention(void)
 {
+	enemy_.ChangeState(Enemy::STATE::TURN);
 	VECTOR pPos = VAdd(
 		player_.GetTransform().pos,
 		VScale(VNorm(player_.GetTransform().GetBack()), 70.0f));
@@ -289,15 +290,16 @@ void EncountScene::UpdateLookAround(void)
 void EncountScene::UpdateEnemySpotlight(void)
 {
 	//一定時間経ったらライトアップ
-	const float intervalLightUp = 1.0f;
+	const float intervalLightUp = 2.0f;
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	if (intervalTimer_ >= intervalLightUp)
 	{
 		SetFogStartEnd(10000.0f, 20000.0f);
 	}
-
-	if (intervalTimer_ >= 1.5f)
+	//一定時間経ったらライトアップ
+	const float intervalStateChange = intervalLightUp + 1.0f;
+	if (intervalTimer_ >= intervalStateChange)
 	{
 		ChangeState(STATE::ENEMY_ATTENTION);
 		return;
