@@ -27,14 +27,16 @@ cbuffer cbParam : register(b4)
     float g_spotlight_range; //光の最大距離
     
     float3 g_spotlight_dir; //ライトの方向
-    float g_spotlight_angle;
+    float g_spotlight_attenuation;
+
 }
 
 float4 main(PS_INPUT PSInput) : SV_TARGET
 {
     float4 color;
     color = diffuseMapTexture.Sample(diffuseMapSampler, PSInput.uv);
-    if (color.a < 0.01f)discard; // アルファ値が0のピクセルは破棄)
+    if (color.a < 0.01f)
+        discard; // アルファ値が0のピクセルは破棄)
     
     color *= g_color; // 定数バッファの色を乗算
     
@@ -43,14 +45,13 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     float lihgt = dot(normal, -g_light_dir);
     //ポイントライト
     //距離
-    float dis = length(PSInput.worldPos - g_pointlight_pos);
-    //float lightPow;
+    float pointDis = length(PSInput.worldPos - g_pointlight_pos);
     //ライトの色
     float4 pointLightCol = float4(1.0f, 1.0f, 1.0f, 0.5f);
     //影響力を計算
-    float pointLightAtten = 1.0f - 1.0f / g_pointlight_range * dis;
+    float pointLightAtten = 1.0f - 1.0f / g_pointlight_range * pointDis;
     //影響力がマイナスなら0にする
-        if(pointLightAtten < 0.0f)
+    if (pointLightAtten < 0.0f)
     {
         pointLightAtten = 0.0f;
     }
@@ -59,18 +60,13 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     //ライトの色に影響力をかける
     pointLightCol.rgb = (pointLightCol.rgb * saturate(pointLightAtten));
     
-    //スポットライト
-    float3 spotlightDir = normalize(g_spotlight_dir);
-    float3 toSpotLight = g_spotlight_pos - PSInput.worldPos;
-    float distanceToLight = length(toSpotLight);
-    float3 lightDir = normalize(toSpotLight);
-    
-    
-    
-    float fogFactor = PSInput.fogFactor.x;
+    //スポットライト---------------------------------------------------------
+
+    float fogFactor = PSInput.fogFactor;
     float3 fogCol = g_fog_color;
     float3 rgb = (color.rgb * g_color.rgb * lihgt) + g_ambient_color.rgb + pointLightCol.rgb;
     float3 finalColor = lerp(fogCol, rgb, fogFactor);
     return float4(finalColor, color.a);
+    
     
 }

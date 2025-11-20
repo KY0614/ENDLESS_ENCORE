@@ -25,7 +25,7 @@ public:
 	/// <summary>
 	///	‰Šú‰»
 	/// </summary>
-	void Init(VECTOR pos);
+	void Init(VECTOR pos,VECTOR sPos);
 
 	/// <summary>
 	///	XVˆ—

@@ -20,7 +20,7 @@ Stage::~Stage(void)
 {
 }
 
-void Stage::Init(VECTOR pos)
+void Stage::Init(VECTOR pos, VECTOR sPos)
 {
 	//3Dモデル初期化
 	Init3DModel();
@@ -28,7 +28,7 @@ void Stage::Init(VECTOR pos)
 	//モデル描画用
 	material_ = std::make_unique<ModelMaterial>(
 		"StdModelVS.cso", 2,
-		"StdModelPS.cso", 5
+		"StdModelPS.cso", 7
 	);
 	//カメラ座標
 	VECTOR CameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
@@ -53,6 +53,11 @@ void Stage::Init(VECTOR pos)
 
 	//ポイントライト
 	material_->AddConstBufPS({ pos.x,pos.y,pos.z,500.0f });
+
+	//スポットライト
+	material_->AddConstBufPS({ sPos.x,sPos.y,sPos.z,600.0f });
+	VECTOR spotDir = CommonUtility::DIR_D;
+	material_->AddConstBufPS({ spotDir.x,spotDir.y,spotDir.z,120.0f });
 
 	renderer_ = std::make_unique<ModelRenderer>(stageTransform_[type_].modelId, *material_);
 

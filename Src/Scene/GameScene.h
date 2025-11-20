@@ -11,6 +11,7 @@ class Enemy;
 class Stage;
 class EncountScene;
 class PointLight;
+class SpotLight;
 
 class GameScene : public SceneBase
 {
@@ -43,6 +44,7 @@ public:
 	void Draw(void) override;
 
 	VECTOR GetPointLightPos();
+	VECTOR GetSpotLightPos();
 
 private:
 	// ポストエフェクト用スクリーン
@@ -72,6 +74,7 @@ private:
 	std::unique_ptr<EncountScene> encountScene_;
 	// プレイヤー
 	std::vector<std::unique_ptr<PointLight>> pointLight_;
+	std::vector<std::unique_ptr<SpotLight>> spotLight_;
 
 	//メッセージクラスみたいなクラスを作って分けてもいいかも
 	//選択肢文字列リスト

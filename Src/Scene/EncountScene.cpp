@@ -164,7 +164,7 @@ void EncountScene::ChangeStateEnemyAttention(void)
 	pPos.y += cameraOffsetY;
 	const VECTOR& pos = VGet(-50.0f, -210.0f, 1350.0f);
 	VECTOR targetPos = enemy_.GetTransform().pos;
-	targetPos.y += cameraOffsetY;
+	targetPos.y += 150.0f;
 	mainCamera->SetDollyInQuadOut(pPos, targetPos, 100.0f, 5.0f);
 	mainCamera->ChangeMode(Camera::MODE::DOLLY_IN);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttention, this);
@@ -257,7 +257,7 @@ void EncountScene::UpdateBlackOut(void)
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	if (intervalTimer_ >= intervalBlackOut)
 	{
-		SetFogStartEnd(100.0f, 2000.0f);
+		SetFogStartEnd(50.0f, 1000.0f);
 		intervalTimer_ = 0.0f;
 		ChangeState(STATE::LOOK_AROUND);
 		return;
@@ -288,10 +288,33 @@ void EncountScene::UpdateLookAround(void)
 
 void EncountScene::UpdateEnemySpotlight(void)
 {
+	//一定時間経ったらライトアップ
+	const float intervalLightUp = 1.0f;
+	//一定時間経過
+	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	if (intervalTimer_ >= intervalLightUp)
+	{
+		SetFogStartEnd(10000.0f, 20000.0f);
+	}
+
+	if (intervalTimer_ >= 1.5f)
+	{
+		ChangeState(STATE::ENEMY_ATTENTION);
+		return;
+	}
+		
 }
 
 void EncountScene::UpdateEnemyAttention(void)
 {
+	//一定時間経ったらドリー開始
+	const float intervalLightUp = 1.5f;
+	//一定時間経過
+	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	if (intervalTimer_ >= intervalLightUp)
+	{
+		return;
+	}
 }
 
 void EncountScene::DebugDraw(void)

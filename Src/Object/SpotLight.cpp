@@ -21,10 +21,11 @@ void SpotLight::Init(void)
 		ResourceManager::GetInstance().LoadModelDuplicate(
 			ResourceManager::SRC::COIN)
 	);
-	transform_.pos = { 1.0f,-30.0f,1830.0f };
+	transform_.pos = { 85.0f,200.0f,3000.0f };
 	transform_.scl = { 1.0f,1.0f,1.0f };
 	transform_.Update();
-
+	MV1SetMaterialDifColor(transform_.modelId, 0, 
+		GetColorF(1.0f, 0.0f, 0.0f, 1.0f));
 	material_ = std::make_unique<ModelMaterial>(
 		"SpotLightVS.cso", 0,
 		"SpotLightPS.cso", 0

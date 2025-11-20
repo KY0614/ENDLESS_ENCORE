@@ -415,10 +415,10 @@ void Camera::SetBeforeDrawDollyIn(void)
 		VScale(VNorm(VSub(dollyInObjectPos_, dollyInStartPos_)), object2CameraDistance_));
 
 	//I—¹À•W‚©‚çŒ»İÀ•W‚Ü‚Å‚Ì‹——£‚ğæ“¾
-	float pos2StartPos = VSize(VSub(dollyInObjectPos_, pos_));
+	float pos2StartPos = VSize(VSub(endPos, pos_));
 	//
 	const float distance = 1.0f;
-	isActionEnd_ = pos2StartPos <= distance;
+	isActionEnd_ = pos2StartPos <= distance;;
 
 	if (isActionEnd_)return;
 

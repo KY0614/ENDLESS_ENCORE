@@ -18,6 +18,7 @@
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
 #include "../Object/PointLight.h"
+#include "../Object/SpotLight.h"
 #include "PauseScene.h"
 #include "EncountScene.h"
 #include "GameScene.h"
@@ -64,9 +65,15 @@ void GameScene::Init(void)
 	light->Init();
 	pointLight_.push_back(std::move(light));
 
+	// スポットライト
+	std::unique_ptr<SpotLight>slight;
+	slight = std::make_unique<SpotLight>();
+	slight->Init();
+	spotLight_.push_back(std::move(slight));
+
 	//ステージ
 	stage_ = std::make_shared<Stage>();
-	stage_->Init(GetPointLightPos());
+	stage_->Init(GetPointLightPos(),GetSpotLightPos());
 
 	//プレイヤー
 	player_ = std::make_shared<Player>();
@@ -131,6 +138,10 @@ void GameScene::Update(void)
 	{
 		light->Update();
 	}
+	for (auto& light : spotLight_)
+	{
+		light->Update();
+	}
 	(this->*update_)();
 }
 
@@ -149,6 +160,10 @@ void GameScene::Draw(void)
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
 	for (auto& light : pointLight_)
+	{
+		light->Draw();
+	}
+	for (auto& light : spotLight_)
 	{
 		light->Draw();
 	}
@@ -171,6 +186,11 @@ void GameScene::Draw(void)
 VECTOR GameScene::GetPointLightPos()
 {
 	return pointLight_[0]->GetTransform().pos;
+}
+
+VECTOR GameScene::GetSpotLightPos()
+{
+	return spotLight_[0]->GetTransform().pos;
 }
 
 
