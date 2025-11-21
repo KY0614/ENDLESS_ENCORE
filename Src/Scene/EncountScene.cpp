@@ -21,8 +21,10 @@ EncountScene::EncountScene(
 	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&EncountScene::ChangeStateLookAround, this));
 	stateChanges_.emplace(STATE::ENEMY_SPOTLIGHT, std::bind(&EncountScene::ChangeStateEnemySpotlight, this));
 	stateChanges_.emplace(STATE::ENEMY_ATTENTION, std::bind(&EncountScene::ChangeStateEnemyAttention, this));
+	stateChanges_.emplace(STATE::FINISH, std::bind(&EncountScene::ChangeStateFinish, this));
 
 	intervalTimer_ = 0.0f;
+	isFinish_ = false;
 }
 
 EncountScene::~EncountScene(void)
@@ -36,8 +38,8 @@ void EncountScene::LoadData(void)
 void EncountScene::Init(void)
 {
 
-	fader_ = std::make_unique<Fader>();
-	fader_->Init();
+	//fader_ = std::make_unique<Fader>();
+	//fader_->Init();
 
 	//初期状態
 	ChangeState(STATE::NONE);
@@ -45,7 +47,7 @@ void EncountScene::Init(void)
 
 void EncountScene::Update(void)
 {
-	fader_->Update();
+	//fader_->Update();
 
 	//更新ステップ
 	stateUpdate_();
@@ -54,7 +56,7 @@ void EncountScene::Update(void)
 void EncountScene::Draw(void)
 {
 	//暗転・明転
-	fader_->Draw();
+	//fader_->Draw();
 
 	DebugDraw();
 }
@@ -67,15 +69,21 @@ void EncountScene::Start(void)
 bool EncountScene::IsFadeOutEnd(void)
 {
 	//フェードアウトが終わったかどうか
-	return fader_->GetState() == Fader::STATE::FADE_OUT &&
-		fader_->IsEnd();
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	return fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
+		fader.lock()->IsEnd();
+	//return fader_->GetState() == Fader::STATE::FADE_OUT &&
+	//	fader_->IsEnd();
 }
 
 bool EncountScene::IsFadeInEnd(void)
 {
 	//フェードインが終わったかどうか
-	return fader_->GetState() == Fader::STATE::FADE_IN &&
-		fader_->IsEnd();
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	return fader.lock()->GetState() == Fader::STATE::FADE_IN &&
+		fader.lock()->IsEnd();
+	//return fader_->GetState() == Fader::STATE::FADE_IN &&
+	//	fader_->IsEnd();
 }
 
 void EncountScene::ChangeState(STATE state)
@@ -95,7 +103,9 @@ void EncountScene::ChangeStateNone(void)
 
 void EncountScene::ChangeStateFade(void)
 {
-	fader_->SetFade(Fader::STATE::FADE_OUT);
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	fader.lock()->SetFade(Fader::STATE::FADE_OUT);
+	//fader_->SetFade(Fader::STATE::FADE_OUT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateFade, this);
 }
 
@@ -156,7 +166,6 @@ void EncountScene::ChangeStateEnemySpotlight(void)
 
 void EncountScene::ChangeStateEnemyAttention(void)
 {
-	enemy_.ChangeState(Enemy::STATE::TURN);
 	VECTOR pPos = VAdd(
 		player_.GetTransform().pos,
 		VScale(VNorm(player_.GetTransform().GetBack()), 70.0f));
@@ -171,16 +180,25 @@ void EncountScene::ChangeStateEnemyAttention(void)
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttention, this);
 }
 
+void EncountScene::ChangeStateFinish(void)
+{
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	fader.lock()->SetFade(Fader::STATE::FADE_OUT);
+	//fader_->SetFade(Fader::STATE::FADE_OUT);
+	stateUpdate_ = std::bind(&EncountScene::UpdateFinish, this);
+}
+
 void EncountScene::UpdateNone(void)
 {
 }
 
 void EncountScene::UpdateFade(void)
 {
-	if (fader_->GetState() == Fader::STATE::FADE_OUT &&
-		fader_->IsEnd())
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	if (fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
+		fader.lock()->IsEnd())
 	{
-		fader_->SetFade(Fader::STATE::FADE_IN);
+		fader.lock()->SetFade(Fader::STATE::FADE_IN);
 		ChangeState(STATE::PLAYER_WALK);
 		return;
 	}
@@ -188,6 +206,7 @@ void EncountScene::UpdateFade(void)
 
 void EncountScene::UpdatePlayerWalk(void)
 {
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
 	if (mainCamera->IsActionEnd() &&
 		player_.IsActionEnd())
 	{
@@ -195,7 +214,7 @@ void EncountScene::UpdatePlayerWalk(void)
 		const float intervalTime = 1.0f;
 		if(intervalTimer_ >= intervalTime)
 		{
-			fader_->SetFade(Fader::STATE::FADE_OUT);
+			fader.lock()->SetFade(Fader::STATE::FADE_OUT);
 			intervalTimer_ = 0.0f;
 			ChangeState(STATE::PLAYER_ATTENTION);
 			return;
@@ -205,13 +224,14 @@ void EncountScene::UpdatePlayerWalk(void)
 
 void EncountScene::UpdatePlayerAttention(void)
 {
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
 	//フェードアウトが終わった判定
-	const bool fadeOutEnd = fader_->GetState() == Fader::STATE::FADE_OUT &&
-		fader_->IsEnd();
+	const bool fadeOutEnd = fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
+		fader.lock()->IsEnd();
 	if (fadeOutEnd)
 	{
 		//フェードイン開始
-		fader_->SetFade(Fader::STATE::FADE_IN);
+		fader.lock()->SetFade(Fader::STATE::FADE_IN);
 
 		//相対距離
 		const float distance = 80.0f;
@@ -229,8 +249,8 @@ void EncountScene::UpdatePlayerAttention(void)
 	}
 
 	//フェードインが終わった判定
-	const bool fadeInEnd = fader_->GetState() == Fader::STATE::FADE_IN &&
-		fader_->IsEnd();
+	const bool fadeInEnd = fader.lock()->GetState() == Fader::STATE::FADE_IN &&
+		fader.lock()->IsEnd();
 
 	//フェードイン終了後、カメラのクレーンアップが終わったら
 	//インターバル時間を経過させる
@@ -309,13 +329,35 @@ void EncountScene::UpdateEnemySpotlight(void)
 
 void EncountScene::UpdateEnemyAttention(void)
 {
-	//一定時間経ったらドリー開始
-	const float intervalLightUp = 1.5f;
+	//一定時間経ったら振り向き開始
+	const float intervalLightUp = 1.2f;
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
-	if (intervalTimer_ >= intervalLightUp)
+
+	if (enemy_.GetState() == Enemy::STATE::ENCOUNT_FINISH)
 	{
+		player_.ChangeState(Player::STATE::WAIT);
+		ChangeState(STATE::FINISH);
 		return;
+	}
+	if (intervalTimer_ >= intervalLightUp	&&
+		enemy_.GetState() != Enemy::STATE::TURN)
+	{
+		enemy_.ChangeState(Enemy::STATE::TURN);
+	}
+}
+
+void EncountScene::UpdateFinish(void)
+{
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+
+	//フェードアウトが終わった判定
+	const bool fadeOutEnd = fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
+		fader.lock()->IsEnd();
+	if (fadeOutEnd)
+	{
+		
+		isFinish_ = true;
 	}
 }
 
@@ -345,6 +387,9 @@ void EncountScene::DebugDraw(void)
 		break;
 	case EncountScene::STATE::ENEMY_ATTENTION:
 		DrawFormatString(0, 100, 0xFFFFFF, L"ENEMY_ATTENTION");
+		break;
+	case EncountScene::STATE::FINISH:
+		DrawFormatString(0, 100, 0xFFFFFF, L"FINISH");
 		break;
 	default:
 		break;

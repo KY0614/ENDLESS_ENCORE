@@ -17,13 +17,14 @@ public:
 		NONE,                   //初期状態
 		FADE,					//演出初めの暗転明転
 		PLAYER_WALK,			//プレイヤー前進
-		PLAYER_ATTENTION,		//プレイヤー前進
+		PLAYER_ATTENTION,		//プレイヤー注目
 		BLACK_OUT,				//照明消灯
 		LOOK_AROUND,			//周りを見渡す
 		ENEMY_SPOTLIGHT,		//敵をスポットライトで照らす
 		ENEMY_ATTENTION,        //敵が出現
 		ENEMY_TURN,				//敵が振り向く
-		FINISHED                //終了
+		FADE2FINISH,			//敵が振り向く
+		FINISH					//終了
 	};
 
 	//コンストラクタ
@@ -54,6 +55,8 @@ public:
 
 	void Start(void);
 
+	const bool& IsFinished(void) const { return isFinish_; }
+
 private:
 	//状態管理
 	STATE state_;
@@ -71,6 +74,8 @@ private:
 	Enemy& enemy_;				//敵参照
 
 	float intervalTimer_;		//インターバルタイマー
+
+	bool isFinish_;			//シーン終了フラグ
 
 	/// <summary>
 	/// フェードアウトが終了したかどうか
@@ -124,6 +129,10 @@ private:
 	/// 状態遷移：ENEMY_ATTENTION
 	/// </summary>
 	void ChangeStateEnemyAttention(void);
+	/// <summary>
+	/// 状態遷移：FINISH
+	/// </summary>
+	void ChangeStateFinish(void);
 
 	//状態更新処理----------------------------------------------------------
 
@@ -159,6 +168,10 @@ private:
 	/// 更新：ENEMY_ATTENTION
 	/// </summary>
 	void UpdateEnemyAttention(void);
+	/// <summary>
+	/// 更新：FINISH
+	/// </summary>
+	void UpdateFinish(void);
 
 	void DebugDraw(void);
 };

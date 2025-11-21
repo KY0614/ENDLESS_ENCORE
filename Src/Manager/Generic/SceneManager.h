@@ -62,6 +62,7 @@ public:
 
 	// カメラの取得
 	std::weak_ptr<Camera> GetCamera(void) const;
+	std::weak_ptr<Fader> GetFader(void) const;
 
 	/// <summary>
 	/// シーンを新しく積む
@@ -88,6 +89,8 @@ public:
 
 	int GetMainScreen(void) const { return mainScreen_; }
 
+	void SetFadeIn(void);
+
 private:
 
 	// 静的インスタンス
@@ -102,7 +105,7 @@ private:
 	std::list<std::unique_ptr<SceneBase>>scenes_;
 
 	// フェード
-	std::unique_ptr<Fader> fader_;
+	std::shared_ptr<Fader> fader_;
 
 	// カメラ
 	std::shared_ptr<Camera> camera_;
@@ -150,6 +153,8 @@ private:
 	//SCENE_IDからシーンを生成する
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
-
+	/// <summary>
+	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
+	/// </summary>
 	void UpdateDebugImGui(void);
 };

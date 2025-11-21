@@ -56,7 +56,7 @@ void SceneManager::Init(void)
 	sceneId_ = SCENE_ID::NONE;
 	waitSceneId_ = SCENE_ID::NONE;
 
-	fader_ = std::make_unique<Fader>();
+	fader_ = std::make_shared<Fader>();
 	fader_->Init();
 
 	//ƒJƒƒ‰
@@ -255,6 +255,11 @@ std::weak_ptr<Camera> SceneManager::GetCamera(void) const
 	return camera_;
 }
 
+std::weak_ptr<Fader> SceneManager::GetFader(void) const
+{
+	return fader_;
+}
+
 void SceneManager::PushScene(std::unique_ptr<SceneBase> _scene)
 {
 	//V‚µ‚­Ï‚Ş‚Ì‚Å‚à‚Æ‚à‚Æ“ü‚Á‚Ä‚¢‚é“z‚Í‚Ü‚¾íœ‚³‚ê‚È‚¢
@@ -292,6 +297,11 @@ void SceneManager::SetShakeScreen(bool isShake)
 		shakeFrame_ = SHAKE_FRAME;
 		shakeRate_ = 1.0f;
 	}
+}
+
+void SceneManager::SetFadeIn(void)
+{
+	fader_->SetFade(Fader::STATE::FADE_IN);
 }
 
 SceneManager::SceneManager(void)

@@ -18,7 +18,9 @@ public:
 		NONE,
 		ENCOUNT,		//エンカウント(登場）
 		TURN,			//振り向く
+		ENCOUNT_FINISH,	//振り向く
 		FOLLOW,			//追跡
+		WAIT,			//待機
 		MOVE,			//移動(左右に)
 		ATTACK_NEAR,	//近接攻撃
 		SHOT_ONE,		//遠距離攻撃(１つずつ発射）
@@ -83,6 +85,8 @@ public:
 	/// <param name="state">遷移したい状態</param>
 	void ChangeState(const STATE state);
 
+	const STATE& GetState(void)const { return state_; }
+
 	/// <summary>
 	/// ダウンしているかどうかを取得
 	/// </summary>
@@ -100,8 +104,6 @@ public:
 	/// </summary>
 	/// <returns>true:可能　false:不可能</returns>
 	bool CheckBackstab(void);
-
-	const STATE& GetState(void)const { return state_; }
 
 private:
 
@@ -276,6 +278,14 @@ private:
 	/// </summary>
 	void ChangeStateTurn(void);
 	/// <summary>
+	/// 状態遷移：ENCOUNT_FINISH
+	/// </summary>
+	void ChangeStateEncountFinish(void);
+	/// <summary>
+	/// 状態遷移：WAIT
+	/// </summary>
+	void ChangeStateWait(void);
+	/// <summary>
 	/// 状態遷移：FOLLOW
 	/// </summary>
 	void ChangeStateFollow(void);
@@ -316,19 +326,66 @@ private:
 	/// </summary>
 	void ChangeStateDead(void);
 
-	//更新ステップ
+	//更新ステップ--------------------------------------------------------
+	/// <summary>
+	/// 更新：NONE
+	/// </summary>
 	void UpdateNone(void);
+	/// <summary>
+	/// 更新：ENCOUNT
+	/// </summary>
 	void UpdateEncount(void);
+	/// <summary>
+	/// 更新：TURN
+	/// </summary>
 	void UpdateTurn(void);
+	/// <summary>
+	/// 更新：WAIT
+	/// </summary>
+	void UpdateEncountFinish(void);
+	/// <summary>
+	/// 更新：WAIT
+	/// </summary>
+	void UpdateWait(void);
+	/// <summary>
+	/// 更新：FOLLOW
+	/// </summary>
 	void UpdateFollow(void);
+	/// <summary>
+	/// 更新：MOVE
+	/// </summary>
 	void UpdateMove(void);
+	/// <summary>
+	/// 更新：ATTACK_NEAR
+	/// </summary>
 	void UpdateAttackNear(void);
+	/// <summary>
+	/// 更新：SHOT_ONE
+	/// </summary>
 	void UpdateShotOne(void);
+	/// <summary>
+	/// 更新：SHOT_ALL
+	/// </summary>
 	void UpdateShotAll(void);
+	/// <summary>
+	/// 更新：CHARGE
+	/// </summary>
 	void UpdateCharge(void);
+	/// <summary>
+	/// 更新：CHARGE_ATTACK
+	/// </summary>
 	void UpdateChargeAttack(void);
+	/// <summary>
+	/// 更新：BACKSTAB
+	/// </summary>
 	void UpdateBackstab(void);
+	/// <summary>
+	/// 更新：DOWN
+	/// </summary>
 	void UpdateDown(void);
+	/// <summary>
+	/// 更新：DEAD
+	/// </summary>
 	void UpdateDead(void);
 
 	/// <summary>

@@ -64,7 +64,7 @@ Player::Player(void)
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::STAGE_WALK, std::bind(&Player::ChangeStateStageWalk, this));
 	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&Player::ChangeStateLookAround, this));
-	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&Player::ChangeStateEncount, this));
+	stateChanges_.emplace(STATE::WAIT, std::bind(&Player::ChangeStateWait, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
@@ -364,7 +364,7 @@ void Player::ChangeStateNone(void)
 void Player::ChangeStateStageWalk(void)
 {
 	//ゆっくり歩くアニメーションに変更
-	animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
+	animationController_->Play((int)ANIM_TYPE::WALK_SLOW,true,0.0f,-1.0f,false,true);
 	transform_.pos = VGet(10.0f, -217.0f, 900.0f);
 	transform_.quaRot =
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(0.0f), 0.0f });
@@ -378,11 +378,10 @@ void Player::ChangeStateLookAround(void)
 	stateUpdate_ = std::bind(&Player::UpdateLookAround, this);
 }
 
-void Player::ChangeStateEncount(void)
+void Player::ChangeStateWait(void)
 {
-	//待機アニメーションに変更
 	animationController_->Play((int)ANIM_TYPE::IDLE);
-	stateUpdate_ = std::bind(&Player::UpdateEncount, this);
+	stateUpdate_ = std::bind(&Player::UpdateWait, this);
 }
 
 void Player::ChangeStatePlay(void)
@@ -440,7 +439,7 @@ void Player::UpdateLookAround(void)
 	//}
 }
 
-void Player::UpdateEncount(void)
+void Player::UpdateWait(void)
 {
 }
 
@@ -1003,7 +1002,29 @@ void Player::DebugDraw(void)
 	//VECTOR dir = VAdd(transform_.GetLeft(), transform_.GetForward());
 	//VECTOR pos = VAdd(transform_.pos, VScale(dir,30.0f));
 	//DrawSphere3D(pos,15.0f,16,0x00ff00,0x00ff00,true);
-
+	switch (state_)
+	{
+	case Player::STATE::NONE:
+		break;
+	case Player::STATE::STAGE_WALK:
+		DrawFormatString(0, 60, 0xFF0000, L"STAGE_WALK");
+		break;
+	case Player::STATE::LOOK_AROUND:
+		DrawFormatString(0, 60, 0xFF0000, L"LOOK_AROUND");
+		break;
+	case Player::STATE::WAIT:
+		DrawFormatString(0, 60, 0xFF0000, L"WAIT");
+		break;
+	case Player::STATE::PLAY:
+		DrawFormatString(0, 60, 0xFF0000, L"PLAY");
+		break;
+	case Player::STATE::BACKSTAB:
+		break;
+	case Player::STATE::DEAD:
+		break;
+	default:
+		break;
+	}
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);
 }

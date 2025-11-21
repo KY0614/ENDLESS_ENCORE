@@ -61,7 +61,8 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 
 	renderer_ = std::make_unique<ModelRenderer>(stageTransform_[type_].modelId, *material_);
 
-	//cube_ = std::make_unique<Cube>(stageTransform_[type_].pos,
+	//cube_ = std::make_unique<Cube>(
+	//	stageTransform_[type_].pos,
 	// stageTransform_[type_].quaRot,
 	//	VGet(-1375.0f, -219.0f, 2000.0f),
 	//	VGet(1430.0f, 219.0f, 4375.0f));
@@ -71,8 +72,9 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 	//	VGet(2700.0f,430.0f,2600.0f));
 
 	cube_ = std::make_unique<Box>(stageTransform_[type_]);
-	cube_->SetLocalCenter(VGet(0.0f, 215.0f, 2000.0f));
-	cube_->SetSize(VGet(2700.0f/2.0f, 430.0f / 2.0f, 1000.0f));
+	//cube_->SetLocalCenter(VGet(0.0f, -150.0f, 3000.0f));
+	cube_->SetLocalCenter(VGet(0.0f, 0.0f, 0.0f));
+	cube_->SetSize(VGet(2700.0f/2.0f, 500.0f / 2.0f, 500.0f));
 }
 
 void Stage::Update(void)
@@ -91,16 +93,41 @@ void Stage::Update(void)
 	material_->SetConstBufPS(3, { 0.0f,0.0f,0.0f,0.0f });
 
 	stageTransform_[type_].Update();
+
+	//UpdateDebugImGui();
 }
 
 void Stage::Draw(void)
 {
 	renderer_->Draw();
+	cube_->Draw();
+	DrawSphere3D(stageTransform_[type_].pos, 30.0f, 32, 0x00ffff, 0x00ffff, true);
 }
 
 void Stage::UpdateDebugImGui(void)
 {
 
+	//ウィンドウタイトル&開始処理
+	ImGui::Begin("Stage");
+	VECTOR pos = cube_->GetCenter();
+	//ボックスの位置調整
+	ImGui::InputFloat3("cubePos", &pos.x);
+	ImGui::SliderFloat("cubePosX", &pos.x, -5000.0f, 5000.0f);
+	ImGui::SliderFloat("cubePosY", &pos.y, -5000.0f, 5000.0f);
+	ImGui::SliderFloat("cubePosZ", &pos.z, -5000.0f, 5000.0f);
+	cube_->SetLocalCenter(pos);
+
+	VECTOR size = cube_->GetSize();
+	//ボックスの大きさ調整
+	ImGui::InputFloat3("cubeSize", &size.x);
+	ImGui::SliderFloat("cubeSizeX", &size.x, -5000.0f, 5000.0f);
+	ImGui::SliderFloat("cubeSizeY", &size.y, -5000.0f, 5000.0f);
+	ImGui::SliderFloat("cubeSizeZ", &size.z, -5000.0f, 5000.0f);
+
+	//cube_->SetSize(VGet(2700.0f / 2.0f, 430.0f / 2.0f, 1000.0f));
+
+	//終了処理
+	ImGui::End();
 }
 
 void Stage::Init3DModel(void)
@@ -111,6 +138,7 @@ void Stage::Init3DModel(void)
 	stageTransform_[TYPE::EXPLORE].scl = { scale ,scale ,scale };
 	stageTransform_[TYPE::EXPLORE].pos = { 0.0f,0.0f,-1000.0f };
 	stageTransform_[TYPE::EXPLORE].quaRot = Quaternion();
+	//stageTransform_[TYPE::EXPLORE].quaRot = Quaternion::Euler({ CommonUtility::Deg2RadF(30.0f), 0.0f, 0.0f });
 	stageTransform_[TYPE::EXPLORE].quaRotLocal = Quaternion();
 	stageTransform_[TYPE::EXPLORE].MakeCollider(Collider::TYPE::STAGE);
 	stageTransform_[TYPE::EXPLORE].Update();

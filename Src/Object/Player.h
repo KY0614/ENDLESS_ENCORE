@@ -27,7 +27,7 @@ public:
 		NONE,		//初期化前
 		STAGE_WALK,	//ステージ上を歩く
 		LOOK_AROUND,//周りを見渡す
-		ENCOUNT,	//エンカウント
+		WAIT,		//戦闘開始前の待機
 		PLAY,		//操作可能
 		BACKSTAB,	//バックスタブ
 		DEAD,		//死亡
@@ -274,9 +274,9 @@ private:
 	/// </summary>
 	void ChangeStateLookAround(void);
 	/// <summary>
-	/// 状態遷移：SELECT
+	/// 状態遷移：WAIT
 	/// </summary>
-	void ChangeStateEncount(void);
+	void ChangeStateWait(void);
 	/// <summary>
 	/// 状態遷移：PLAY
 	/// </summary>
@@ -305,9 +305,9 @@ private:
 	/// </summary>
 	void UpdateLookAround(void);
 	/// <summary>
-	/// 更新：ENCOUNT
+	/// 更新：WAIT
 	/// </summary>
-	void UpdateEncount(void);
+	void UpdateWait(void);
 	/// <summary>
 	/// 更新：PLAY
 	/// </summary>

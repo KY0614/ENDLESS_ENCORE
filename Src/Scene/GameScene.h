@@ -17,6 +17,13 @@ class GameScene : public SceneBase
 {
 public:
 
+	enum class STATE
+	{
+		EXPLORE,
+		ENCOUNT,
+		BATTLE,
+	};
+
 	//コンストラクタ
 	GameScene(void);
 
@@ -52,14 +59,17 @@ private:
 
 	// ポストエフェクト用(ブラー)
 	std::unique_ptr<PixelMaterial> blurMaterial_;
-	std::unique_ptr<PixelRenderer> blurRenderer_;
+	std::unique_ptr<PixelRenderer> blurRenderer_;;
 
-	//関数ポインタ（カウントダウン、ゲーム中、タイムアップ）
-	using UpdateFunc_t = void(GameScene::*)();
-	using DrawFunc_t = void(GameScene::*)();
+	//状態管理
+	STATE state_;		//現在の状態
 
-	UpdateFunc_t update_;
-	DrawFunc_t draw_;
+	//状態管理(状態遷移時初期処理)
+	std::map<STATE, std::function<void(void)>> stateChanges_;
+
+	//状態管理
+	std::function<void(void)> stateUpdate_;		//更新ステップ
+	std::function<void(void)> stateDraw_;		//描画ステップ
 
 	//フェーズ管理
 	bool isFaseChange_;
@@ -75,18 +85,32 @@ private:
 	// プレイヤー
 	std::vector<std::unique_ptr<PointLight>> pointLight_;
 	std::vector<std::unique_ptr<SpotLight>> spotLight_;
+	//状態遷移--------------------------------------------------------
 
-	//メッセージクラスみたいなクラスを作って分けてもいいかも
-	//選択肢文字列リスト
-	//std::vector<std::wstring> selectList_;
-	////選択肢関数テーブル
-	//using SelectFunc_t = std::function<void()>;
-	//std::map<std::wstring, SelectFunc_t> selectFuncTable_;
-	////現在選択しているもの
-	//int cursorIdx_;
+	/// <summary>
+	/// 状態変更
+	/// </summary>
+	/// <param name="state">遷移したい状態</param>
+	void ChangeState(STATE state);
 
-	////触れているかどうか
-	//bool isToutch_;
+	/// <summary>
+	/// 状態遷移：EXPLORE
+	/// </summary>
+	void ChangeStateExplore(void);
+
+	/// <summary>
+	/// 状態遷移：ENCOUNT
+	/// </summary>
+	void ChangeStateEncount(void);
+
+	/// <summary>
+	/// 状態遷移：BATTLE
+	/// </summary>
+	void ChangeStateBattle(void);
+
+	//状態ごとの更新と描画--------------------------------------------------------
+	
+	//探索
 
 	/// <summary>
 	/// 探索フェーズの更新処理
@@ -98,6 +122,8 @@ private:
 	/// </summary>
 	void DrawExplore(void);
 
+	//エンカウント演出
+
 	/// <summary>
 	/// エンカウント中の更新処理
 	/// </summary>
@@ -108,17 +134,25 @@ private:
 	/// </summary>
 	void DrawEncount(void);
 
+	//戦闘
+
 	/// <summary>
 	/// ゲーム中の更新処理
 	/// </summary>
-	void UpdateGame(void);
+	void UpdateBattle(void);
 
 	/// <summary>
 	/// ゲーム中の描画
 	/// </summary>
-	void DrawGame(void);
+	void DrawBattle(void);
 
+	/// <summary>
+	/// ゲーム中のメッセージ描画処理
+	/// </summary>
 	void DrawMessage(void);
 
+	/// <summary>
+	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
+	/// </summary>
 	void UpdateDebugImGui(void);
 };

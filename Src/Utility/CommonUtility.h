@@ -115,7 +115,11 @@ public:
 	//ÉJÉvÉZÉãÇ∆óßï˚ëÃÇÃè’ìÀîªíË
 	static bool IsHitCapsuleBox(
 		const VECTOR& capPos1, const VECTOR& capPos2, float capRadius,
-		const VECTOR& boxPos ,const VECTOR& boxMinPos, const VECTOR& boxMaxPos);
+		const VECTOR& boxMaxPos, const VECTOR& boxMinPos, const VECTOR& boxParentPos,
+		const VECTOR& axis, const VECTOR& axisY, const VECTOR& axisZ);
+
+	static float ClosestSegmentAABB(const VECTOR& segA,
+		const VECTOR& segB, const VECTOR& aabbMin,const VECTOR& aabbMax);
 
 	//î‰är
 	static bool Equals(const VECTOR& v1, const VECTOR& v2);

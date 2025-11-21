@@ -25,18 +25,14 @@
 
 GameScene::GameScene(void)
 {
-	update_ = &GameScene::UpdateExplore;
-	draw_ = &GameScene::DrawExplore;
 	player_ = nullptr;
 	enemy_ = nullptr;
 	stage_ = nullptr;
 	isFaseChange_ = false;
-	//isToutch_ = false;
-	//selectList_ = {
-	//L"触れる",
-	//L"見つめる"
-	//};
-	//cursorIdx_ = 0;
+	//状態管理
+	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
+	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&GameScene::ChangeStateEncount, this));
+	stateChanges_.emplace(STATE::BATTLE, std::bind(&GameScene::ChangeStateBattle, this));
 }
 
 GameScene::~GameScene(void)
@@ -87,27 +83,6 @@ void GameScene::Init(void)
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
 	encountScene_->Init();
 
-	//選択肢テーブルごとの処理
-	//selectFuncTable_ = {
-	//{L"触れる",[this]()
-	//	{
-	//		stage_->ChangeType(Stage::TYPE::BATTLE);
-	//		player_->Init();
-	//		player_->AddCollider(stage_->GetTransform().collider);
-	//		enemy_->AddCollider(stage_->GetTransform().collider);
-	//		update_ = &GameScene::UpdateGame;
-	//		draw_ = &GameScene::DrawGame;
-	//	}
-	//},
-	//{L"見つめる",[this]()
-	//	{
-	//		player_->ChangeState(Player::STATE::PLAY);
-	//		update_ = &GameScene::UpdateExplore;
-	//		draw_ = &GameScene::DrawExplore;
-	//	}
-	//},
-	//};
-
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->SetTarget(&enemy_->GetTransform());
@@ -130,6 +105,8 @@ void GameScene::Init(void)
 		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
 	);
 
+	//初期状態設定
+	ChangeState(STATE::EXPLORE);
 }
 
 void GameScene::Update(void)
@@ -142,21 +119,15 @@ void GameScene::Update(void)
 	{
 		light->Update();
 	}
-	(this->*update_)();
+	//更新ステップ
+	stateUpdate_();
+	UpdateDebugImGui();
 }
 
 void GameScene::Draw(void)
 {
-	(this->*draw_)();
-	////start
-	//DrawSphere3D(VGet(10.0f, -219.0f, 900.0f), 15.0f, 16, 0xffffff, 0xffffff, false);
-	////goal
-	//DrawSphere3D(VGet(10.0f, -219.0f, 1150.0f), 15.0f, 16, 0x00ff00, 0x00ff00, false);
-	////camera
-	//DrawSphere3D(VGet(-200.0f, -219.0f, 1150.0f), 15.0f, 16, 0x0000ff, 0x0000ff, false);
-
-	////enemy
-	//DrawSphere3D(VGet(10.0f, -219.0f, 3100.0f), 15.0f, 16, 0xff0000, 0xff0000, false);
+	//更新ステップ
+	stateDraw_();
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
 	for (auto& light : pointLight_)
@@ -193,6 +164,33 @@ VECTOR GameScene::GetSpotLightPos()
 	return spotLight_[0]->GetTransform().pos;
 }
 
+void GameScene::ChangeState(STATE state)
+{
+	state_ = state;
+
+	//各状態遷移の初期処理
+	stateChanges_[state_]();
+}
+
+void GameScene::ChangeStateExplore(void)
+{
+	stateUpdate_ = std::bind(&GameScene::UpdateExplore, this);
+	stateDraw_ = std::bind(&GameScene::DrawExplore, this);
+}
+
+void GameScene::ChangeStateEncount(void)
+{
+	stateUpdate_ = std::bind(&GameScene::UpdateEncount, this);
+	stateDraw_ = std::bind(&GameScene::DrawEncount, this);
+}
+
+void GameScene::ChangeStateBattle(void)
+{
+	enemy_->ChangeState(Enemy::STATE::MOVE);
+	player_->ChangeState(Player::STATE::PLAY);
+	stateUpdate_ = std::bind(&GameScene::UpdateBattle, this);
+	stateDraw_ = std::bind(&GameScene::DrawBattle, this);
+}
 
 void GameScene::UpdateExplore(void)
 {
@@ -215,52 +213,9 @@ void GameScene::UpdateExplore(void)
 	FadeTransitor& fade = FadeTransitor::GetInstance();
 	if (ins.IsInputTriggered("Next"))
 	{
-		update_ = &GameScene::UpdateEncount;
-		draw_ = &GameScene::DrawEncount;
+		ChangeState(STATE::ENCOUNT);
 		encountScene_->Start();
 	}
-	//if (SceneManager::GetInstance().GetFade().IsEnd() &&
-	//	isFaseChange_)
-	//{
-		//enemy_->ChangeState(Enemy::STATE::ENCOUNT);
-		//player_->ChangeState(Player::STATE::ENCOUNT);
-		// 
-		//const float distance = 100.0f;
-		//VECTOR dir = VAdd(player_->GetTransform().GetLeft(), player_->GetTransform().GetForward());
-		//VECTOR startPos = VAdd(player_->GetTransform().pos, VScale(dir, distance));
-		//mainCamera->SetCraneUpPos(startPos, 200.0f, player_->GetTransform().pos);
-		//mainCamera->ChangeMode(Camera::MODE:::CRANE_UP);
-
-		//mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
-		//VECTOR pos = VGet(-50.0f, -210.0f, 1150.0f);
-		//mainCamera->SetFixedPointPos(pos, VGet(10.0f, -210.0f, 1150.0f));
-
-		//VECTOR startPos = VGet(-50.0f, -210.0f, 1350.0f);
-		//VECTOR endPos = VGet(-50.0f, -210.0f, 1150.0f);
-		//mainCamera->SetTrackCamera(startPos, endPos,0.8f);
-		//mainCamera->ChangeMode(Camera::MODE::TRACK);
-		//SceneManager::GetInstance().SetFadeIn();
-		//isFaseChange_ = false;
-	//}
-	
-	//isToutch_ = false;
-	//if (CommonUtility::IsHitSpheres(
-	//	stage_->GetSphere().GetPos(),
-	//	stage_->GetSphere().GetRadius(),
-	//	player_->GetSphere().GetPos(),
-	//	player_->GetSphere().GetRadius()
-	//))
-	//{
-	//	isToutch_ = true;
-	//}
-
-	//if (isToutch_ &&
-	//	ins.IsInputTriggered("Parry"))
-	//{
-	//	player_->ChangeState(Player::STATE::NONE);
-	//	update_ = &GameScene::UpdateSelect;
-	//	draw_ = &GameScene::DrawSelect;
-	//}
 }
 
 void GameScene::DrawExplore(void)
@@ -271,28 +226,33 @@ void GameScene::DrawExplore(void)
 	//プレイヤー描画
 	player_->Draw();
 
-	DrawString(0, 60, L"探索ステージ", 0xAAAAAA);
-
+	DrawString(0, 0, L"探索ステージ", 0xffffff);
 }
 
 void GameScene::UpdateEncount(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
-	//if (mainCamera->IsActionEnd())
-	//{
-	//	//相対距離
-	//	const float distance = 100.0f;
-	//	//プレイヤーから見て左斜め前方向
-	//	VECTOR dir = VAdd(player_->GetTransform().GetLeft(), player_->GetTransform().GetForward());
-	//	VECTOR startPos = VAdd(player_->GetTransform().pos, VScale(dir, distance));
-	//	VECTOR endPos = VGet(startPos.x, startPos.y + 100.0f, startPos.z);
-	//	const float moveistance = 200.0f;
-	//	VECTOR target = player_->GetTransform().pos;
-	//	target.y += 50.0f;
-	//	mainCamera->SetCraneUpPos(startPos, moveistance, target);
-	//	mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
-	//}
+	if (encountScene_->IsFinished() &&
+		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
+		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_OUT)
+	{
+		enemy_->ChangeState(Enemy::STATE::WAIT);
+		player_->ChangeState(Player::STATE::WAIT);
+		//カメラ
+		mainCamera->SetFollow(&player_->GetTransform());
+		mainCamera->SetTarget(&enemy_->GetTransform());
+		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
+	}
+
+	if (encountScene_->IsFinished() &&
+		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
+		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_IN)
+	{
+		ChangeState(STATE::BATTLE);
+	}
+
 	encountScene_->Update();
 	player_->Update();
 	enemy_->Update();
@@ -315,10 +275,10 @@ void GameScene::DrawEncount(void)
 
 	encountScene_->Draw();
 
-	DrawString(0, 60, L"エンカウント", 0xAAAAAA);
+	DrawString(0, 0, L"エンカウント", 0xffffff);
 }
 
-void GameScene::UpdateGame(void)
+void GameScene::UpdateBattle(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
@@ -363,7 +323,7 @@ void GameScene::UpdateGame(void)
 	}
 }
 
-void GameScene::DrawGame(void)
+void GameScene::DrawBattle(void)
 {
 	//プレイヤー描画
 	stage_->Draw();
@@ -380,6 +340,8 @@ void GameScene::DrawGame(void)
 	}
 
 	player_->DrawDead();
+
+	DrawString(0, 0, L"バトル", 0xffffff);
 }
 
 void GameScene::DrawMessage(void)
@@ -402,66 +364,26 @@ void GameScene::DrawMessage(void)
 	const int lineY = Application::SCREEN_SIZE_Y / 2 + 16;
 	int lineX = (Application::SCREEN_SIZE_X / 2 - 150);
 
-	//現在選択している行をずらす幅
-	const int currentLineOffset = 20;
-	//現在選択している行の文字列
-	//std::wstring currentStr = selectList_[cursorIdx_];
-	//for (auto& row : selectList_)
-	//{
-	//	//文字列の幅を取得
-	//	int stringWidth = GetDrawStringWidth(row.c_str(), row.size());
-	//	unsigned int col = 0xFFFFFF;
-	//	if (row == currentStr)
-	//	{
-	//		DrawString(lineX - currentLineOffset, lineY, L"⇒", 0xFF0000);
-	//		col = 0xFF00FF;
-	//		//lineX += currentLineOffset;
-	//	}
-
-	//	DrawFormatString(lineX + 1, lineY + 1, 0x000000, L"%s", row.c_str());
-	//	DrawFormatString(lineX, lineY, col, L"%s", row.c_str());
-	//	lineX += 150 + stringWidth;
-	//}
 }
 
 void GameScene::UpdateDebugImGui(void)
 {
+	//ウィンドウタイトル&開始処理
+	ImGui::Begin("GameScene");
+
+	//状態変更ボタン
+	if (ImGui::Button("Explore"))
+	{
+		enemy_->ChangeState(Enemy::STATE::NONE);
+		player_->ChangeState(Player::STATE::NONE);
+		ChangeState(STATE::ENCOUNT);
+		encountScene_->Start();
+	}
+	if (ImGui::Button("Battle"))
+	{
+		ChangeState(STATE::BATTLE);
+	}
+
 	//終了処理
 	ImGui::End();
 }
-
-
-//void GameScene::UpdateSelect(void)
-//{
-//	player_->Update();
-//	stage_->Update();
-//
-//	InputManager& ins = InputManager::GetInstance();
-
-	//if (ins.IsInputTriggered("Left"))
-	//{
-	//	cursorIdx_ = (cursorIdx_ + 1) % selectList_.size();
-	//}
-	//if (ins.IsInputTriggered("Right"))
-	//{
-	//	cursorIdx_ = (cursorIdx_ + selectList_.size() - 1) % selectList_.size();
-	//}
-
-	//if (ins.IsInputTriggered("Parry"))
-	//{
-	//	auto selectedName = selectList_[cursorIdx_];
-	//	selectFuncTable_[selectedName]();
-	//	return;
-	//}
-//}
-
-//void GameScene::DrawSelect(void)
-//{
-//	//プレイヤー描画
-//	stage_->Draw();
-//
-//	//プレイヤー描画
-//	player_->Draw();
-//
-//	DrawMessage();
-//}

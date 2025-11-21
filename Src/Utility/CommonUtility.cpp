@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -502,9 +503,93 @@ bool CommonUtility::IsHitSphereCapsule(
 
 }
 
-bool CommonUtility::IsHitCapsuleBox(const VECTOR& capPos1, const VECTOR& capPos2, float capRadius, const VECTOR& boxPos, const VECTOR& boxMinPos, const VECTOR& boxMaxPos)
+bool CommonUtility::IsHitCapsuleBox(
+    const VECTOR& capPos1,
+    const VECTOR& capPos2,
+    float capRadius,
+    const VECTOR& boxMaxPos,
+    const VECTOR& boxMinPos,
+    const VECTOR& boxParentPos,
+    const VECTOR& axisX,
+    const VECTOR& axisY,
+    const VECTOR& axisZ)
 {
+    // OBB のローカル中心
+    VECTOR localCenter = VScale(VAdd(boxMinPos, boxMaxPos), 0.5f);
+
+    // OBB のワールド中心
+    VECTOR worldCenter = VAdd(
+        VAdd(
+            VAdd(
+                VScale(axisX, localCenter.x),
+                VScale(axisY, localCenter.y)
+            ),
+            VScale(axisZ, localCenter.z)
+        ),
+        boxParentPos
+    );
+
+    // カプセル線分をOBBのローカル空間に変換
+    VECTOR rel1 = VSub(capPos1, worldCenter);
+    VECTOR rel2 = VSub(capPos2, worldCenter);
+
+    VECTOR local1 = {
+        VDot(rel1, axisX),
+        VDot(rel1, axisY),
+        VDot(rel1, axisZ)
+    };
+
+    VECTOR local2 = {
+        VDot(rel2, axisX),
+        VDot(rel2, axisY),
+        VDot(rel2, axisZ)
+    };
+
+    // スラブ法で最近接点を見つける
+    // AABBとして処理する（OBBローカル空間内で）
+
+    float distSq = ClosestSegmentAABB(local1, local2, boxMinPos, boxMaxPos);
+
+    return distSq <= (capRadius * capRadius);
+
     return false;
+}
+
+float CommonUtility::ClosestSegmentAABB(
+    const VECTOR& segA,
+    const VECTOR& segB,
+    const VECTOR& aabbMin,
+    const VECTOR& aabbMax)
+{
+    // 線分とAABBの最短距離?を求める
+// → 各軸でクランプを行う
+
+    float t = 0.0f;
+    float minDistSq = FLT_MAX;
+
+    // 線分上の点 P(t) = A + t*(B - A), 0 <= t <= 1
+    const int steps = 10;
+    for (int i = 0; i <= steps; ++i)
+    {
+        float ft = static_cast<float>(i) / steps;
+        VECTOR point = VAdd(segA, VScale(VSub(segB, segA), ft));
+
+        // AABB内の最近接点
+        VECTOR clamped = {
+            std::max(aabbMin.x, std::min(point.x, aabbMax.x)),
+            std::max(aabbMin.y, std::min(point.y, aabbMax.y)),
+            std::max(aabbMin.z, std::min(point.z, aabbMax.z))
+        };
+
+        float distSq = SqrMagnitudeF(VSub(point, clamped));
+        if (distSq < minDistSq)
+        {
+            minDistSq = distSq;
+            t = ft;
+        }
+    }
+
+    return minDistSq;
 }
 
 bool CommonUtility::Equals(const VECTOR& v1, const VECTOR& v2)

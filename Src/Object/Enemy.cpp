@@ -102,6 +102,8 @@ Enemy::Enemy(Player& player):player_(player)
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&Enemy::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::TURN, std::bind(&Enemy::ChangeStateTurn, this));
+	stateChanges_.emplace(STATE::ENCOUNT_FINISH, std::bind(&Enemy::ChangeStateEncountFinish, this));
+	stateChanges_.emplace(STATE::WAIT, std::bind(&Enemy::ChangeStateWait, this));
 	stateChanges_.emplace(STATE::FOLLOW, std::bind(&Enemy::ChangeStateFollow, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Enemy::ChangeStateMove, this));
 	stateChanges_.emplace(STATE::ATTACK_NEAR, std::bind(&Enemy::ChangeStateAttackNear, this));
@@ -227,12 +229,12 @@ void Enemy::Init3DModel(void)
 	//モデルの大きさ(Jsonデータから取得できなかったら1.0f)
 	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
 	transform_.scl = { scale ,scale ,scale };
+	//モデルの初期位置
 	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
+	//モデルの初期回転(度数法で保存されているのでラジアンに変換)
 	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
-	transform_.quaRot = //Quaternion();
-	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
-	transform_.quaRotLocal = Quaternion();
-		//Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+	transform_.quaRot = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 
 	//HPを設定
@@ -409,9 +411,6 @@ bool Enemy::CheckBackstab(void)
 
 void Enemy::FollowPlayer(VECTOR& pos)
 {
-	//歩きアニメーション再生
-	animationController_->Play((int)ANIM_TYPE::RUN);
-
 	// プレイヤーの位置
 	VECTOR playerPos = player_.GetTransform().pos;
 
@@ -638,6 +637,9 @@ void Enemy::ChangeStateNone(void)
 
 void Enemy::ChangeStateEncount(void)
 {
+	transform_.quaRot =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
+	transform_.quaRotLocal = Quaternion();
 	isEncount_ = true;
 	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
 }
@@ -648,13 +650,32 @@ void Enemy::ChangeStateTurn(void)
 	stateUpdate_ = std::bind(&Enemy::UpdateTurn, this);
 }
 
+void Enemy::ChangeStateEncountFinish(void)
+{
+	transform_.quaRot =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
+	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
+	animationController_->Play((int)ANIM_TYPE::IDLE, false);
+	stateUpdate_ = std::bind(&Enemy::UpdateEncountFinish, this);
+}
+
+void Enemy::ChangeStateWait(void)
+{
+	animationController_->Play((int)ANIM_TYPE::IDLE);
+	stateUpdate_ = std::bind(&Enemy::UpdateWait, this);
+}
+
 void Enemy::ChangeStateFollow(void)
 {
+	//歩きアニメーション再生
+	//animationController_->Play((int)ANIM_TYPE::RUN);
+
 	stateUpdate_ = std::bind(&Enemy::UpdateFollow, this);
 }
 
 void Enemy::ChangeStateMove(void)
 {
+	if (!isEncount_)isEncount_ = true;
 	moveDir_ = transform_.GetRight();
 	animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
 	stateUpdate_ = std::bind(&Enemy::UpdateMove, this);
@@ -705,6 +726,7 @@ void Enemy::ChangeStateDown(void)
 	animationController_->Play((int)ANIM_TYPE::DOWN, true, 0.0f,9.0f);
 	animationController_->SetEndLoop(1.0f, 9.0f, 10.0f);
 	isDown_ = true;
+	stepDownTime_ = 0.0f;
 	stateUpdate_ = std::bind(&Enemy::UpdateDown, this);
 }
 
@@ -726,6 +748,19 @@ void Enemy::UpdateEncount(void)
 }
 
 void Enemy::UpdateTurn(void)
+{
+	if(animationController_->IsEnd())
+	{
+		ChangeState(STATE::ENCOUNT_FINISH);
+		return;
+	}
+}
+
+void Enemy::UpdateEncountFinish(void)
+{
+}
+
+void Enemy::UpdateWait(void)
 {
 }
 
@@ -1184,6 +1219,10 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::NONE);
 	}
+	if (ImGui::Button("Move"))
+	{
+		ChangeState(STATE::MOVE);
+	}
 	if (ImGui::Button("Kick"))
 	{
 		ChangeState(STATE::ATTACK_NEAR);
@@ -1218,12 +1257,7 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
-	VECTOR right = transform_.GetRight();
-	VECTOR left = transform_.GetLeft();
-	ImGui::InputFloat3("moveDir", &moveDir_.x);
-	ImGui::SliderFloat3("RightDir", &right.x, -1.0f, 1.0f);
-	ImGui::SliderFloat3("LeftDir", &left.x, -1.0f, 1.0f);
-
+	ImGui::InputFloat("downTime", &stepDownTime_);
 	//終了処理
 	ImGui::End();
 }

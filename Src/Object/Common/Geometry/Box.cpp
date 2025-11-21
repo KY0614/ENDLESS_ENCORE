@@ -4,76 +4,72 @@
 Box::Box(const Transform& parent) : 
 	transformParent_(parent)
 {
+	localCenter_ = { 0.0f,0.0f,0.0f };
+	size_ = { 0.0f,0.0f,0.0f };
+
+	UpdateAxis();
 }
 
 Box::Box(const Box& base, const Transform& parent) :
-	parentPos_(base.parentPos_),
 	transformParent_(parent)
 {
+	localCenter_ = base.GetLocalCenter();
+	size_ = base.GetSize();
+	UpdateAxis();
 }
 
 Box::~Box(void)
 {
 }
-// 描画 (ワイヤーフレーム)
+
 void Box::Draw(void)
 {
-	Draw(COLOR, false);
+	VECTOR pos = GetCenter();
+	DrawBox(COLOR, pos);
 }
 
-// 描画 (色と塗りつぶしを指定)
-void Box::Draw(int col, bool fill)
+void Box::DrawBox(int col, VECTOR center)
 {
-	// Bounding Box (AABB) の描画関数がないため、DxLibのDrawBox3Dを使用します。
-	// DrawBox3Dは中心座標と各軸方向の長さを取るのではなく、Min/Max座標を必要とします。
-
-	VECTOR center = GetCenter();
-
+	//回転行列を更新
+	UpdateAxis();
 	// ワールド座標での8頂点を計算
 	// 立方体の中心から、サイズ分だけローカル座標でオフセットした位置を回転させてワールド座標に変換します。
+	// OBBの半分のサイズ (obb_.vMaxを使用)
+	VECTOR extents = obb_.vMax;
 
-	// ローカル座標でのオフセット (size_ は半分の長さ)
-	VECTOR offsets[8] = {
-		{ size_.x, size_.y, size_.z },   // 奥右上0
-		{ -size_.x, size_.y, size_.z },  // 奥左上1
-		{ -size_.x, -size_.y, size_.z }, // 奥左下2
-		{ size_.x, -size_.y, size_.z },  // 奥右下3
-		{ size_.x, size_.y, -size_.z },  // 手前右上4
-		{ -size_.x, size_.y, -size_.z }, // 手前左上5
-		{ -size_.x, -size_.y, -size_.z },// 手間左下6
-		{ size_.x, -size_.y, -size_.z }	 // 手前右下7
-	};
-
-	VECTOR corners[8];
-	for (int i = 0; i < 8; ++i)
+	MATRIX rotMat;
+	rotMat = transformParent_.quaRot.ToMatrix();
+	VECTOR outVertices[8];
+	int idx = 0;
+	for (int x = 0; x <= 1; ++x)
 	{
-		// localCenter_ にオフセットを加えた位置を回転させ、親の位置に加算
-		VECTOR localPos = VAdd(localCenter_, offsets[i]);
-		corners[i] = GetRotPos(localPos);
+		for (int y = 0; y <= 1; ++y)
+		{
+			for (int z = 0; z <= 1; ++z)
+			{
+				VECTOR local;
+				local.x = (x == 0) ? obb_.vMin.x : obb_.vMax.x;
+				local.y = (y == 0) ? obb_.vMin.y : obb_.vMax.y;
+				local.z = (z == 0) ? obb_.vMin.z : obb_.vMax.z;
+
+				VECTOR world = VTransform(local, rotMat);
+				VECTOR pos = GetCenter();
+				world = VAdd(world, pos);
+
+				outVertices[idx++] = world;
+			}
+		}
 	}
-
-	// DrawBox3Dを使って描画するには、AABBのMin/Maxが必要ですが、
-	// 立方体が回転している場合はDrawBox3Dは使えません。
-	// 代わりに、8頂点を使って12本の線を描画します。
-
-	// ワイヤーフレーム描画 (12辺)
-	// 底面
-	DrawLine3D(corners[2], corners[3], col);
-	DrawLine3D(corners[3], corners[7], col);
-	DrawLine3D(corners[7], corners[6], col);
-	DrawLine3D(corners[6], corners[2], col);
-
-	// 天井
-	DrawLine3D(corners[0], corners[1], col);
-	DrawLine3D(corners[1], corners[5], col);
-	DrawLine3D(corners[5], corners[4], col);
-	DrawLine3D(corners[4], corners[0], col);
-
-	// 側面
-	DrawLine3D(corners[0], corners[3], col);
-	DrawLine3D(corners[1], corners[2], col);
-	DrawLine3D(corners[4], corners[7], col);
-	DrawLine3D(corners[5], corners[6], col);
+	// 12本のエッジのインデックス
+	static const int edges[12][2] = {
+		{0,1},{0,2},{0,4}, {1,3},{1,5},
+		{2,3},{2,6}, {3,7},
+		{4,5},{4,6}, {5,7},{6,7}
+	};
+	for (int i = 0; i < 12; ++i)
+	{
+		DrawLine3D(outVertices[edges[i][0]], outVertices[edges[i][1]], col);
+	}
 }
 
 // ワールド座標での中心位置を取得
@@ -88,4 +84,26 @@ VECTOR Box::GetRotPos(const VECTOR& localPos) const
 	// Sphere/Capsule の実装と同じロジック
 	VECTOR localRotPos = transformParent_.quaRot.PosAxis(localPos);
 	return VAdd(transformParent_.pos, localRotPos);
+}
+
+void Box::SetSize(const VECTOR& size)
+{
+	size_ = size;
+	obb_.vMin = VGet(-size_.x, -size_.y, -size_.z);
+	obb_.vMax = VGet(size_.x, size_.y, size_.z);
+}
+
+VECTOR Box::GetParetPos(void) const
+{ 
+	return transformParent_.pos; 
+}
+
+void Box::UpdateAxis(void)
+{
+	MATRIX rotMat;
+	rotMat = transformParent_.quaRot.ToMatrix();
+
+	obb_.axis[0] = VTransform(VGet(1, 0, 0), rotMat); // Right
+	obb_.axis[1] = VTransform(VGet(0, 1, 0), rotMat); // Up
+	obb_.axis[2] = VTransform(VGet(0, 0, 1), rotMat); // Forward
 }
