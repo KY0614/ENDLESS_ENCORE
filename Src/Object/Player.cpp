@@ -994,37 +994,37 @@ void Player::DebugDraw(void)
 	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
 	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
 	VECTOR right = VScale(transform_.GetRight(), 120.0f);
-	forward.y += 150.0f;
-	right.y += 150.0f;
-	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
-	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+	//forward.y += 150.0f;
+	//right.y += 150.0f;
+	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
+	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
 
 	//VECTOR dir = VAdd(transform_.GetLeft(), transform_.GetForward());
 	//VECTOR pos = VAdd(transform_.pos, VScale(dir,30.0f));
 	//DrawSphere3D(pos,15.0f,16,0x00ff00,0x00ff00,true);
-	switch (state_)
-	{
-	case Player::STATE::NONE:
-		break;
-	case Player::STATE::STAGE_WALK:
-		DrawFormatString(0, 60, 0xFF0000, L"STAGE_WALK");
-		break;
-	case Player::STATE::LOOK_AROUND:
-		DrawFormatString(0, 60, 0xFF0000, L"LOOK_AROUND");
-		break;
-	case Player::STATE::WAIT:
-		DrawFormatString(0, 60, 0xFF0000, L"WAIT");
-		break;
-	case Player::STATE::PLAY:
-		DrawFormatString(0, 60, 0xFF0000, L"PLAY");
-		break;
-	case Player::STATE::BACKSTAB:
-		break;
-	case Player::STATE::DEAD:
-		break;
-	default:
-		break;
-	}
+	//switch (state_)
+	//{
+	//case Player::STATE::NONE:
+	//	break;
+	//case Player::STATE::STAGE_WALK:
+	//	DrawFormatString(0, 60, 0xFF0000, L"STAGE_WALK");
+	//	break;
+	//case Player::STATE::LOOK_AROUND:
+	//	DrawFormatString(0, 60, 0xFF0000, L"LOOK_AROUND");
+	//	break;
+	//case Player::STATE::WAIT:
+	//	DrawFormatString(0, 60, 0xFF0000, L"WAIT");
+	//	break;
+	//case Player::STATE::PLAY:
+	//	DrawFormatString(0, 60, 0xFF0000, L"PLAY");
+	//	break;
+	//case Player::STATE::BACKSTAB:
+	//	break;
+	//case Player::STATE::DEAD:
+	//	break;
+	//default:
+	//	break;
+	//}
 	//球体描画（色指定あり）
 	sphere_->Draw(col_);
 }

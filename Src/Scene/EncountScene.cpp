@@ -58,7 +58,7 @@ void EncountScene::Draw(void)
 	//ˆÃ“]E–¾“]
 	//fader_->Draw();
 
-	DebugDraw();
+	//DebugDraw();
 }
 
 void EncountScene::Start(void)

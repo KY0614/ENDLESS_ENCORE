@@ -100,8 +100,8 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 	renderer_->Draw();
-	cube_->Draw();
-	DrawSphere3D(stageTransform_[type_].pos, 30.0f, 32, 0x00ffff, 0x00ffff, true);
+	//cube_->Draw();
+	//DrawSphere3D(stageTransform_[type_].pos, 30.0f, 32, 0x00ffff, 0x00ffff, true);
 }
 
 void Stage::UpdateDebugImGui(void)
