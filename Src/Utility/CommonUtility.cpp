@@ -6,6 +6,7 @@
 #include <math.h>
 #include <algorithm>
 #include <DxLib.h>
+#include "../Manager/Generic/SceneManager.h"
 #include "CommonUtility.h"
 
 int CommonUtility::Round(float v)
@@ -707,6 +708,21 @@ void CommonUtility::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float 
     dir = rot.GetForward();
     DrawLineDir(pos, dir, 0x0000ff, len);
 
+}
+
+bool CommonUtility::TimeOver(float& totalTime, const float& waitTime)
+{
+    //デルタタイム
+    auto delta = SceneManager::GetInstance().GetDeltaTime();
+    totalTime += delta;
+
+    //待機時間を超過しているか判断
+    if (totalTime >= waitTime)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 

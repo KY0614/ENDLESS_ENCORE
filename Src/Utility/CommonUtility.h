@@ -137,5 +137,8 @@ public:
 	static void DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len = 50.0f);
 	static void DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len = 50.0f);
 
+	//‘Ò‹@ŽžŠÔ
+	static bool TimeOver(float& totalTime, const float& waitTime);
+
 };
 

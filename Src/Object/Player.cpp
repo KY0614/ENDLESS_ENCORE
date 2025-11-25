@@ -7,11 +7,14 @@
 #include "../Common/DebugDrawFormat.h"
 #include "../Common/FpsController.h"
 #include "../Common/Easing.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/JsonManager.h"
 #include "../Manager/Generic/Camera.h"
+#include "../Renderer/ModelRenderer.h"
+#include "../Renderer/ModelMaterial.h"
 #include "Common/AnimationController.h"
 #include "Common/Geometry/Capsule.h"
 #include "Common/Geometry/Sphere.h"
@@ -33,6 +36,7 @@ namespace
 	static const std::string KEY_DODGE = "Dodge";
 	static const std::string KEY_BACKSTAB = "Backstab";
 	static const std::string KEY_DEATH = "Death";
+	static const std::string KEY_STAGE_POS = "stageWalkPosition";
 
 	//ジャンプ力
 	const float JUMP_POW = 9.0f; 
@@ -105,10 +109,35 @@ Player::~Player(void)
 
 void Player::Init(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PARRY,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::PARRY_SE).handleId_);
+
 	colliders_.clear();
+
 	//3Dモデルの初期化
 	Init3DModel();
+	//モデル描画用
+	material_ = std::make_unique<ModelMaterial>(
+		"RimLightVS.cso", 0,
+		"RimLightPS.cso", 5
+	);
+	//ピクセルシェーダーの定数バッファ設定
+	material_->AddConstBufPS({ 0.0f,0.0f,0.0f,0.1f });
+	//光の向き
+	VECTOR lightDir = GetLightDirection();
+	material_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,1.0f });
+	//環境光
+	float anbientCol = 0.2f;
+	material_->AddConstBufPS({ anbientCol,anbientCol,anbientCol,1.0f });
+	//カメラ位置
+	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->AddConstBufPS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+	//反射光の色(白色)
+	float specColor = 1.0f;
+	material_->AddConstBufPS({ specColor,specColor,specColor,0.0f });
 
+	renderer_ = std::make_unique<ModelRenderer>(parryTransform_.modelId, *material_);
 	//当たり判定の初期化
 	InitCollider();
 
@@ -128,6 +157,10 @@ void Player::Init(void)
 
 void Player::Update(void)
 {
+	//カメラ位置
+	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->SetConstBufPS(3,{ cameraPos.x,cameraPos.y,cameraPos.z,1.0f });
+
 	//HP制限(HPが最大HPを超えないようにする)
 	if (hp_ > maxHp_)
 	{
@@ -142,6 +175,9 @@ void Player::Update(void)
 	animationController_->Update();
 
 	transform_.Update();
+	parryTransform_.pos = transform_.pos;
+	parryTransform_.pos.y += 20.0f;
+	parryTransform_.Update();
 
 	UpdateDebugImGui();
 }
@@ -153,7 +189,7 @@ void Player::Draw(void)
 
 	//丸影描画
 	DrawShadow();
-
+	renderer_->Draw();
 #ifdef _DEBUG
 	DebugDraw();
 #endif // _DEBUG
@@ -281,6 +317,15 @@ void Player::Init3DModel(void)
 	const auto& paramData = param[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
+
+	parryTransform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
+		ResourceManager::SRC::SPHERE));
+	parryTransform_.pos = transform_.pos;
+	parryTransform_.pos.y += 20.0f;
+	const float scl = 1.0f;
+	parryTransform_.scl = { scl,scl,scl };
+	parryTransform_.quaRot = Quaternion();
+	parryTransform_.Update();
 }
 
 void Player::InitCollider(void)
@@ -313,32 +358,34 @@ void Player::InitAnimation(void)
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Player/";
 	const char* KEY_EMPTY = "";
+	//アニメーション速度
 	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
+	const float animSpeedSlow = animSpeed / 2.0f;	//ゆっくり再生する速度
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
-	const float animSpeedSlow = animSpeed / 2.0f;
+	//ゆっくり歩く
 	animationController_->Add((int)ANIM_TYPE::WALK_SLOW, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeedSlow);
-
+	//周りを見渡す
 	animationController_->Add((int)ANIM_TYPE::LOOK_AROUND, path + animPath.value(KEY_LOOK_AROUND, KEY_EMPTY),
 		animSpeed);
-
+	//歩く
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
-
+	//走る
 	animationController_->Add((int)ANIM_TYPE::RUN, path + animPath.value(KEY_RUN, KEY_EMPTY),
 		animSpeed);
-
+	//ジャンプ
 	animationController_->Add((int)ANIM_TYPE::JUMP, path + animPath.value(KEY_JUMP, KEY_EMPTY),
 		animSpeed);
-
+	//回避
 	animationController_->Add((int)ANIM_TYPE::DODGE, path + animPath.value(KEY_DODGE, KEY_EMPTY),
 		animSpeed);
-
+	//バックスタブ
 	animationController_->Add((int)ANIM_TYPE::BACKSTAB, path + animPath.value(KEY_BACKSTAB, KEY_EMPTY),
 		animSpeed);
-
+	//死亡
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
 		animSpeed);
 	//初期アニメーションはアイドルを再生
@@ -363,11 +410,19 @@ void Player::ChangeStateNone(void)
 
 void Player::ChangeStateStageWalk(void)
 {
-	//ゆっくり歩くアニメーションに変更
-	animationController_->Play((int)ANIM_TYPE::WALK_SLOW,true,0.0f,-1.0f,false,true);
-	transform_.pos = VGet(10.0f, -217.0f, 900.0f);
-	transform_.quaRot =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(0.0f), 0.0f });
+	jumpPow_ = CommonUtility::VECTOR_ZERO;
+	JsonManager& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
+	const auto& param = data[KEY_PLAYER];	//Playerオブジェクトを取得
+	//パラメータを取得
+	const auto& paramData = param[JsonManager::KEY_PARAMETER];
+	//座標をステージ上の端(手前側)に設定
+	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
+	//正面を向かせる(Z軸方向)
+	transform_.quaRot = Quaternion();
 	stateUpdate_ = std::bind(&Player::UpdateStageWalk, this);
 }
 
@@ -391,12 +446,14 @@ void Player::ChangeStatePlay(void)
 
 void Player::ChangeStateBackstab(void)
 {
-	//敵と同じ方向を向く
+	//アニメーションがY軸90度分回転しているので合わせる
+	const float rotY = -90.0f;
 	transform_.quaRotLocal =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-90.0f), 0.0f });
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 
 	//アニメーションを途中まで再生
-	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false,0.0f,26.0f);
+	const float animationEnd = 26.0f;
+	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false,0.0f, animationEnd);
 	stateUpdate_ = std::bind(&Player::UpdateBackstab, this);
 }
 
@@ -411,10 +468,12 @@ void Player::UpdateNone(void)
 
 void Player::UpdateStageWalk(void)
 {
-	//目標座標
+	//目標Z座標
 	const float moveEndZ = 1150.0f;
 	if (transform_.pos.z <= moveEndZ)
 	{
+		//ゆっくり歩くアニメーション
+		animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
 		//ゆっくり歩く処理
 		const float walkSpeed = 1.0f;
 		movePow_ = VScale(transform_.GetForward(), walkSpeed);
@@ -422,7 +481,9 @@ void Player::UpdateStageWalk(void)
 	}
 	else
 	{
+		//移動終了
 		movePow_ = CommonUtility::VECTOR_ZERO;
+		//待機アニメーション
 		animationController_->Play((int)ANIM_TYPE::IDLE);
 		isActionEnd_ = true;
 	}
@@ -675,10 +736,13 @@ void Player::ProcessDodge(void)
 
 void Player::ProcessParry(void)
 {
-	InputManager& ins = InputManager::GetInstance();
+	InputManager& ins = InputManager::GetInstance(); 
+	SoundManager& sound = SoundManager::GetInstance();
 	bool isHit = ins.IsInputTriggered("Parry");
 	if (isHit)
 	{
+		sound.AdjustVolume(SoundManager::SOUND::PARRY,50);
+		sound.Play(SoundManager::SOUND::PARRY);
 		isParry_ = true;
 	}
 
@@ -998,6 +1062,24 @@ void Player::DebugDraw(void)
 	//right.y += 150.0f;
 	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
 	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
+
+	switch (animationController_->GetPlayType())
+	{
+	case 0:
+		DrawFormatString(0, 60, 0xFF0000, L"ANIM_IDLE");
+		break;
+		
+	case 1:
+		DrawFormatString(0, 60, 0xFF0000, L"ANIM_WALK_SLOW");
+		break;
+		
+	case 5:
+		DrawFormatString(0, 60, 0xFF0000, L"ANIM_JUMP");
+		break;
+	
+	default:
+		break;
+	}
 
 	//VECTOR dir = VAdd(transform_.GetLeft(), transform_.GetForward());
 	//VECTOR pos = VAdd(transform_.pos, VScale(dir,30.0f));

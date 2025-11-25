@@ -34,14 +34,13 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     }
     
     color *= g_color; // 定数バッファの色を乗算
-    
     float lihgt = dot(PSInput.normal, -g_light_dir);
 
     float3 toCamera = normalize(g_camera_pos - PSInput.worldPos);
     float cDot = abs(dot(PSInput.normal, toCamera));
     cDot = 1.0f - cDot;
     float rimDot = pow(cDot, 2.0f); // 強弱を強め
-    float4 rimColor = float4(0.0f, 1.0f, 1.0f, 1.0f) * rimDot; // 青リムライト
+    float4 rimColor = float4(0.0f, 1.0f, 1.0f, 0.8f) * rimDot; //水色リムライト
     
     // 色の合成
     float3 rgb = (color.rgb * g_color.rgb * lihgt) + rimColor.rgb

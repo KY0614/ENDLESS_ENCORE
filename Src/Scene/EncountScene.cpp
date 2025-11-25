@@ -3,6 +3,8 @@
 #include "../Common/Fader.h"
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/SceneManager.h"
+#include "../Manager/Generic/ResourceManager.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "EncountScene.h"
 
 EncountScene::EncountScene(
@@ -24,6 +26,7 @@ EncountScene::EncountScene(
 	stateChanges_.emplace(STATE::FINISH, std::bind(&EncountScene::ChangeStateFinish, this));
 
 	intervalTimer_ = 0.0f;
+	isStateActioned_ = false;
 	isFinish_ = false;
 }
 
@@ -37,6 +40,10 @@ void EncountScene::LoadData(void)
 
 void EncountScene::Init(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::LIGHT_UP,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::LIGHT_UP_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 256 / 2);
 
 	//fader_ = std::make_unique<Fader>();
 	//fader_->Init();
@@ -89,6 +96,7 @@ bool EncountScene::IsFadeInEnd(void)
 void EncountScene::ChangeState(STATE state)
 {
 	intervalTimer_ = 0.0f;
+	isStateActioned_ = false;
 	//状態変更
 	state_ = state;
 
@@ -272,13 +280,18 @@ void EncountScene::UpdatePlayerAttention(void)
 
 void EncountScene::UpdateBlackOut(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
 	//一定時間経ったら暗転
 	const float intervalBlackOut = 1.0f;
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	if (intervalTimer_ >= intervalBlackOut)
 	{
-		SetFogStartEnd(50.0f, 1000.0f);
+		sound.AdjustVolume(SoundManager::SOUND::LIGHT_UP, 50);
+		sound.Play(SoundManager::SOUND::LIGHT_UP);
+		const float blackOutFogStart = 50.0f;
+		const float blackOutFogEnd = 1000.0f;
+		SceneManager::GetInstance().SetFog(blackOutFogStart, blackOutFogEnd);
 		intervalTimer_ = 0.0f;
 		ChangeState(STATE::LOOK_AROUND);
 		return;
@@ -309,22 +322,27 @@ void EncountScene::UpdateLookAround(void)
 
 void EncountScene::UpdateEnemySpotlight(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
 	//一定時間経ったらライトアップ
 	const float intervalLightUp = 2.0f;
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
-	if (intervalTimer_ >= intervalLightUp)
+	if (!isStateActioned_ &&
+		intervalTimer_ >= intervalLightUp)
 	{
-		SetFogStartEnd(10000.0f, 20000.0f);
+		isStateActioned_ = true;
+		sound.AdjustVolume(SoundManager::SOUND::LIGHT_UP, 50);
+		sound.Play(SoundManager::SOUND::LIGHT_UP);
+		SceneManager::GetInstance().ResetFog();
 	}
 	//一定時間経ったらライトアップ
 	const float intervalStateChange = intervalLightUp + 1.0f;
-	if (intervalTimer_ >= intervalStateChange)
+	if (isStateActioned_ &&
+		intervalTimer_ >= intervalStateChange)
 	{
 		ChangeState(STATE::ENEMY_ATTENTION);
 		return;
 	}
-		
 }
 
 void EncountScene::UpdateEnemyAttention(void)
@@ -334,14 +352,15 @@ void EncountScene::UpdateEnemyAttention(void)
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 
-	if (enemy_.GetState() == Enemy::STATE::ENCOUNT_FINISH)
+	if (enemy_.GetState() == Enemy::STATE::ENCOUNT_FINISH &&
+		mainCamera->IsActionEnd())
 	{
 		player_.ChangeState(Player::STATE::WAIT);
 		ChangeState(STATE::FINISH);
 		return;
 	}
 	if (intervalTimer_ >= intervalLightUp	&&
-		enemy_.GetState() != Enemy::STATE::TURN)
+		enemy_.GetState() == Enemy::STATE::ENCOUNT)
 	{
 		enemy_.ChangeState(Enemy::STATE::TURN);
 	}
@@ -356,7 +375,6 @@ void EncountScene::UpdateFinish(void)
 		fader.lock()->IsEnd();
 	if (fadeOutEnd)
 	{
-		
 		isFinish_ = true;
 	}
 }

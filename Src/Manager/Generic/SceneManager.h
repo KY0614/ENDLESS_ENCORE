@@ -83,13 +83,15 @@ public:
 	/// <param name="scene">ジャンプ先シーン</param>
 	void JumpScene(std::unique_ptr<SceneBase> scene);
 
+	void SetFog(const int fogStart,const int fogEnd);
+
+	void ResetFog(void);
+
 	void SetShakeScreen(bool isShake);
 
 	void SceneID2Game(void) { sceneId_ = SCENE_ID::GAME; }
 
 	int GetMainScreen(void) const { return mainScreen_; }
-
-	void SetFadeIn(void);
 
 private:
 

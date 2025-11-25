@@ -25,14 +25,18 @@
 
 GameScene::GameScene(void)
 {
+	loadingTime_ = 0.0f;
 	player_ = nullptr;
 	enemy_ = nullptr;
 	stage_ = nullptr;
 	isFaseChange_ = false;
 	//状態管理
+	stateChanges_.emplace(STATE::LOADING, std::bind(&GameScene::ChangeStateLoading, this));
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
 	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&GameScene::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::BATTLE, std::bind(&GameScene::ChangeStateBattle, this));
+
+	//ChangeState(STATE::LOADING);
 }
 
 GameScene::~GameScene(void)
@@ -42,18 +46,27 @@ GameScene::~GameScene(void)
 
 void GameScene::LoadData(void)
 {
+	//非同期読み込みを有効にする
+	SetUseASyncLoadFlag(true);
+
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
+
+
+	//sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
+	//	ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
+	//sound.AdjustVolume(SoundManager::SOUND::BATTLE, 25);
+
 }
 
 void GameScene::Init(void)
 {
+
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 256 / 3);
-	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::BATTLE, 256 / 3);
-	sound.Play(SoundManager::SOUND::EXPLORE);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
 
 	// ポイントライト
 	std::unique_ptr<PointLight>light;
@@ -130,14 +143,14 @@ void GameScene::Draw(void)
 	stateDraw_();
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
-	for (auto& light : pointLight_)
-	{
-		light->Draw();
-	}
-	for (auto& light : spotLight_)
-	{
-		light->Draw();
-	}
+	//for (auto& light : pointLight_)
+	//{
+	//	light->Draw();
+	//}
+	//for (auto& light : spotLight_)
+	//{
+	//	light->Draw();
+	//}
 	// ポストエフェクト(ブラー)
 	//-----------------------------------------
 	//
@@ -172,8 +185,18 @@ void GameScene::ChangeState(STATE state)
 	stateChanges_[state_]();
 }
 
+void GameScene::ChangeStateLoading(void)
+{
+	stateUpdate_ = std::bind(&GameScene::LoadingUpdate, this);
+	stateDraw_ = std::bind(&GameScene::LoadingDraw, this);
+}
+
 void GameScene::ChangeStateExplore(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 50);
+	sound.Play(SoundManager::SOUND::EXPLORE);
+
 	stateUpdate_ = std::bind(&GameScene::UpdateExplore, this);
 	stateDraw_ = std::bind(&GameScene::DrawExplore, this);
 }
@@ -192,6 +215,53 @@ void GameScene::ChangeStateBattle(void)
 	stateDraw_ = std::bind(&GameScene::DrawBattle, this);
 }
 
+void GameScene::LoadingUpdate(void)
+{
+	bool loadTimeOver = CommonUtility::TimeOver(loadingTime_, 2.0f);
+
+	//ロードが完了したか判断
+	if (GetASyncLoadNum() == 0 && loadTimeOver)
+	{
+		//非同期処理を無効にする
+		SetUseASyncLoadFlag(false);
+
+		//カーソルモードの変更
+		//input.ChangeCurrsolMode(false);
+
+		//初期化処理
+		Init();
+		//フェードイン開始
+		//sceneManager_.StartFadeIn();
+		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
+
+		ChangeState(STATE::EXPLORE);
+
+		//更新関数のセット
+		//updataFunc_ = [&](InputManager& input) {NormalUpdate(input); };
+		//描画関数のセット
+		//drawFunc_ = std::bind(&GameScene::NormalDraw, this);
+	}
+}
+
+void GameScene::LoadingDraw(void)
+{
+	//ロード中
+	auto time = 5.0f;
+	int count = static_cast<int>(time / 0.5f);
+	count %= 5;
+
+	std::wstring loadStr = L"now loading";
+	std::wstring dotStr = L".";
+
+	for (int i = 0; i < count; i++)
+	{
+		loadStr += dotStr;
+	}
+	//DrawStringToHandle(250, 250, loadStr.c_str(), 0xffffff);
+	DrawFormatString(250, 250, 0xffffff, loadStr.c_str());
+
+}
+
 void GameScene::UpdateExplore(void)
 {
 	InputManager& ins = InputManager::GetInstance();
@@ -201,21 +271,27 @@ void GameScene::UpdateExplore(void)
 		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
 		return;
 	}
-
+	//更新
 	player_->Update();
 	stage_->Update();
 	encountScene_->Update();
-	//if(ins.IsInputTriggered("Next"))
-	//{
-	//	update_ = &GameScene::UpdateEncount;
-	//	draw_ = &GameScene::DrawEncount;
-	//}
-	FadeTransitor& fade = FadeTransitor::GetInstance();
+
+	//Z値850を超えるとエンカウント状態へ遷移
+	//(ステージの手前端よりも奥)
+	const float stagePosZ = 850.0f;
+	if (player_->GetTransform().pos.z > stagePosZ)
+	{
+		ChangeState(STATE::ENCOUNT);
+		encountScene_->Start();
+	}
+#ifdef _DEBUG
 	if (ins.IsInputTriggered("Next"))
 	{
 		ChangeState(STATE::ENCOUNT);
 		encountScene_->Start();
 	}
+#endif // _DEBUG
+
 }
 
 void GameScene::DrawExplore(void)

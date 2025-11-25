@@ -74,8 +74,9 @@ private:
 	Enemy& enemy_;				//敵参照
 
 	float intervalTimer_;		//インターバルタイマー
+	bool isStateActioned_;
 
-	bool isFinish_;			//シーン終了フラグ
+	bool isFinish_;				//シーン終了フラグ
 
 	/// <summary>
 	/// フェードアウトが終了したかどうか

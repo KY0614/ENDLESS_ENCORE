@@ -35,6 +35,7 @@ VS_OUTPUT main(VS_INPUT VSInput)
     // ビュー座標を射影座標に変換
     ret.svPos = mul(lViewPosition, g_base.projectionMatrix);
     
+    ret.fogFactor = float3(0.0f, 0.0f, 0.0f);
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 終了 )
    
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 開始 )

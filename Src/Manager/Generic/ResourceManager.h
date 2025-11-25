@@ -25,6 +25,7 @@ public:
 
 		PLAYER,
 		PLAYER_SHADOW,
+		SPHERE,
 		FOOT_SMOKE,
 		ENEMY,
 		ENEMY_BULLET,
@@ -40,9 +41,10 @@ public:
 
 		//音
 		TITLE_BGM,
-		GAME_BGM,
 		EXPLORE_BGM,
-
+		LIGHT_UP_SE,
+		GAME_BGM,
+		PARRY_SE,
 	};
 
 	// 明示的にインステンスを生成する

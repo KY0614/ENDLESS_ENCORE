@@ -26,11 +26,3 @@ struct VertexToPixelShadow
 	float2 uv			: TEXCOORD0;	// テクスチャ座標
 	float4 vwPos		: TEXCOORD1;	// 座標( ビュー座標 )
 };
-
-//struct VertexToPixelLight
-//{
-//    float4 svPos		: SV_POSITION; // 座標( プロジェクション空間 )
-//    float3 lightPow		: TEXCOORD1; // ライト方向(ローカル)
-//    float3 lightDir		: TEXCOORD2; // ライト方向(ローカル)
-//    float3 lightAtPos	: TEXCOORD3; // ライトから見た座標
-//};

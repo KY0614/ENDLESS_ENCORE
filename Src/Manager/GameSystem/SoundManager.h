@@ -22,7 +22,10 @@ public:
 		NONE,
 
 		EXPLORE,
+		LIGHT_UP,
+
 		BATTLE,
+		PARRY,
 
 		TITLE,
 		PUSH_SPACE,

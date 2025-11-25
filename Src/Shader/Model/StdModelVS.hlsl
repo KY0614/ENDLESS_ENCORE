@@ -48,7 +48,7 @@ VS_OUTPUT main(VS_INPUT VSInput)
     // ビュー座標を射影座標に変換
     ret.svPos = mul(lViewPosition, g_base.projectionMatrix);
     
-    // 1. カメラから頂点までのワールド空間での距離を計算
+    //カメラから頂点までのワールド空間での距離を計算
     float distance = length(lWorldPosition.xyz - g_camera_pos);
     float fog = (g_fog_end - distance) /(g_fog_end - g_fog_start);
     fog = saturate(fog);

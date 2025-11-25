@@ -203,6 +203,10 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
 	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
 
+	//ー
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Sphere.mv1");
+	resourcesMap_.emplace(SRC::SPHERE, std::move(res));
+
 	//プレイヤー影
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
 	resourcesMap_.emplace(SRC::PLAYER_SHADOW, std::move(res));
@@ -226,6 +230,16 @@ void ResourceManager::InitGame(void)
 	//BGM
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Explore.mp3");
 	resourcesMap_.emplace(SRC::EXPLORE_BGM, std::move(res));
+	
+	//SE
+	
+	//ライトアップ
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Light Up.mp3");
+	resourcesMap_.emplace(SRC::LIGHT_UP_SE, std::move(res));
+	
+	//パリィ
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Parry.mp3");
+	resourcesMap_.emplace(SRC::PARRY_SE, std::move(res));
 
 }
 

@@ -10,6 +10,8 @@ class AnimationController;
 class Collider;
 class Capsule;
 class Sphere;
+class ModelRenderer;
+class ModelMaterial;
 
 class Player : public ActorBase
 {
@@ -38,14 +40,14 @@ public:
 	{
 		IDLE,		//通常
 		WALK_SLOW,	//ゆっくり歩く
-		LOOK_AROUND,	//ゆっくり歩く
+		LOOK_AROUND,//周りを見渡す
 		WALK,		//歩く
 		RUN,		//走り
 		JUMP,		//ジャンプ
 		PARRY,		//パリィ
 		DODGE,		//回避
 		DEATH,		//死亡
-		BACKSTAB,
+		BACKSTAB,	//バックスタブ
 		USE_ITEM,	//アイテム使用
 	};
 
@@ -145,14 +147,10 @@ public:
 
 	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY; }
 
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="pos"></param>
-	void SetBackstabPos(const VECTOR& pos) { backstabTarget_ = pos; }
-
 private:
-
+	Transform parryTransform_;
+	std::unique_ptr<ModelMaterial> material_;
+	std::unique_ptr<ModelRenderer> renderer_;
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 

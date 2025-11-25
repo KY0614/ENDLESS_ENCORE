@@ -108,10 +108,7 @@ void SceneManager::Init3D(void)
 	ChangeLightTypeDir(lightDir_);
 
 	//フォグ設定
-	SetFogEnable(true);
-	SetFogColor(5, 5, 5);
-	SetFogStartEnd(fogStart_, fogEnd_);
-	//SetFogStartEnd(100.0f, 2000.0f);
+	ResetFog();
 }
 
 void SceneManager::Update(void)
@@ -290,6 +287,19 @@ void SceneManager::JumpScene(std::unique_ptr<SceneBase> scene)
 	scenes_.push_back(std::move(scene));
 }
 
+void SceneManager::SetFog(const int fogStart, const int fogEnd)
+{
+	SetFogStartEnd(fogStart, fogEnd);
+}
+
+void SceneManager::ResetFog(void)
+{
+	//フォグ設定
+	SetFogEnable(true);
+	SetFogColor(5, 5, 5);
+	SetFogStartEnd(fogStart_, fogEnd_);
+}
+
 void SceneManager::SetShakeScreen(bool isShake)
 {
 	if (isShake)
@@ -297,11 +307,6 @@ void SceneManager::SetShakeScreen(bool isShake)
 		shakeFrame_ = SHAKE_FRAME;
 		shakeRate_ = 1.0f;
 	}
-}
-
-void SceneManager::SetFadeIn(void)
-{
-	fader_->SetFade(Fader::STATE::FADE_IN);
 }
 
 SceneManager::SceneManager(void)
@@ -480,6 +485,7 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 	default:
 		break;
 	}
+	//scene->LoadData();
 	return scene;
 }
 

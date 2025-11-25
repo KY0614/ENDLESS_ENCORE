@@ -19,6 +19,7 @@ public:
 
 	enum class STATE
 	{
+		LOADING,
 		EXPLORE,
 		ENCOUNT,
 		BATTLE,
@@ -82,9 +83,14 @@ private:
 	std::shared_ptr<Stage> stage_;
 	//演出
 	std::unique_ptr<EncountScene> encountScene_;
+
+
 	// プレイヤー
 	std::vector<std::unique_ptr<PointLight>> pointLight_;
 	std::vector<std::unique_ptr<SpotLight>> spotLight_;
+
+	float loadingTime_;
+
 	//状態遷移--------------------------------------------------------
 
 	/// <summary>
@@ -92,6 +98,11 @@ private:
 	/// </summary>
 	/// <param name="state">遷移したい状態</param>
 	void ChangeState(STATE state);
+
+	/// <summary>
+	/// 状態遷移：LOADING
+	/// </summary>
+	void ChangeStateLoading(void);
 
 	/// <summary>
 	/// 状態遷移：EXPLORE
@@ -110,6 +121,9 @@ private:
 
 	//状態ごとの更新と描画--------------------------------------------------------
 	
+	void LoadingUpdate(void);
+	void LoadingDraw(void);
+
 	//探索
 
 	/// <summary>

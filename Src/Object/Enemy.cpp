@@ -279,11 +279,12 @@ void Enemy::InitAnimation(void)
 	const std::string path = Application::PATH_MODEL + "Enemy/Animation/";
 	const char* KEY_EMPTY = "";
 	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
+	const float animSpeedSlow = animSpeed / 2.0f;
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::TURN, path + animPath.value(KEY_TURN, KEY_EMPTY),
-		animSpeed - 15.0f);
+		animSpeedSlow);
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::WALK_RIGHT, path + animPath.value(KEY_WALK_RIGHT, KEY_EMPTY),
@@ -655,7 +656,6 @@ void Enemy::ChangeStateEncountFinish(void)
 	transform_.quaRot =
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
 	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
-	animationController_->Play((int)ANIM_TYPE::IDLE, false);
 	stateUpdate_ = std::bind(&Enemy::UpdateEncountFinish, this);
 }
 
@@ -751,6 +751,7 @@ void Enemy::UpdateTurn(void)
 {
 	if(animationController_->IsEnd())
 	{
+		animationController_->Play((int)ANIM_TYPE::IDLE);
 		ChangeState(STATE::ENCOUNT_FINISH);
 		return;
 	}
@@ -1283,6 +1284,12 @@ void Enemy::DrawDebug(void)
 	switch (state_)
 	{
 	case Enemy::STATE::NONE:
+		break;
+	case Enemy::STATE::TURN:
+		DrawFormatString(0, 120, 0xFFFFFF, L"TURN");
+		break;
+	case Enemy::STATE::ENCOUNT_FINISH:
+		DrawFormatString(0, 120, 0xFFFFFF, L"ENCOUNT_FINISH");
 		break;
 	case Enemy::STATE::FOLLOW:
 		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
