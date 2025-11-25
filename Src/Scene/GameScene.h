@@ -23,6 +23,8 @@ public:
 		EXPLORE,
 		ENCOUNT,
 		BATTLE,
+		ENEMY_SUMMON,
+		BATTLE_SECOND,
 	};
 
 	//コンストラクタ
@@ -91,6 +93,8 @@ private:
 
 	float loadingTime_;
 
+	void Backstab(void);
+
 	//状態遷移--------------------------------------------------------
 
 	/// <summary>
@@ -118,6 +122,16 @@ private:
 	/// 状態遷移：BATTLE
 	/// </summary>
 	void ChangeStateBattle(void);
+
+	/// <summary>
+	/// 状態遷移：ENEMY_SUMMON
+	/// </summary>
+	void ChangeStateEnemySummon(void);
+
+	/// <summary>
+	/// 状態遷移：BATTLE_SECOND
+	/// </summary>
+	void ChangeStateBattleSecond(void);
 
 	//状態ごとの更新と描画--------------------------------------------------------
 	
@@ -159,6 +173,30 @@ private:
 	/// ゲーム中の描画
 	/// </summary>
 	void DrawBattle(void);
+
+	//雑魚敵召喚
+
+	/// <summary>
+	/// 雑魚敵召喚の更新処理
+	/// </summary>
+	void UpdateEnemySummon(void);
+
+	/// <summary>
+	/// 雑魚敵召喚の描画
+	/// </summary>
+	void DrawEnemySummon(void);
+
+	//戦闘第2フェーズ
+
+	/// <summary>
+	/// 戦闘第2フェーズの更新処理
+	/// </summary>
+	void UpdateBattleSecond(void);
+
+	/// <summary>
+	/// 戦闘第2フェーズの描画
+	/// </summary>
+	void DrawBattleSecond(void);
 
 	/// <summary>
 	/// ゲーム中のメッセージ描画処理

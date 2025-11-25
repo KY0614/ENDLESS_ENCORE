@@ -35,6 +35,8 @@ GameScene::GameScene(void)
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
 	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&GameScene::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::BATTLE, std::bind(&GameScene::ChangeStateBattle, this));
+	stateChanges_.emplace(STATE::ENEMY_SUMMON, std::bind(&GameScene::ChangeStateEnemySummon, this));
+	stateChanges_.emplace(STATE::BATTLE_SECOND, std::bind(&GameScene::ChangeStateBattleSecond, this));
 
 	//ChangeState(STATE::LOADING);
 }
@@ -177,6 +179,25 @@ VECTOR GameScene::GetSpotLightPos()
 	return spotLight_[0]->GetTransform().pos;
 }
 
+void GameScene::Backstab(void)
+{
+	VECTOR backDir = enemy_->GetTransform().GetBack();
+	//バックスタブ位置
+	const float distance = 60.0f;
+	VECTOR target = VAdd(enemy_->GetTransform().pos, VScale(backDir, distance));
+	//ダウン中のバックスタブ判定
+	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
+	{
+		if (player_->GetIsParry())
+		{
+			player_->SetPos(target);
+			player_->SetRotateY(enemy_->GetTransform().quaRot);
+			player_->ChangeState(Player::STATE::BACKSTAB);
+			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
+		}
+	}
+}
+
 void GameScene::ChangeState(STATE state)
 {
 	state_ = state;
@@ -213,6 +234,18 @@ void GameScene::ChangeStateBattle(void)
 	player_->ChangeState(Player::STATE::PLAY);
 	stateUpdate_ = std::bind(&GameScene::UpdateBattle, this);
 	stateDraw_ = std::bind(&GameScene::DrawBattle, this);
+}
+
+void GameScene::ChangeStateEnemySummon(void)
+{
+	stateUpdate_ = std::bind(&GameScene::UpdateEnemySummon, this);
+	stateDraw_ = std::bind(&GameScene::DrawEnemySummon, this);
+}
+
+void GameScene::ChangeStateBattleSecond(void)
+{
+	stateUpdate_ = std::bind(&GameScene::UpdateBattleSecond, this);
+	stateDraw_ = std::bind(&GameScene::DrawBattleSecond, this);
 }
 
 void GameScene::LoadingUpdate(void)
@@ -383,32 +416,23 @@ void GameScene::UpdateBattle(void)
 		return;
 	}
 
-	VECTOR backDir = enemy_->GetTransform().GetBack();
-	float distance = 60.0f;
-	VECTOR target = VAdd(enemy_->GetTransform().pos, VScale(backDir, distance));
-	//ダウン中のバックスタブ判定
-	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
+	if(enemy_->GetHP() <= enemy_->GetMaxHP()/2.0f)
 	{
-		if (player_->GetIsParry())
-		{
-			player_->SetPos(target);
-			player_->SetRotateY(enemy_->GetTransform().quaRot);
-			player_->ChangeState(Player::STATE::BACKSTAB);
-			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
-		}
+		ChangeState(STATE::ENEMY_SUMMON);
 	}
+
+	Backstab();
 }
 
 void GameScene::DrawBattle(void)
 {
 	//プレイヤー描画
 	stage_->Draw();
-
+	//敵描画
+	enemy_->Draw();
 	//プレイヤー描画
 	player_->Draw();
 
-	//敵描画
-	enemy_->Draw();
 
 	if(enemy_->GetIsDead())
 	{
@@ -418,6 +442,27 @@ void GameScene::DrawBattle(void)
 	player_->DrawDead();
 
 	DrawString(0, 0, L"バトル", 0xffffff);
+}
+
+void GameScene::UpdateEnemySummon(void)
+{
+	player_->Update();
+	enemy_->Update();
+	stage_->Update();
+
+	Backstab();
+}
+
+void GameScene::DrawEnemySummon(void)
+{
+}
+
+void GameScene::UpdateBattleSecond(void)
+{
+}
+
+void GameScene::DrawBattleSecond(void)
+{
 }
 
 void GameScene::DrawMessage(void)

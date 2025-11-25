@@ -105,6 +105,9 @@ public:
 	/// <returns>true:可能　false:不可能</returns>
 	bool CheckBackstab(void);
 
+	const float& GetHP(void) const { return hp_; }
+	const float& GetMaxHP(void) const { return maxHp_; }
+
 private:
 
 	//アニメーション
