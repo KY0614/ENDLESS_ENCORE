@@ -157,7 +157,7 @@ void Enemy::Draw(void)
 
 	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
 
-	for(const auto& bullet : bullets_)
+	for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		bullet->Draw();
 	}
@@ -211,17 +211,17 @@ const bool Enemy::GetIsDead(void) const
 
 void Enemy::Init3DModel(void)
 {
-	auto& jsonM = JsonManager::GetInstance();
+	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
 	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!data.contains(KEY_ENEMY))assert(0 && "データが存在しないか不正なデータです");
-	const auto& param = data[KEY_ENEMY];
+	const json& param = data[KEY_ENEMY];
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
-	const auto& transformData = param[JsonManager::KEY_TRANSFORM];
+	const json& transformData = param[JsonManager::KEY_TRANSFORM];
 
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
@@ -238,7 +238,7 @@ void Enemy::Init3DModel(void)
 	transform_.Update();
 
 	//HPを設定
-	const auto& paramData = param[JsonManager::KEY_PARAMETER];
+	const json& paramData = param[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 }
@@ -267,13 +267,13 @@ void Enemy::InitCollider(void)
 
 void Enemy::InitAnimation(void)
 {
-	auto& jsonM = JsonManager::GetInstance();
+	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得w
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
-	const auto& param = data[KEY_ENEMY];
+	const json& data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
+	const json& param = data[KEY_ENEMY];
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!param.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
-	const auto& animPath = param[JsonManager::KEY_ANIMATION];
+	const json& animPath = param[JsonManager::KEY_ANIMATION];
 
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Enemy/Animation/";
@@ -568,7 +568,7 @@ void Enemy::CreateBullet(const int createNum)
 	}
 	bullets_.resize(createNum);
 	//破棄済みの弾を探して再利用する
-	for (const auto& bullet : bullets_)
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		//弾が消滅していたら再利用する
 		if (bullet->GetState() != EnemyBullet::STATE::DESTROY)continue;
@@ -609,7 +609,7 @@ void Enemy::CreateBullet(const int createNum)
 
 bool Enemy::CheckBulletReady(void)
 {
-	for(const auto& bullet : bullets_)
+	for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		if (bullet->GetState() != EnemyBullet::STATE::READY)
 		{
@@ -621,7 +621,7 @@ bool Enemy::CheckBulletReady(void)
 
 bool Enemy::CheckBulletDestroy(void)
 {
-	for (const auto& bullet : bullets_)
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		if (bullet->GetState() != EnemyBullet::STATE::DESTROY)
 		{
@@ -895,14 +895,14 @@ void Enemy::UpdateShotOne(void)
 	//
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 
-	for (auto& bullet : bullets_)
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		bullet->Update();
 	}
 
 	//弾を順々に準備状態にする
 	const float bulletInterval = 0.7f;
-	for(auto& bullet : bullets_)
+	for(std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
 		if (stateStep_ > bulletInterval)
@@ -912,7 +912,7 @@ void Enemy::UpdateShotOne(void)
 		}
 	}
 	//弾が全部準備できたらプレイヤーに向けて発射する
-	for (const auto& bullet : bullets_)
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		if (CheckBulletDestroy())break;
 		if(CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
@@ -1008,7 +1008,7 @@ void Enemy::UpdateShotAll(void)
 
 	//弾を順々に準備状態にする
 	const float bulletInterval = 0.4f;
-	for (auto& bullet : bullets_)
+	for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
 		if (stateStep_ > bulletInterval)
@@ -1021,7 +1021,7 @@ void Enemy::UpdateShotAll(void)
 	if(CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ALL, false);
 
 	//弾が全部準備できたらプレイヤーに向けて発射する
-	for (const auto& bullet : bullets_)
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		if (CheckBulletDestroy())break;
 		if (stateStep_ > bulletInterval && 
@@ -1258,7 +1258,18 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
-	ImGui::InputFloat("downTime", &stepDownTime_);
+	// 角度
+	VECTOR rotDeg = VECTOR();
+	rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.x);
+	rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.y);
+	rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.z);
+	ImGui::Text("angle(deg)");
+	ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
+	ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
+	ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
+	transform_.quaRot.x = CommonUtility::Deg2RadF(rotDeg.x);
+	transform_.quaRot.y = CommonUtility::Deg2RadF(rotDeg.y);
+	transform_.quaRot.z = CommonUtility::Deg2RadF(rotDeg.z);
 	//終了処理
 	ImGui::End();
 }

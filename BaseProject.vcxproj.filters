@@ -672,5 +672,7 @@
     <FxCompile Include="Src\Shader\Model\RimLightVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\ShieldPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\ShieldVS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\MistWallVS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\MistWallPS.hlsl" />
   </ItemGroup>
 </Project>

@@ -351,7 +351,8 @@ void EncountScene::UpdateEnemyAttention(void)
 	const float intervalLightUp = 1.2f;
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
-
+	//振り向きが終わったらプレイヤーは待機状態
+	//エンカウント演出は終了状態へ
 	if (enemy_.GetState() == Enemy::STATE::ENCOUNT_FINISH &&
 		mainCamera->IsActionEnd())
 	{
@@ -359,6 +360,7 @@ void EncountScene::UpdateEnemyAttention(void)
 		ChangeState(STATE::FINISH);
 		return;
 	}
+	//経過時間が一定時間たったら敵は振り向き状態へ遷移
 	if (intervalTimer_ >= intervalLightUp	&&
 		enemy_.GetState() == Enemy::STATE::ENCOUNT)
 	{
@@ -373,6 +375,7 @@ void EncountScene::UpdateFinish(void)
 	//フェードアウトが終わった判定
 	const bool fadeOutEnd = fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
 		fader.lock()->IsEnd();
+	//フェードアウトが終わったら演出終了フラグを立てる
 	if (fadeOutEnd)
 	{
 		isFinish_ = true;

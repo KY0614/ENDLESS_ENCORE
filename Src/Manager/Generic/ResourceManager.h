@@ -35,8 +35,9 @@ public:
 
 		//ステージオブジェクト
 		FLOOR,
-		STAGE,
 		THEATER,
+		MIST_WALL,
+		NOISE_TEXTURE,
 		ROCK,
 
 		//音

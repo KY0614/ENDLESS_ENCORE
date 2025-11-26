@@ -147,6 +147,8 @@ public:
 
 	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY; }
 
+	void StageWalkReady(void);
+
 private:
 	Transform parryTransform_;
 	std::unique_ptr<ModelMaterial> material_;

@@ -1,5 +1,4 @@
 #pragma once
-#include <map>
 #include "Common/Transform.h"
 
 class Cube;
@@ -12,12 +11,6 @@ class Stage
 {
 public:
 
-	enum class TYPE
-	{
-		EXPLORE,	//探索ステージ
-		BATTLE		//戦闘ステージ
-	};
-
 	Stage(void);
 	//デストラクタ
 	~Stage(void);
@@ -25,7 +18,7 @@ public:
 	/// <summary>
 	///	初期化
 	/// </summary>
-	void Init(VECTOR pos,VECTOR sPos);
+	void Init(const VECTOR pos = {0.0f,0.0f,0.0f}, VECTOR sPos = { 0.0f,0.0f,0.0f });
 
 	/// <summary>
 	///	更新処理
@@ -37,14 +30,6 @@ public:
 	/// </summary>
 	void Draw(void);
 
-	//Cube& GetStageCube(void) { return *cube_; }
-
-	/// <summary>
-	/// ステージを変更する
-	/// </summary>
-	/// <param name="type">指定するステージ</param>
-	void ChangeType(const TYPE& type) { type_ = type; }
-
 	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
 	/// </summary>
@@ -54,21 +39,52 @@ public:
 	/// ステージのモデル情報を取得する
 	/// </summary>
 	/// <returns>現在のステージモデル情報</returns>
-	const Transform& GetTransform(void){ return stageTransform_[type_]; }
+	const Transform& GetTransform(void){ return transform_; }
+
+	void IsBattle(void) { isBattle_ = true; }
+
 private:
-	std::unique_ptr<ModelMaterial> material_;
-	std::unique_ptr<ModelRenderer> renderer_;
+	//ステージのマテリアルとレンダー
+	std::unique_ptr<ModelMaterial> stageMaterial_;
+	std::unique_ptr<ModelRenderer> stageRenderer_;
+	
+	//霧の壁のマテリアルとレンダー
+	std::unique_ptr<ModelMaterial> mistWallMaterial_;
+	std::unique_ptr<ModelRenderer> mistWallRenderer_;
 
-	TYPE type_;
+	//ステージ本体のモデル情報
+	Transform transform_;
 
-	std::unordered_map<TYPE, Transform> stageTransform_;
+	//戦闘中に出す霧の壁のモデル情報
+	Transform mistWallTransform_;
+	int noiseTextureId_;
+	float mistScrollSpeed_;
+	float dissolveAlphaLine_;
 
 	//std::unique_ptr<Cube> cube_;
 	std::unique_ptr<Box> cube_;
+
+	//戦闘中かどうか
+	bool isBattle_;		//true:戦闘中 false:戦闘中ではない
 
 	/// <summary>
 	/// 3Dモデル初期化
 	/// </summary>
 	void Init3DModel(void);
+
+	/// <summary>
+	/// マテリアル初期化
+	/// </summary>
+	void InitMaterial(const VECTOR pos = { 0.0f,0.0f,0.0f }, VECTOR sPos = { 0.0f,0.0f,0.0f });
+
+	/// <summary>
+	/// ステージマテリアルの定数バッファ更新
+	/// </summary>
+	void UpdateStageMaterialConstBuf(void);
+
+	/// <summary>
+	/// 霧の壁マテリアルの定数バッファ更新
+	/// </summary>
+	void UpdateMistWallMaterialConstBuf(void);
 };
 

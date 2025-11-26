@@ -27,7 +27,7 @@ void InputManager::Init(void)
 	// Ž–‘O‚É‚±‚±‚Å“o˜^‚µ‚Ä‚¨‚¢‚Ä‚­‚¾‚³‚¢
 	//InputManager::GetInstance().Add(KEY_INPUT_SPACE);
 	//InputManager::GetInstance().Add(KEY_INPUT_RETURN);
-	//InputManager::GetInstance().Add(KEY_INPUT_N);
+	InputManager::GetInstance().Add(KEY_INPUT_N);
 	//InputManager::GetInstance().Add(KEY_INPUT_Z);
 
 	//InputManager::GetInstance().Add(KEY_INPUT_LEFT);

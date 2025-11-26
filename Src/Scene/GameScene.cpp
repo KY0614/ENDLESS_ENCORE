@@ -126,11 +126,11 @@ void GameScene::Init(void)
 
 void GameScene::Update(void)
 {
-	for (auto& light : pointLight_)
+	for (std::unique_ptr<PointLight>& light : pointLight_)
 	{
 		light->Update();
 	}
-	for (auto& light : spotLight_)
+	for (std::unique_ptr<SpotLight>& light : spotLight_)
 	{
 		light->Update();
 	}
@@ -230,6 +230,7 @@ void GameScene::ChangeStateEncount(void)
 
 void GameScene::ChangeStateBattle(void)
 {
+	stage_->IsBattle();
 	enemy_->ChangeState(Enemy::STATE::MOVE);
 	player_->ChangeState(Player::STATE::PLAY);
 	stateUpdate_ = std::bind(&GameScene::UpdateBattle, this);
@@ -279,7 +280,7 @@ void GameScene::LoadingUpdate(void)
 void GameScene::LoadingDraw(void)
 {
 	//ÉçÅ[ÉhíÜ
-	auto time = 5.0f;
+	float time = 5.0f;
 	int count = static_cast<int>(time / 0.5f);
 	count %= 5;
 
@@ -416,9 +417,13 @@ void GameScene::UpdateBattle(void)
 		return;
 	}
 
-	if(enemy_->GetHP() <= enemy_->GetMaxHP()/2.0f)
+	//
+	if(!enemy_->GetIsBackstab() &&
+		enemy_->GetHP() <= enemy_->GetMaxHP()/2.0f)
 	{
+		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_OUT);
 		ChangeState(STATE::ENEMY_SUMMON);
+		return;
 	}
 
 	Backstab();
@@ -446,6 +451,20 @@ void GameScene::DrawBattle(void)
 
 void GameScene::UpdateEnemySummon(void)
 {
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+
+	if (fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
+		fader.lock()->IsEnd())
+	{
+		fader.lock()->SetFade(Fader::STATE::FADE_IN);
+	}
+
+	if (!(fader.lock()->GetState() == Fader::STATE::FADE_IN &&
+		fader.lock()->IsEnd()))
+	{
+		return;
+	}
+
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
@@ -455,6 +474,22 @@ void GameScene::UpdateEnemySummon(void)
 
 void GameScene::DrawEnemySummon(void)
 {
+	//ÉvÉåÉCÉÑÅ[ï`âÊ
+	stage_->Draw();
+	//ìGï`âÊ
+	enemy_->Draw();
+	//ÉvÉåÉCÉÑÅ[ï`âÊ
+	player_->Draw();
+
+
+	if (enemy_->GetIsDead())
+	{
+		player_->DrawVictory();
+	}
+
+	player_->DrawDead();
+
+	DrawString(0, 0, L"è¢ä´", 0xffffff);
 }
 
 void GameScene::UpdateBattleSecond(void)
@@ -502,6 +537,7 @@ void GameScene::UpdateDebugImGui(void)
 	}
 	if (ImGui::Button("Battle"))
 	{
+		player_->SetPos({ 10.0, -217.0, 900.0 });
 		ChangeState(STATE::BATTLE);
 	}
 

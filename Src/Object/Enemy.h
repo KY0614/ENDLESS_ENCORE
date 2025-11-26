@@ -93,6 +93,8 @@ public:
 	/// <returns>true:ダウン中　false:ダウンではない</returns>
 	const bool GetIsDown(void)const { return state_ == STATE::DOWN; }
 
+	const bool GetIsBackstab(void)const { return state_ == STATE::BACKSTAB;}
+
 	/// <summary>
 	/// 死亡しているかどうかを取得
 	/// </summary>

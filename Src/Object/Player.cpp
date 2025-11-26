@@ -56,6 +56,9 @@ namespace
 	//行動時間
 	const float DODGE_TIME = 0.4f;		//回避(無敵)時間
 	const float PARRY_TIME = 0.3f;		//パリィ時間
+
+	const float WALK_STAGE_POS_Z = 1150.0f;
+	const float WALK_SPEED_SLOW = 1.0f;
 }
 
 Player::Player(void)
@@ -189,7 +192,7 @@ void Player::Draw(void)
 
 	//丸影描画
 	DrawShadow();
-	renderer_->Draw();
+	//renderer_->Draw();
 #ifdef _DEBUG
 	DebugDraw();
 #endif // _DEBUG
@@ -292,15 +295,15 @@ void Player::Init3DModel(void)
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	const json&  data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	const auto& param = data[KEY_PLAYER];
+	const json& param = data[KEY_PLAYER];
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
-	const auto& transformData = param[JsonManager::KEY_TRANSFORM];
+	const json& transformData = param[JsonManager::KEY_TRANSFORM];
 
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
@@ -314,7 +317,7 @@ void Player::Init3DModel(void)
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 	//HPを設定
-	const auto& paramData = param[JsonManager::KEY_PARAMETER];
+	const json& paramData = param[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 
@@ -350,10 +353,10 @@ void Player::InitAnimation(void)
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
 	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-	const auto& param = data[KEY_PLAYER];
+	const json& param = data[KEY_PLAYER];
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!param.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
-	const auto& animPath = param[JsonManager::KEY_ANIMATION];
+	const json& animPath = param[JsonManager::KEY_ANIMATION];
 
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Player/";
@@ -403,6 +406,24 @@ void Player::ChangeState(STATE state)
 	stateChanges_[state_]();
 }
 
+void Player::StageWalkReady(void)
+{
+	//ジャンプ中に遷移したらジャンプ力を無効にする
+	jumpPow_ = CommonUtility::VECTOR_ZERO;
+	//Jsonデータ取得
+	JsonManager& jsonM = JsonManager::GetInstance();
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
+	const json& param = data[KEY_PLAYER];	//Playerオブジェクトを取得
+	//パラメータを取得
+	const json& paramData = param[JsonManager::KEY_PARAMETER];
+	//座標をステージ上の端(手前側)に設定
+	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
+	//正面を向かせる(Z軸方向)
+	transform_.quaRot = Quaternion();
+}
+
 void Player::ChangeStateNone(void)
 {
 	stateUpdate_ = std::bind(&Player::UpdateNone, this);
@@ -410,19 +431,7 @@ void Player::ChangeStateNone(void)
 
 void Player::ChangeStateStageWalk(void)
 {
-	jumpPow_ = CommonUtility::VECTOR_ZERO;
-	JsonManager& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	const auto& param = data[KEY_PLAYER];	//Playerオブジェクトを取得
-	//パラメータを取得
-	const auto& paramData = param[JsonManager::KEY_PARAMETER];
-	//座標をステージ上の端(手前側)に設定
-	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
-	//正面を向かせる(Z軸方向)
-	transform_.quaRot = Quaternion();
+	StageWalkReady();
 	stateUpdate_ = std::bind(&Player::UpdateStageWalk, this);
 }
 
@@ -468,15 +477,12 @@ void Player::UpdateNone(void)
 
 void Player::UpdateStageWalk(void)
 {
-	//目標Z座標
-	const float moveEndZ = 1150.0f;
-	if (transform_.pos.z <= moveEndZ)
+	if (transform_.pos.z <= WALK_STAGE_POS_Z)
 	{
 		//ゆっくり歩くアニメーション
 		animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
 		//ゆっくり歩く処理
-		const float walkSpeed = 1.0f;
-		movePow_ = VScale(transform_.GetForward(), walkSpeed);
+		movePow_ = VScale(transform_.GetForward(), WALK_SPEED_SLOW);
 		movedPos_ = VAdd(transform_.pos, movePow_);
 	}
 	else
@@ -494,10 +500,6 @@ void Player::UpdateStageWalk(void)
 
 void Player::UpdateLookAround(void)
 {
-	//if (animationController_->IsEnd())
-	//{
-	//	ChangeState(STATE::ENCOUNT);
-	//}
 }
 
 void Player::UpdateWait(void)
@@ -555,19 +557,19 @@ void Player::UpdateBackstab(void)
 	if (animationController_->IsEnd())
 	{
 		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-		if (stateStep_ > stopTime && !isPlay)
+		if (stateStep_ > stopTime && !isActionEnd_)
 		{
 			isPlay = true;
 			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 100.0f, false, true);
 		}
 	}
-
+	//バックスタブアニメーションが終了したらローカル回転を元に戻す
 	if (isPlay && animationController_->IsEnd())
 	{
 		//Jsonデータ取得
 		const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-		const auto& param = data[KEY_PLAYER];
-		const auto& transformData = param[JsonManager::KEY_TRANSFORM];
+		const json& param = data[KEY_PLAYER];
+		const json& transformData = param[JsonManager::KEY_TRANSFORM];
 		const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 		transform_.quaRotLocal =
 			Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
@@ -811,16 +813,16 @@ void Player::CollisionCapsule(void)
 	trans.Update();
 	Capsule cap = Capsule(*capsule_, trans);
 	//カプセルとの衝突判定
-	for (const auto c : colliders_)
+	for (const std::weak_ptr<Collider> c : colliders_)
 	{
-		auto hits = MV1CollCheck_Capsule(
+		MV1_COLL_RESULT_POLY_DIM hits = MV1CollCheck_Capsule(
 			c.lock()->modelId_, -1,
 			cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius());
 		//衝突した複数のポリゴンと衝突回避するまで、
 		//プレイヤーの位置を移動させる
 		for (int i = 0; i < hits.HitNum; i++)
 		{
-			auto hit = hits.Dim[i];
+			MV1_COLL_RESULT_POLY hit = hits.Dim[i];
 			//地面と異なり、衝突回避位置が不明なため、何度か移動させる
 			//この時、移動させる方向は、移動前座標に向いた方向であったり、
 			//衝突したポリゴンの法線方向だったりする
@@ -867,7 +869,7 @@ void Player::CollisionGravity(void)
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
-	for (const auto c : colliders_)
+	for (const std::weak_ptr<Collider> c : colliders_)
 	{
 		// 地面との衝突
 		auto hit = MV1CollCheck_Line(
@@ -1036,7 +1038,19 @@ void Player::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
-
+	// 角度
+	//VECTOR rotDeg = VECTOR();
+	//rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.x);
+	//rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.y);
+	//rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.z);
+	//ImGui::Text("angle(deg)");
+	//ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
+	//ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
+	//ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
+	//transform_.quaRot = Quaternion::Euler(
+	//	CommonUtility::Deg2RadF(rotDeg.x),
+	//	CommonUtility::Deg2RadF(rotDeg.y),
+	//	CommonUtility::Deg2RadF(rotDeg.z));
 	//終了処理
 	ImGui::End();
 }

@@ -23,6 +23,7 @@ public:
 	{
 		PLAYER,		//プレイヤー
 		ENEMY,		//敵
+		STAGE,		//ステージ
 	};
 
 	//インスタンスの生成
@@ -46,7 +47,7 @@ public:
 	/// </summary>
 	void Destroy(void);
 
-	nlohmann::json GetJsonData(JSON_DATA data);
+	const nlohmann::json& GetJsonData(const JSON_DATA data)const;
 
 	/// <summary>
 	/// 指定されたオブジェクト名に基づいてデータを読み込む

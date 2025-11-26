@@ -184,12 +184,16 @@ void ResourceManager::InitGame(void)
 	std::unique_ptr<Resource> res;
 
 	//ステージ
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Stage_.mv1");
-	resourcesMap_.emplace(SRC::STAGE, std::move(res));
-
-	//ステージ
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/long.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Theater/large_theater.mv1");
 	resourcesMap_.emplace(SRC::THEATER, std::move(res));
+
+	//霧の壁
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Mist/MistWall.mv1");
+	resourcesMap_.emplace(SRC::MIST_WALL, std::move(res));
+
+	//ノイズ用画像
+	res = std::make_unique<RES>(RES_T::IMG, PATH_MDL + "Stage/Mist/Noise.png");
+	resourcesMap_.emplace(SRC::NOISE_TEXTURE, std::move(res));
 
 	//敵
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician_.mv1");
@@ -211,9 +215,9 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
 	resourcesMap_.emplace(SRC::PLAYER_SHADOW, std::move(res));
 
-	//床
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Floor/floor.mv1");
-	resourcesMap_.emplace(SRC::FLOOR, std::move(res));
+	////床
+	//res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Floor/floor.mv1");
+	//resourcesMap_.emplace(SRC::FLOOR, std::move(res));
 
 	//コイン
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Coin.mv1");

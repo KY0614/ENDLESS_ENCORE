@@ -1,11 +1,13 @@
 #include <DxLib.h>
 #include "../../Application.h"
 #include "JsonManager.h"
-
+// 長いのでnamespaceの省略
+using json = nlohmann::json;
 namespace 
 {
 	const std::string JSON_PLAYER = "Player";
 	const std::string JSON_ENEMY = "Enemy";
+	const std::string JSON_STAGE = "Stage";
 }
 
 JsonManager* JsonManager::instance_ = nullptr;
@@ -41,10 +43,9 @@ void JsonManager::Destroy(void)
 	delete instance_;
 }
 
-nlohmann::json JsonManager::GetJsonData(JSON_DATA data)
+const nlohmann::json& JsonManager::GetJsonData(const JSON_DATA data)const
 {
-	nlohmann::json jsonData = jsonDataMap_[data];
-	return jsonData;
+	return jsonDataMap_.at(data);
 }
 
 nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::string& dataName)
@@ -70,7 +71,7 @@ const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const s
 		return VGet(0.0f, 0.0f, 0.0f);
 	}
 	//配列の取得
-	const auto& arr = jsonData[key];
+	const json& arr = jsonData[key];
 	return VGet(
 		arr[0].get<float>(),//X座標
 		arr[1].get<float>(),//Y座標
@@ -85,6 +86,10 @@ void JsonManager::InitGame(void)
 	//プレイヤーデータの読み込み
 	const std::string playerPath = "Player.json";
 	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadData(PATH_JSON + playerPath, JSON_PLAYER));
+	//敵のデータ読み込み
 	const std::string enemyPath = "Enemy.json";
 	jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadData(PATH_JSON + enemyPath, JSON_ENEMY));
+	//ステージのデータ読み込み
+	const std::string stagePath = "Stage.json";
+	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadData(PATH_JSON + stagePath, JSON_STAGE));
 }
