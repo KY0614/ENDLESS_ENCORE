@@ -92,7 +92,7 @@ void Stage::Draw(void)
 {
 	stageRenderer_->Draw();
 
-	//if (!isBattle_)return;
+	if (!isBattle_)return;
 	mistWallRenderer_->Draw();
 	//cube_->Draw();
 }

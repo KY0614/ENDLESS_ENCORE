@@ -392,10 +392,15 @@ void GameScene::UpdateBattle(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
-	//if(player_->GetTransform().pos.y < -50.0f)
-	//{
-	//	player_->SetHP(0.0f);
-	//}
+
+	//敵の体力が半分以下でバックスタブ状態でなければ敵召喚状態へ遷移
+	if (/*!enemy_->GetIsBackstab() &&*/
+		enemy_->GetHP() <= enemy_->GetMaxHP() / 2.0f)
+	{
+		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_OUT);
+		ChangeState(STATE::ENEMY_SUMMON);
+		return;
+	}
 
 	player_->Update();
 	enemy_->Update();
@@ -414,15 +419,6 @@ void GameScene::UpdateBattle(void)
 	{
 		//ポーズボタンが押されたらポーズシーンへ遷移
 		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
-		return;
-	}
-
-	//
-	if(!enemy_->GetIsBackstab() &&
-		enemy_->GetHP() <= enemy_->GetMaxHP()/2.0f)
-	{
-		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_OUT);
-		ChangeState(STATE::ENEMY_SUMMON);
 		return;
 	}
 
@@ -452,13 +448,13 @@ void GameScene::DrawBattle(void)
 void GameScene::UpdateEnemySummon(void)
 {
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
-
+	//フェードアウトが完了したらフェードインへ切り替え
 	if (fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
 		fader.lock()->IsEnd())
 	{
 		fader.lock()->SetFade(Fader::STATE::FADE_IN);
 	}
-
+	//フェードインが完了するまで更新しない
 	if (!(fader.lock()->GetState() == Fader::STATE::FADE_IN &&
 		fader.lock()->IsEnd()))
 	{
