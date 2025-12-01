@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Navigate.cpp" />
     <ClCompile Include="Src\Object\SpotLight.cpp" />
     <ClCompile Include="Src\Object\PointLight.cpp" />
     <ClCompile Include="Src\Scene\EncountScene.cpp" />
@@ -94,8 +95,10 @@
     <ClCompile Include="Src\Object\State\Enemy\EnemyStateBase.cpp" />
     <ClCompile Include="Src\Object\State\Enemy\StateMove.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
+    <ClCompile Include="Src\Object\SummonEnemyBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Navigate.h" />
     <ClInclude Include="Src\Object\SpotLight.h" />
     <ClInclude Include="Src\Object\PointLight.h" />
     <ClInclude Include="Src\Scene\EncountScene.h" />
@@ -218,6 +221,7 @@
     <ClInclude Include="Src\Object\State\Enemy\EnemyStateBase.h" />
     <ClInclude Include="Src\Object\State\Enemy\StateMove.h" />
     <ClInclude Include="Src\Object\Stage.h" />
+    <ClInclude Include="Src\Object\SummonEnemyBase.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />

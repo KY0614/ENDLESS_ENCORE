@@ -27,6 +27,7 @@ public:
 	enum class STATE
 	{
 		NONE,		//初期化前
+		WAKE_UP,	//起き上がる
 		STAGE_WALK,	//ステージ上を歩く
 		LOOK_AROUND,//周りを見渡す
 		WAIT,		//戦闘開始前の待機
@@ -38,6 +39,7 @@ public:
 	//アニメーション種別
 	enum class ANIM_TYPE
 	{
+		WAKE_UP,	//起き上がる
 		IDLE,		//通常
 		WALK_SLOW,	//ゆっくり歩く
 		LOOK_AROUND,//周りを見渡す
@@ -266,6 +268,10 @@ private:
 	/// </summary>
 	void ChangeStateNone(void);
 	/// <summary>
+	/// 状態遷移：WAKE_UP
+	/// </summary>
+	void ChangeStateWakeUp(void);
+	/// <summary>
 	/// 状態遷移：STAGE_WALK
 	/// </summary>
 	void ChangeStateStageWalk(void);
@@ -296,6 +302,10 @@ private:
 	/// 更新：NONE
 	/// </summary>
 	void UpdateNone(void);
+	/// <summary>
+	/// 更新：WAKE_UP
+	/// </summary>
+	void UpdateWakeUp(void);
 	/// <summary>
 	/// 更新：STAGE_WALK
 	/// </summary>

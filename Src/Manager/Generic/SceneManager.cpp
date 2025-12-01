@@ -83,7 +83,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::GAME);
+	DoChangeScene(SCENE_ID::SELECT);
 }
 
 void SceneManager::Init3D(void)
@@ -495,11 +495,11 @@ void SceneManager::UpdateDebugImGui(void)
 	ImGui::Begin("SceneM");
 
 	//位置
-	ImGui::InputFloat("Fog", &fogStart_);
-	ImGui::SliderFloat("Fog Start", &fogStart_, -20000.0f, 20000.0f);
+	ImGui::InputFloat("LightDir", &lightDir_.x);
+	ImGui::SliderFloat("LightDirX", &lightDir_.x, -1.0f, 1.0f);
+	ImGui::SliderFloat("LightDirY", &lightDir_.y, -1.0f, 1.0f);
+	ImGui::SliderFloat("LightDirZ", &lightDir_.z, -1.0f, 1.0f);
 	
-	ImGui::InputFloat("Fog", &fogEnd_);
-	ImGui::SliderFloat("Fog End", &fogEnd_, -20000.0f, 20000.0f);
 	//SetFogStartEnd(fogStart_, fogEnd_);
 	//終了処理
 	ImGui::End();

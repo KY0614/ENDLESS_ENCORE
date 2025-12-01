@@ -26,13 +26,10 @@ public:
 	//カメラ座標関連の定数---------------------------------------------------------------------
 
 	static constexpr VECTOR DEFAULT_CAMERA_POS = { 0.0f, 500.0f, -800.0f };			//カメラの初期座標
-	static constexpr VECTOR FIXEDTOP_CAMERA_POS = { 20.0f, 600.0f, -360.0f };		//固定カメラの初期座標
 
 	static constexpr VECTOR RELATIVE_C2T_POS = { 0.0f, 165.0f, 200.0f };			//カメラ位置から注視点までの相対座標
-	static constexpr VECTOR FIXEDTOP_CAMERA_RELATIVE_POS = { 20.0f, 0.0f, 65.0f };	//固定カメラ位置から注視点までの相対座標
 
 	static constexpr VECTOR RELATIVE_F2C_POS_FOLLOW = { 0.0f, 500.0f, -500.0f };	//追従対象からカメラ位置までの相対座標(完全追従)
-
 
 	//カメラのX回転上限度角
 	static constexpr float LIMIT_X_UP_RAD = 90.0f * (DX_PI_F / 180.0f);
@@ -54,7 +51,6 @@ public:
 		TRACK,		//左右に移動させる(向き固定)
 		DOLLY_IN,	//
 		FIXED_POINT,//固定カメラ
-		TOP_FIXED,	//上部固定
 		FOLLOW,		//追従
 		FREE,		//自由
 		MOUSE,		//マウスで操作
@@ -106,7 +102,8 @@ public:
 	void SetCraneUpPos(
 		const VECTOR& startPos,
 		const float& distance,
-		const VECTOR& targetPos);
+		const VECTOR& targetPos,
+		const float& craneUpSpeed);
 
 	/// <summary>
 	/// トラックカメラの設定(一定速度)
@@ -188,6 +185,7 @@ private:
 	VECTOR craneUpStartPos_;	//開始位置
 	VECTOR craneUpTargetPos_;	//注視点
 	float craneUpDistance_;		//移動距離
+	float craneUpSpeed_;		//移動速度
 
 	//トラックカメラ用座標
 	VECTOR trackStartPos_;		//開始位置

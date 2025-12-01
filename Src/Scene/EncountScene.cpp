@@ -250,7 +250,8 @@ void EncountScene::UpdatePlayerAttention(void)
 		const float moveDistance = 100.0f;
 		VECTOR target = player_.GetTransform().pos;
 		target.y += 80.0f;
-		mainCamera->SetCraneUpPos(startPos, moveDistance, target);
+		const float craneUpSpeed = 0.5f;
+		mainCamera->SetCraneUpPos(startPos, moveDistance, target, craneUpSpeed);
 		mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
 		intervalTimer_ = 0.0f;
 		return;

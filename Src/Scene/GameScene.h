@@ -20,6 +20,7 @@ public:
 	enum class STATE
 	{
 		LOADING,
+		WAKE_UP,
 		EXPLORE,
 		ENCOUNT,
 		BATTLE,
@@ -109,6 +110,11 @@ private:
 	void ChangeStateLoading(void);
 
 	/// <summary>
+	/// 状態遷移：WAKE_UP
+	/// </summary>
+	void ChangeStateWakeUp(void);
+
+	/// <summary>
 	/// 状態遷移：EXPLORE
 	/// </summary>
 	void ChangeStateExplore(void);
@@ -137,6 +143,18 @@ private:
 	
 	void LoadingUpdate(void);
 	void LoadingDraw(void);
+
+	//ゲーム開始
+
+	/// <summary>
+	/// ゲーム開始の更新処理
+	/// </summary>
+	void UpdateWakeUp(void);
+
+	/// <summary>
+	/// ゲーム開始の描画処理
+	/// </summary>
+	void DrawWakeUp(void);
 
 	//探索
 

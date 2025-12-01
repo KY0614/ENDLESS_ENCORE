@@ -92,10 +92,6 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawDollyIn();
 		break;
 
-	case Camera::MODE::TOP_FIXED:
-		SetBeforeDrawTopFixed();
-		break;
-
 	case Camera::MODE::FOLLOW:
 		SetBeforeDrawFollow();
 		break;
@@ -193,12 +189,6 @@ void Camera::ChangeMode(MODE mode)
 	case Camera::MODE::DOLLY_IN:
 		pos_ = dollyInStartPos_;
 		targetPos_ = dollyInObjectPos_;
-		break;
-	case Camera::MODE::TOP_FIXED:
-		//カメラの初期設定
-		pos_ = FIXEDTOP_CAMERA_POS;
-		//注視点
-		targetPos_ = FIXEDTOP_CAMERA_RELATIVE_POS;
 		break;	
 	case Camera::MODE::FREE:
 		targetPos_ = VAdd(pos_, VGet(0.0f,0.0f,50.0f));
@@ -215,11 +205,13 @@ void Camera::SetFixedPointPos(const VECTOR& pos, const VECTOR& targetPos)
 void Camera::SetCraneUpPos(
 	const VECTOR& startPos,
 	const float& distance,
-	const VECTOR& targetPos)
+	const VECTOR& targetPos,
+	const float& craneUpSpeed)
 {
 	craneUpStartPos_ = startPos;
 	craneUpDistance_ = distance;
 	craneUpTargetPos_ = targetPos;
+	craneUpSpeed_ = craneUpSpeed;
 }
 
 void Camera::SetTrackCamera(
@@ -373,14 +365,14 @@ void Camera::SetBeforeDrawCraneUp(void)
 {
 	//スタート座標から現在座標までの距離を取得
 	VECTOR endPos = VAdd(craneUpStartPos_, VScale(cameraUp_, craneUpDistance_));
+	//現在地から目的地までの距離が一定以下になったら終了
 	float pos2StartPos = VSize(VSub(endPos, pos_));
 	const float distance = 0.5f;
 	isActionEnd_ = pos2StartPos <= distance;
 
 	if (isActionEnd_) return;
-
-	const float craneUpSpeed = 0.5f;
-	pos_ = VAdd(pos_, VScale(cameraUp_, craneUpSpeed));
+	//カメラを上昇させる
+	pos_ = VAdd(pos_, VScale(cameraUp_, craneUpSpeed_));
 }
 
 void Camera::SetBeforeDrawTrack(void)

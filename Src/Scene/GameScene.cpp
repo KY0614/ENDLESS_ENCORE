@@ -32,6 +32,7 @@ GameScene::GameScene(void)
 	isFaseChange_ = false;
 	//状態管理
 	stateChanges_.emplace(STATE::LOADING, std::bind(&GameScene::ChangeStateLoading, this));
+	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
 	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&GameScene::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::BATTLE, std::bind(&GameScene::ChangeStateBattle, this));
@@ -121,7 +122,7 @@ void GameScene::Init(void)
 	);
 
 	//初期状態設定
-	ChangeState(STATE::EXPLORE);
+	ChangeState(STATE::WAKE_UP);
 }
 
 void GameScene::Update(void)
@@ -143,6 +144,11 @@ void GameScene::Draw(void)
 {
 	//更新ステップ
 	stateDraw_();
+
+	VECTOR pos = player_->GetTransform().pos;
+	pos = VAdd(pos, VScale(
+		VAdd(player_->GetTransform().GetRight(), player_->GetTransform().GetForward()), 100.0f));
+	DrawSphere3D(pos, 20.0f, 32, 0xffffff, 0xffffff, true);
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
 	//for (auto& light : pointLight_)
@@ -212,10 +218,27 @@ void GameScene::ChangeStateLoading(void)
 	stateDraw_ = std::bind(&GameScene::LoadingDraw, this);
 }
 
+void GameScene::ChangeStateWakeUp(void)
+{
+	VECTOR pos = player_->GetTransform().pos;
+	pos = VAdd(pos, VScale(
+		VAdd(player_->GetTransform().GetRight(),
+			player_->GetTransform().GetForward()), 100.0f));
+	//pos.y += 80.0f;
+	VECTOR targetPos = player_->GetTransform().pos;
+	targetPos.y += 70.0f;
+	//targetPos.z += 80.0f;
+	const float craneUpSpeed = 0.13f;
+	mainCamera->SetCraneUpPos(pos, 80.0f,targetPos, craneUpSpeed);
+	mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
+	stateUpdate_ = std::bind(&GameScene::UpdateWakeUp, this);
+	stateDraw_ = std::bind(&GameScene::DrawWakeUp, this);
+}
+
 void GameScene::ChangeStateExplore(void)
 {
 	SoundManager& sound = SoundManager::GetInstance();
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 50);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
 	sound.Play(SoundManager::SOUND::EXPLORE);
 
 	stateUpdate_ = std::bind(&GameScene::UpdateExplore, this);
@@ -296,20 +319,31 @@ void GameScene::LoadingDraw(void)
 
 }
 
-void GameScene::UpdateExplore(void)
+void GameScene::UpdateWakeUp(void)
 {
-	InputManager& ins = InputManager::GetInstance();
-	if (ins.IsInputTriggered("Pause"))
+	if(player_->GetState() == Player::STATE::PLAY)
 	{
-		//ポーズボタンが押されたらポーズシーンへ遷移
-		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
+		ChangeState(STATE::EXPLORE);
 		return;
 	}
 	//更新
-	player_->Update();
 	stage_->Update();
-	encountScene_->Update();
+	player_->Update();
+}
 
+void GameScene::DrawWakeUp(void)
+{
+	//ステージ描画
+	stage_->Draw();
+
+	//プレイヤー描画
+	player_->Draw();
+
+	DrawString(0, 0, L"ゲーム開始", 0xffffff);
+}
+
+void GameScene::UpdateExplore(void)
+{
 	//Z値850を超えるとエンカウント状態へ遷移
 	//(ステージの手前端よりも奥)
 	const float stagePosZ = 850.0f;
@@ -317,7 +351,22 @@ void GameScene::UpdateExplore(void)
 	{
 		ChangeState(STATE::ENCOUNT);
 		encountScene_->Start();
+		return;
 	}
+
+	InputManager& ins = InputManager::GetInstance();
+	if (ins.IsInputTriggered("Pause"))
+	{
+		//ポーズボタンが押されたらポーズシーンへ遷移
+		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
+		return;
+	}
+
+	//更新
+	player_->Update();
+	stage_->Update();
+	encountScene_->Update();
+
 #ifdef _DEBUG
 	if (ins.IsInputTriggered("Next"))
 	{
@@ -330,7 +379,7 @@ void GameScene::UpdateExplore(void)
 
 void GameScene::DrawExplore(void)
 {
-	//プレイヤー描画
+	//ステージ描画
 	stage_->Draw();
 
 	//プレイヤー描画
@@ -342,7 +391,8 @@ void GameScene::DrawExplore(void)
 void GameScene::UpdateEncount(void)
 {
 	InputManager& ins = InputManager::GetInstance();
-
+	//エンカウントシーンが終了し、
+	// フェードアウトが完了したらバトル状態へ遷移
 	if (encountScene_->IsFinished() &&
 		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
 		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_OUT)
@@ -356,13 +406,17 @@ void GameScene::UpdateEncount(void)
 		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
 	}
 
+	//エンカウントシーンが終了したらバトル状態へ遷移
+	//(フェードインが終わった後に遷移)
 	if (encountScene_->IsFinished() &&
 		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
 		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_IN)
 	{
 		ChangeState(STATE::BATTLE);
+		return;
 	}
 
+	//各オブジェクト更新
 	encountScene_->Update();
 	player_->Update();
 	enemy_->Update();
@@ -375,7 +429,7 @@ void GameScene::DrawEncount(void)
 
 	player_->Draw();
 	enemy_->Draw();
-
+	//敵が死んだら勝利演出を描画
 	if (enemy_->GetIsDead())
 	{
 		player_->DrawVictory();
@@ -525,6 +579,12 @@ void GameScene::UpdateDebugImGui(void)
 
 	//状態変更ボタン
 	if (ImGui::Button("Explore"))
+	{
+		enemy_->ChangeState(Enemy::STATE::NONE);
+		player_->ChangeState(Player::STATE::PLAY);
+		ChangeState(STATE::EXPLORE);
+	}
+	if (ImGui::Button("Encount"))
 	{
 		enemy_->ChangeState(Enemy::STATE::NONE);
 		player_->ChangeState(Player::STATE::NONE);

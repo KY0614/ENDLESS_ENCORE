@@ -9,6 +9,7 @@
     "Animation": 
     {
       "defaultSpeed":30.0,
+      "WakeUp": "Standing Up.mv1",
       "Idle": "Idle.mv1",
       "Walk": "Walking.mv1",
       "LookAround": "Look Around.mv1",

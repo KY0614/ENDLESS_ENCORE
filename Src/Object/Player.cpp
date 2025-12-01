@@ -28,6 +28,7 @@ namespace
 {
 	//JSONキー名を定義
 	static const std::string KEY_PLAYER = "Player";
+	static const std::string KEY_WAKE_UP = "WakeUp";
 	static const std::string KEY_IDLE = "Idle";
 	static const std::string KEY_WALK = "Walk";
 	static const std::string KEY_LOOK_AROUND = "LookAround";
@@ -69,6 +70,7 @@ Player::Player(void)
 	maxHp_ = 0.0f;
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
+	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&Player::ChangeStateWakeUp, this));
 	stateChanges_.emplace(STATE::STAGE_WALK, std::bind(&Player::ChangeStateStageWalk, this));
 	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&Player::ChangeStateLookAround, this));
 	stateChanges_.emplace(STATE::WAIT, std::bind(&Player::ChangeStateWait, this));
@@ -120,6 +122,7 @@ void Player::Init(void)
 
 	//3Dモデルの初期化
 	Init3DModel();
+
 	//モデル描画用
 	material_ = std::make_unique<ModelMaterial>(
 		"RimLightVS.cso", 0,
@@ -155,7 +158,7 @@ void Player::Init(void)
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 	//初期状態
-	ChangeState(STATE::PLAY);
+	ChangeState(STATE::WAKE_UP);
 }
 
 void Player::Update(void)
@@ -365,6 +368,10 @@ void Player::InitAnimation(void)
 	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
 	const float animSpeedSlow = animSpeed / 2.0f;	//ゆっくり再生する速度
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
+	//起き上がり
+	animationController_->Add((int)ANIM_TYPE::WAKE_UP, path + animPath.value(KEY_WAKE_UP, KEY_EMPTY),
+		animSpeed);
+	//待機状態
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
 	//ゆっくり歩く
@@ -391,8 +398,6 @@ void Player::InitAnimation(void)
 	//死亡
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
 		animSpeed);
-	//初期アニメーションはアイドルを再生
-	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
 
 void Player::ChangeState(STATE state)
@@ -429,6 +434,13 @@ void Player::ChangeStateNone(void)
 	stateUpdate_ = std::bind(&Player::UpdateNone, this);
 }
 
+void Player::ChangeStateWakeUp(void)
+{
+	//起き上がりアニメーションに変更
+	animationController_->Play((int)ANIM_TYPE::WAKE_UP, false);
+	stateUpdate_ = std::bind(&Player::UpdateWakeUp, this);
+}
+
 void Player::ChangeStateStageWalk(void)
 {
 	StageWalkReady();
@@ -438,7 +450,7 @@ void Player::ChangeStateStageWalk(void)
 void Player::ChangeStateLookAround(void)
 {
 	//周りを見渡すアニメーションに変更
-	animationController_->Play((int)ANIM_TYPE::LOOK_AROUND);
+	animationController_->Play((int)ANIM_TYPE::LOOK_AROUND,false);
 	stateUpdate_ = std::bind(&Player::UpdateLookAround, this);
 }
 
@@ -473,6 +485,18 @@ void Player::ChangeStateDead(void)
 
 void Player::UpdateNone(void)
 {//何もしない
+}
+
+void Player::UpdateWakeUp(void)
+{
+	//起き上がりアニメーションが終了したら待機状態へ移行
+	if(animationController_->IsEnd() &&
+		animationController_->GetPlayType() == (int)ANIM_TYPE::WAKE_UP)
+	{
+		animationController_->Play((int)ANIM_TYPE::IDLE);
+		ChangeState(STATE::PLAY);
+		return;
+	}
 }
 
 void Player::UpdateStageWalk(void)
