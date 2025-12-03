@@ -41,7 +41,11 @@ public:
 	/// <returns>現在のステージモデル情報</returns>
 	const Transform& GetTransform(void){ return transform_; }
 
+	const Transform& GetMistWallTransform(void) { return mistWallTransform_; }
+
 	void IsBattle(void) { isBattle_ = true; }
+
+	void SetMistWall(const bool isVisible) { isBattle_ = isVisible; }
 
 private:
 	//ステージのマテリアルとレンダー

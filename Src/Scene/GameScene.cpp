@@ -105,7 +105,9 @@ void GameScene::Init(void)
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	player_->AddCollider(stage_->GetTransform().collider);
+	player_->AddCollider(stage_->GetMistWallTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
+	enemy_->AddCollider(stage_->GetMistWallTransform().collider);
 
 	// ポストエフェクト用スクリーン
 	postEffectScreen_ = MakeScreen(
@@ -144,11 +146,6 @@ void GameScene::Draw(void)
 {
 	//更新ステップ
 	stateDraw_();
-
-	//VECTOR pos = player_->GetTransform().pos;
-	//pos = VAdd(pos, VScale(
-	//	VAdd(player_->GetTransform().GetRight(), player_->GetTransform().GetForward()), 100.0f));
-	//DrawSphere3D(pos, 20.0f, 32, 0xffffff, 0xffffff, true);
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
 	//for (auto& light : pointLight_)

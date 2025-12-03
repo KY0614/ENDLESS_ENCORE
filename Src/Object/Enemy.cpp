@@ -216,7 +216,6 @@ const bool Enemy::GetIsDead(void) const
 
 void Enemy::Init3DModel(void)
 {
-	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
 	const json data = GetJsonData();
 
@@ -268,7 +267,6 @@ void Enemy::InitCollider(void)
 
 void Enemy::InitAnimation(void)
 {
-	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得w
 	const json& data = GetJsonData();
 	//データが含まれていない場合はエラーメッセージを出す
@@ -343,13 +341,6 @@ void Enemy::Move(void)
 		std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
 		std::shuffle(moveDir.begin(), moveDir.end(), engine);
 		moveDir_ = moveDir[0];
-
-
-
-		//if( CheckMovePos())
-		//{
-		//	moveDir_ = VScale(moveDir_, -1.0f); // 逆方向に変更
-		//}
 
 		//移動方向に応じて歩行アニメーションを変更
 		if (CommonUtility::Equals(moveDir_, transform_.GetLeft()))
