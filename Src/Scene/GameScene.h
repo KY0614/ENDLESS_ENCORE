@@ -16,16 +16,17 @@ class SpotLight;
 class GameScene : public SceneBase
 {
 public:
-
+	
+	//状態
 	enum class STATE
 	{
-		LOADING,
-		WAKE_UP,
-		EXPLORE,
-		ENCOUNT,
-		BATTLE,
-		ENEMY_SUMMON,
-		BATTLE_SECOND,
+		LOADING,	//読み込み
+		WAKE_UP,	//ゲーム開始
+		EXPLORE,	//探索
+		ENCOUNT,	//エンカウント演出
+		BATTLE,		//戦闘
+		ENEMY_SUMMON,//雑魚敵召喚
+		BATTLE_SECOND,//戦闘第2フェーズ
 	};
 
 	//コンストラクタ
@@ -95,6 +96,8 @@ private:
 	float loadingTime_;
 
 	void Backstab(void);
+
+	void InitStateExplore(void);
 
 	//状態遷移--------------------------------------------------------
 

@@ -46,6 +46,7 @@ public:
 		LIGHT_UP_SE,
 		GAME_BGM,
 		PARRY_SE,
+		WAKE_UP_SE,
 	};
 
 	// 明示的にインステンスを生成する

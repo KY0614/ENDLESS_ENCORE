@@ -11,7 +11,7 @@ class Stage;
 class EncountScene :  public SceneBase
 {
 public:
-	// 演出のサブステートを定義
+	//演出ごとの状態
 	enum class STATE
 	{
 		NONE,                   //初期状態
@@ -77,18 +77,6 @@ private:
 	bool isStateActioned_;
 
 	bool isFinish_;				//シーン終了フラグ
-
-	/// <summary>
-	/// フェードアウトが終了したかどうか
-	/// </summary>
-	/// <returns>true: 終了 false : 終了していない</returns>
-	bool IsFadeOutEnd(void);
-
-	/// <summary>
-	/// フェードインが終了したかどうか
-	/// </summary>
-	/// <returns>true: 終了 false : 終了していない</returns>
-	bool IsFadeInEnd(void);
 
 	/// <summary>
 	/// 状態遷移

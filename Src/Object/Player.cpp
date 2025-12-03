@@ -106,6 +106,7 @@ Player::Player(void)
 	stepWalk_ = 0.0f;
 	stringAlpha_ = 0;
 	isActionEnd_ = false;
+	clothSE_ = false;
 }
 
 Player::~Player(void)
@@ -117,6 +118,9 @@ void Player::Init(void)
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PARRY,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::PARRY_SE).handleId_);
+	
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::WAKE_UP,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::WAKE_UP_SE).handleId_);
 
 	colliders_.clear();
 
@@ -436,8 +440,9 @@ void Player::ChangeStateNone(void)
 
 void Player::ChangeStateWakeUp(void)
 {
+	const float wakeUpEnd = 320.0f;
 	//起き上がりアニメーションに変更
-	animationController_->Play((int)ANIM_TYPE::WAKE_UP, false);
+	animationController_->Play((int)ANIM_TYPE::WAKE_UP, false, 0.0f,wakeUpEnd);
 	stateUpdate_ = std::bind(&Player::UpdateWakeUp, this);
 }
 
@@ -489,13 +494,21 @@ void Player::UpdateNone(void)
 
 void Player::UpdateWakeUp(void)
 {
-	//起き上がりアニメーションが終了したら待機状態へ移行
-	if(animationController_->IsEnd() &&
-		animationController_->GetPlayType() == (int)ANIM_TYPE::WAKE_UP)
+	if (isActionEnd_)return;
+	if (!clothSE_)
 	{
+		SoundManager& sound = SoundManager::GetInstance();
+		sound.Play(SoundManager::SOUND::WAKE_UP);
+		clothSE_ = true;
+	}
+	//起き上がりアニメーションが終了したら待機状態へ移行
+	if(animationController_->IsEnd()/* &&
+		animationController_->GetPlayType() == (int)ANIM_TYPE::WAKE_UP*/)
+	{
+		isActionEnd_ = true;
 		animationController_->Play((int)ANIM_TYPE::IDLE);
-		ChangeState(STATE::PLAY);
-		return;
+		//ChangeState(STATE::PLAY);
+		//return;
 	}
 }
 
@@ -934,21 +947,21 @@ void Player::CalcGravityPow(void)
 		// 地面にいる場合はジャンプ力をリセット
 		//jumpPow_ = CommonUtility::VECTOR_ZERO;
 
-		// 重力方向
+		//重力方向
 		VECTOR dirGravity = CommonUtility::DIR_D;
 
-		// 重力の強さ
+		//重力の強さ
 		float gravityPow = GRAVITY_POW;
 
 		//重力
 		VECTOR gravity = VScale(dirGravity, gravityPow);
 		jumpPow_ = VAdd(jumpPow_, gravity);
 
-		// 内積
+		//内積
 		float dot = VDot(dirGravity, jumpPow_);
 		if (dot >= 0.0f)
 		{
-			// 重力方向と反対方向(マイナス)でなければ、ジャンプ力を無くす
+			//重力方向と反対方向(マイナス)でなければ、ジャンプ力を無くす
 			jumpPow_ = gravity;
 		}
 	}
@@ -1062,19 +1075,7 @@ void Player::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
-	// 角度
-	//VECTOR rotDeg = VECTOR();
-	//rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.x);
-	//rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.y);
-	//rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.z);
-	//ImGui::Text("angle(deg)");
-	//ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
-	//ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
-	//ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
-	//transform_.quaRot = Quaternion::Euler(
-	//	CommonUtility::Deg2RadF(rotDeg.x),
-	//	CommonUtility::Deg2RadF(rotDeg.y),
-	//	CommonUtility::Deg2RadF(rotDeg.z));
+
 	//終了処理
 	ImGui::End();
 }

@@ -87,11 +87,30 @@ public:
 
 	void ResetFog(void);
 
-	void SetShakeScreen(bool isShake);
+	/// <summary>
+	/// 画面揺らし開始
+	/// </summary>
+	void StartShakeScreen(void);
 
 	void SceneID2Game(void) { sceneId_ = SCENE_ID::GAME; }
 
+	/// <summary>
+	/// メインスクリーン取得
+	/// </summary>
+	/// <returns>メインスクリーンのハンドル</returns>
 	int GetMainScreen(void) const { return mainScreen_; }
+
+	/// <summary>
+	/// フェードアウトが終わったかどうか
+	/// </summary>
+	/// <returns>true:終了 false:フェードアウト中</returns>
+	bool IsFadeOutEnd(void);
+
+	/// <summary>
+	/// フェードイン終わったかどうか
+	/// </summary>
+	/// <returns>true:終了 false:フェードイン中</returns>
+	bool IsFadeInEnd(void);
 
 private:
 
@@ -121,7 +140,7 @@ private:
 
 	//フォグ
 	float fogStart_;	//開始位置
-	float fogEnd_;	//終了位置
+	float fogEnd_;		//終了位置
 
 	//ライトの方向
 	VECTOR lightDir_;
@@ -155,6 +174,8 @@ private:
 	//SCENE_IDからシーンを生成する
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
+
+
 	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
 	/// </summary>

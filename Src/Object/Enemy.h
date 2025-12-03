@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <map>
+#include "../Libs/nlohmann/json.hpp"
 #include "ActorBase.h"
 
 class AnimationController;
@@ -136,6 +137,13 @@ private:
 	//当たり判定用カプセル
 	Player& player_;
 
+	//衝突チェック	
+	VECTOR gravHitPosDown_;	//重力方向の当たり判定位置
+	VECTOR gravHitPosUp_;	//重力と逆方向の当たり判定位置
+	VECTOR movedPos_;	//移動後の位置
+	VECTOR movePow_;	//移動量
+
+	//移動方向
 	VECTOR moveDir_;
 
 	//体力
@@ -205,6 +213,10 @@ private:
 	/// </summary>
 	void Move(void);
 
+	bool CheckMovePos(void);
+
+	void ControlMoveDir(void);
+
 	/// <summary>
 	/// プレイヤーとの距離をチェックする
 	/// </summary>
@@ -222,6 +234,16 @@ private:
 
 	//衝突判定--------------------------------------------------------
 	
+	/// <summary>
+	/// 衝突判定処理
+	/// </summary>
+	void Collision(void);
+
+	/// <summary>
+	/// カプセルの衝突判定処理
+	/// </summary>
+	void CollisionCapsule(void);
+
 	/// <summary>
 	/// 重力方向の衝突判定処理
 	/// </summary>
@@ -392,6 +414,8 @@ private:
 	/// 更新：DEAD
 	/// </summary>
 	void UpdateDead(void);
+
+	const nlohmann::json GetJsonData(void)const;
 
 	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)

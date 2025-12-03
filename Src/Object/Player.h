@@ -234,9 +234,13 @@ private:
 	bool isParry_;
 	float stepParry_;
 
-	int stringAlpha_;	//結果表示用文字列のアルファ値
+	//結果表示用文字列のアルファ値
+	int stringAlpha_;
 
 	bool isActionEnd_;
+
+	//布擦れSE再生フラグ
+	bool clothSE_;
 
 	void LoadData(void);
 

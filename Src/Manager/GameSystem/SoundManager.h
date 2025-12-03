@@ -25,6 +25,8 @@ public:
 		LIGHT_UP,
 
 		BATTLE,
+		//PLAYER—p
+		WAKE_UP,
 		PARRY,
 
 		TITLE,

@@ -300,13 +300,25 @@ void SceneManager::ResetFog(void)
 	SetFogStartEnd(fogStart_, fogEnd_);
 }
 
-void SceneManager::SetShakeScreen(bool isShake)
+void SceneManager::StartShakeScreen(void)
 {
-	if (isShake)
-	{
-		shakeFrame_ = SHAKE_FRAME;
-		shakeRate_ = 1.0f;
-	}
+	//画面揺らしのフレームとレートを設定
+	shakeFrame_ = SHAKE_FRAME;
+	shakeRate_ = 1.0f;
+}
+
+bool SceneManager::IsFadeOutEnd(void)
+{
+	//true:フェードアウト終了 false:まだ終了していない
+	return fader_->GetState() == Fader::STATE::FADE_OUT &&
+		fader_->IsEnd();
+}
+
+bool SceneManager::IsFadeInEnd(void)
+{
+	//true:フェードイン終了 false:まだ終了していない
+	return fader_->GetState() == Fader::STATE::FADE_IN &&
+		fader_->IsEnd();
 }
 
 SceneManager::SceneManager(void)

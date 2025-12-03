@@ -48,7 +48,7 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 
 	cube_ = std::make_unique<Box>(transform_);
 	//cube_->SetLocalCenter(VGet(0.0f, -150.0f, 3000.0f));
-	cube_->SetLocalCenter(VGet(0.0f, 0.0f, 0.0f));
+	cube_->SetLocalCenter(VGet(0.0f, 0.0f, 3000.0f));
 	cube_->SetSize(VGet(2700.0f/2.0f, 500.0f / 2.0f, 500.0f));
 }
 
@@ -92,9 +92,10 @@ void Stage::Draw(void)
 {
 	stageRenderer_->Draw();
 
+	cube_->Draw();
+
 	if (!isBattle_)return;
 	mistWallRenderer_->Draw();
-	//cube_->Draw();
 }
 
 void Stage::UpdateDebugImGui(void)

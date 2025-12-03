@@ -95,7 +95,7 @@ void GameScene::Init(void)
 	enemy_ = std::make_shared<Enemy>(*player_);
 	enemy_->Init();
 
-	//敵
+	//演出シーン
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
 	encountScene_->Init();
 
@@ -122,7 +122,7 @@ void GameScene::Init(void)
 	);
 
 	//初期状態設定
-	ChangeState(STATE::WAKE_UP);
+	ChangeState(STATE::BATTLE);
 }
 
 void GameScene::Update(void)
@@ -145,10 +145,10 @@ void GameScene::Draw(void)
 	//更新ステップ
 	stateDraw_();
 
-	VECTOR pos = player_->GetTransform().pos;
-	pos = VAdd(pos, VScale(
-		VAdd(player_->GetTransform().GetRight(), player_->GetTransform().GetForward()), 100.0f));
-	DrawSphere3D(pos, 20.0f, 32, 0xffffff, 0xffffff, true);
+	//VECTOR pos = player_->GetTransform().pos;
+	//pos = VAdd(pos, VScale(
+	//	VAdd(player_->GetTransform().GetRight(), player_->GetTransform().GetForward()), 100.0f));
+	//DrawSphere3D(pos, 20.0f, 32, 0xffffff, 0xffffff, true);
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
 	//for (auto& light : pointLight_)
@@ -204,9 +204,47 @@ void GameScene::Backstab(void)
 	}
 }
 
+void GameScene::InitStateExplore(void)
+{
+	//フェードイン開始
+	SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
+	//カメラ
+	mainCamera->SetFollow(&player_->GetTransform());
+	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+
+	//敵とプレイヤーの状態設定
+	enemy_->ChangeState(Enemy::STATE::NONE);
+	player_->ChangeState(Player::STATE::PLAY);
+
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
+	sound.Play(SoundManager::SOUND::EXPLORE);
+}
+
 void GameScene::ChangeState(STATE state)
 {
 	state_ = state;
+
+	switch (state_)
+	{
+	case GameScene::STATE::LOADING:
+		break;
+	case GameScene::STATE::WAKE_UP:
+		break;
+	case GameScene::STATE::EXPLORE:
+		InitStateExplore();
+		break;
+	case GameScene::STATE::ENCOUNT:
+		break;
+	case GameScene::STATE::BATTLE:
+		break;
+	case GameScene::STATE::ENEMY_SUMMON:
+		break;
+	case GameScene::STATE::BATTLE_SECOND:
+		break;
+	default:
+		break;
+	}
 
 	//各状態遷移の初期処理
 	stateChanges_[state_]();
@@ -237,10 +275,6 @@ void GameScene::ChangeStateWakeUp(void)
 
 void GameScene::ChangeStateExplore(void)
 {
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
-	sound.Play(SoundManager::SOUND::EXPLORE);
-
 	stateUpdate_ = std::bind(&GameScene::UpdateExplore, this);
 	stateDraw_ = std::bind(&GameScene::DrawExplore, this);
 }
@@ -256,6 +290,8 @@ void GameScene::ChangeStateBattle(void)
 	stage_->IsBattle();
 	enemy_->ChangeState(Enemy::STATE::MOVE);
 	player_->ChangeState(Player::STATE::PLAY);
+	mainCamera->SetFollow(&player_->GetTransform());
+	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 	stateUpdate_ = std::bind(&GameScene::UpdateBattle, this);
 	stateDraw_ = std::bind(&GameScene::DrawBattle, this);
 }
@@ -321,11 +357,20 @@ void GameScene::LoadingDraw(void)
 
 void GameScene::UpdateWakeUp(void)
 {
-	if(player_->GetState() == Player::STATE::PLAY)
+	//プレイヤーの行動が終了したらフェードアウト開始
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	if(player_->IsActionEnd() &&
+		fader.lock()->GetState() != Fader::STATE::FADE_OUT)
+	{
+		fader.lock()->SetFade(Fader::STATE::FADE_OUT);
+	}
+	//フェードアウトが完了したら探索状態へ遷移
+	if (SceneManager::GetInstance().IsFadeOutEnd())
 	{
 		ChangeState(STATE::EXPLORE);
 		return;
 	}
+
 	//更新
 	stage_->Update();
 	player_->Update();
@@ -344,6 +389,8 @@ void GameScene::DrawWakeUp(void)
 
 void GameScene::UpdateExplore(void)
 {
+	if (!SceneManager::GetInstance().IsFadeInEnd())return;
+	
 	//Z値850を超えるとエンカウント状態へ遷移
 	//(ステージの手前端よりも奥)
 	const float stagePosZ = 850.0f;
@@ -464,7 +511,7 @@ void GameScene::UpdateBattle(void)
 
 	if (ins.IsInputTriggered("CameraShake"))
 	{
-		SceneManager::GetInstance().SetShakeScreen(true);
+		SceneManager::GetInstance().StartShakeScreen();
 	}
 
 #endif // _DEBUG
@@ -580,8 +627,7 @@ void GameScene::UpdateDebugImGui(void)
 	//状態変更ボタン
 	if (ImGui::Button("Explore"))
 	{
-		enemy_->ChangeState(Enemy::STATE::NONE);
-		player_->ChangeState(Player::STATE::PLAY);
+		InitStateExplore();
 		ChangeState(STATE::EXPLORE);
 	}
 	if (ImGui::Button("Encount"))

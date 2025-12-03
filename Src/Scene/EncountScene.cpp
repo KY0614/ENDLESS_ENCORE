@@ -45,52 +45,24 @@ void EncountScene::Init(void)
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::LIGHT_UP_SE).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 256 / 2);
 
-	//fader_ = std::make_unique<Fader>();
-	//fader_->Init();
-
 	//初期状態
 	ChangeState(STATE::NONE);
 }
 
 void EncountScene::Update(void)
 {
-	//fader_->Update();
-
 	//更新ステップ
 	stateUpdate_();
 }
 
 void EncountScene::Draw(void)
 {
-	//暗転・明転
-	//fader_->Draw();
-
 	//DebugDraw();
 }
 
 void EncountScene::Start(void)
 {
 	ChangeStateFade();
-}
-
-bool EncountScene::IsFadeOutEnd(void)
-{
-	//フェードアウトが終わったかどうか
-	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
-	return fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
-		fader.lock()->IsEnd();
-	//return fader_->GetState() == Fader::STATE::FADE_OUT &&
-	//	fader_->IsEnd();
-}
-
-bool EncountScene::IsFadeInEnd(void)
-{
-	//フェードインが終わったかどうか
-	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
-	return fader.lock()->GetState() == Fader::STATE::FADE_IN &&
-		fader.lock()->IsEnd();
-	//return fader_->GetState() == Fader::STATE::FADE_IN &&
-	//	fader_->IsEnd();
 }
 
 void EncountScene::ChangeState(STATE state)
@@ -113,7 +85,6 @@ void EncountScene::ChangeStateFade(void)
 {
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
 	fader.lock()->SetFade(Fader::STATE::FADE_OUT);
-	//fader_->SetFade(Fader::STATE::FADE_OUT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateFade, this);
 }
 
@@ -192,7 +163,6 @@ void EncountScene::ChangeStateFinish(void)
 {
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
 	fader.lock()->SetFade(Fader::STATE::FADE_OUT);
-	//fader_->SetFade(Fader::STATE::FADE_OUT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateFinish, this);
 }
 
@@ -203,8 +173,7 @@ void EncountScene::UpdateNone(void)
 void EncountScene::UpdateFade(void)
 {
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
-	if (fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
-		fader.lock()->IsEnd())
+	if (SceneManager::GetInstance().IsFadeOutEnd())
 	{
 		fader.lock()->SetFade(Fader::STATE::FADE_IN);
 		ChangeState(STATE::PLAYER_WALK);
@@ -233,10 +202,7 @@ void EncountScene::UpdatePlayerWalk(void)
 void EncountScene::UpdatePlayerAttention(void)
 {
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
-	//フェードアウトが終わった判定
-	const bool fadeOutEnd = fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
-		fader.lock()->IsEnd();
-	if (fadeOutEnd)
+	if (SceneManager::GetInstance().IsFadeOutEnd())
 	{
 		//フェードイン開始
 		fader.lock()->SetFade(Fader::STATE::FADE_IN);
@@ -257,13 +223,9 @@ void EncountScene::UpdatePlayerAttention(void)
 		return;
 	}
 
-	//フェードインが終わった判定
-	const bool fadeInEnd = fader.lock()->GetState() == Fader::STATE::FADE_IN &&
-		fader.lock()->IsEnd();
-
 	//フェードイン終了後、カメラのクレーンアップが終わったら
 	//インターバル時間を経過させる
-	if (fadeInEnd &&
+	if (SceneManager::GetInstance().IsFadeInEnd() &&
 		mainCamera->IsActionEnd())
 	{
 		//一定時間経過
@@ -372,12 +334,8 @@ void EncountScene::UpdateEnemyAttention(void)
 void EncountScene::UpdateFinish(void)
 {
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
-
-	//フェードアウトが終わった判定
-	const bool fadeOutEnd = fader.lock()->GetState() == Fader::STATE::FADE_OUT &&
-		fader.lock()->IsEnd();
 	//フェードアウトが終わったら演出終了フラグを立てる
-	if (fadeOutEnd)
+	if (SceneManager::GetInstance().IsFadeOutEnd())
 	{
 		isFinish_ = true;
 	}

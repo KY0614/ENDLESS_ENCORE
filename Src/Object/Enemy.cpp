@@ -38,10 +38,13 @@ namespace
 	static const std::string KEY_STAND_UP = "Stand Up";
 	static const std::string KEY_DEATH = "Death";
 	static const std::string KEY_MAX_HP = "maxHp";
+	static const std::string KEY_MAX_POS = "maxPosition";
+	static const std::string KEY_MIN_POS = "minPosition";
 	//回転にかける時間
 	const float TIME_ROT = 0.1f;
 	//敵の基本パラメータ
-	const float MOVE_SPEED = 7.0f;	//移動速度
+	const float MOVE_SPEED = 2.0f;		//移動速度
+	const float FOLLOW_SPEED = 7.0f;	//追従速度
 	//距離の基準値
 	const float ATTACK_NEAR_DISTANCE = 350.0f;	//近距離攻撃判定距離
 	const float ATTACK_FAR_DISTANCE = 800.0f;	//遠距離攻撃判定距離
@@ -60,8 +63,6 @@ namespace
 	const float BACKSTAB_DAMAGE = 50.0f;
 	const float CHARGE_DAMAGE = 100.0f;
 
-	//アニメーション再生速度
-	const float ANIM_SPEED = 30.0f;
 	//ダウンする時間
 	const float DOWN_TIME = 4.0f;
 
@@ -70,15 +71,18 @@ namespace
 
 	//重力加速度
 	const float GRAVITY_POW = 15.0f;
-
 }
 
-Enemy::Enemy(Player& player):player_(player)
+Enemy::Enemy(Player& player):
+	player_(player)
 {
 	hp_ = 0.0f;
 	maxHp_ = 0.0f;
 	stateStep_ = 0.0f;
 	changeDirStep_ = 0.0f;
+	gravHitPosDown_ = CommonUtility::VECTOR_ZERO;
+	gravHitPosUp_ = CommonUtility::VECTOR_ZERO;
+	movedPos_ = CommonUtility::VECTOR_ZERO;
 	state_ = STATE::NONE;
 	prevState_ = STATE::NONE;
 	col_ = 0xff0000;
@@ -138,6 +142,7 @@ void Enemy::Init(void)
 void Enemy::Update(void)
 {
 	if (hp_ <= 0.0f)hp_ = 0.0f;
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -213,15 +218,11 @@ void Enemy::Init3DModel(void)
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
+	const json data = GetJsonData();
 
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(KEY_ENEMY))assert(0 && "データが存在しないか不正なデータです");
-	const json& param = data[KEY_ENEMY];
-
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
-	const json& transformData = param[JsonManager::KEY_TRANSFORM];
+	if (!data.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
+	const json& transformData = data[JsonManager::KEY_TRANSFORM];
 
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
@@ -238,7 +239,7 @@ void Enemy::Init3DModel(void)
 	transform_.Update();
 
 	//HPを設定
-	const json& paramData = param[JsonManager::KEY_PARAMETER];
+	const json& paramData = data[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 }
@@ -269,11 +270,10 @@ void Enemy::InitAnimation(void)
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得w
-	const json& data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
-	const json& param = data[KEY_ENEMY];
+	const json& data = GetJsonData();
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!param.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
-	const json& animPath = param[JsonManager::KEY_ANIMATION];
+	if (!data.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
+	const json& animPath = data[JsonManager::KEY_ANIMATION];
 
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Enemy/Animation/";
@@ -333,7 +333,6 @@ void Enemy::Move(void)
 	changeDirStep_ += SceneManager::GetInstance().GetDeltaTime();
 	//一定時間経過したら移動方向をランダムで変更
 	const float changeInterval = 1.0f;
-
 	if (changeDirStep_ >= changeInterval)
 	{
 		changeDirStep_ = 0.0f;
@@ -344,6 +343,14 @@ void Enemy::Move(void)
 		std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
 		std::shuffle(moveDir.begin(), moveDir.end(), engine);
 		moveDir_ = moveDir[0];
+
+
+
+		//if( CheckMovePos())
+		//{
+		//	moveDir_ = VScale(moveDir_, -1.0f); // 逆方向に変更
+		//}
+
 		//移動方向に応じて歩行アニメーションを変更
 		if (CommonUtility::Equals(moveDir_, transform_.GetLeft()))
 		{
@@ -354,9 +361,10 @@ void Enemy::Move(void)
 			animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
 		}
 	}
-	//移動方向をスピード分加算
-	const float speed = 2.0f;
-	transform_.pos = VAdd(transform_.pos, VScale(moveDir_, speed));
+	movePow_ = VScale(moveDir_, MOVE_SPEED);
+	//移動処理
+	movedPos_ = VAdd(transform_.pos, movePow_);
+	transform_.pos = movedPos_;
 }
 
 float Enemy::CheckPlayerDistance(void)
@@ -426,7 +434,7 @@ void Enemy::FollowPlayer(VECTOR& pos)
 	float size = sqrtf(lookAt.x * lookAt.x + lookAt.z * lookAt.z);
 
 	//敵の移動処理
-	if (size < MOVE_SPEED)
+	if (size < FOLLOW_SPEED)
 	{
 		//ぶるぶるしないように
 		//移動量よりも位置差が短い場合はプレイヤーに重なる
@@ -440,8 +448,8 @@ void Enemy::FollowPlayer(VECTOR& pos)
 		VECTOR dirNorm = { lookAt.x / size, lookAt.y / size,lookAt.z / size };
 
 		//位置ベクトルを使って敵を移動
-		pos.x += static_cast<float>(dirNorm.x * MOVE_SPEED);
-		pos.z += static_cast<float>(dirNorm.z * MOVE_SPEED);
+		pos.x += static_cast<float>(dirNorm.x * FOLLOW_SPEED);
+		pos.z += static_cast<float>(dirNorm.z * FOLLOW_SPEED);
 
 		//向き画像を決める
 		//水平か鉛直を選択する
@@ -481,6 +489,76 @@ void Enemy::FollowPlayer(VECTOR& pos)
 	}
 }
 
+void Enemy::Collision(void)
+{
+	//重力方向
+	VECTOR dirGravity = CommonUtility::DIR_D;
+
+	//重力の強さ
+	float gravityPow = GRAVITY_POW;
+
+	//重力
+	VECTOR gravity = VScale(dirGravity, gravityPow);
+	transform_.pos = VAdd(transform_.pos, gravity);
+
+	//現在座標を起点に移動後座標を決める
+	movedPos_ = VAdd(transform_.pos, movePow_);
+
+	//衝突(カプセル)
+	CollisionCapsule();
+
+	// 衝突(重力)
+	CollisionGravity();
+
+	transform_.pos = movedPos_;
+}
+
+void Enemy::CollisionCapsule(void)
+{
+	//カプセルを移動させる
+	Transform trans = Transform(transform_);
+	trans.pos = movedPos_;
+	trans.Update();
+	Capsule cap = Capsule(*capsule_, trans);
+	//カプセルとの衝突判定
+	for (const std::weak_ptr<Collider> c : colliders_)
+	{
+		MV1_COLL_RESULT_POLY_DIM hits = MV1CollCheck_Capsule(
+			c.lock()->modelId_, -1,
+			cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius());
+		//衝突した複数のポリゴンと衝突回避するまで、
+		//プレイヤーの位置を移動させる
+		for (int i = 0; i < hits.HitNum; i++)
+		{
+			MV1_COLL_RESULT_POLY hit = hits.Dim[i];
+			//地面と異なり、衝突回避位置が不明なため、何度か移動させる
+			//この時、移動させる方向は、移動前座標に向いた方向であったり、
+			//衝突したポリゴンの法線方向だったりする
+			for (int tryCnt = 0; tryCnt < 10; tryCnt++)
+			{
+				//再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
+				//最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
+				int pHit = HitCheck_Capsule_Triangle(
+					cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius(),
+					hit.Position[0], hit.Position[1], hit.Position[2]);
+
+				if (pHit)
+				{
+					//法線の方向にちょっとだけ移動させる
+					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 2.0f));
+					//カプセルも一緒に移動させる
+					trans.pos = movedPos_;
+					trans.Update();
+					continue;
+				}
+				break;
+			}
+		}
+		//検出した地面ポリゴン情報の後始末
+		MV1CollResultPolyDimTerminate(hits);
+	}
+}
+
 void Enemy::CollisionGravity(void)
 {
 	// 重力方向
@@ -492,21 +570,21 @@ void Enemy::CollisionGravity(void)
 	// 重力の強さ
 	float gravityPow = GRAVITY_POW;
 
-	//float checkPow = 10.0f;
-	//gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
-	//gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
-	//for (const auto c : colliders_)
-	//{
-	//	//地面との衝突
-	//	auto hit = MV1CollCheck_Line(
-	//		c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
+	float checkPow = 10.0f;
+	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
+	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
+	for (const auto c : colliders_)
+	{
+		//地面との衝突
+		auto hit = MV1CollCheck_Line(
+			c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
 
-	//	if (hit.HitFlag > 0 && VDot(dirGravity, CommonUtility::VECTOR_ZERO) > 0.9f)
-	//	{
-	//		// 衝突地点から、少し上に移動
-	//		movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
-	//	}
-	//}
+		if (hit.HitFlag > 0 && VDot(dirGravity, CommonUtility::VECTOR_ZERO) > 0.9f)
+		{
+			// 衝突地点から、少し上に移動
+			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
+		}
+	}
 }
 
 void Enemy::SetGoalRotate(double rotRad)
@@ -778,6 +856,9 @@ void Enemy::UpdateFollow(void)
 
 	//追従処理
 	FollowPlayer(transform_.pos);
+
+	Collision();
+
 	//回転処理
 	Rotate();
 }
@@ -791,7 +872,7 @@ void Enemy::UpdateMove(void)
 
 	//移動処理
 	Move();
-
+	Collision();
 	if (stateStep_ > MOVE_TIME)
 	{
 		//HPが最大の半分以下になっていたらチャージ攻撃状態に遷移
@@ -877,7 +958,7 @@ void Enemy::UpdateAttackNear(void)
 		if (player_.GetIsDodge())return;
 		player_.Damage(ATTACK_DAMAGE);
 		//画面揺らし
-		SceneManager::GetInstance().SetShakeScreen(true);
+		SceneManager::GetInstance().StartShakeScreen();
 		isStepActioned_ = true;
 	}
 }
@@ -952,7 +1033,7 @@ void Enemy::UpdateShotOne(void)
 			if (player_.GetIsDodge())continue;
 			//ダメージ処理(当たった弾は破棄)
 			player_.Damage(ATTACK_DAMAGE);
-			SceneManager::GetInstance().SetShakeScreen(true);
+			SceneManager::GetInstance().StartShakeScreen();
 			bullet->Destroy();
 		}
 
@@ -1065,7 +1146,7 @@ void Enemy::UpdateShotAll(void)
 			}
 			//ダメージ処理(当たった弾は破棄)
  			player_.Damage(ATTACK_DAMAGE);
-			SceneManager::GetInstance().SetShakeScreen(true);
+			SceneManager::GetInstance().StartShakeScreen();
 			bullet->Destroy();
 		}
 
@@ -1196,10 +1277,24 @@ void Enemy::UpdateDead(void)
 {//何もしない
 }
 
+const json Enemy::GetJsonData(void)const
+{
+	JsonManager& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(KEY_ENEMY))assert(0 && "データが存在しないか不正なデータです");
+	const json& param = data[KEY_ENEMY];
+	return param;
+}
+
 void Enemy::UpdateDebugImGui(void)
 {
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Enemy");
+
+	ImGui::InputFloat3("pos", &transform_.pos.x);
 
 	//HP用スライダー
 	ImGui::SliderFloat("HP", &hp_, 0.0f,maxHp_);
