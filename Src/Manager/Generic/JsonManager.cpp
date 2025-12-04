@@ -43,12 +43,16 @@ void JsonManager::Destroy(void)
 	delete instance_;
 }
 
-const nlohmann::json& JsonManager::GetJsonData(const JSON_DATA data)const
+const nlohmann::json& JsonManager::GetJsonData(
+	const JSON_DATA dataType,
+	const std::string data)const
 {
-	return jsonDataMap_.at(data);
+	return jsonDataMap_.at(dataType).at(data);
 }
 
-nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::string& dataName)
+nlohmann::json JsonManager::LoadData(
+	const std::string& fileName,
+	const std::string& dataName)
 {
 	std::ifstream ifs(fileName);
 	if (!ifs)return nlohmann::json();

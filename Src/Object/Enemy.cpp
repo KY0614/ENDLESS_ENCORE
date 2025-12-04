@@ -1272,12 +1272,13 @@ const json Enemy::GetJsonData(void)const
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::ENEMY);
+	const json data = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::ENEMY,KEY_ENEMY);
 
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(KEY_ENEMY))assert(0 && "データが存在しないか不正なデータです");
-	const json& param = data[KEY_ENEMY];
-	return param;
+	//if (!data.contains(KEY_ENEMY))assert(0 && "データが存在しないか不正なデータです");
+	//const json& param = data[KEY_ENEMY];
+	return data;
 }
 
 void Enemy::UpdateDebugImGui(void)

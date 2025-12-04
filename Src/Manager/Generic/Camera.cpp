@@ -422,6 +422,10 @@ void Camera::SetBeforeDrawDollyIn(void)
 	pos_.z = Easing::QuadOut(dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.z, endPos.z);
 }
 
+void Camera::SetBeforeDrawSurroundView(void)
+{
+}
+
 void Camera::SetBeforeDrawFixedPoint(void)
 {
 	//‚È‚É‚à‚µ‚È‚¢

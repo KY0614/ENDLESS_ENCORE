@@ -46,8 +46,16 @@ public:
 	/// リソースの完全破棄
 	/// </summary>
 	void Destroy(void);
-
-	const nlohmann::json& GetJsonData(const JSON_DATA data)const;
+		
+	/// <summary>
+	/// Jsonデータを取得
+	/// </summary>
+	/// <param name="dataType">データの種類</param>
+	/// <param name="data">Jsonオブジェクト</param>
+	/// <returns>Jsonデータ</returns>
+	const nlohmann::json& GetJsonData(
+		const JSON_DATA dataType,
+		const std::string data)const;
 
 	/// <summary>
 	/// 指定されたオブジェクト名に基づいてデータを読み込む

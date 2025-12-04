@@ -124,7 +124,7 @@ void GameScene::Init(void)
 	);
 
 	//初期状態設定
-	ChangeState(STATE::BATTLE);
+	ChangeState(STATE::WAKE_UP);
 }
 
 void GameScene::Update(void)
@@ -211,7 +211,7 @@ void GameScene::InitStateExplore(void)
 
 	//敵とプレイヤーの状態設定
 	enemy_->ChangeState(Enemy::STATE::NONE);
-	player_->ChangeState(Player::STATE::PLAY);
+	player_->ChangeState(Player::STATE::WAIT);
 
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
@@ -394,7 +394,7 @@ void GameScene::UpdateExplore(void)
 	if (player_->GetTransform().pos.z > stagePosZ)
 	{
 		ChangeState(STATE::ENCOUNT);
-		encountScene_->Start();
+		encountScene_->Start();	//エンカウントシーン開始
 		return;
 	}
 
@@ -410,15 +410,6 @@ void GameScene::UpdateExplore(void)
 	player_->Update();
 	stage_->Update();
 	encountScene_->Update();
-
-#ifdef _DEBUG
-	if (ins.IsInputTriggered("Next"))
-	{
-		ChangeState(STATE::ENCOUNT);
-		encountScene_->Start();
-	}
-#endif // _DEBUG
-
 }
 
 void GameScene::DrawExplore(void)
@@ -490,8 +481,7 @@ void GameScene::UpdateBattle(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
-
-	//敵の体力が半分以下でバックスタブ状態でなければ敵召喚状態へ遷移
+	//敵の体力が半分以下で敵召喚状態へ遷移
 	if (/*!enemy_->GetIsBackstab() &&*/
 		enemy_->GetHP() <= enemy_->GetMaxHP() / 2.0f)
 	{
@@ -503,15 +493,6 @@ void GameScene::UpdateBattle(void)
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
-	
-#ifdef _DEBUG
-
-	if (ins.IsInputTriggered("CameraShake"))
-	{
-		SceneManager::GetInstance().StartShakeScreen();
-	}
-
-#endif // _DEBUG
 
 	if (ins.IsInputTriggered("Pause"))
 	{
@@ -594,7 +575,7 @@ void GameScene::DrawBattleSecond(void)
 {
 }
 
-void GameScene::DrawMessage(void)
+void GameScene::DrawMessage(const std::wstring& wStr)
 {
 	const int boxWidth = Application::SCREEN_SIZE_X - 100;
 	const int boxHeight = 200;
@@ -605,11 +586,10 @@ void GameScene::DrawMessage(void)
 		Application::SCREEN_SIZE_Y / 2 + boxHeight / 2,
 		0x000000, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	std::wstring str = L"静かに浮かぶ何かがある...。";
-	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
+	int diff = GetDrawStringWidth(wStr.c_str(), wStr.size(), NULL);
 	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
 		Application::SCREEN_SIZE_Y / 2 - 32,
-		str.c_str(), 0xFFFFFF);
+		wStr.c_str(), 0xFFFFFF);
 
 	const int lineY = Application::SCREEN_SIZE_Y / 2 + 16;
 	int lineX = (Application::SCREEN_SIZE_X / 2 - 150);

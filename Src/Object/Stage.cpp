@@ -92,7 +92,7 @@ void Stage::Draw(void)
 {
 	stageRenderer_->Draw();
 
-	cube_->Draw();
+	//cube_->Draw();
 
 	if (!isBattle_)return;
 	mistWallRenderer_->Draw();
@@ -124,14 +124,15 @@ void Stage::Init3DModel(void)
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
-	const json& data = jsonM.GetJsonData(JsonManager::JSON_DATA::STAGE);
+	const json& data = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::STAGE,KEY_STAGE);
 
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(KEY_STAGE))assert(0 && "データが存在しないか不正なデータです");
-	const json& stageData = data[KEY_STAGE];
+	//if (!data.contains(KEY_STAGE))assert(0 && "データが存在しないか不正なデータです");
+	//const json& stageData = data[KEY_STAGE];
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!stageData.contains(KEY_THEATER))assert(0 && "データが存在しないか不正なデータです");
-	const json& theaterData = stageData[KEY_THEATER];
+	if (!data.contains(KEY_THEATER))assert(0 && "データが存在しないか不正なデータです");
+	const json& theaterData = data[KEY_THEATER];
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!theaterData.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
@@ -139,8 +140,6 @@ void Stage::Init3DModel(void)
 
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::THEATER));
-	//const float stageScale = theaterTransformData.value(JsonManager::KEY_SCALE, 1.0f);
-	//transform_.scl = { stageScale ,stageScale ,stageScale };
 	transform_.scl = JsonManager::GetParseVector(theaterTransformData, JsonManager::KEY_SCALE);
 	transform_.pos = JsonManager::GetParseVector(theaterTransformData, JsonManager::KEY_POSITION);
 	transform_.quaRot = Quaternion();
@@ -148,8 +147,8 @@ void Stage::Init3DModel(void)
 	transform_.MakeCollider(Collider::TYPE::STAGE);
 	transform_.Update();
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!stageData.contains(KEY_MIST_WALL))assert(0 && "データが存在しないか不正なデータです");
-	const json& mistWallData = stageData[KEY_MIST_WALL];
+	if (!data.contains(KEY_MIST_WALL))assert(0 && "データが存在しないか不正なデータです");
+	const json& mistWallData = data[KEY_MIST_WALL];
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!mistWallData.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
@@ -170,10 +169,12 @@ void Stage::Init3DModel(void)
 
 void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 {
+	const int VS_CONST_BUF_NUM = 2;
+	const int PS_CONST_BUF_NUM = 7;
 	//モデル描画用
 	stageMaterial_ = std::make_unique<ModelMaterial>(
-		"StdModelVS.cso", 2,
-		"StdModelPS.cso", 7
+		"StdModelVS.cso", VS_CONST_BUF_NUM,
+		"StdModelPS.cso", PS_CONST_BUF_NUM
 	);
 	//カメラ座標
 	VECTOR CameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();

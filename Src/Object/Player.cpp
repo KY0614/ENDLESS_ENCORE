@@ -302,15 +302,16 @@ void Player::Init3DModel(void)
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
-	const json&  data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	const json&  playerData = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
 
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	const json& param = data[KEY_PLAYER];
+	//if (!playerData.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
+	//const json& param = data.at(KEY_PLAYER);
 
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!param.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
-	const json& transformData = param[JsonManager::KEY_TRANSFORM];
+	if (!playerData.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
+	const json& transformData = playerData.at(JsonManager::KEY_TRANSFORM);
 
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
@@ -324,7 +325,7 @@ void Player::Init3DModel(void)
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 	//HPを設定
-	const json& paramData = param[JsonManager::KEY_PARAMETER];
+	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 
@@ -359,11 +360,12 @@ void Player::InitAnimation(void)
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-	const json& param = data[KEY_PLAYER];
+	const json playerData = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::PLAYER,KEY_PLAYER);
+	//const json& param = data[KEY_PLAYER];
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!param.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
-	const json& animPath = param[JsonManager::KEY_ANIMATION];
+	if (!playerData.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
+	const json& animPath = playerData[JsonManager::KEY_ANIMATION];
 
 	//アニメーションコントローラーの生成とアニメーションの登録
 	const std::string path = Application::PATH_MODEL + "Player/";
@@ -421,12 +423,13 @@ void Player::StageWalkReady(void)
 	jumpPow_ = CommonUtility::VECTOR_ZERO;
 	//Jsonデータ取得
 	JsonManager& jsonM = JsonManager::GetInstance();
-	const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
+	const json playerData = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::PLAYER,KEY_PLAYER);
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!data.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	const json& param = data[KEY_PLAYER];	//Playerオブジェクトを取得
+	if (!playerData.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
+	//const json& param = data[KEY_PLAYER];	//Playerオブジェクトを取得
 	//パラメータを取得
-	const json& paramData = param[JsonManager::KEY_PARAMETER];
+	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
 	//座標をステージ上の端(手前側)に設定
 	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
 	//正面を向かせる(Z軸方向)
@@ -604,9 +607,10 @@ void Player::UpdateBackstab(void)
 	if (isPlay && animationController_->IsEnd())
 	{
 		//Jsonデータ取得
-		const json data = jsonM.GetJsonData(JsonManager::JSON_DATA::PLAYER);
-		const json& param = data[KEY_PLAYER];
-		const json& transformData = param[JsonManager::KEY_TRANSFORM];
+		const json playerData = jsonM.GetJsonData(
+			JsonManager::JSON_DATA::PLAYER,KEY_PLAYER);
+		//const json& param = data[KEY_PLAYER];
+		const json& transformData = playerData[JsonManager::KEY_TRANSFORM];
 		const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 		transform_.quaRotLocal =
 			Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
@@ -945,7 +949,7 @@ void Player::CalcGravityPow(void)
 	else
 	{
 		// 地面にいる場合はジャンプ力をリセット
-		//jumpPow_ = CommonUtility::VECTOR_ZERO;
+		jumpPow_ = CommonUtility::VECTOR_ZERO;
 
 		//重力方向
 		VECTOR dirGravity = CommonUtility::DIR_D;

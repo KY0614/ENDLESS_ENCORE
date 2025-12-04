@@ -49,7 +49,8 @@ public:
 		NONE,
 		CRANE_UP,	//カメラを上昇させる(向き固定)
 		TRACK,		//左右に移動させる(向き固定)
-		DOLLY_IN,	//
+		DOLLY_IN,	//被写体に対してカメラを前後移動させる
+		SURROUND_VIEW,//被写体に対して回り込むカメラ
 		FIXED_POINT,//固定カメラ
 		FOLLOW,		//追従
 		FREE,		//自由
@@ -181,13 +182,13 @@ private:
 	VECTOR fixedPointPos_;			//カメラ位置
 	VECTOR fixedPointTargetPos_;	//注視点
 
-	//クレーンアップ用座標
+	//クレーンアップ用
 	VECTOR craneUpStartPos_;	//開始位置
 	VECTOR craneUpTargetPos_;	//注視点
 	float craneUpDistance_;		//移動距離
 	float craneUpSpeed_;		//移動速度
 
-	//トラックカメラ用座標
+	//トラックカメラ用
 	VECTOR trackStartPos_;		//開始位置
 	VECTOR trackEndPos_;		//終了位置
 	VECTOR trackDir_;			//移動方向
@@ -195,11 +196,16 @@ private:
 	float trackTotalTime_;		//総移動時間
 	float trackElapsedTime_;	//経過時間
 
+	//ドリーインカメラ用
 	VECTOR dollyInStartPos_;	//開始位置
 	VECTOR dollyInObjectPos_;	//被写体の座標
 	float object2CameraDistance_;	//カメラから被写体までの距離
 	float dollyInTotalTime_;		//総移動時間
 	float dollyInElapsedTime_;		//経過時間
+
+	//回り込むカメラ用
+	VECTOR surroundViewStartPos_;	//開始位置
+	VECTOR surroundViewTargetPos_;	//被写体の座標
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
@@ -221,6 +227,7 @@ private:
 	void SetBeforeDrawCraneUp(void);
 	void SetBeforeDrawTrack(void);
 	void SetBeforeDrawDollyIn(void);
+	void SetBeforeDrawSurroundView(void);
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);

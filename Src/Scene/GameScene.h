@@ -218,11 +218,12 @@ private:
 	/// 戦闘第2フェーズの描画
 	/// </summary>
 	void DrawBattleSecond(void);
-
+	
 	/// <summary>
 	/// ゲーム中のメッセージ描画処理
 	/// </summary>
-	void DrawMessage(void);
+	/// <param name="wStr">描画する文字列</param>
+	void DrawMessage(const std::wstring& wStr);
 
 	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
