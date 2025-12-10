@@ -233,7 +233,7 @@ void Enemy::Init3DModel(void)
 	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	//モデルの初期回転(度数法で保存されているのでラジアンに変換)
 	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
-	transform_.quaRot = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
+	transform_.quaRot = Quaternion();
 	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 
@@ -707,9 +707,10 @@ void Enemy::ChangeStateNone(void)
 
 void Enemy::ChangeStateEncount(void)
 {
-	transform_.quaRot =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
-	transform_.quaRotLocal = Quaternion();
+	//const float encountRotY = 180.0f;
+	//transform_.quaRot =
+	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(encountRotY), 0.0f });
+
 	isEncount_ = true;
 	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
 }
@@ -722,9 +723,11 @@ void Enemy::ChangeStateTurn(void)
 
 void Enemy::ChangeStateEncountFinish(void)
 {
+	const float battleRotY = 180.0f;
 	transform_.quaRot =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
-	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(180.0f), 0.0f });
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-battleRotY), 0.0f });
+	//transform_.quaRotLocal = 
+	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(battleRotY), 0.0f });
 	stateUpdate_ = std::bind(&Enemy::UpdateEncountFinish, this);
 }
 
@@ -832,6 +835,8 @@ void Enemy::UpdateEncountFinish(void)
 
 void Enemy::UpdateWait(void)
 {
+	//プレイヤーのほうを向いて待機
+	RotateToPlayer();
 }
 
 void Enemy::UpdateFollow(void)
@@ -1345,18 +1350,26 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
-	// 角度
+	//角度
 	VECTOR rotDeg = VECTOR();
-	rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.x);
-	rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.y);
-	rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.z);
+	rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().x);
+	rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().y);
+	rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().z);
 	ImGui::Text("angle(deg)");
 	ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
 	ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
 	ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
-	transform_.quaRot.x = CommonUtility::Deg2RadF(rotDeg.x);
-	transform_.quaRot.y = CommonUtility::Deg2RadF(rotDeg.y);
-	transform_.quaRot.z = CommonUtility::Deg2RadF(rotDeg.z);
+
+	//ローカル角度
+	VECTOR localRotDeg = VECTOR();
+	localRotDeg.x = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().x);
+	localRotDeg.y = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().y);
+	localRotDeg.z = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().z);
+	ImGui::Text("localAngle(deg)");
+	ImGui::SliderFloat("LocalRotX", &rotDeg.x, 0.0f, 360.0f);
+	ImGui::SliderFloat("LocalRotY", &rotDeg.y, 0.0f, 360.0f);
+	ImGui::SliderFloat("LocalRotZ", &rotDeg.z, 0.0f, 360.0f);
+
 	//終了処理
 	ImGui::End();
 }

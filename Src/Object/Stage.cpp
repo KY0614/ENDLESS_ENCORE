@@ -128,9 +128,6 @@ void Stage::Init3DModel(void)
 		JsonManager::JSON_DATA::STAGE,KEY_STAGE);
 
 	//データが含まれていない場合はエラーメッセージを出す
-	//if (!data.contains(KEY_STAGE))assert(0 && "データが存在しないか不正なデータです");
-	//const json& stageData = data[KEY_STAGE];
-	//データが含まれていない場合はエラーメッセージを出す
 	if (!data.contains(KEY_THEATER))assert(0 && "データが存在しないか不正なデータです");
 	const json& theaterData = data[KEY_THEATER];
 

@@ -61,7 +61,7 @@ public:
 	struct SOUND_DATA
 	{
 		int data;		//音声データ格納
-		TYPE type;		//音声データの種類	※この要素は削除するかも
+		TYPE type;		//音声データの種類
 		int playMode;	//音声データの再生タイプ
 	};
 

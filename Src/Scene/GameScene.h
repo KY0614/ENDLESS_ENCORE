@@ -99,6 +99,8 @@ private:
 
 	void InitStateExplore(void);
 
+	void InitStateBattle(void);
+
 	//ó‘Ô‘JˆÚ--------------------------------------------------------
 
 	/// <summary>

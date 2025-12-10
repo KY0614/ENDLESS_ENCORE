@@ -50,11 +50,11 @@ GameScene::~GameScene(void)
 void GameScene::LoadData(void)
 {
 	//非同期読み込みを有効にする
-	SetUseASyncLoadFlag(true);
+	//SetUseASyncLoadFlag(true);
 
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
+	//SoundManager& sound = SoundManager::GetInstance();
+	//sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
+	//	ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
 
 
 	//sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
@@ -65,11 +65,16 @@ void GameScene::LoadData(void)
 
 void GameScene::Init(void)
 {
-
+	//探索BGM
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
+
+	//戦闘BGM
+	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::BATTLE, 50);
 
 	// ポイントライト
 	std::unique_ptr<PointLight>light;
@@ -105,7 +110,6 @@ void GameScene::Init(void)
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	player_->AddCollider(stage_->GetTransform().collider);
-	player_->AddCollider(stage_->GetMistWallTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetMistWallTransform().collider);
 
@@ -211,37 +215,29 @@ void GameScene::InitStateExplore(void)
 
 	//敵とプレイヤーの状態設定
 	enemy_->ChangeState(Enemy::STATE::NONE);
-	player_->ChangeState(Player::STATE::WAIT);
+	player_->ChangeState(Player::STATE::PLAY);
 
 	SoundManager& sound = SoundManager::GetInstance();
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 30);
 	sound.Play(SoundManager::SOUND::EXPLORE);
+}
+
+void GameScene::InitStateBattle(void)
+{
+	stage_->IsBattle();
+	enemy_->ChangeState(Enemy::STATE::MOVE);
+	player_->ChangeState(Player::STATE::PLAY);
+	player_->AddCollider(stage_->GetMistWallTransform().collider);
+	//mainCamera->SetFollow(&player_->GetTransform());
+	//mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+	SoundManager& sound = SoundManager::GetInstance();
+	//sound.AdjustVolume(SoundManager::SOUND::BATTLE, 50);
+	sound.Play(SoundManager::SOUND::BATTLE);
 }
 
 void GameScene::ChangeState(STATE state)
 {
 	state_ = state;
-
-	switch (state_)
-	{
-	case GameScene::STATE::LOADING:
-		break;
-	case GameScene::STATE::WAKE_UP:
-		break;
-	case GameScene::STATE::EXPLORE:
-		InitStateExplore();
-		break;
-	case GameScene::STATE::ENCOUNT:
-		break;
-	case GameScene::STATE::BATTLE:
-		break;
-	case GameScene::STATE::ENEMY_SUMMON:
-		break;
-	case GameScene::STATE::BATTLE_SECOND:
-		break;
-	default:
-		break;
-	}
 
 	//各状態遷移の初期処理
 	stateChanges_[state_]();
@@ -259,10 +255,8 @@ void GameScene::ChangeStateWakeUp(void)
 	pos = VAdd(pos, VScale(
 		VAdd(player_->GetTransform().GetRight(),
 			player_->GetTransform().GetForward()), 100.0f));
-	//pos.y += 80.0f;
 	VECTOR targetPos = player_->GetTransform().pos;
 	targetPos.y += 70.0f;
-	//targetPos.z += 80.0f;
 	const float craneUpSpeed = 0.13f;
 	mainCamera->SetCraneUpPos(pos, 80.0f,targetPos, craneUpSpeed);
 	mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
@@ -272,6 +266,7 @@ void GameScene::ChangeStateWakeUp(void)
 
 void GameScene::ChangeStateExplore(void)
 {
+	InitStateExplore();
 	stateUpdate_ = std::bind(&GameScene::UpdateExplore, this);
 	stateDraw_ = std::bind(&GameScene::DrawExplore, this);
 }
@@ -284,11 +279,7 @@ void GameScene::ChangeStateEncount(void)
 
 void GameScene::ChangeStateBattle(void)
 {
-	stage_->IsBattle();
-	enemy_->ChangeState(Enemy::STATE::MOVE);
-	player_->ChangeState(Player::STATE::PLAY);
-	mainCamera->SetFollow(&player_->GetTransform());
-	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+	InitStateBattle();
 	stateUpdate_ = std::bind(&GameScene::UpdateBattle, this);
 	stateDraw_ = std::bind(&GameScene::DrawBattle, this);
 }

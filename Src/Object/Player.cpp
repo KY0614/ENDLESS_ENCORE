@@ -425,9 +425,6 @@ void Player::StageWalkReady(void)
 	JsonManager& jsonM = JsonManager::GetInstance();
 	const json playerData = jsonM.GetJsonData(
 		JsonManager::JSON_DATA::PLAYER,KEY_PLAYER);
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!playerData.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	//const json& param = data[KEY_PLAYER];	//Playerオブジェクトを取得
 	//パラメータを取得
 	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
 	//座標をステージ上の端(手前側)に設定

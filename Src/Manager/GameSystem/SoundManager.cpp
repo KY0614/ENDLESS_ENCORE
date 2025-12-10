@@ -48,6 +48,20 @@ void SoundManager::Play(const SOUND _sound)
 	//元データがないときは警告
 	if (sounds_.find(_sound) == sounds_.end())assert("設定していない音声を再生しようとしています。");
 
+	//他のBGMが再生されている場合はそのBGMを停止する
+	for (const auto& sound : sounds_) 
+	{
+		//BGMで、再生しようとしている音と違う音が再生されている場合
+		if (sound.second.type == TYPE::BGM &&
+			sounds_[_sound].type == TYPE::BGM &&
+			sounds_[_sound].data != sound.second.data)
+		{
+			//再生されているか確認
+			if (CheckSoundMem(sound.second.data) < 1)continue;
+			StopSoundMem(sound.second.data);
+		}
+	}
+
 	//再生処理
 	PlaySoundMem(sounds_[_sound].data, sounds_[_sound].playMode);
 }
