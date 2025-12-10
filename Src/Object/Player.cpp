@@ -106,6 +106,7 @@ Player::Player(void)
 	stepWalk_ = 0.0f;
 	stringAlpha_ = 0;
 	isActionEnd_ = false;
+	stepBackstab_ = 0.0f;
 	clothSE_ = false;
 }
 
@@ -586,15 +587,14 @@ void Player::UpdateBackstab(void)
 	//続きを再生させるための待ち時間
 	const float stopTime = 0.6f;
 	//
-	static bool isPlay = false;
-	//経過時間
-	static float stateStep_ = 0.0f;	
+	bool isPlay = false;
+
 	//途中までの再生が終わったら経過時間まで待ち、
 	//残りのアニメーションを再生する
 	if (animationController_->IsEnd())
 	{
-		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-		if (stateStep_ > stopTime && !isActionEnd_)
+		stepBackstab_ += SceneManager::GetInstance().GetDeltaTime();
+		if (stepBackstab_ > stopTime && !isActionEnd_)
 		{
 			isPlay = true;
 			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 100.0f, false, true);
@@ -612,7 +612,7 @@ void Player::UpdateBackstab(void)
 		transform_.quaRotLocal =
 			Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 		isPlay = false;
-		stateStep_ = 0.0f;
+		stepBackstab_ = 0.0f;
 		ChangeState(STATE::PLAY);
 		return;
 	}

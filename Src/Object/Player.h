@@ -207,7 +207,7 @@ private:
 	float stepFootSmoke_;	//足煙エフェクト発生までの時間経過
 
 	//バックスタブ位置
-	VECTOR backstabTarget_;	
+	float stepBackstab_;	//バックスタブ完了までの時間経過
 
 	//フレームごとの移動値
 	VECTOR moveDiff_;
