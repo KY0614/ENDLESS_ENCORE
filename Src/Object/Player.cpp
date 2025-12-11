@@ -4,8 +4,6 @@
 #include "../Libs/nlohmann/json.hpp"
 #include "../Libs/ImGui/imgui.h"
 #include "../Utility/CommonUtility.h"
-#include "../Common/DebugDrawFormat.h"
-#include "../Common/FpsController.h"
 #include "../Common/Easing.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
@@ -85,6 +83,9 @@ Player::Player(void)
 	effectSmokeResId_ = -1;
 	stepFootSmoke_ = -1.0f;
 
+	effectParryPlayId_ = -1;
+	effectParryResId_ = -1;
+
 	stepJump_ = -1.0f;
 	isJump_ = false;
 	speed_ = -1.0f;
@@ -161,6 +162,10 @@ void Player::Init(void)
 
 	//足煙エフェクトの発生間隔
 	stepFootSmoke_ = TERM_FOOT_SMOKE;
+
+	//パリィのエフェクトのリソース読み込み
+	effectParryResId_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::PARRY_EFKT).handleId_;
 
 	//初期状態
 	ChangeState(STATE::WAKE_UP);
@@ -418,6 +423,15 @@ void Player::ChangeState(STATE state)
 	stateChanges_[state_]();
 }
 
+void Player::SetBackstabRotY(const Quaternion& rotY)
+{
+	//敵の方向を向くように回転を設定
+	transform_.quaRot = rotY;
+	//バックスタブ終了後の回転も同じように設定
+	playerRotY_ = rotY;
+	goalQuaRot_ = rotY;
+}
+
 void Player::StageWalkReady(void)
 {
 	//ジャンプ中に遷移したらジャンプ力を無効にする
@@ -576,6 +590,8 @@ void Player::UpdatePlay(void)
 	//歩きエフェクト
 	EffectFootSmoke();
 
+	EffectParryPosUpdate();
+
 	//重力方向に沿って回転させる
 	transform_.quaRot = Quaternion::Quaternion();
 	transform_.quaRot = transform_.quaRot.Mult(playerRotY_);
@@ -585,33 +601,30 @@ void Player::UpdateBackstab(void)
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//続きを再生させるための待ち時間
-	const float stopTime = 0.6f;
-	//
-	bool isPlay = false;
+	const float waitTime = 0.6f;
 
 	//途中までの再生が終わったら経過時間まで待ち、
 	//残りのアニメーションを再生する
 	if (animationController_->IsEnd())
 	{
 		stepBackstab_ += SceneManager::GetInstance().GetDeltaTime();
-		if (stepBackstab_ > stopTime && !isActionEnd_)
+		if (stepBackstab_ > waitTime && !isActionEnd_)
 		{
-			isPlay = true;
+			isActionEnd_ = true;
 			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 100.0f, false, true);
 		}
 	}
 	//バックスタブアニメーションが終了したらローカル回転を元に戻す
-	if (isPlay && animationController_->IsEnd())
+	if (isActionEnd_ && animationController_->IsEnd())
 	{
-		//Jsonデータ取得
+		//アニメーション用に変更したローカル回転を元に戻す
 		const json playerData = jsonM.GetJsonData(
 			JsonManager::JSON_DATA::PLAYER,KEY_PLAYER);
-		//const json& param = data[KEY_PLAYER];
 		const json& transformData = playerData[JsonManager::KEY_TRANSFORM];
 		const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 		transform_.quaRotLocal =
 			Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
-		isPlay = false;
+		
 		stepBackstab_ = 0.0f;
 		ChangeState(STATE::PLAY);
 		return;
@@ -779,11 +792,13 @@ void Player::ProcessParry(void)
 	InputManager& ins = InputManager::GetInstance(); 
 	SoundManager& sound = SoundManager::GetInstance();
 	bool isHit = ins.IsInputTriggered("Parry");
-	if (isHit)
+	if (isHit && !isParry_)
 	{
-		sound.AdjustVolume(SoundManager::SOUND::PARRY,50);
+		sound.AdjustVolume(SoundManager::SOUND::PARRY,70);
 		sound.Play(SoundManager::SOUND::PARRY);
 		isParry_ = true;
+
+		EffectParry();
 	}
 
 	if (!isParry_)return;
@@ -1036,6 +1051,38 @@ void Player::EffectFootSmoke(void)
 	}
 }
 
+void Player::EffectParry(void)
+{
+	if (IsEffekseer3DEffectPlaying(effectParryPlayId_) > -1)return;
+
+	//再生Idを取得
+	effectParryPlayId_ = PlayEffekseer3DEffect(effectParryResId_);
+
+	//再生速度の設定(少し早めに設定）
+	SetSpeedPlayingEffekseer3DEffect(effectParryPlayId_, 6.0f);
+
+	//大きさの設定
+	//大きさ
+	float EFFEKT_SCALE = 20.0f;
+	float EFFEKT_SCALE_Y = 26.0f;
+	SetScalePlayingEffekseer3DEffect(
+		effectParryPlayId_,
+		EFFEKT_SCALE,
+		EFFEKT_SCALE_Y,
+		EFFEKT_SCALE
+	);
+}
+
+void Player::EffectParryPosUpdate(void)
+{
+	//エフェクトの位置をプレイヤーの位置に設定
+	SetPosPlayingEffekseer3DEffect(
+		effectParryPlayId_,
+		transform_.pos.x,
+		transform_.pos.y,
+		transform_.pos.z);
+}
+
 void Player::UpdateDebugImGui(void)
 {
 	//ウィンドウタイトル&開始処理
@@ -1076,6 +1123,26 @@ void Player::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::DEAD);
 	}
+
+	//角度
+	VECTOR rotDeg = VECTOR();
+	rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().x);
+	rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().y);
+	rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().z);
+	ImGui::Text("angle(deg)");
+	ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
+	ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
+	ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
+
+	//ローカル角度
+	VECTOR localRotDeg = VECTOR();
+	localRotDeg.x = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().x);
+	localRotDeg.y = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().y);
+	localRotDeg.z = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().z);
+	ImGui::Text("localAngle(deg)");
+	ImGui::SliderFloat("LocalRotX", &rotDeg.x, 0.0f, 360.0f);
+	ImGui::SliderFloat("LocalRotY", &rotDeg.y, 0.0f, 360.0f);
+	ImGui::SliderFloat("LocalRotZ", &rotDeg.z, 0.0f, 360.0f);
 
 	//終了処理
 	ImGui::End();
@@ -1147,6 +1214,55 @@ void Player::DebugDraw(void)
 	//default:
 	//	break;
 	//}
+	
 	//球体描画（色指定あり）
-	sphere_->Draw(col_);
+	//sphere_->Draw(col_);
+
+	DrawParryCD();
+}
+
+void Player::DrawParryCD(void)
+{
+	const float progressRatio = stepParry_ / PARRY_TIME;
+
+	// 画面座標 (適宜調整してください)
+	const int GAUGE_X = 50;  // ゲージの左上のX座標
+	const int GAUGE_Y = 50;  // ゲージの左上のY座標
+	const int GAUGE_W = 200; // ゲージの最大幅
+	const int GAUGE_H = 20;  // ゲージの高さ
+
+	// 現在のクールダウンゲージの幅
+	const int currentGaugeWidth = (int)(GAUGE_W * progressRatio);
+
+	// ゲージの色
+	unsigned int bgColor = 0x333333; // 背景色（灰色）
+	unsigned int fgColor = 0x00FFFF; // 前景色（水色：パリィ可能）
+	unsigned int cdColor = 0xAA6600; // クールダウン中の色（オレンジ）
+
+	// ゲージの背景を描画
+	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, bgColor, true);
+
+	// クールダウン中の場合
+	if (stepParry_ > 0.0f)
+	{
+		// クールダウン中の色で現在の進行度を描画
+		// ゲージは左から右へ満たされていく (回復していく)
+		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + currentGaugeWidth, GAUGE_Y + GAUGE_H, cdColor, TRUE);
+
+		// ゲージの枠を描画
+		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
+
+		// テキスト表示 (クールダウン中)
+		DrawFormatString(GAUGE_X + GAUGE_W + 10, GAUGE_Y, cdColor, L"PARRY CD: %.1f", PARRY_TIME - stepParry_);
+	}
+	else // クールダウンが完了している場合
+	{
+		// パリィ可能な緑色で全体を描画
+		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, fgColor, TRUE);
+		// ゲージの枠を描画
+		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
+
+		// テキスト表示 (パリィ可能)
+		DrawFormatString(GAUGE_X + GAUGE_W + 10, GAUGE_Y, fgColor, L"PARRY READY");
+	}
 }

@@ -147,7 +147,8 @@ public:
 	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
 	void SetHP(const float hp) { hp_ = hp; }
 
-	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY; }
+	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY;  }
+	void SetBackstabRotY(const Quaternion& rotY);
 
 	void StageWalkReady(void);
 
@@ -205,6 +206,10 @@ private:
 	int effectSmokeResId_;	//エフェクトリソースID
 	int effectSmokePlayId_;	//エフェクト再生ID
 	float stepFootSmoke_;	//足煙エフェクト発生までの時間経過
+
+	//パリィエフェクト
+	int effectParryResId_;	//エフェクトリソースID
+	int effectParryPlayId_;	//エフェクト再生ID
 
 	//バックスタブ位置
 	float stepBackstab_;	//バックスタブ完了までの時間経過
@@ -424,6 +429,13 @@ private:
 	void EffectFootSmoke(void);
 
 	/// <summary>
+	/// パリィエフェクトの発生処理
+	/// </summary>
+	void EffectParry(void);
+
+	void EffectParryPosUpdate(void);
+
+	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
 	/// </summary>
 	void UpdateDebugImGui(void);
@@ -432,6 +444,8 @@ private:
 	/// デバッグ用の描画処理
 	/// </summary>
 	void DebugDraw(void);
+
+	void DrawParryCD(void);
 
 	int col_;
 };

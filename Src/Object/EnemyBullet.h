@@ -1,13 +1,13 @@
 #pragma once
 #include <functional>
 #include <map>
-#include "ShotBase.h"
+#include "ActorBase.h"
 #include "PointLight.h"
 #include "SpotLight.h"
 
 class Sphere;
 
-class EnemyBullet :  public ShotBase
+class EnemyBullet :  public ActorBase
 {
 public:
 	//状態
@@ -61,7 +61,7 @@ public:
 	/// <summary>
 	/// 準備状態に設定
 	/// </summary>
-	void SetStateReady(void) { state_ = STATE::READY; isAlive_ = true; }
+	void SetStateReady(void);
 
 	/// <summary>
 	/// 反射状態に設定
@@ -136,6 +136,10 @@ private:
 
 	//球体
 	std::unique_ptr<Sphere> sphere_;
+
+	//エフェクト
+	int effectFireResId_;	//エフェクトリソースID
+	int effectFirePlayId_;	//エフェクト再生ID
 	
 	/// <summary>
 	/// 移動処理
@@ -146,5 +150,7 @@ private:
 	/// 相対座標を親の回転に同期させる
 	/// </summary>
 	void SyncParentRotate(void);
+
+	void EffectFire(void);
 };
 

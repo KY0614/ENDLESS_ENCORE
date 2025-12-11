@@ -198,7 +198,8 @@ void GameScene::Backstab(void)
 		if (player_->GetIsParry())
 		{
 			player_->SetPos(target);
-			player_->SetRotateY(enemy_->GetTransform().quaRot);
+			//player_->SetRotateY(enemy_->GetTransform().quaRot);
+			player_->SetBackstabRotY(enemy_->GetTransform().quaRot);
 			player_->ChangeState(Player::STATE::BACKSTAB);
 			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
 		}
@@ -608,6 +609,9 @@ void GameScene::UpdateDebugImGui(void)
 	if (ImGui::Button("Battle"))
 	{
 		player_->SetPos({ 10.0, -217.0, 900.0 });
+		InitStateBattle();
+		mainCamera->SetFollow(&player_->GetTransform());
+		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 		ChangeState(STATE::BATTLE);
 	}
 

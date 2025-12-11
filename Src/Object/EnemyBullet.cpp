@@ -1,4 +1,5 @@
 #include <DxLib.h>
+#include<EffekseerForDXLib.h>
 #include "../Common/DebugDrawFormat.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Utility/CommonUtility.h"
@@ -34,6 +35,10 @@ void EnemyBullet::Init(void)
     sphere_ = std::make_unique<Sphere>(transform_);
     sphere_->SetLocalPos(CommonUtility::VECTOR_ZERO);
 	sphere_->SetRadius(20.0f);
+
+	//火のエフェクトのリソース読み込み
+	effectFireResId_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::FIRE_EFKT).handleId_;
 }
 
 void EnemyBullet::Update(void)
@@ -48,6 +53,13 @@ void EnemyBullet::Update(void)
 		//同期
 		SyncParentRotate();
 	}
+
+	//エフェクトの位置を同期
+	SetPosPlayingEffekseer3DEffect(
+		effectFirePlayId_,
+		transform_.pos.x,
+		transform_.pos.y,
+		transform_.pos.z);
 
 	//発射状態でなければ移動処理を行わない
 	if (!CheckStateShot() && !CheckStateReverse())return;
@@ -81,6 +93,14 @@ void EnemyBullet::Destroy(void)
 	//破棄状態へ変更
 	ChangeState(STATE::DESTROY);
 	SetIsAlive(false);
+	StopEffekseer3DEffect(effectFirePlayId_);
+}
+
+void EnemyBullet::SetStateReady(void)
+{
+	state_ = STATE::READY;
+	isAlive_ = true;
+	EffectFire();
 }
 
 void EnemyBullet::SetOffsetPos(const VECTOR offset)
@@ -144,4 +164,21 @@ void EnemyBullet::SyncParentRotate(void)
 	//予め決めておいた敵の頭からの相対座標を敵の向きに応じて回転させる
 	transform_.pos = VAdd(basePos, parentTran_.quaRot.PosAxis(localPos_));
 	transform_.quaRot = parentTran_.quaRot;
+}
+
+void EnemyBullet::EffectFire(void)
+{
+	//再生Idを取得
+	effectFirePlayId_ = PlayEffekseer3DEffect(effectFireResId_);
+	//大きさの設定
+	//大きさ
+	float EFFEKT_SCALE = 20.0f;
+	float EFFEKT_SCALE_Y = 26.0f;
+	SetScalePlayingEffekseer3DEffect(
+		effectFirePlayId_,
+		EFFEKT_SCALE,
+		EFFEKT_SCALE_Y,
+		EFFEKT_SCALE
+	);
+
 }

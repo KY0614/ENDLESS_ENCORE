@@ -242,13 +242,22 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::LIGHT_UP_SE, std::move(res));
 	
 	//パリィ
-	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Parry.mp3");
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Barrior.mp3");
 	resourcesMap_.emplace(SRC::PARRY_SE, std::move(res));
 	
 	//起き上がるときの音
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Wake Up.mp3");
 	resourcesMap_.emplace(SRC::WAKE_UP_SE, std::move(res));
 
+	//エフェクト
+
+	//パリィ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Barrior/Barrior.efkefc");
+	resourcesMap_.emplace(SRC::PARRY_EFKT, std::move(res));
+
+	//パリィ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire.efkefc");
+	resourcesMap_.emplace(SRC::FIRE_EFKT, std::move(res));
 }
 
 void ResourceManager::InitPause(void)
