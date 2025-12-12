@@ -412,7 +412,7 @@ void Player::InitAnimation(void)
 		animSpeed);
 }
 
-void Player::ChangeState(STATE state)
+void Player::ChangeState(const STATE& state)
 {
 	//行動終了判定をリセット
 	isActionEnd_ = false;

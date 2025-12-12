@@ -124,7 +124,7 @@ public:
 	/// 状態を変更する
 	/// </summary>
 	/// <param name="state">変更する状態</param>
-	void ChangeState(STATE state);
+	void ChangeState(const STATE& state);
 
 	/// <summary>
 	/// ダメージを与える

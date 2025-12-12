@@ -190,7 +190,7 @@ void Enemy::DebugUpdate(void)
 	UpdateDebugImGui();
 }
 
-void Enemy::ChangeState(const STATE state)
+void Enemy::ChangeState(const STATE& state)
 {
 	stateStep_ = 0.0f;
 	isStepActioned_ = false;
@@ -319,6 +319,579 @@ void Enemy::InitAnimation(void)
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
 
+void Enemy::ChangeStateNone(void)
+{
+	stateUpdate_ = std::bind(&Enemy::UpdateNone, this);
+}
+
+void Enemy::ChangeStateEncount(void)
+{
+	//const float encountRotY = 180.0f;
+	//transform_.quaRot =
+	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(encountRotY), 0.0f });
+
+	isEncount_ = true;
+	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
+}
+
+void Enemy::ChangeStateTurn(void)
+{
+	animationController_->Play((int)ANIM_TYPE::TURN, false);
+	stateUpdate_ = std::bind(&Enemy::UpdateTurn, this);
+}
+
+void Enemy::ChangeStateEncountFinish(void)
+{
+	const float battleRotY = 180.0f;
+	transform_.quaRot =
+		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-battleRotY), 0.0f });
+	//transform_.quaRotLocal = 
+	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(battleRotY), 0.0f });
+	stateUpdate_ = std::bind(&Enemy::UpdateEncountFinish, this);
+}
+
+void Enemy::ChangeStateWait(void)
+{
+	animationController_->Play((int)ANIM_TYPE::IDLE);
+	stateUpdate_ = std::bind(&Enemy::UpdateWait, this);
+}
+
+void Enemy::ChangeStateFollow(void)
+{
+	//歩きアニメーション再生
+	//animationController_->Play((int)ANIM_TYPE::RUN);
+
+	stateUpdate_ = std::bind(&Enemy::UpdateFollow, this);
+}
+
+void Enemy::ChangeStateMove(void)
+{
+	if (!isEncount_)isEncount_ = true;
+	moveDir_ = transform_.GetRight();
+	animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
+	stateUpdate_ = std::bind(&Enemy::UpdateMove, this);
+}
+
+void Enemy::ChangeStateAttackNear(void)
+{
+	//攻撃アニメーション再生
+	animationController_->Play((int)ANIM_TYPE::ATTACK_NEAR, false);
+	stateUpdate_ = std::bind(&Enemy::UpdateAttackNear, this);
+}
+
+void Enemy::ChangeStateShotOne(void)
+{
+	stateUpdate_ = std::bind(&Enemy::UpdateShotOne, this);
+}
+
+void Enemy::ChangeStateShotAll(void)
+{
+	stateUpdate_ = std::bind(&Enemy::UpdateShotAll, this);
+}
+
+void Enemy::ChangeStateCharge(void)
+{
+	sphereNear_->SetRadius(0.0f);
+	sphereNear_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
+	//アニメーションを途中まで再生
+	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 0.0f, 26.0f);
+	stateUpdate_ = std::bind(&Enemy::UpdateCharge, this);
+}
+
+void Enemy::ChangeStateAttackCharge(void)
+{
+	//アニメーションを途中から再生
+	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 26.0f, -1.0f, false, true);
+	stateUpdate_ = std::bind(&Enemy::UpdateChargeAttack, this);
+}
+
+void Enemy::ChangeStateBackstab(void)
+{
+	//アニメーションを途中まで再生
+	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 0.0f, 26.0f);
+	stateUpdate_ = std::bind(&Enemy::UpdateBackstab, this);
+}
+
+void Enemy::ChangeStateDown(void)
+{
+	animationController_->Play((int)ANIM_TYPE::DOWN, true, 0.0f, 9.0f);
+	animationController_->SetEndLoop(1.0f, 9.0f, 10.0f);
+	isDown_ = true;
+	stepDownTime_ = 0.0f;
+	stateUpdate_ = std::bind(&Enemy::UpdateDown, this);
+}
+
+void Enemy::ChangeStateDead(void)
+{
+	//死亡アニメーション再生
+	animationController_->Play((int)ANIM_TYPE::DEATH, false);
+	//バックスタブからの遷移だったら倒れたままのアニメーションを再生
+	if (prevState_ == STATE::BACKSTAB)animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 110.0f, -1.0f);
+	stateUpdate_ = std::bind(&Enemy::UpdateDead, this);
+}
+
+void Enemy::UpdateNone(void)
+{//何もしない
+}
+
+void Enemy::UpdateEncount(void)
+{
+}
+
+void Enemy::UpdateTurn(void)
+{
+	if (animationController_->IsEnd())
+	{
+		animationController_->Play((int)ANIM_TYPE::IDLE);
+		ChangeState(STATE::ENCOUNT_FINISH);
+		return;
+	}
+}
+
+void Enemy::UpdateEncountFinish(void)
+{
+}
+
+void Enemy::UpdateWait(void)
+{
+	//プレイヤーのほうを向いて待機
+	RotateToPlayer();
+}
+
+void Enemy::UpdateFollow(void)
+{
+	//状態時間更新
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	if (stateStep_ > FOLLOW_TIME)
+	{
+		hitCount_ = 0;
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
+	//追従処理
+	FollowPlayer(transform_.pos);
+
+	Collision();
+
+	//回転処理
+	Rotate();
+}
+
+void Enemy::UpdateMove(void)
+{
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+
+	//プレイヤーがいる方向を見続ける
+	RotateToPlayer();
+
+	//移動処理
+	Move();
+	Collision();
+	if (stateStep_ > MOVE_TIME)
+	{
+		//HPが最大の半分以下になっていたらチャージ攻撃状態に遷移
+		if (!isChargeAtk_ &&
+			hp_ <= maxHp_ / 2.0f)
+		{
+			isChargeAtk_ = true;
+			ChangeState(STATE::CHARGE);
+			return;
+		}
+		//プレイヤーとの距離を測り、一定以上離れていたら遠距離攻撃
+		//それ以外は近距離攻撃
+		if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
+		{
+			ChangeState(STATE::ATTACK_NEAR);
+		}
+		else
+		{
+			animationController_->Play((int)ANIM_TYPE::CAST_SPELL, false);
+			std::vector<STATE> attackState = { STATE::SHOT_ONE, STATE::SHOT_ALL };
+			// 乱数生成器の初期化
+			std::random_device rd; //非決定的な乱数生成器
+			std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
+			std::shuffle(attackState.begin(), attackState.end(), engine);
+			//遠距離攻撃
+			const int bulletNum = 5;
+			CreateBullet(bulletNum);
+			ChangeState(attackState[0]);
+			return;
+		}
+	}
+
+	//離れていたら追従状態に遷移
+	if (CheckPlayerDistance() > FOLLOW_DISTANCE)
+	{
+		animationController_->Play((int)ANIM_TYPE::RUN);
+		ChangeState(STATE::FOLLOW);
+	}
+}
+
+void Enemy::UpdateAttackNear(void)
+{
+	Rotate();
+
+	col_ = 0xff0000;
+
+	//アニメーションが終わったら移動状態へ戦記
+	if (animationController_->IsEnd())
+	{
+		col_ = 0x00ff00;
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
+	//パリィされたらダメージを受けてダウン状態へ遷移
+	if (CommonUtility::IsHitSpheres(
+		sphereNear_->GetPos(),
+		sphereNear_->GetRadius(),
+		player_.GetSphere().GetPos(),
+		player_.GetSphere().GetRadius()))
+	{
+		if (player_.GetIsParry())
+		{
+			Damage(NORMAL_DAMAGE);
+			ChangeState(STATE::DOWN);
+			col_ = 0x00ff00;
+			return;
+		}
+	}
+
+	//既に行動済みだったら処理しない
+	if (isStepActioned_)return;
+
+	//当たり判定
+	if (CommonUtility::IsHitSphereCapsule(
+		sphereNear_->GetPos(),
+		sphereNear_->GetRadius(),
+		player_.GetCapsule().GetPosTop(),
+		player_.GetCapsule().GetPosDown(),
+		player_.GetCapsule().GetRadius()))
+	{
+		//回避中だったらダメージを受けない
+		if (player_.GetIsDodge())return;
+		player_.Damage(ATTACK_DAMAGE);
+		//画面揺らし
+		SceneManager::GetInstance().StartShakeScreen();
+		isStepActioned_ = true;
+	}
+}
+
+void Enemy::UpdateShotOne(void)
+{
+	if (IsCastSpell())
+	{
+		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
+	}
+
+	//回転処理
+	RotateToPlayer();
+
+	//
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	{
+		bullet->Update();
+	}
+
+	//弾を順々に準備状態にする
+	const float bulletInterval = 0.7f;
+	for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	{
+		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
+		if (stateStep_ > bulletInterval)
+		{
+			bullet->SetStateReady();
+			stateStep_ = 0.0f;
+		}
+	}
+	//弾が全部準備できたらプレイヤーに向けて発射する
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	{
+		if (CheckBulletDestroy())break;
+		if (CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
+		if (stateStep_ > bulletInterval && bullet->GetState() == EnemyBullet::STATE::READY)
+		{
+			//ターゲットに発射
+			bullet->SetStateShot();
+			bullet->SetTargetPos(player_.GetTransform().pos);
+			stateStep_ = 0.0f;
+		}
+		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
+
+		//パリィ判定
+		if (CommonUtility::IsHitSpheres(
+			bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
+			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
+		{
+			//破棄状態の弾は無視
+			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			if (player_.GetIsParry())
+			{
+				bullet->SetStateReverse();
+				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, 80.0f, 0.0f));
+				bullet->SetTargetPos(targetPos);
+				continue;
+			}
+		}
+
+		//当たり判定
+		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+			bullet->GetSphere().GetRadius(), player_.GetCapsule().GetPosTop(),
+			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
+		{
+			//破棄状態の弾は無視
+			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			//回避中だったらダメージを受けない
+			if (player_.GetIsDodge())continue;
+			//ダメージ処理(当たった弾は破棄)
+			player_.Damage(ATTACK_DAMAGE);
+			SceneManager::GetInstance().StartShakeScreen();
+			bullet->SetStateDestroy();
+		}
+
+		//当たり判定
+		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+			bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
+			capsule_->GetPosDown(), capsule_->GetRadius()))
+		{
+			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
+			//ダメージ処理(当たった弾は破棄)
+			Damage(NORMAL_DAMAGE);
+			bullet->SetStateDestroy();
+			hitCount_++;
+			continue;
+		}
+	}
+
+	//全弾命中でダウン状態へ
+	if (hitCount_ >= static_cast<int>(bullets_.size()))
+	{
+		ChangeState(STATE::DOWN);
+		hitCount_ = 0;
+		return;
+	}
+
+	//生成した弾が全部消滅したら移動遷移
+	if (CheckBulletDestroy())
+	{
+		ChangeState(STATE::MOVE);
+		hitCount_ = 0;
+		return;
+	}
+}
+
+void Enemy::UpdateShotAll(void)
+{
+	if (IsCastSpell())
+	{
+		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
+	}
+
+	//回転処理
+	RotateToPlayer();
+
+	//遠距離攻撃の状態
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	//if (stateStep_ > ATTACK_FAR_TIME)
+	//{
+	//	hitCount_ = 0;
+	//	ChangeState(STATE::MOVE);
+	//	return;
+	//}
+
+	//弾を順々に準備状態にする
+	const float bulletInterval = 0.4f;
+	for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	{
+		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
+		if (stateStep_ > bulletInterval)
+		{
+			bullet->SetStateReady();
+			stateStep_ = 0.0f;
+			continue;
+		}
+	}
+	if (CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ALL, false);
+
+	//弾が全部準備できたらプレイヤーに向けて発射する
+	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	{
+		if (CheckBulletDestroy())break;
+		if (stateStep_ > bulletInterval &&
+			bullet->GetState() == EnemyBullet::STATE::READY)
+		{
+			//ターゲットに発射
+			bullet->SetStateShot();
+			bullet->SetTargetPos(player_.GetTransform().pos);
+		}
+		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
+		bullet->Update();
+
+		//パリィ判定
+		if (CommonUtility::IsHitSpheres(
+			bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
+			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
+		{
+			//破棄状態の弾は無視
+			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			//パリィ中にあたったら弾を跳ね返す
+			if (player_.GetIsParry())
+			{
+				bullet->SetStateReverse();
+				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, 80.0f, 0.0f));
+				bullet->SetTargetPos(targetPos);
+				continue;
+			}
+		}
+
+		//当たり判定
+		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+			bullet->GetSphere().GetRadius(), player_.GetCapsule().GetPosTop(),
+			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
+		{
+			//破棄状態の弾は無視
+			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			//回避中だったらダメージを受けない
+			if (player_.GetIsDodge())
+			{
+				continue;
+			}
+			//ダメージ処理(当たった弾は破棄)
+			player_.Damage(ATTACK_DAMAGE);
+			SceneManager::GetInstance().StartShakeScreen();
+			bullet->SetStateDestroy();
+		}
+
+		//当たり判定
+		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+			bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
+			capsule_->GetPosDown(), capsule_->GetRadius()))
+		{
+			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
+			//ダメージ処理(当たった弾は破棄)
+			Damage(NORMAL_DAMAGE);
+			bullet->SetStateDestroy();
+			hitCount_++;
+			continue;
+		}
+	}
+
+	//全弾命中でダウン状態へ
+	if (hitCount_ >= static_cast<int>(bullets_.size()))
+	{
+		stateStep_ = 0.0f;
+		ChangeState(STATE::DOWN);
+		hitCount_ = 0;
+		return;
+	}
+
+	//生成した弾が全部消滅したら移動遷移
+	if (CheckBulletDestroy())
+	{
+		ChangeState(STATE::MOVE);
+		hitCount_ = 0;
+		return;
+	}
+}
+
+void Enemy::UpdateCharge(void)
+{
+	//チャージで範囲を大きくする
+	charge_ += 1.5f;
+	sphereNear_->SetRadius(charge_);
+	const float chargeRad = 250.0f;
+	if (charge_ > chargeRad)
+	{
+		charge_ = chargeRad;
+		ChangeState(STATE::ATTACK_CHARGE);
+		return;
+	}
+}
+
+void Enemy::UpdateChargeAttack(void)
+{
+	col_ = 0x000000;
+
+	if (animationController_->IsEnd())
+	{
+		charge_ = 0.0f;
+		//球体を近接用に戻す
+		sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
+		sphereNear_->SetRadius(30.0f);
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
+	//既に行動済みだったら処理しない
+	if (isStepActioned_)return;
+	//球体判定
+	if (CommonUtility::IsHitSphereCapsule(
+		sphereNear_->GetPos(),
+		sphereNear_->GetRadius(),
+		player_.GetCapsule().GetPosTop(),
+		player_.GetCapsule().GetPosDown(),
+		player_.GetCapsule().GetRadius()))
+	{
+		//回避中だったらダメージを受けない
+		if (!player_.GetIsDodge())
+		{
+			col_ = 0xFFFFFF;
+		}
+		player_.Damage(CHARGE_DAMAGE);
+		isStepActioned_ = true;
+	}
+}
+
+void Enemy::UpdateBackstab(void)
+{
+	//続きを再生させるための待ち時間
+	const float stopTime = 0.1f;
+	//途中までの再生が終わったら経過時間まで待ち、
+	//残りのアニメーションを再生する
+	if (animationController_->IsEnd())
+	{
+		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+		if (stateStep_ > stopTime && !isBackstab_)
+		{
+			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 110.0f, false, true);
+			Damage(BACKSTAB_DAMAGE);
+			isBackstab_ = true;
+		}
+	}
+
+	if (isBackstab_ && animationController_->IsEnd())
+	{
+		isBackstab_ = false;
+		ChangeState(STATE::MOVE);
+		return;
+	}
+}
+
+void Enemy::UpdateDown(void)
+{
+	if (stepDownTime_ > DOWN_TIME && isDown_)
+	{
+		isDown_ = false;
+		animationController_->Play((int)ANIM_TYPE::DOWN, false, 9.0f, -1.0f, false, true);
+	}
+	if (animationController_->IsEnd())
+	{
+		stepDownTime_ = 0.0f;
+
+		ChangeState(STATE::MOVE);
+		return;
+	}
+
+	stepDownTime_ += SceneManager::GetInstance().GetDeltaTime();
+}
+
+void Enemy::UpdateDead(void)
+{//何もしない
+}
+
 void Enemy::Damage(const float damage)
 {
 	//ダメージ処理
@@ -371,8 +944,9 @@ bool Enemy::IsCastSpell(void)
 {
 	bool ret = true;
 
-	// アニメーションが終了しているか
-	if (animationController_->IsEnd() && animationController_->GetPlayType() == (int)ANIM_TYPE::CAST_SPELL)
+	//アニメーションが終了しているか
+	if (animationController_->IsEnd() && 
+		animationController_->GetPlayType() == (int)ANIM_TYPE::CAST_SPELL)
 	{
 		return ret;	//終了している
 	}
@@ -700,579 +1274,6 @@ bool Enemy::CheckBulletDestroy(void)
 	return true;
 }
 
-void Enemy::ChangeStateNone(void)
-{
-	stateUpdate_ = std::bind(&Enemy::UpdateNone, this);
-}
-
-void Enemy::ChangeStateEncount(void)
-{
-	//const float encountRotY = 180.0f;
-	//transform_.quaRot =
-	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(encountRotY), 0.0f });
-
-	isEncount_ = true;
-	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
-}
-
-void Enemy::ChangeStateTurn(void)
-{
-	animationController_->Play((int)ANIM_TYPE::TURN, false);
-	stateUpdate_ = std::bind(&Enemy::UpdateTurn, this);
-}
-
-void Enemy::ChangeStateEncountFinish(void)
-{
-	const float battleRotY = 180.0f;
-	transform_.quaRot =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-battleRotY), 0.0f });
-	//transform_.quaRotLocal = 
-	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(battleRotY), 0.0f });
-	stateUpdate_ = std::bind(&Enemy::UpdateEncountFinish, this);
-}
-
-void Enemy::ChangeStateWait(void)
-{
-	animationController_->Play((int)ANIM_TYPE::IDLE);
-	stateUpdate_ = std::bind(&Enemy::UpdateWait, this);
-}
-
-void Enemy::ChangeStateFollow(void)
-{
-	//歩きアニメーション再生
-	//animationController_->Play((int)ANIM_TYPE::RUN);
-
-	stateUpdate_ = std::bind(&Enemy::UpdateFollow, this);
-}
-
-void Enemy::ChangeStateMove(void)
-{
-	if (!isEncount_)isEncount_ = true;
-	moveDir_ = transform_.GetRight();
-	animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
-	stateUpdate_ = std::bind(&Enemy::UpdateMove, this);
-}
-
-void Enemy::ChangeStateAttackNear(void)
-{
-	//攻撃アニメーション再生
-	animationController_->Play((int)ANIM_TYPE::ATTACK_NEAR, false);
-	stateUpdate_ = std::bind(&Enemy::UpdateAttackNear, this);
-}
-
-void Enemy::ChangeStateShotOne(void)
-{
-	stateUpdate_ = std::bind(&Enemy::UpdateShotOne, this);
-}
-
-void Enemy::ChangeStateShotAll(void)
-{
-	stateUpdate_ = std::bind(&Enemy::UpdateShotAll, this);
-}
-
-void Enemy::ChangeStateCharge(void)
-{
-	sphereNear_->SetRadius(0.0f);
-	sphereNear_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
-	//アニメーションを途中まで再生
-	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 0.0f, 26.0f);
-	stateUpdate_ = std::bind(&Enemy::UpdateCharge, this);
-}
-
-void Enemy::ChangeStateAttackCharge(void)
-{
-	//アニメーションを途中から再生
-	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 26.0f,-1.0f,false,true);
-	stateUpdate_ = std::bind(&Enemy::UpdateChargeAttack, this);
-}
-
-void Enemy::ChangeStateBackstab(void)
-{
-	//アニメーションを途中まで再生
-	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 0.0f, 26.0f);
-	stateUpdate_ = std::bind(&Enemy::UpdateBackstab, this);
-}
-
-void Enemy::ChangeStateDown(void)
-{
-	animationController_->Play((int)ANIM_TYPE::DOWN, true, 0.0f,9.0f);
-	animationController_->SetEndLoop(1.0f, 9.0f, 10.0f);
-	isDown_ = true;
-	stepDownTime_ = 0.0f;
-	stateUpdate_ = std::bind(&Enemy::UpdateDown, this);
-}
-
-void Enemy::ChangeStateDead(void)
-{
-	//死亡アニメーション再生
-	animationController_->Play((int)ANIM_TYPE::DEATH, false);
-	//バックスタブからの遷移だったら倒れたままのアニメーションを再生
-	if (prevState_ == STATE::BACKSTAB)animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 110.0f, -1.0f);
-	stateUpdate_ = std::bind(&Enemy::UpdateDead, this);
-}
-
-void Enemy::UpdateNone(void)
-{//何もしない
-}
-
-void Enemy::UpdateEncount(void)
-{
-}
-
-void Enemy::UpdateTurn(void)
-{
-	if(animationController_->IsEnd())
-	{
-		animationController_->Play((int)ANIM_TYPE::IDLE);
-		ChangeState(STATE::ENCOUNT_FINISH);
-		return;
-	}
-}
-
-void Enemy::UpdateEncountFinish(void)
-{
-}
-
-void Enemy::UpdateWait(void)
-{
-	//プレイヤーのほうを向いて待機
-	RotateToPlayer();
-}
-
-void Enemy::UpdateFollow(void)
-{
-	//状態時間更新
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	if (stateStep_ > FOLLOW_TIME)
-	{
-		hitCount_ = 0;
-		ChangeState(STATE::MOVE);
-		return;
-	}
-
-	//追従処理
-	FollowPlayer(transform_.pos);
-
-	Collision();
-
-	//回転処理
-	Rotate();
-}
-
-void Enemy::UpdateMove(void)
-{
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-
-	//プレイヤーがいる方向を見続ける
-	RotateToPlayer();
-
-	//移動処理
-	Move();
-	Collision();
-	if (stateStep_ > MOVE_TIME)
-	{
-		//HPが最大の半分以下になっていたらチャージ攻撃状態に遷移
-		if (!isChargeAtk_ &&
-			hp_ <= maxHp_ / 2.0f)
-		{
-			isChargeAtk_ = true;
-			ChangeState(STATE::CHARGE);
-			return;
-		}
-		//プレイヤーとの距離を測り、一定以上離れていたら遠距離攻撃
-		//それ以外は近距離攻撃
-		if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
-		{
-			ChangeState(STATE::ATTACK_NEAR);
-		}
-		else
-		{
-			animationController_->Play((int)ANIM_TYPE::CAST_SPELL, false);
-			std::vector<STATE> attackState = { STATE::SHOT_ONE, STATE::SHOT_ALL };
-			// 乱数生成器の初期化
-			std::random_device rd; //非決定的な乱数生成器
-			std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
-			std::shuffle(attackState.begin(), attackState.end(), engine);
-			//遠距離攻撃
-			const int bulletNum = 5;
-			CreateBullet(bulletNum);
-			ChangeState(attackState[0]);
-			return;
-		}
-	}
-
-	//離れていたら追従状態に遷移
-	if(CheckPlayerDistance() > FOLLOW_DISTANCE)
-	{
-		animationController_->Play((int)ANIM_TYPE::RUN);
-		ChangeState(STATE::FOLLOW);
-	}
-}
-
-void Enemy::UpdateAttackNear(void)
-{
-	Rotate();
-
-	col_ = 0xff0000;
-
-	//アニメーションが終わったら移動状態へ戦記
-	if (animationController_->IsEnd())
-	{
-		col_ = 0x00ff00;
-		ChangeState(STATE::MOVE);
-		return;
-	}
-
-	//パリィされたらダメージを受けてダウン状態へ遷移
-	if (CommonUtility::IsHitSpheres(
-		sphereNear_->GetPos(),
-		sphereNear_->GetRadius(),
-		player_.GetSphere().GetPos(),
-		player_.GetSphere().GetRadius()))
-	{
-		if (player_.GetIsParry())
-		{
-			Damage(NORMAL_DAMAGE);
-			ChangeState(STATE::DOWN);
-			col_ = 0x00ff00;
-			return;
-		}
-	}
-
-	//既に行動済みだったら処理しない
-	if (isStepActioned_)return;
-
-	//当たり判定
-	if(CommonUtility::IsHitSphereCapsule(
-		sphereNear_->GetPos(),
-		sphereNear_->GetRadius(),
-		player_.GetCapsule().GetPosTop(),
-		player_.GetCapsule().GetPosDown(),
-		player_.GetCapsule().GetRadius()))
-	{
-		//回避中だったらダメージを受けない
-		if (player_.GetIsDodge())return;
-		player_.Damage(ATTACK_DAMAGE);
-		//画面揺らし
-		SceneManager::GetInstance().StartShakeScreen();
-		isStepActioned_ = true;
-	}
-}
-
-void Enemy::UpdateShotOne(void)
-{
-	if (IsCastSpell())
-	{
-		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
-	}
-
-	//回転処理
-	RotateToPlayer();
-
-	//
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
-	{
-		bullet->Update();
-	}
-
-	//弾を順々に準備状態にする
-	const float bulletInterval = 0.7f;
-	for(std::unique_ptr<EnemyBullet>& bullet : bullets_)
-	{
-		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
-		if (stateStep_ > bulletInterval)
-		{
-			bullet->SetStateReady();
-			stateStep_ = 0.0f;
-		}
-	}
-	//弾が全部準備できたらプレイヤーに向けて発射する
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
-	{
-		if (CheckBulletDestroy())break;
-		if(CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
-		if (stateStep_ > bulletInterval && bullet->GetState() == EnemyBullet::STATE::READY)
-		{
-			//ターゲットに発射
-			bullet->Shot();
-			bullet->SetTargetPos(player_.GetTransform().pos);
-			stateStep_ = 0.0f;
-		}
-		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
-
-		//パリィ判定
-		if (CommonUtility::IsHitSpheres(
-			bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
-			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
-		{
-			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
-			if (player_.GetIsParry())
-			{
-				bullet->SetStateReverse();
-				VECTOR targetPos = VAdd(transform_.pos,VGet(0.0f,80.0f,0.0f));
-				bullet->SetTargetPos(targetPos);
-				continue;
-			}
-		}
-
-		//当たり判定
-		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
-			bullet->GetSphere().GetRadius(), player_.GetCapsule().GetPosTop(),
-			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
-		{
-			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
-			//回避中だったらダメージを受けない
-			if (player_.GetIsDodge())continue;
-			//ダメージ処理(当たった弾は破棄)
-			player_.Damage(ATTACK_DAMAGE);
-			SceneManager::GetInstance().StartShakeScreen();
-			bullet->Destroy();
-		}
-
-		//当たり判定
-		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
-			bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
-			capsule_->GetPosDown(), capsule_->GetRadius()))
-		{
-			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
-			//ダメージ処理(当たった弾は破棄)
-			Damage(NORMAL_DAMAGE);
-			bullet->Destroy();
-			hitCount_++;
-			continue;
-		}
-	}
-
-	//全弾命中でダウン状態へ
-	if (hitCount_ >= static_cast<int>(bullets_.size()))
-	{
-		ChangeState(STATE::DOWN);
-		hitCount_ = 0;
-		return;
-	}
-	
-	//生成した弾が全部消滅したら移動遷移
-	if (CheckBulletDestroy())
-	{
-		ChangeState(STATE::MOVE);
-		hitCount_ = 0;
-		return;
-	}
-}
-
-void Enemy::UpdateShotAll(void)
-{
-	if (IsCastSpell())
-	{
-		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
-	}
-
-	//回転処理
-	RotateToPlayer();
-
-	//遠距離攻撃の状態
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	//if (stateStep_ > ATTACK_FAR_TIME)
-	//{
-	//	hitCount_ = 0;
-	//	ChangeState(STATE::MOVE);
-	//	return;
-	//}
-
-	//弾を順々に準備状態にする
-	const float bulletInterval = 0.4f;
-	for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
-	{
-		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
-		if (stateStep_ > bulletInterval)
-		{
-			bullet->SetStateReady();
-			stateStep_ = 0.0f;
-			continue;
-		}
-	}
-	if(CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ALL, false);
-
-	//弾が全部準備できたらプレイヤーに向けて発射する
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
-	{
-		if (CheckBulletDestroy())break;
-		if (stateStep_ > bulletInterval && 
-			bullet->GetState() == EnemyBullet::STATE::READY)
-		{
-			//ターゲットに発射
-			bullet->Shot();
-			bullet->SetTargetPos(player_.GetTransform().pos);
-		}
-		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
-		bullet->Update();
-
-		//パリィ判定
-		if (CommonUtility::IsHitSpheres(
-			bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
-			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
-		{
-			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
-			//パリィ中にあたったら弾を跳ね返す
-			if (player_.GetIsParry())
-			{
-				bullet->SetStateReverse();
-				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, 80.0f, 0.0f));
-				bullet->SetTargetPos(targetPos);
-				continue;
-			}
-		}
-
-		//当たり判定
-		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
-			bullet->GetSphere().GetRadius(), player_.GetCapsule().GetPosTop(),
-			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
-		{
-			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
-			//回避中だったらダメージを受けない
-			if (player_.GetIsDodge())
-			{
-				continue;
-			}
-			//ダメージ処理(当たった弾は破棄)
- 			player_.Damage(ATTACK_DAMAGE);
-			SceneManager::GetInstance().StartShakeScreen();
-			bullet->Destroy();
-		}
-
-		//当たり判定
-		if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
-			bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
-			capsule_->GetPosDown(), capsule_->GetRadius()))
-		{
-			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
-			//ダメージ処理(当たった弾は破棄)
-			Damage(NORMAL_DAMAGE);
-			bullet->Destroy();
-			hitCount_++;
-			continue;
-		}
-	}
-
-	//全弾命中でダウン状態へ
-	if (hitCount_ >= static_cast<int>(bullets_.size()))
-	{
-		stateStep_ = 0.0f;
-		ChangeState(STATE::DOWN);
-		hitCount_ = 0;
-		return;
-	}
-
-	//生成した弾が全部消滅したら移動遷移
-	if (CheckBulletDestroy())
-	{
-		ChangeState(STATE::MOVE);
-		hitCount_ = 0;
-		return;
-	}
-}
-
-void Enemy::UpdateCharge(void)
-{
-	//チャージで範囲を大きくする
-	charge_ += 1.5f;
-	sphereNear_->SetRadius(charge_);
-	const float chargeRad = 250.0f;
-	if (charge_ > chargeRad)
-	{
-		charge_ = chargeRad;
-		ChangeState(STATE::ATTACK_CHARGE);
-		return;
-	}
-}
-
-void Enemy::UpdateChargeAttack(void)
-{
-	col_ = 0x000000;
-
-	if (animationController_->IsEnd())
-	{
-		charge_ = 0.0f;
-		//球体を近接用に戻す
-		sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
-		sphereNear_->SetRadius(30.0f);
-		ChangeState(STATE::MOVE);
-		return;
-	}
-
-	//既に行動済みだったら処理しない
-	if (isStepActioned_)return;
-	//球体判定
-	if (CommonUtility::IsHitSphereCapsule(
-		sphereNear_->GetPos(),
-		sphereNear_->GetRadius(),
-		player_.GetCapsule().GetPosTop(),
-		player_.GetCapsule().GetPosDown(),
-		player_.GetCapsule().GetRadius()))
-	{
-		//回避中だったらダメージを受けない
-		if (!player_.GetIsDodge())
-		{
-			col_ = 0xFFFFFF;
-		}
-		player_.Damage(CHARGE_DAMAGE);
-		isStepActioned_ = true;
-	}
-}
-
-void Enemy::UpdateBackstab(void)
-{
-	//続きを再生させるための待ち時間
-	const float stopTime = 0.1f;
-	//途中までの再生が終わったら経過時間まで待ち、
-	//残りのアニメーションを再生する
-	if (animationController_->IsEnd())
-	{
-		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-		if (stateStep_ > stopTime && !isBackstab_)
-		{
-			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 110.0f, false, true);
-			Damage(BACKSTAB_DAMAGE);
-			isBackstab_ = true;
-		}
-	}
-
-	if (isBackstab_ && animationController_->IsEnd())
-	{
-		isBackstab_ = false;
-		ChangeState(STATE::MOVE);
-		return;
-	}
-}
-
-void Enemy::UpdateDown(void)
-{
-	if(stepDownTime_ > DOWN_TIME && isDown_)
-	{
-		isDown_ = false;
-		animationController_->Play((int)ANIM_TYPE::DOWN, false,9.0f,-1.0f, false, true);
-	}
-	if (animationController_->IsEnd())
-	{
-		stepDownTime_ = 0.0f;
-
-		ChangeState(STATE::MOVE);
-		return;
-	}
-
-	stepDownTime_ += SceneManager::GetInstance().GetDeltaTime();
-}
-
-void Enemy::UpdateDead(void)
-{//何もしない
-}
-
 const json Enemy::GetJsonData(void)const
 {
 	JsonManager& jsonM = JsonManager::GetInstance();
@@ -1320,12 +1321,12 @@ void Enemy::UpdateDebugImGui(void)
 	{
 		ChangeState(STATE::ATTACK_NEAR);
 	}
-	if (ImGui::Button("Shot One"))
+	if (ImGui::Button("SetStateShot One"))
 	{
 		CreateBullet(bulletNum);
 		ChangeState(STATE::SHOT_ONE);
 	}
-	if (ImGui::Button("Shot All"))
+	if (ImGui::Button("SetStateShot All"))
 	{
 		CreateBullet(bulletNum);
 		ChangeState(STATE::SHOT_ALL);

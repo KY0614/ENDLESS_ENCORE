@@ -84,7 +84,7 @@ public:
 	/// 状態変更
 	/// </summary>
 	/// <param name="state">遷移したい状態</param>
-	void ChangeState(const STATE state);
+	void ChangeState(const STATE& state);
 
 	const STATE& GetState(void)const { return state_; }
 
@@ -201,94 +201,6 @@ private:
 	/// </summary>
 	/// <param name="maxHp">最大HP</param>
 	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
-
-	/// <summary>
-	/// ダメージを与える
-	/// </summary>
-	/// <param name="damage">ダメージ量</param>
-	void Damage(const float damage);
-
-	/// <summary>
-	/// 移動処理
-	/// </summary>
-	void Move(void);
-
-	bool CheckMovePos(void);
-
-	void ControlMoveDir(void);
-
-	/// <summary>
-	/// プレイヤーとの距離をチェックする
-	/// </summary>
-	/// <param name=""></param>
-	/// <returns>プレイヤーと敵の距離</returns>
-	float CheckPlayerDistance(void);
-
-	bool IsCastSpell(void);
-
-	/// <summary>
-	/// プレイヤーを追従する処理
-	/// </summary>
-	/// <param name=""></param>
-	void FollowPlayer(VECTOR& pos);
-
-	//衝突判定--------------------------------------------------------
-	
-	/// <summary>
-	/// 衝突判定処理
-	/// </summary>
-	void Collision(void);
-
-	/// <summary>
-	/// カプセルの衝突判定処理
-	/// </summary>
-	void CollisionCapsule(void);
-
-	/// <summary>
-	/// 重力方向の衝突判定処理
-	/// </summary>
-	void CollisionGravity(void);
-
-	//回転--------------------------------------------------------
-
-	/// <summary>
-	/// 目標回転角度の設定
-	/// </summary>
-	/// <param name="rotRad">目標回転角度</param>
-	void SetGoalRotate(double rotRad);
-
-	/// <summary>
-	/// 回転処理
-	/// </summary>
-	void Rotate(void);
-
-	/// <summary>
-	/// プレイヤーの方向へ回転する処理
-	/// </summary>
-	/// <param name=""></param>
-	void RotateToPlayer(void);
-
-	//弾--------------------------------------------------------
-	
-	/// <summary>
-	/// 弾の生成
-	/// </summary>
-	/// <param name="createNum">生成する数</param>
-	void CreateBullet(const int createNum);
-
-	/// <summary>
-	/// 生成した弾全てが準備状態かチェックする
-	/// </summary>
-	/// <param name=""></param>
-	/// <returns>true:全て準備状態　false:未準備</returns>
-	bool CheckBulletReady(void);
-
-	/// <summary>
-	/// 生成した弾全てが破棄状態かチェックする
-	/// </summary>
-	/// <param name=""></param>
-	/// <returns>true:全て破棄状態　false:未破棄</returns>
-	bool CheckBulletDestroy(void);
 
 	//状態遷移--------------------------------------------------------
 
@@ -414,6 +326,91 @@ private:
 	/// 更新：DEAD
 	/// </summary>
 	void UpdateDead(void);
+
+
+	/// <summary>
+	/// ダメージを与える
+	/// </summary>
+	/// <param name="damage">ダメージ量</param>
+	void Damage(const float damage);
+
+	/// <summary>
+	/// 移動処理
+	/// </summary>
+	void Move(void);
+
+	/// <summary>
+	/// プレイヤーとの距離をチェックする
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>プレイヤーと敵の距離</returns>
+	float CheckPlayerDistance(void);
+
+	bool IsCastSpell(void);
+
+	/// <summary>
+	/// プレイヤーを追従する処理
+	/// </summary>
+	/// <param name=""></param>
+	void FollowPlayer(VECTOR& pos);
+
+	//衝突判定--------------------------------------------------------
+	
+	/// <summary>
+	/// 衝突判定処理
+	/// </summary>
+	void Collision(void);
+
+	/// <summary>
+	/// カプセルの衝突判定処理
+	/// </summary>
+	void CollisionCapsule(void);
+
+	/// <summary>
+	/// 重力方向の衝突判定処理
+	/// </summary>
+	void CollisionGravity(void);
+
+	//回転--------------------------------------------------------
+
+	/// <summary>
+	/// 目標回転角度の設定
+	/// </summary>
+	/// <param name="rotRad">目標回転角度</param>
+	void SetGoalRotate(double rotRad);
+
+	/// <summary>
+	/// 回転処理
+	/// </summary>
+	void Rotate(void);
+
+	/// <summary>
+	/// プレイヤーの方向へ回転する処理
+	/// </summary>
+	/// <param name=""></param>
+	void RotateToPlayer(void);
+
+	//弾--------------------------------------------------------
+	
+	/// <summary>
+	/// 弾の生成
+	/// </summary>
+	/// <param name="createNum">生成する数</param>
+	void CreateBullet(const int createNum);
+
+	/// <summary>
+	/// 生成した弾全てが準備状態かチェックする
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true:全て準備状態　false:未準備</returns>
+	bool CheckBulletReady(void);
+
+	/// <summary>
+	/// 生成した弾全てが破棄状態かチェックする
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>true:全て破棄状態　false:未破棄</returns>
+	bool CheckBulletDestroy(void);
 
 	const nlohmann::json GetJsonData(void)const;
 
