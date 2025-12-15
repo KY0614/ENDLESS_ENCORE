@@ -149,7 +149,11 @@ void Enemy::Update(void)
 	animationController_->Update();
 	transform_.Update();
 
+#ifdef _DEBUG
+
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void Enemy::Draw(void)
@@ -1433,29 +1437,6 @@ void Enemy::DrawDebug(void)
 
 	sphereNear_->Draw(col_);
 
-	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
-	const int HP_BAR_Y = pos.z + 100.0f;// HPバーの左上Y座標
-
-	const int HP_BAR_WIDTH = maxHp_;    // HPバーの最大幅
-	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
-	float hp = hp_ / maxHp_;
-	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
-	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
-	// 背景（グレー）
-	DrawBox(posX,
-		posY,
-		posX + HP_BAR_WIDTH,
-		posY + HP_BAR_HEIGHT,
-		GetColor(100, 100, 100), TRUE);
-	// 現在HP（赤）
-	DrawBox(posX,
-		posY,
-		posX + barWidth,
-		posY + HP_BAR_HEIGHT,
-		GetColor(255, 0, 0), TRUE);
-
-
 	//ラジアンに変換
 	float viewRad = CommonUtility::Deg2RadF(VIEW_ANGLE);
 
@@ -1495,5 +1476,33 @@ void Enemy::DrawDebug(void)
 
 	//DrawTriangle3D(backPos, centerPos, leftPos, 0xffdead, true);
 	//DrawTriangle3D(centerPos, backPos, rightPos, 0xffdead, true);
+
+}
+
+void Enemy::DrawHPBar(void)
+{
+	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
+
+	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
+	const int HP_BAR_Y = pos.z + 100.0f;// HPバーの左上Y座標
+
+	const int HP_BAR_WIDTH = maxHp_;    // HPバーの最大幅
+	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
+	float hp = hp_ / maxHp_;
+	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
+	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
+	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
+	// 背景（グレー）
+	DrawBox(posX,
+		posY,
+		posX + HP_BAR_WIDTH,
+		posY + HP_BAR_HEIGHT,
+		GetColor(100, 100, 100), TRUE);
+	// 現在HP（赤）
+	DrawBox(posX,
+		posY,
+		posX + barWidth,
+		posY + HP_BAR_HEIGHT,
+		GetColor(255, 0, 0), TRUE);
 
 }

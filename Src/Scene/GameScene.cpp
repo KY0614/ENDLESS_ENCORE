@@ -90,7 +90,8 @@ void GameScene::Init(void)
 
 	//ステージ
 	stage_ = std::make_shared<Stage>();
-	stage_->Init(GetPointLightPos(),GetSpotLightPos());
+	//stage_->Init(GetPointLightPos(),GetSpotLightPos());
+	stage_->Init();
 
 	//プレイヤー
 	player_ = std::make_shared<Player>();
@@ -141,9 +142,15 @@ void GameScene::Update(void)
 	{
 		light->Update();
 	}
+
 	//更新ステップ
 	stateUpdate_();
+
+#ifdef _DEBUG
+
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void GameScene::Draw(void)
@@ -513,7 +520,13 @@ void GameScene::DrawBattle(void)
 
 	player_->DrawDead();
 
+	enemy_->DrawHPBar();
+	player_->DrawHPBar();
+
+#ifdef _DEBUG
 	DrawString(0, 0, L"バトル", 0xffffff);
+#endif
+
 }
 
 void GameScene::UpdateEnemySummon(void)

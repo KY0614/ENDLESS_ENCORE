@@ -83,6 +83,15 @@ const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const s
 	);
 }
 
+void JsonManager::InitTitle(void)
+{
+	static std::string PATH_JSON = Application::PATH_JSON;
+
+	//ステージのデータ読み込み
+	const std::string stagePath = "Stage.json";
+	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadData(PATH_JSON + stagePath, JSON_STAGE));
+}
+
 void JsonManager::InitGame(void)
 {
 	static std::string PATH_JSON = Application::PATH_JSON;

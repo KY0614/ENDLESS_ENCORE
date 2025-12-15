@@ -83,7 +83,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::SELECT);
+	DoChangeScene(SCENE_ID::TITLE);
 }
 
 void SceneManager::Init3D(void)
@@ -146,8 +146,11 @@ void SceneManager::Update(void)
 
 	//カメラ更新
 	camera_->Update();
+#ifdef _DEBUG
 
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void SceneManager::Draw(void)
@@ -441,6 +444,7 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 	case SceneManager::SCENE_ID::TITLE:
 		scene = std::make_unique<TitleScene>();
 		resM.InitTitle();
+		jsonM.InitTitle();
 		break;
 
 	case SceneManager::SCENE_ID::DEBUG:

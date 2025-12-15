@@ -88,8 +88,7 @@ private:
 	//演出
 	std::unique_ptr<EncountScene> encountScene_;
 
-
-	// プレイヤー
+	//
 	std::vector<std::unique_ptr<PointLight>> pointLight_;
 	std::vector<std::unique_ptr<SpotLight>> spotLight_;
 

@@ -75,6 +75,12 @@ public:
 	//シーンごとにデータを読み込むことにする
 	
 	/// <summary>
+	/// タイトル用のデータを初期化する
+	/// </summary>
+	/// <param name=""></param>
+	void InitTitle(void);
+	
+	/// <summary>
 	/// ゲームシーン用のデータを初期化する
 	/// </summary>
 	/// <param name=""></param>

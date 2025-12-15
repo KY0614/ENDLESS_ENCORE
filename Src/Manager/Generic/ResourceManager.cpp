@@ -122,21 +122,9 @@ void ResourceManager::InitTitle(void)
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Title.png");
 	resourcesMap_.emplace(SRC::TITLE_LOGO, std::move(res));
 
-	//プレイヤー
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
-	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
-
-	//スカイドーム
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "SkyDome/SkyDome.mv1");
-	resourcesMap_.emplace(SRC::SKY_DOME, std::move(res));
-
-	//家具：床
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/floor.mv1");
-	resourcesMap_.emplace(SRC::FLOOR, std::move(res));
-
-	//地面テクスチャ
-	res = std::make_unique<RES>(RES_T::IMG, PATH_MDL + "Stage/Tex/ground.png");
-	resourcesMap_.emplace(SRC::GROUND, std::move(res));
+	//ステージ
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Theater/large_theater.mv1");
+	resourcesMap_.emplace(SRC::THEATER, std::move(res));
 
 	//音------------------------------------------------------------------------
 
@@ -256,7 +244,7 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::PARRY_EFKT, std::move(res));
 
 	//パリィ
-	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire.efkefc");
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire_.efkefc");
 	resourcesMap_.emplace(SRC::FIRE_EFKT, std::move(res));
 }
 

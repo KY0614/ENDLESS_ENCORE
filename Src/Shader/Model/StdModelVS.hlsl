@@ -7,7 +7,6 @@
 
 // OUT
 #define VS_OUTPUT VertexToPixelLit
-//#define VS_OUTPUT_LIGHT VertexToPixelLight
 #include "../Common/Vertex/VertexShader3DHeader.hlsli"
 
 // 定数バッファ：スロット7番目(b7と書く)

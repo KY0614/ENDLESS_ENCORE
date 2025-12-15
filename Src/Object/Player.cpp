@@ -194,8 +194,11 @@ void Player::Update(void)
 	parryTransform_.pos = transform_.pos;
 	parryTransform_.pos.y += 20.0f;
 	parryTransform_.Update();
+#ifdef _DEBUG
 
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void Player::Draw(void)
@@ -206,6 +209,9 @@ void Player::Draw(void)
 	//丸影描画
 	DrawShadow();
 	//renderer_->Draw();
+
+	DrawParryCD();
+
 #ifdef _DEBUG
 	DebugDraw();
 #endif // _DEBUG
@@ -230,7 +236,11 @@ void Player::DebugUpdate(void)
 
 	transform_.Update();
 
+#ifdef _DEBUG
+
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void Player::DrawDead(void)
@@ -1150,18 +1160,6 @@ void Player::UpdateDebugImGui(void)
 
 void Player::DebugDraw(void)
 {
-	int lineH = 2;
-	const int HP_BAR_X = 20;         // HPバーの左上X座標
-	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
-	const int HP_BAR_WIDTH = maxHp_; // HPバーの最大幅
-	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
-	float hp = hp_ / maxHp_;
-	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	// 背景（グレー）
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
-	// 現在HP（緑）
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
-
 	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
 	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
 	VECTOR right = VScale(transform_.GetRight(), 120.0f);
@@ -1217,8 +1215,6 @@ void Player::DebugDraw(void)
 	
 	//球体描画（色指定あり）
 	//sphere_->Draw(col_);
-
-	DrawParryCD();
 }
 
 void Player::DrawParryCD(void)
@@ -1265,4 +1261,19 @@ void Player::DrawParryCD(void)
 		// テキスト表示 (パリィ可能)
 		DrawFormatString(GAUGE_X + GAUGE_W + 10, GAUGE_Y, fgColor, L"PARRY READY");
 	}
+}
+
+void Player::DrawHPBar(void)
+{
+	const int HP_BAR_X = 20;         // HPバーの左上X座標
+	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
+	const int HP_BAR_WIDTH = maxHp_; // HPバーの最大幅
+	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
+	float hp = hp_ / maxHp_;
+	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
+	// 背景（グレー）
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
+	// 現在HP（緑）
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
+
 }

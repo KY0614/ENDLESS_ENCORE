@@ -18,7 +18,7 @@ public:
 	/// <summary>
 	///	‰Šú‰»
 	/// </summary>
-	void Init(const VECTOR pos = {0.0f,0.0f,0.0f}, VECTOR sPos = { 0.0f,0.0f,0.0f });
+	void Init(const VECTOR pos = {0.0f,-10000.0f,0.0f}, VECTOR sPos = { 0.0f,0.0f,0.0f });
 
 	/// <summary>
 	///	XVˆ—

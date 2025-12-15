@@ -75,6 +75,8 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	void DrawHPBar(void);
+
 	/// <summary>
 	/// デバッグシーン用の更新処理
 	/// </summary>

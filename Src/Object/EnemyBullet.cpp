@@ -10,7 +10,7 @@
 namespace 
 {
 	//弾の生存時間
-	const float LIFE_TIME = 10.0f;
+	const float LIFE_TIME = 8.0f;
 }
 
 EnemyBullet::EnemyBullet(Transform& parent)
@@ -97,7 +97,7 @@ void EnemyBullet::Draw(void)
 	MV1DrawModel(transform_.modelId);
 
 	//当たり判定用の球の描画
-    sphere_->Draw(); 
+    //sphere_->Draw(); 
 }
 
 void EnemyBullet::SetOffsetPos(const VECTOR& offset)
@@ -243,12 +243,11 @@ void EnemyBullet::EffectFire(void)
 	effectFirePlayId_ = PlayEffekseer3DEffect(effectFireResId_);
 
 	//大きさの設定
-	float EFFEKT_SCALE = 20.0f;		//X,Z方向のスケール
-	float EFFEKT_SCALE_Y = 26.0f;	//Y方向のスケール
+	float EFFEKT_SCALE = 15.0f;		//X,Z方向のスケール
 	SetScalePlayingEffekseer3DEffect(
 		effectFirePlayId_,
 		EFFEKT_SCALE,
-		EFFEKT_SCALE_Y,
+		EFFEKT_SCALE,
 		EFFEKT_SCALE
 	);
 }

@@ -3,11 +3,7 @@
 #include "SceneBase.h"
 #include "../Object/Common/Transform.h"
 
-class SceneManager;
-class AnimationController;
-class ModelRenderer;
-class ModelMaterial;
-
+class Stage;
 
 class TitleScene : public SceneBase
 {
@@ -51,24 +47,14 @@ public:
 	void Draw(void) override;
 
 private:
-	//マテリアル
-	std::unique_ptr<ModelMaterial> material_;
-	//レンダラ
-	std::unique_ptr<ModelRenderer> renderer_;
 
-	//地面用
-	Transform graoundTran_;
+	//ステージ
+	std::shared_ptr<Stage> stage_;
 
-	//アニメーション
-	std::unique_ptr<AnimationController> animationController_;
+	int logoImg_;
 
+	//宣伝シーンへ遷移する用のタイマー
 	int toAdvertiseLoopTimer_;
-
-	/// <summary>
-	/// マテリアル情報初期化
-	/// </summary>
-	/// <param name="">マテリアルの定数バッファ設定</param>
-	void InitMaterial(void);
 
 	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)

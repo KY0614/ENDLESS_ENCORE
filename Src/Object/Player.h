@@ -74,6 +74,8 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	void DrawHPBar(void);
+
 	void DebugUpdate(void);
 
 	void DrawDead(void);

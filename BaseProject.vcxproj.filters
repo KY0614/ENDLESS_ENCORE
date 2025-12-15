@@ -676,15 +676,15 @@
     <FxCompile Include="Src\Shader\Model\StdModelPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\StdModelVS.hlsl" />
     <FxCompile Include="Src\Shader\PostEffect\Blur.hlsl" />
-    <FxCompile Include="Src\Shader\Model\PointLightVS.hlsl" />
-    <FxCompile Include="Src\Shader\Model\PointLightPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\SpotLightPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\SpotLightVS.hlsl" />
-    <FxCompile Include="Src\Shader\Model\RimLightPS.hlsl" />
-    <FxCompile Include="Src\Shader\Model\RimLightVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\ShieldPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\ShieldVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\MistWallVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\MistWallPS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\PointLightVS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\PointLightPS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\RimLightVS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\RimLightPS.hlsl" />
   </ItemGroup>
 </Project>

@@ -158,11 +158,10 @@ void Input::ResetTable()
 							{PeripheralType::MOUSE, MOUSE_INPUT_RIGHT} };
 
 	inputTable_["Dash"] = { {PeripheralType::KEYBOARD,KEY_INPUT_LCONTROL},
-							{PeripheralType::GAMEPAD, PAD_INPUT_Y},
-							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_TRIGGER} };
+							{PeripheralType::GAMEPAD, PAD_INPUT_C}};
 
-	inputTable_["Jump"] = { {PeripheralType::KEYBOARD,KEY_INPUT_F},
-							{PeripheralType::GAMEPAD, PAD_INPUT_Y},
+	inputTable_["Jump"] = { {PeripheralType::KEYBOARD,KEY_INPUT_E},
+							{PeripheralType::GAMEPAD, PAD_INPUT_X},
 							/*{PeripheralType::x_analog,(int)AnalogInputType::r_trigger}*/ };
 
 	inputTable_["Up"] = {	{PeripheralType::KEYBOARD,KEY_INPUT_W},

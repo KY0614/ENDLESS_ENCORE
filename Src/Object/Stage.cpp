@@ -85,7 +85,11 @@ void Stage::Update(void)
 	transform_.Update();
 	mistWallTransform_.Update();
 
+#ifdef _DEBUG
+
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void Stage::Draw(void)

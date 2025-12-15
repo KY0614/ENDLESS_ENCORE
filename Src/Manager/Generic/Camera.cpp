@@ -117,7 +117,11 @@ void Camera::SetBeforeDraw(void)
 	//DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
 
+#ifdef _DEBUG
+
 	UpdateDebugImGui();
+
+#endif // _DEBUG
 }
 
 void Camera::Draw(void)
@@ -428,7 +432,8 @@ void Camera::SetBeforeDrawSurroundView(void)
 
 void Camera::SetBeforeDrawFixedPoint(void)
 {
-	//なにもしない
+	pos_ = fixedPointPos_;
+	targetPos_ = fixedPointTargetPos_;
 }
 
 void Camera::SetBeforeDrawTopFixed(void)
@@ -489,17 +494,13 @@ void Camera::UpdateDebugImGui(void)
 	//ウィンドウタイトル&開始処理
 	ImGui::Begin("Camera");
 
-	ImGui::SliderFloat("angleX", &angles_.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("angleY", &angles_.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("angleZ", &angles_.z, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("fixedPointPosX", &fixedPointPos_.x, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("fixedPointPosY", &fixedPointPos_.y, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("fixedPointPosZ", &fixedPointPos_.z, -10000.0f, 10000.0f);
 
-	ImGui::SliderFloat("positionX", &pos_.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("positionY", &pos_.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("positionZ", &pos_.z, -10000.0f, 10000.0f);
-
-	ImGui::SliderFloat("targetX", &targetPos_.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("targetY", &targetPos_.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("targetZ", &targetPos_.z, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("fixedPointTargetPosX", &fixedPointTargetPos_.x, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("fixedPointTargetPosY", &fixedPointTargetPos_.y, -10000.0f, 10000.0f);
+	ImGui::SliderFloat("fixedPointTargetPosZ", &fixedPointTargetPos_.z, -10000.0f, 10000.0f);
 
 	//終了処理
 	ImGui::End();
