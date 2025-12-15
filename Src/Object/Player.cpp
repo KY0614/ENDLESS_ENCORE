@@ -210,8 +210,6 @@ void Player::Draw(void)
 	DrawShadow();
 	//renderer_->Draw();
 
-	DrawParryCD();
-
 #ifdef _DEBUG
 	DebugDraw();
 #endif // _DEBUG
@@ -1276,4 +1274,5 @@ void Player::DrawHPBar(void)
 	// åªç›HPÅióŒÅj
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
 
+	DrawParryCD();
 }

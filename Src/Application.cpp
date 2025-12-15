@@ -93,7 +93,7 @@ void Application::Run(void)
 
 		imGuiWrapper.Draw();
 
-		fps_->Draw();
+		//fps_->Draw();
 
 		ScreenFlip();
 

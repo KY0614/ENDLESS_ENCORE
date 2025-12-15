@@ -243,9 +243,25 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Barrior/Barrior.efkefc");
 	resourcesMap_.emplace(SRC::PARRY_EFKT, std::move(res));
 
-	//パリィ
+	//敵の弾
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire_.efkefc");
 	resourcesMap_.emplace(SRC::FIRE_EFKT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge.efkefc");
+	resourcesMap_.emplace(SRC::CHARGE_EFKT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "CosmicMist.efkefc");
+	resourcesMap_.emplace(SRC::COSMIC_EFKT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge_atk.efkefc");
+	resourcesMap_.emplace(SRC::EXPLOSIVE_EFKT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "LossOfBlood.efkefc");
+	resourcesMap_.emplace(SRC::BLOOD_EFKT, std::move(res));
 }
 
 void ResourceManager::InitPause(void)

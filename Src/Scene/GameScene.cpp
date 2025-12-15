@@ -380,7 +380,10 @@ void GameScene::DrawWakeUp(void)
 	//プレイヤー描画
 	player_->Draw();
 
+#ifdef _DEBUG
 	DrawString(0, 0, L"ゲーム開始", 0xffffff);
+#endif
+	
 }
 
 void GameScene::UpdateExplore(void)
@@ -418,8 +421,10 @@ void GameScene::DrawExplore(void)
 
 	//プレイヤー描画
 	player_->Draw();
-
+#ifdef _DEBUG
 	DrawString(0, 0, L"探索ステージ", 0xffffff);
+#endif
+	
 }
 
 void GameScene::UpdateEncount(void)
@@ -472,8 +477,10 @@ void GameScene::DrawEncount(void)
 	player_->DrawDead();
 
 	encountScene_->Draw();
-
+#ifdef _DEBUG
 	DrawString(0, 0, L"エンカウント", 0xffffff);
+#endif
+	
 }
 
 void GameScene::UpdateBattle(void)
@@ -481,13 +488,13 @@ void GameScene::UpdateBattle(void)
 	InputManager& ins = InputManager::GetInstance();
 
 	//敵の体力が半分以下で敵召喚状態へ遷移
-	if (/*!enemy_->GetIsBackstab() &&*/
-		enemy_->GetHP() <= enemy_->GetMaxHP() / 2.0f)
-	{
-		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_OUT);
-		ChangeState(STATE::ENEMY_SUMMON);
-		return;
-	}
+	//if (/*!enemy_->GetIsBackstab() &&*/
+	//	enemy_->GetHP() <= enemy_->GetMaxHP() / 2.0f)
+	//{
+	//	SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_OUT);
+	//	ChangeState(STATE::ENEMY_SUMMON);
+	//	return;
+	//}
 
 	player_->Update();
 	enemy_->Update();
@@ -568,8 +575,10 @@ void GameScene::DrawEnemySummon(void)
 	}
 
 	player_->DrawDead();
-
+#ifdef _DEBUG
 	DrawString(0, 0, L"召喚", 0xffffff);
+#endif
+
 }
 
 void GameScene::UpdateBattleSecond(void)
@@ -578,6 +587,10 @@ void GameScene::UpdateBattleSecond(void)
 
 void GameScene::DrawBattleSecond(void)
 {
+
+	enemy_->DrawHPBar();
+	player_->DrawHPBar();
+
 }
 
 void GameScene::DrawMessage(const std::wstring& wStr)

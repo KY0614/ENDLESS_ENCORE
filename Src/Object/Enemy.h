@@ -177,6 +177,13 @@ private:
 
 	bool isEncount_;
 
+	//エフェクト
+	int effectChargeResId_;	//エフェクトリソースID
+	int effectChargePlayId_;	//エフェクト再生ID
+	int effectChargeAtkResId_;	//エフェクトリソースID
+	int effectChargeAtkPlayId_;	//エフェクト再生ID
+
+
 	/// <summary>
 	/// 3Dモデル初期化
 	/// </summary>
@@ -413,6 +420,10 @@ private:
 	/// <param name=""></param>
 	/// <returns>true:全て破棄状態　false:未破棄</returns>
 	bool CheckBulletDestroy(void);
+
+
+	void EffectCharge(void);
+	void EffectChargeAtk(void);
 
 	const nlohmann::json GetJsonData(void)const;
 

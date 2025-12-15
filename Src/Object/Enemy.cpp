@@ -1,4 +1,5 @@
 #include <random>
+#include <EffekseerForDXLib.h>
 #include "../Application.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Utility/CommonUtility.h"
@@ -134,6 +135,13 @@ void Enemy::Init(void)
 
 	//アニメーションの初期化
 	InitAnimation();
+
+	//火のエフェクトのリソース読み込み
+	effectChargeResId_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::CHARGE_EFKT).handleId_;
+
+	effectChargeAtkResId_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::EXPLOSIVE_EFKT).handleId_;
 
 	//初期の状態を設定
 	ChangeState(STATE::NONE);
@@ -399,6 +407,7 @@ void Enemy::ChangeStateCharge(void)
 	sphereNear_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
 	//アニメーションを途中まで再生
 	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 0.0f, 26.0f);
+	EffectCharge();
 	stateUpdate_ = std::bind(&Enemy::UpdateCharge, this);
 }
 
@@ -406,6 +415,7 @@ void Enemy::ChangeStateAttackCharge(void)
 {
 	//アニメーションを途中から再生
 	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 26.0f, -1.0f, false, true);
+	EffectChargeAtk();
 	stateUpdate_ = std::bind(&Enemy::UpdateChargeAttack, this);
 }
 
@@ -812,6 +822,11 @@ void Enemy::UpdateCharge(void)
 		charge_ = chargeRad;
 		ChangeState(STATE::ATTACK_CHARGE);
 		return;
+	}
+
+	if (IsEffekseer3DEffectPlaying(effectChargePlayId_) < 0)
+	{
+		EffectCharge();
 	}
 }
 
@@ -1276,6 +1291,51 @@ bool Enemy::CheckBulletDestroy(void)
 		}
 	}
 	return true;
+}
+
+void Enemy::EffectCharge(void)
+{
+	//再生Idを取得
+	effectChargePlayId_ = PlayEffekseer3DEffect(effectChargeResId_);
+
+	//大きさの設定
+	float EFFEKT_SCALE = 80.0f;		//X,Z方向のスケール
+	SetScalePlayingEffekseer3DEffect(
+		effectChargePlayId_,
+		EFFEKT_SCALE,
+		EFFEKT_SCALE,
+		EFFEKT_SCALE
+	);
+
+	//エフェクトの位置を同期
+	SetPosPlayingEffekseer3DEffect(
+		effectChargePlayId_,
+		transform_.pos.x,
+		transform_.pos.y,
+		transform_.pos.z);
+}
+
+void Enemy::EffectChargeAtk(void)
+{
+	//再生Idを取得
+	effectChargeAtkPlayId_ = PlayEffekseer3DEffect(effectChargeAtkResId_);
+
+	//大きさの設定
+	float EFFEKT_SCALE = 40.0f;		//X,Z方向のスケール
+	SetScalePlayingEffekseer3DEffect(
+		effectChargeAtkPlayId_,
+		EFFEKT_SCALE,
+		EFFEKT_SCALE,
+		EFFEKT_SCALE
+	);
+	//再生速度の設定(少し早めに設定）
+	SetSpeedPlayingEffekseer3DEffect(effectChargeAtkPlayId_, 2.0f);
+	//エフェクトの位置を同期
+	SetPosPlayingEffekseer3DEffect(
+		effectChargeAtkPlayId_,
+		transform_.pos.x,
+		transform_.pos.y,
+		transform_.pos.z);
 }
 
 const json Enemy::GetJsonData(void)const
