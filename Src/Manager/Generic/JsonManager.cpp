@@ -40,6 +40,7 @@ void JsonManager::Destroy(void)
 {
 	//インスタンスの解放
 	Release();
+	jsonDataMap_.clear();
 	delete instance_;
 }
 

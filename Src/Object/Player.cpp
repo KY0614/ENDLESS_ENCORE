@@ -320,10 +320,6 @@ void Player::Init3DModel(void)
 		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
 
 	//データが含まれていない場合はエラーメッセージを出す
-	//if (!playerData.contains(KEY_PLAYER))assert(0 && "データが存在しないか不正なデータです");
-	//const json& param = data.at(KEY_PLAYER);
-
-	//データが含まれていない場合はエラーメッセージを出す
 	if (!playerData.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
 	const json& transformData = playerData.at(JsonManager::KEY_TRANSFORM);
 
