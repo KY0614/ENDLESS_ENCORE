@@ -1,4 +1,5 @@
 #include <DxLib.h>
+#include<EffekseerForDXLib.h>
 #include "../Application.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Common/Fader.h"
@@ -30,6 +31,8 @@ GameScene::GameScene(void)
 	enemy_ = nullptr;
 	stage_ = nullptr;
 	isFaseChange_ = false;
+	postEffectScreen_ = -1;
+	state_ = STATE::NONE;
 	//状態管理
 	stateChanges_.emplace(STATE::LOADING, std::bind(&GameScene::ChangeStateLoading, this));
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
@@ -59,8 +62,7 @@ void GameScene::LoadData(void)
 
 	//sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
 	//	ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
-	//sound.AdjustVolume(SoundManager::SOUND::BATTLE, 25);
-
+	//sound.AdjustVolume(SoundManager::SOUND::BATTLE, 25)
 }
 
 void GameScene::Init(void)
@@ -141,7 +143,7 @@ void GameScene::Update(void)
 	for (std::unique_ptr<SpotLight>& light : spotLight_)
 	{
 		light->Update();
-	}
+	};
 
 	//更新ステップ
 	stateUpdate_();

@@ -320,7 +320,11 @@ void Player::Init3DModel(void)
 		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
 
 	//データが含まれていない場合はエラーメッセージを出す
-	if (!playerData.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
+	if (!playerData.contains(JsonManager::KEY_TRANSFORM))
+	{
+		assert(0 && "データが存在しないか不正なデータです");
+	}
+	//Transformデータ取得
 	const json& transformData = playerData.at(JsonManager::KEY_TRANSFORM);
 
 	//モデルの基本設定
@@ -1057,6 +1061,7 @@ void Player::EffectFootSmoke(void)
 
 void Player::EffectParry(void)
 {
+	//すでに再生中なら何もしない
 	if (IsEffekseer3DEffectPlaying(effectParryPlayId_) > -1)return;
 
 	//再生Idを取得
@@ -1128,25 +1133,25 @@ void Player::UpdateDebugImGui(void)
 		ChangeState(STATE::DEAD);
 	}
 
-	//角度
-	VECTOR rotDeg = VECTOR();
-	rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().x);
-	rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().y);
-	rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().z);
-	ImGui::Text("angle(deg)");
-	ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
-	ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
-	ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
+	////角度
+	//VECTOR rotDeg = VECTOR();
+	//rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().x);
+	//rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().y);
+	//rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().z);
+	//ImGui::Text("angle(deg)");
+	//ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
+	//ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
+	//ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
 
-	//ローカル角度
-	VECTOR localRotDeg = VECTOR();
-	localRotDeg.x = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().x);
-	localRotDeg.y = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().y);
-	localRotDeg.z = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().z);
-	ImGui::Text("localAngle(deg)");
-	ImGui::SliderFloat("LocalRotX", &rotDeg.x, 0.0f, 360.0f);
-	ImGui::SliderFloat("LocalRotY", &rotDeg.y, 0.0f, 360.0f);
-	ImGui::SliderFloat("LocalRotZ", &rotDeg.z, 0.0f, 360.0f);
+	////ローカル角度
+	//VECTOR localRotDeg = VECTOR();
+	//localRotDeg.x = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().x);
+	//localRotDeg.y = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().y);
+	//localRotDeg.z = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().z);
+	//ImGui::Text("localAngle(deg)");
+	//ImGui::SliderFloat("LocalRotX", &rotDeg.x, 0.0f, 360.0f);
+	//ImGui::SliderFloat("LocalRotY", &rotDeg.y, 0.0f, 360.0f);
+	//ImGui::SliderFloat("LocalRotZ", &rotDeg.z, 0.0f, 360.0f);
 
 	//終了処理
 	ImGui::End();
@@ -1161,24 +1166,6 @@ void Player::DebugDraw(void)
 	//right.y += 150.0f;
 	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
 	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
-
-	switch (animationController_->GetPlayType())
-	{
-	case 0:
-		DrawFormatString(0, 60, 0xFF0000, L"ANIM_IDLE");
-		break;
-		
-	case 1:
-		DrawFormatString(0, 60, 0xFF0000, L"ANIM_WALK_SLOW");
-		break;
-		
-	case 5:
-		DrawFormatString(0, 60, 0xFF0000, L"ANIM_JUMP");
-		break;
-	
-	default:
-		break;
-	}
 
 	//VECTOR dir = VAdd(transform_.GetLeft(), transform_.GetForward());
 	//VECTOR pos = VAdd(transform_.pos, VScale(dir,30.0f));

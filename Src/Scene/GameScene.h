@@ -20,6 +20,7 @@ public:
 	//状態
 	enum class STATE
 	{
+		NONE,		//初期化用
 		LOADING,	//読み込み
 		WAKE_UP,	//ゲーム開始
 		EXPLORE,	//探索

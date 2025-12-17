@@ -203,10 +203,6 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
 	resourcesMap_.emplace(SRC::PLAYER_SHADOW, std::move(res));
 
-	////床
-	//res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Floor/floor.mv1");
-	//resourcesMap_.emplace(SRC::FLOOR, std::move(res));
-
 	//コイン
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Coin.mv1");
 	resourcesMap_.emplace(SRC::COIN, std::move(res));
@@ -244,24 +240,24 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::PARRY_EFKT, std::move(res));
 
 	//敵の弾
-	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire_.efkefc");
-	resourcesMap_.emplace(SRC::FIRE_EFKT, std::move(res));
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire_test.efkefc");
+	resourcesMap_.emplace(SRC::FIRE_EFFECT, std::move(res));
 
 	//敵のチャージ
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge.efkefc");
-	resourcesMap_.emplace(SRC::CHARGE_EFKT, std::move(res));
+	resourcesMap_.emplace(SRC::CHARGE_EFFECT, std::move(res));
 
 	//敵のチャージ
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "CosmicMist.efkefc");
-	resourcesMap_.emplace(SRC::COSMIC_EFKT, std::move(res));
+	resourcesMap_.emplace(SRC::COSMIC_EFFECT, std::move(res));
 
 	//敵のチャージ
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge_atk.efkefc");
-	resourcesMap_.emplace(SRC::EXPLOSIVE_EFKT, std::move(res));
+	resourcesMap_.emplace(SRC::EXPLOSIVE_EFFECT, std::move(res));
 
 	//敵のチャージ
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "LossOfBlood.efkefc");
-	resourcesMap_.emplace(SRC::BLOOD_EFKT, std::move(res));
+	resourcesMap_.emplace(SRC::BLOOD_EFFECT, std::move(res));
 }
 
 void ResourceManager::InitPause(void)

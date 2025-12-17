@@ -62,7 +62,7 @@ public:
 	/// </summary>
 	/// <param name="objName">データを読み込む対象のオブジェクト名</param>
 	/// <returns>オブジェクト名と対応するパラメータ</returns>
-	nlohmann::json LoadData(const std::string& fileName, const std::string& dataName);
+	nlohmann::json LoadJsonData(const std::string& fileName, const std::string& dataName);
 
 	/// <summary>
 	/// JSONデータからVECTOR型へ変換して取得

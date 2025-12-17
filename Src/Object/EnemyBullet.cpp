@@ -58,7 +58,7 @@ void EnemyBullet::Init(void)
 
 	//火のエフェクトのリソース読み込み
 	effectFireResId_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::FIRE_EFKT).handleId_;
+		ResourceManager::SRC::FIRE_EFFECT).handleId_;
 
 	//初期状態は非生存状態
 	SetIsAlive(false);
@@ -153,6 +153,14 @@ void EnemyBullet::ChangeStateShot(void)
 
 void EnemyBullet::ChangeStateReverse(void)
 {
+	//エフェクトの色変更(水色っぽく変更)
+	SetColorPlayingEffekseer3DEffect(
+		effectFirePlayId_,
+		0,
+		128,
+		255,
+		255
+	);
 	stateUpdate_ = std::bind(&EnemyBullet::UpdateReverse, this);
 }
 

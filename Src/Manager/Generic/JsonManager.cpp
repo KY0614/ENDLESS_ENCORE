@@ -51,7 +51,7 @@ const nlohmann::json& JsonManager::GetJsonData(
 	return jsonDataMap_.at(dataType).at(data);
 }
 
-nlohmann::json JsonManager::LoadData(
+nlohmann::json JsonManager::LoadJsonData(
 	const std::string& fileName,
 	const std::string& dataName)
 {
@@ -90,20 +90,24 @@ void JsonManager::InitTitle(void)
 
 	//ステージのデータ読み込み
 	const std::string stagePath = "Stage.json";
-	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadData(PATH_JSON + stagePath, JSON_STAGE));
+	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(PATH_JSON + stagePath, JSON_STAGE));
 }
 
 void JsonManager::InitGame(void)
 {
+	//JSONデータが入っているフォルダのパス
 	static std::string PATH_JSON = Application::PATH_JSON;
 
-	//プレイヤーデータの読み込み
+	//プレイヤーのデータ読み込み
 	const std::string playerPath = "Player.json";
-	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadData(PATH_JSON + playerPath, JSON_PLAYER));
+	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadJsonData(
+		PATH_JSON + playerPath, JSON_PLAYER));
 	//敵のデータ読み込み
 	const std::string enemyPath = "Enemy.json";
-	jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadData(PATH_JSON + enemyPath, JSON_ENEMY));
+	jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadJsonData(
+		PATH_JSON + enemyPath, JSON_ENEMY));
 	//ステージのデータ読み込み
 	const std::string stagePath = "Stage.json";
-	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadData(PATH_JSON + stagePath, JSON_STAGE));
+	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(
+		PATH_JSON + stagePath, JSON_STAGE));
 }

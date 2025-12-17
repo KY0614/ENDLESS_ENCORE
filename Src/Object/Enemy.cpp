@@ -138,10 +138,10 @@ void Enemy::Init(void)
 
 	//火のエフェクトのリソース読み込み
 	effectChargeResId_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::CHARGE_EFKT).handleId_;
+		ResourceManager::SRC::CHARGE_EFFECT).handleId_;
 
 	effectChargeAtkResId_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::EXPLOSIVE_EFKT).handleId_;
+		ResourceManager::SRC::EXPLOSIVE_EFFECT).handleId_;
 
 	//初期の状態を設定
 	ChangeState(STATE::NONE);
