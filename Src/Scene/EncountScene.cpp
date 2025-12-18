@@ -7,6 +7,13 @@
 #include "../Manager/GameSystem/SoundManager.h"
 #include "EncountScene.h"
 
+namespace
+{
+	const VECTOR PLAYER_WALK_START_POS = { -50.0f, -210.0f, 1350.0f };
+	const VECTOR PLAYER_WALK_END_POS = { -50.0f, -210.0f, 1150.0f };
+	const float PLAYER_WALK_TOTAL_TIME = 3.0f;
+}
+
 EncountScene::EncountScene(
 	Player& player,
 	Enemy& enemy) : 
@@ -90,11 +97,14 @@ void EncountScene::ChangeStateFade(void)
 
 void EncountScene::ChangeStatePlayerWalk(void)
 {
+	//プレイヤーをステージ上で歩かせる
 	player_.ChangeState(Player::STATE::STAGE_WALK);
-	VECTOR startPos = VGet(-50.0f, -210.0f, 1350.0f);
-	VECTOR endPos = VGet(-50.0f, -210.0f, 1150.0f);
-	const float& moveTotalTime = 3.0f;
-	mainCamera->SetTrackCameraQuadOut(startPos, endPos, moveTotalTime);
+	//カメラをトラック移動させる(ステージからプレイヤーに向かって)
+	//足元を映すように
+	mainCamera->SetTrackCameraQuadOut(
+		PLAYER_WALK_START_POS,
+		PLAYER_WALK_END_POS,
+		PLAYER_WALK_TOTAL_TIME);
 	mainCamera->ChangeMode(Camera::MODE::TRACK);
 	stateUpdate_ = std::bind(&EncountScene::UpdatePlayerWalk, this);
 }
@@ -113,7 +123,6 @@ void EncountScene::ChangeStateBlackOut(void)
 		VScale(VNorm(playerBackLeft),100.0f));
 	const float cameraOffsetY = 100.0f;
 	pPos.y += cameraOffsetY;
-	const VECTOR& pos = VGet(-50.0f, -210.0f, 1350.0f);
 	VECTOR targetPos = player_.GetTransform().pos;
 	targetPos.y += cameraOffsetY;
 	mainCamera->SetFixedPointPos(pPos, targetPos);
@@ -184,6 +193,8 @@ void EncountScene::UpdateFade(void)
 void EncountScene::UpdatePlayerWalk(void)
 {
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	//カメラのトラック移動とプレイヤーの歩行が終わったら
+	//一定時間経過させてから次の状態へ遷移&フェードアウト
 	if (mainCamera->IsActionEnd() &&
 		player_.IsActionEnd())
 	{
@@ -193,6 +204,7 @@ void EncountScene::UpdatePlayerWalk(void)
 		{
 			fader.lock()->SetFade(Fader::STATE::FADE_OUT);
 			intervalTimer_ = 0.0f;
+			//プレイヤーに注目状態へ遷移
 			ChangeState(STATE::PLAYER_ATTENTION);
 			return;
 		}

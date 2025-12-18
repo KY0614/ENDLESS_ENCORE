@@ -92,8 +92,7 @@
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
     <ClCompile Include="Src\Manager\Transition\Transitor.cpp" />
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
-    <ClCompile Include="Src\Object\State\Enemy\EnemyStateBase.cpp" />
-    <ClCompile Include="Src\Object\State\Enemy\StateMove.cpp" />
+    <ClCompile Include="Src\Object\StateList\Enemy\BaseState.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Object\SummonEnemyBase.cpp" />
   </ItemGroup>
@@ -218,8 +217,7 @@
     <ClInclude Include="Src\Utility\StringUtility.h" />
     <ClInclude Include="Src\Manager\Transition\Transitor.h" />
     <ClInclude Include="Src\Manager\Transition\WipeTransitor.h" />
-    <ClInclude Include="Src\Object\State\Enemy\EnemyStateBase.h" />
-    <ClInclude Include="Src\Object\State\Enemy\StateMove.h" />
+    <ClInclude Include="Src\Object\StateList\Enemy\BaseState.h" />
     <ClInclude Include="Src\Object\Stage.h" />
     <ClInclude Include="Src\Object\SummonEnemyBase.h" />
   </ItemGroup>

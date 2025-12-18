@@ -1,5 +1,5 @@
 #pragma once
-class EnemyStateBase
+class BaseState
 {
 public:
 	//èÛë‘
@@ -17,8 +17,8 @@ public:
 		DEAD,			//
 	};
 
-	EnemyStateBase(void);
-	~EnemyStateBase(void);
+	BaseState(void);
+	~BaseState(void);
 
 	virtual void StateInit(void) = 0;
 	virtual void StateUpdate(void) = 0;
