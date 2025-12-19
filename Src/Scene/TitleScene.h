@@ -64,9 +64,9 @@ private:
 	std::unique_ptr<PixelMaterial> vignetteMaterial_;
 	std::unique_ptr<PixelRenderer> vignetteRenderer_;
 
-	// ポストエフェクト用(線ノイズ)周りを暗くするやつ
-	std::unique_ptr<PixelMaterial> lineMaterial_;
-	std::unique_ptr<PixelRenderer> lineRenderer_;
+	// ポストエフェクト用(線ノイズ)
+	std::unique_ptr<PixelMaterial> filmNoiseMaterial_;
+	std::unique_ptr<PixelRenderer> filmNoiseRenderer_;
 
 	int logoImg_;
 

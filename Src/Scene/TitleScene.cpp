@@ -97,11 +97,11 @@ void TitleScene::Init(void)
 	);
 	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
 	// ポストエフェクト用(線ノイズ)
-	lineMaterial_ = std::make_unique<PixelMaterial>("LineNoise.cso", 2);
-	lineMaterial_->AddConstBuf({ randomNoiseLineX, 0.0f, 0.0f, 0.0f });
-	lineMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
-	lineRenderer_ = std::make_unique<PixelRenderer>(*lineMaterial_);
-	lineRenderer_->MakeSquereVertex(
+	filmNoiseMaterial_ = std::make_unique<PixelMaterial>("FilmNoise.cso", 2);
+	filmNoiseMaterial_->AddConstBuf({ randomNoiseLineX, 0.0f, 0.0f, 0.0f });
+	filmNoiseMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	filmNoiseRenderer_ = std::make_unique<PixelRenderer>(*filmNoiseMaterial_);
+	filmNoiseRenderer_->MakeSquereVertex(
 		Vector2(0, 0),
 		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
 	);
@@ -111,7 +111,7 @@ void TitleScene::Init(void)
 void TitleScene::Update(void)
 {
 	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
-	lineMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
+	filmNoiseMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
 	InputManager& ins = InputManager::GetInstance();
 	SoundManager& sound = SoundManager::GetInstance();
 	if (ins.IsInputTriggered("Parry") && !isPushSpace_)
@@ -189,7 +189,7 @@ void TitleScene::Draw(void)
 	// 画面を初期化
 	ClearDrawScreen();
 
-	lineRenderer_->Draw();
+	filmNoiseRenderer_->Draw();
 
 	// メインに戻す
 	SetDrawScreen(mainScreen);

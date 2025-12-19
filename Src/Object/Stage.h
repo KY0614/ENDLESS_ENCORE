@@ -56,6 +56,8 @@ private:
 	std::unique_ptr<ModelMaterial> mistWallMaterial_;
 	std::unique_ptr<ModelRenderer> mistWallRenderer_;
 
+	int mistWallNoiseTex_;
+
 	//ステージ本体のモデル情報
 	Transform transform_;
 
