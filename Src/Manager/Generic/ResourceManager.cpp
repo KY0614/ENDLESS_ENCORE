@@ -133,7 +133,7 @@ void ResourceManager::InitTitle(void)
 	resourcesMap_.emplace(SRC::TITLE_BGM, std::move(res));
 
 	//SE
-	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/press_key.mp3");
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Push_Space.mp3");
 	resourcesMap_.emplace(SRC::PUSH_SPACE_SE, std::move(res));
 
 	//--------------------------------------------------------------------------
@@ -222,7 +222,7 @@ void ResourceManager::InitGame(void)
 	//SE
 	
 	//ライトアップ
-	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Light Up.mp3");
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Light_Up.mp3");
 	resourcesMap_.emplace(SRC::LIGHT_UP_SE, std::move(res));
 	
 	//パリィ
@@ -230,13 +230,13 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::PARRY_SE, std::move(res));
 	
 	//起き上がるときの音
-	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Wake Up.mp3");
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Wake_Up.mp3");
 	resourcesMap_.emplace(SRC::WAKE_UP_SE, std::move(res));
 
 	//エフェクト
 
 	//パリィ
-	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Barrior/Barrior.efkefc");
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Barrior.efkefc");
 	resourcesMap_.emplace(SRC::PARRY_EFKT, std::move(res));
 
 	//敵の弾
