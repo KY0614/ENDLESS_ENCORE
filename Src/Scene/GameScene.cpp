@@ -160,7 +160,7 @@ void GameScene::Draw(void)
 	//更新ステップ
 	stateDraw_();
 
-	int mainScreen = SceneManager::GetInstance().GetMainScreen();
+	//int mainScreen = SceneManager::GetInstance().GetMainScreen();
 	//for (auto& light : pointLight_)
 	//{
 	//	light->Draw();

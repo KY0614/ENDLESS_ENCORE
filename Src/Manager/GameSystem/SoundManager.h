@@ -21,16 +21,17 @@ public:
 		//ここに使用する音楽や効果音などを羅列
 		NONE,
 
-		EXPLORE,
-		LIGHT_UP,
+		EXPLORE,	//探索BGM
+		LIGHT_UP,	//ライト点灯SE
 
-		BATTLE,
+		BATTLE,		//戦闘BGM
+
 		//PLAYER用
-		WAKE_UP,
-		PARRY,
+		WAKE_UP,	//起床SE
+		PARRY,		//パリィSE
 
-		TITLE,
-		PUSH_SPACE,
+		TITLE,		//タイトルBGM
+		PUSH_SPACE,	//スペースキーを押してくださいSE
 
 		TUTORIAL,
 		NEXT_PAGE,

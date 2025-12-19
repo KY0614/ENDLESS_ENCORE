@@ -65,7 +65,7 @@ private:
 
 	// ポストエフェクト用(ブラー)
 	std::unique_ptr<PixelMaterial> blurMaterial_;
-	std::unique_ptr<PixelRenderer> blurRenderer_;;
+	std::unique_ptr<PixelRenderer> blurRenderer_;
 
 	//状態管理
 	STATE state_;		//現在の状態

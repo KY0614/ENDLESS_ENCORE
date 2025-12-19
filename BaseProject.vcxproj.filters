@@ -680,5 +680,8 @@
     <FxCompile Include="Src\Shader\Model\PointLightPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\RimLightVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\RimLightPS.hlsl" />
+    <FxCompile Include="Src\Shader\PostEffect\Sepiatone.hlsl" />
+    <FxCompile Include="Src\Shader\PostEffect\Vignette.hlsl" />
+    <FxCompile Include="Src\Shader\PostEffect\LineNoise.hlsl" />
   </ItemGroup>
 </Project>

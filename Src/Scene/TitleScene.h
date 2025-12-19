@@ -3,6 +3,8 @@
 #include "SceneBase.h"
 #include "../Object/Common/Transform.h"
 
+class PixelMaterial;
+class PixelRenderer;
 class Stage;
 
 class TitleScene : public SceneBase
@@ -51,13 +53,34 @@ private:
 	//ステージ
 	std::shared_ptr<Stage> stage_;
 
+	// ポストエフェクト用スクリーン
+	int postEffectScreen_;
+
+	// ポストエフェクト用(セピア調)
+	std::unique_ptr<PixelMaterial> sepiaMaterial_;
+	std::unique_ptr<PixelRenderer> sepiaRenderer_;
+
+	// ポストエフェクト用(ビネット)周りを暗くするやつ
+	std::unique_ptr<PixelMaterial> vignetteMaterial_;
+	std::unique_ptr<PixelRenderer> vignetteRenderer_;
+
+	// ポストエフェクト用(線ノイズ)周りを暗くするやつ
+	std::unique_ptr<PixelMaterial> lineMaterial_;
+	std::unique_ptr<PixelRenderer> lineRenderer_;
+
 	int logoImg_;
 
 	//宣伝シーンへ遷移する用のタイマー
 	int toAdvertiseLoopTimer_;
 
-	/// <summary>
-	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
-	/// </summary>
-	void UpdateDebugImGui(void);
+	//フェードアウト開始するまでのインターバル時間
+	float intervalTimer_;
+
+	//スペースキーを押したかどうか
+	bool isPushSpace_;
+
+	//スペースキーを押したときの効果音のボリューム
+	int pushSpaceSEVolume_;
+	int seVolumeDecreaseFrame_;
+
 };
