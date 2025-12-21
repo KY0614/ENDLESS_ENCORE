@@ -17,9 +17,9 @@ public:
 	enum class SRC
 	{
 		NONE,
+
+		//タイトル関連
 		TITLE_LOGO,
-		CAFE,
-		GROUND,
 		PUSH_SPACE,
 		PUSH_SPACE_SE,
 
@@ -55,6 +55,8 @@ public:
 		GAME_BGM,
 		PARRY_SE,
 		WAKE_UP_SE,
+		FIRE_SE,
+		BACKSTAB_SE,
 	};
 
 	// 明示的にインステンスを生成する

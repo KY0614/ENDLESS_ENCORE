@@ -24,6 +24,11 @@
 #include "EncountScene.h"
 #include "GameScene.h"
 
+namespace
+{
+	const float SKIP_TIME = 2.0f; //スキップ判定時間
+}
+
 GameScene::GameScene(void)
 {
 	loadingTime_ = 0.0f;
@@ -33,6 +38,10 @@ GameScene::GameScene(void)
 	isFaseChange_ = false;
 	postEffectScreen_ = -1;
 	state_ = STATE::NONE;
+
+	skipTimer_ = 0.0f;
+	isSkip_ = false;
+
 	//状態管理
 	stateChanges_.emplace(STATE::LOADING, std::bind(&GameScene::ChangeStateLoading, this));
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
@@ -79,16 +88,16 @@ void GameScene::Init(void)
 	sound.AdjustVolume(SoundManager::SOUND::BATTLE, 50);
 
 	// ポイントライト
-	std::unique_ptr<PointLight>light;
-	light = std::make_unique<PointLight>();
-	light->Init();
-	pointLight_.push_back(std::move(light));
+	//std::unique_ptr<PointLight>light;
+	//light = std::make_unique<PointLight>();
+	//light->Init();
+	//pointLight_.push_back(std::move(light));
 
 	// スポットライト
-	std::unique_ptr<SpotLight>slight;
-	slight = std::make_unique<SpotLight>();
-	slight->Init();
-	spotLight_.push_back(std::move(slight));
+	//std::unique_ptr<SpotLight>slight;
+	//slight = std::make_unique<SpotLight>();
+	//slight->Init();
+	//spotLight_.push_back(std::move(slight));
 
 	//ステージ
 	stage_ = std::make_shared<Stage>();
@@ -136,14 +145,14 @@ void GameScene::Init(void)
 
 void GameScene::Update(void)
 {
-	for (std::unique_ptr<PointLight>& light : pointLight_)
-	{
-		light->Update();
-	}
-	for (std::unique_ptr<SpotLight>& light : spotLight_)
-	{
-		light->Update();
-	};
+	//for (std::unique_ptr<PointLight>& light : pointLight_)
+	//{
+	//	light->Update();
+	//}
+	//for (std::unique_ptr<SpotLight>& light : spotLight_)
+	//{
+	//	light->Update();
+	//};
 
 	//更新ステップ
 	stateUpdate_();
@@ -160,7 +169,7 @@ void GameScene::Draw(void)
 	//更新ステップ
 	stateDraw_();
 
-	//int mainScreen = SceneManager::GetInstance().GetMainScreen();
+	int mainScreen = SceneManager::GetInstance().GetMainScreen();
 	//for (auto& light : pointLight_)
 	//{
 	//	light->Draw();
@@ -171,7 +180,7 @@ void GameScene::Draw(void)
 	//}
 	// ポストエフェクト(ブラー)
 	//-----------------------------------------
-	//
+	
 	//SetDrawScreen(postEffectScreen_);
 
 	//// 画面を初期化
@@ -217,15 +226,16 @@ void GameScene::Backstab(void)
 
 void GameScene::InitStateExplore(void)
 {
+	//敵とプレイヤーの状態設定
+	enemy_->ChangeState(Enemy::STATE::NONE);
+	player_->ChangeState(Player::STATE::PLAY);
+	player_->Update(); //状態変更後すぐに更新しておく
+
 	//フェードイン開始
 	SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
-
-	//敵とプレイヤーの状態設定
-	enemy_->ChangeState(Enemy::STATE::NONE);
-	player_->ChangeState(Player::STATE::PLAY);
 
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 30);
@@ -236,7 +246,10 @@ void GameScene::InitStateBattle(void)
 {
 	stage_->IsBattle();
 	enemy_->ChangeState(Enemy::STATE::MOVE);
+	enemy_->SetIsEncount(true);
+	enemy_->Update(); //状態変更後すぐに更新しておく
 	player_->ChangeState(Player::STATE::PLAY);
+	player_->Update(); //状態変更後すぐに更新しておく
 	player_->AddCollider(stage_->GetMistWallTransform().collider);
 	//mainCamera->SetFollow(&player_->GetTransform());
 	//mainCamera->ChangeMode(Camera::MODE::FOLLOW);
@@ -283,6 +296,8 @@ void GameScene::ChangeStateExplore(void)
 
 void GameScene::ChangeStateEncount(void)
 {
+	skipTimer_ = 0.0f;
+	isSkip_ = false;
 	stateUpdate_ = std::bind(&GameScene::UpdateEncount, this);
 	stateDraw_ = std::bind(&GameScene::DrawEncount, this);
 }
@@ -355,8 +370,31 @@ void GameScene::LoadingDraw(void)
 
 void GameScene::UpdateWakeUp(void)
 {
-	//プレイヤーの行動が終了したらフェードアウト開始
+	InputManager& ins = InputManager::GetInstance();
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	//スペースキー長押しでスキップ
+	if (ins.IsInputPressed("Parry"))
+	{
+		isSkip_ = true;
+		skipTimer_ += SceneManager::GetInstance().GetDeltaTime();
+		if(skipTimer_ >= SKIP_TIME)
+		{
+			skipTimer_ = SKIP_TIME;
+			fader.lock()->SetFade(Fader::STATE::FADE_OUT);
+		}
+	}
+	else if (skipTimer_ >= SKIP_TIME)	//スキップ完了後、キーを離しても表示
+	{
+		skipTimer_ = SKIP_TIME;
+		isSkip_ = true;
+	}
+	else //キーを離したらタイマーリセット
+	{
+		isSkip_ = false;
+		skipTimer_ = 0.0f;
+	}
+
+	//プレイヤーの行動が終了したらフェードアウト開始
 	if(player_->IsActionEnd() &&
 		fader.lock()->GetState() != Fader::STATE::FADE_OUT)
 	{
@@ -382,6 +420,9 @@ void GameScene::DrawWakeUp(void)
 	//プレイヤー描画
 	player_->Draw();
 
+	if (!isSkip_)return;
+	SkipBarDraw();
+
 #ifdef _DEBUG
 	DrawString(0, 0, L"ゲーム開始", 0xffffff);
 #endif
@@ -402,13 +443,13 @@ void GameScene::UpdateExplore(void)
 		return;
 	}
 
-	InputManager& ins = InputManager::GetInstance();
-	if (ins.IsInputTriggered("Pause"))
-	{
-		//ポーズボタンが押されたらポーズシーンへ遷移
-		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
-		return;
-	}
+	//InputManager& ins = InputManager::GetInstance();
+	//if (ins.IsInputTriggered("Pause"))
+	//{
+	//	//ポーズボタンが押されたらポーズシーンへ遷移
+	//	SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
+	//	return;
+	//}
 
 	//更新
 	player_->Update();
@@ -432,9 +473,31 @@ void GameScene::DrawExplore(void)
 void GameScene::UpdateEncount(void)
 {
 	InputManager& ins = InputManager::GetInstance();
+	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
+	//スペースキー長押しでスキップ
+	if (ins.IsInputPressed("Parry"))
+	{
+		isSkip_ = true;
+		skipTimer_ += SceneManager::GetInstance().GetDeltaTime();
+		if (skipTimer_ >= SKIP_TIME)
+		{
+			skipTimer_ = SKIP_TIME;
+			fader.lock()->SetFade(Fader::STATE::FADE_OUT);
+		}
+	}
+	else if (skipTimer_ >= SKIP_TIME)	//スキップ完了後、キーを離しても表示
+	{
+		skipTimer_ = SKIP_TIME;
+		isSkip_ = true;
+	}
+	else //キーを離したらタイマーリセット
+	{
+		isSkip_ = false;
+		skipTimer_ = 0.0f;
+	}
 	//エンカウントシーンが終了し、
 	// フェードアウトが完了したらバトル状態へ遷移
-	if (encountScene_->IsFinished() &&
+	if ((encountScene_->IsFinished() || skipTimer_ >= SKIP_TIME) &&
 		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
 		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_OUT)
 	{
@@ -444,12 +507,13 @@ void GameScene::UpdateEncount(void)
 		mainCamera->SetFollow(&player_->GetTransform());
 		mainCamera->SetTarget(&enemy_->GetTransform());
 		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+		SceneManager::GetInstance().ResetFog();
 		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
 	}
 
 	//エンカウントシーンが終了したらバトル状態へ遷移
 	//(フェードインが終わった後に遷移)
-	if (encountScene_->IsFinished() &&
+	if ((encountScene_->IsFinished() || skipTimer_ >= SKIP_TIME) &&
 		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
 		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_IN)
 	{
@@ -470,15 +534,11 @@ void GameScene::DrawEncount(void)
 
 	player_->Draw();
 	enemy_->Draw();
-	//敵が死んだら勝利演出を描画
-	if (enemy_->GetIsDead())
-	{
-		player_->DrawVictory();
-	}
-
-	player_->DrawDead();
 
 	encountScene_->Draw();
+
+	if (!isSkip_)return;
+	SkipBarDraw();
 #ifdef _DEBUG
 	DrawString(0, 0, L"エンカウント", 0xffffff);
 #endif
@@ -497,6 +557,11 @@ void GameScene::UpdateBattle(void)
 	//	ChangeState(STATE::ENEMY_SUMMON);
 	//	return;
 	//}
+
+	if(player_->GetTransform().pos.z < 938.0f)
+	{
+		player_->SetPosZ(938.0f);
+	}
 
 	player_->Update();
 	enemy_->Update();
@@ -592,6 +657,42 @@ void GameScene::DrawBattleSecond(void)
 
 	enemy_->DrawHPBar();
 	player_->DrawHPBar();
+
+}
+
+void GameScene::SkipBarDraw(void)
+{
+	const float progressRatio = skipTimer_ / SKIP_TIME;
+
+	//画面座標
+	const int GAUGE_X = Application::SCREEN_SIZE_X - 150;  // ゲージの左上のX座標
+	const int GAUGE_Y = Application::SCREEN_SIZE_Y - 150;  // ゲージの左上のY座標
+	const int GAUGE_W = 100; // ゲージの最大幅
+	const int GAUGE_H = 20;  // ゲージの高さ
+
+	// 現在のクールダウンゲージの幅
+	const int currentGaugeWidth = (int)(GAUGE_W * progressRatio);
+
+	// ゲージの色
+	const int bgColor = 0x333333; // 背景色（灰色）
+	int skipColor = 0x00FFFF; // スキップゲージの色
+	std::wstring str = L"";
+	if (skipTimer_ >= SKIP_TIME)
+	{
+		skipColor = 0x00FF00; str = L"スキップ完了";
+	}
+	else 
+	{
+		str = L"スキップ中...";
+	}
+
+	DrawFormatString(GAUGE_X + 2, GAUGE_Y - 28, 0x000000, str.c_str());
+	DrawFormatString(GAUGE_X, GAUGE_Y - 30, 0xFFFFFF, str.c_str());
+	// ゲージの背景を描画
+	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, bgColor, true);
+	// 進行中のゲージを描画
+	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + (int)(GAUGE_W * progressRatio), GAUGE_Y + GAUGE_H,
+		skipColor, TRUE);
 
 }
 

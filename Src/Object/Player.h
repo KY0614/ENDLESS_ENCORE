@@ -147,6 +147,7 @@ public:
 	const bool& GetIsParry(void)const  { return isParry_; }
 
 	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
+	void SetPosZ(const float& pos) { transform_.pos.z = pos; }
 	void SetHP(const float hp) { hp_ = hp; }
 
 	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY;  }

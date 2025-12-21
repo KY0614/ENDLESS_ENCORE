@@ -75,7 +75,7 @@ void SceneManager::Init(void)
 	//ƒ‰ƒCƒg‚ÌŒü‚«
 	lightDir_ = LIGHT_DIR;
 
-	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y,true);
 	shakeFrame_ = 0;
 	shakeRate_ = 0.0f;
 
@@ -211,6 +211,7 @@ void SceneManager::Destroy(void)
 	SoundManager::GetInstance().Destroy();
 	JsonManager::GetInstance().Destroy();
 	//UIManager::GetInstance().Destroy();
+	DeleteGraph(mainScreen_);
 	delete instance_;
 }
 

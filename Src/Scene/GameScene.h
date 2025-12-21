@@ -86,8 +86,13 @@ private:
 	std::shared_ptr<Enemy> enemy_;
 	//ステージ
 	std::shared_ptr<Stage> stage_;
-	//演出
+	//エンカウント演出
 	std::unique_ptr<EncountScene> encountScene_;
+
+	//演出スキップ用タイマー
+	float skipTimer_;
+	//スキップ中かどうか
+	bool isSkip_;	
 
 	//
 	std::vector<std::unique_ptr<PointLight>> pointLight_;
@@ -220,6 +225,8 @@ private:
 	/// 戦闘第2フェーズの描画
 	/// </summary>
 	void DrawBattleSecond(void);
+
+	void SkipBarDraw(void);
 	
 	/// <summary>
 	/// ゲーム中のメッセージ描画処理

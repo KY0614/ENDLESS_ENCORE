@@ -1,6 +1,6 @@
 #include <DxLib.h>
 #include<EffekseerForDXLib.h>
-#include "../Common/DebugDrawFormat.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Utility/CommonUtility.h"
@@ -39,6 +39,10 @@ EnemyBullet::~EnemyBullet(void)
 
 void EnemyBullet::Init(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FIRE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::FIRE_SE).handleId_);
+
 	//ÉÇÉfÉãÇÃäÓñ{ê›íË
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::ENEMY_BULLET));
@@ -141,6 +145,9 @@ void EnemyBullet::ChangeStateNone(void)
 
 void EnemyBullet::ChangeStateReady(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.AdjustVolume(SoundManager::SOUND::PARRY, 70);
+	sound.Play(SoundManager::SOUND::FIRE);
 	SetIsAlive(true);
 	EffectFire();
 	stateUpdate_ = std::bind(&EnemyBullet::UpdateReady, this);

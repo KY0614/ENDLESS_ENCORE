@@ -14,7 +14,7 @@
 namespace
 {
 	//宣伝シーンへ遷移する時間
-	const int ADVERTISE_TIME = 500;
+	const int ADVERTISE_TIME = 1500;
 	//PushSpaceSEの音量
 	const int PUSH_SPACE_SE_VOLUME = 40;
 	//スペースキー押下時のSE音量が下がるフレーム間隔
@@ -27,17 +27,21 @@ namespace
 
 TitleScene::TitleScene(void)
 {
-	toAdvertiseLoopTimer_ = 0;
+	toAdvertiseLoopTimer_ = 255;
 	logoImg_ = -1;
+	pushSpaceImg_ = -1;
+	pushSpaceImgAlpha_ = 0;
 	intervalTimer_ = 0.0f;
 	isPushSpace_ = false;
+	isIncreaseAlpha_ = false;
 	pushSpaceSEVolume_ = 0;
 	seVolumeDecreaseFrame_ = 0;
+	postEffectScreen_ = 0;
 }
 
 TitleScene::~TitleScene(void)
 {
-
+	DeleteGraph(postEffectScreen_);
 }
 
 void TitleScene::LoadData(void)
@@ -66,6 +70,9 @@ void TitleScene::Init(void)
 	//タイトルロゴ
 	logoImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_LOGO).handleId_;
 
+	//プッシュスペース画像
+	pushSpaceImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE).handleId_;
+
 	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
 
 	mainCamera->SetFixedPointPos(VGet(0.0f, -109.0f, -65.0f),VGet(0.0f, -153.0f, 2863.0f));
@@ -76,7 +83,7 @@ void TitleScene::Init(void)
 	postEffectScreen_ = MakeScreen(
 		Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, true);
 
-	// ポストエフェクト用(モノトーン)
+	// ポストエフェクト用(セピア)
 	sepiaMaterial_ = std::make_unique<PixelMaterial>("Sepiatone.cso", 1);
 	sepiaMaterial_->AddConstBuf({ 1.0f, 1.0f, 1.0f, 1.0f });
 	sepiaMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
@@ -110,22 +117,45 @@ void TitleScene::Init(void)
 
 void TitleScene::Update(void)
 {
+	//画面に出す黒い線のノイズのX座標をランダムに更新
 	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
 	filmNoiseMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
+
+	if (!isIncreaseAlpha_)
+	{
+		pushSpaceImgAlpha_+=2;
+		if (pushSpaceImgAlpha_ >= 255)
+		{
+			pushSpaceImgAlpha_ = 255;
+			isIncreaseAlpha_ = !isIncreaseAlpha_;
+		}
+	}
+	else
+	{
+		pushSpaceImgAlpha_-= 2;
+		if (pushSpaceImgAlpha_ <= 0)
+		{
+			pushSpaceImgAlpha_ = 0;
+			isIncreaseAlpha_ = !isIncreaseAlpha_;
+		}
+	}
+
 	InputManager& ins = InputManager::GetInstance();
 	SoundManager& sound = SoundManager::GetInstance();
+	//スペースキーが押されたら効果音を鳴らす
 	if (ins.IsInputTriggered("Parry") && !isPushSpace_)
 	{
 		isPushSpace_ = true;
 		sound.Play(SoundManager::SOUND::PUSH_SPACE);
 	}
 
-	if (--toAdvertiseLoopTimer_ <= 0)
-	{
-		toAdvertiseLoopTimer_ = ADVERTISE_TIME;
-		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::ADVERTISE);
-		return;
-	}
+	//一定時間経過で宣伝シーンへ遷移
+	//if (--toAdvertiseLoopTimer_ <= 0)
+	//{
+	//	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
+	//	SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::ADVERTISE);
+	//	return;
+	//}
 
 	stage_->Update();
 
@@ -144,7 +174,7 @@ void TitleScene::Update(void)
 
 	if (intervalTimer_ > INTERVAL_TIME)
 	{
-		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::SELECT);
+		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::GAME);
 	}
 }
 
@@ -155,52 +185,63 @@ void TitleScene::Draw(void)
 
 	stage_->Draw();
 
-	// ポストエフェクト(ブラー)
-	//-----------------------------------------
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
-	SetDrawScreen(postEffectScreen_);
+	// ポストエフェクト(セピア)
+	//-----------------------------------------
 
-	// 画面を初期化
-	ClearDrawScreen();
+	//SetDrawScreen(postEffectScreen_);
 
-	sepiaRenderer_->Draw();
+	//// 画面を初期化
+	//ClearDrawScreen();
+	//sepiaRenderer_->Draw();
 
-	// メインに戻す
-	SetDrawScreen(mainScreen);
-	DrawGraph(0, 0, postEffectScreen_, false);
+	//// メインに戻す
+	//SetDrawScreen(mainScreen);
+	//DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
 	// ポストエフェクト(ビネット)
 	//-----------------------------------------
-	SetDrawScreen(postEffectScreen_);
+	//SetDrawScreen(postEffectScreen_);
 
-	// 画面を初期化
-	ClearDrawScreen();
+	//// 画面を初期化
+	//ClearDrawScreen();
 
-	vignetteRenderer_->Draw();
+	//vignetteRenderer_->Draw();
 
-	// メインに戻す
-	SetDrawScreen(mainScreen);
-	DrawGraph(0, 0, postEffectScreen_, false);
+	//// メインに戻す
+	//SetDrawScreen(mainScreen);
+	//DrawGraph(0, 0, postEffectScreen_, false);
+	////-----------------------------------------
+	//// ポストエフェクト(線ノイズ)
+	////-----------------------------------------
+	//SetDrawScreen(postEffectScreen_);
+
+	//// 画面を初期化
+	//ClearDrawScreen();
+
+	//filmNoiseRenderer_->Draw();
+
+	//// メインに戻す
+	//SetDrawScreen(mainScreen);
+	//DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
-	// ポストエフェクト(線ノイズ)
-	//-----------------------------------------
-	SetDrawScreen(postEffectScreen_);
 
-	// 画面を初期化
-	ClearDrawScreen();
-
-	filmNoiseRenderer_->Draw();
-
-	// メインに戻す
-	SetDrawScreen(mainScreen);
-	DrawGraph(0, 0, postEffectScreen_, false);
-	//-----------------------------------------
-
+	//ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
+	SetDrawMode(DX_DRAWMODE_BILINEAR);
+	//タイトルロゴ描画
+	const int titleLogoOffsetY = 100;
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
-		Application::SCREEN_SIZE_Y / 2 - 100,
-		1.0f, 0.0f,
+		Application::SCREEN_SIZE_Y / 2 - titleLogoOffsetY,
+		1.5f, 0.0f,
 		logoImg_, true);
 
-	////ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
-	//SetDrawMode(DX_DRAWMODE_BILINEAR);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, pushSpaceImgAlpha_);
+
+	//プッシュスペース描画
+	const int pushSpaceOffsetY = 256;
+	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
+		Application::SCREEN_SIZE_Y - pushSpaceOffsetY,
+		1.0f, 0.0f,
+		pushSpaceImg_, true);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }

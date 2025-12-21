@@ -184,6 +184,7 @@ void Player::Update(void)
 	}
 	//下限設定
 	if (hp_ <= 0.0f)hp_ = 0.0f;
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -484,12 +485,13 @@ void Player::ChangeStateLookAround(void)
 
 void Player::ChangeStateWait(void)
 {
-	animationController_->Play((int)ANIM_TYPE::IDLE);
+	animationController_->Play((int)ANIM_TYPE::IDLE,true,0.0f,-1.0f,false,true);
 	stateUpdate_ = std::bind(&Player::UpdateWait, this);
 }
 
 void Player::ChangeStatePlay(void)
 {
+	animationController_->Play((int)ANIM_TYPE::IDLE, true, 0.0f, -1.0f, false, true);
 	stateUpdate_ = std::bind(&Player::UpdatePlay, this);
 }
 

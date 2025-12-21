@@ -82,7 +82,6 @@ void Application::Run(void)
 	//ƒQ[ƒ€ƒ‹[ƒv
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0 && !isEnd_)
 	{
-
 		inputManager.Update();
 		imGuiWrapper.Update();
 		sceneManager.Update();

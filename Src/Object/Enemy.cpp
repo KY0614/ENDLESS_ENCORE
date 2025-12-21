@@ -3,6 +3,7 @@
 #include "../Application.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Utility/CommonUtility.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
@@ -127,6 +128,10 @@ Enemy::~Enemy(void)
 
 void Enemy::Init(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::BACKSTAB,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::BACKSTAB_SE).handleId_);
+
 	//3Dƒ‚ƒfƒ‹‚Ì‰Šú‰»
 	Init3DModel();
 
@@ -877,7 +882,10 @@ void Enemy::UpdateBackstab(void)
 		{
 			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 110.0f, false, true);
 			Damage(BACKSTAB_DAMAGE);
-			isBackstab_ = true;
+			isBackstab_ = true;	
+			SoundManager& sound = SoundManager::GetInstance();
+			sound.AdjustVolume(SoundManager::SOUND::BACKSTAB, 70);
+			sound.Play(SoundManager::SOUND::BACKSTAB);
 		}
 	}
 
@@ -1534,8 +1542,8 @@ void Enemy::DrawDebug(void)
 	leftPos.x -= leftX * VIEW_RANGE;
 	leftPos.z -= leftZ * VIEW_RANGE;
 
-	//DrawTriangle3D(backPos, centerPos, leftPos, 0xffdead, true);
-	//DrawTriangle3D(centerPos, backPos, rightPos, 0xffdead, true);
+	DrawTriangle3D(backPos, centerPos, leftPos, 0xffdead, true);
+	DrawTriangle3D(centerPos, backPos, rightPos, 0xffdead, true);
 
 }
 

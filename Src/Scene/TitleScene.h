@@ -68,7 +68,12 @@ private:
 	std::unique_ptr<PixelMaterial> filmNoiseMaterial_;
 	std::unique_ptr<PixelRenderer> filmNoiseRenderer_;
 
+	//タイトルロゴ画像ハンドル
 	int logoImg_;
+	//プッシュスペース画像ハンドル
+	int pushSpaceImg_;
+	int pushSpaceImgAlpha_;
+	bool isIncreaseAlpha_;
 
 	//宣伝シーンへ遷移する用のタイマー
 	int toAdvertiseLoopTimer_;

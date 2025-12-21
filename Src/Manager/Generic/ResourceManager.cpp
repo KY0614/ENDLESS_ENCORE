@@ -115,7 +115,7 @@ void ResourceManager::InitTitle(void)
 	std::unique_ptr<Resource> res;
 
 	//PushSpace画像
-	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "PleaseKey.png");
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Push_Space_.png");
 	resourcesMap_.emplace(SRC::PUSH_SPACE, std::move(res));
 
 	//タイトルロゴ
@@ -232,6 +232,14 @@ void ResourceManager::InitGame(void)
 	//起き上がるときの音
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Wake_Up.mp3");
 	resourcesMap_.emplace(SRC::WAKE_UP_SE, std::move(res));
+	
+	//炎の音
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/fire_.mp3");
+	resourcesMap_.emplace(SRC::FIRE_SE, std::move(res));
+	
+	//炎の音
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/backstab.mp3");
+	resourcesMap_.emplace(SRC::BACKSTAB_SE, std::move(res));
 
 	//エフェクト
 

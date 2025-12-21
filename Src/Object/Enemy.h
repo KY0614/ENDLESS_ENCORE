@@ -113,6 +113,8 @@ public:
 	const float& GetHP(void) const { return hp_; }
 	const float& GetMaxHP(void) const { return maxHp_; }
 
+	const bool& SetIsEncount(const bool isEncount) { return isEncount_ = isEncount; }
+
 private:
 
 	//アニメーション

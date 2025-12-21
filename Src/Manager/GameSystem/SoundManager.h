@@ -26,6 +26,10 @@ public:
 
 		BATTLE,		//戦闘BGM
 
+		//enemy用
+		FIRE,		//敵の弾SE
+		BACKSTAB,		//敵の弾SE
+
 		//PLAYER用
 		WAKE_UP,	//起床SE
 		PARRY,		//パリィSE
