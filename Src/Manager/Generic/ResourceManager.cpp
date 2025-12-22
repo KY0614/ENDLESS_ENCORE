@@ -236,6 +236,10 @@ void ResourceManager::InitGame(void)
 	//‰Š‚Ì‰¹
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/fire_.mp3");
 	resourcesMap_.emplace(SRC::FIRE_SE, std::move(res));
+		
+	//”š”­
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/flame.mp3");
+	resourcesMap_.emplace(SRC::FLAME_SE, std::move(res));
 	
 	//‰Š‚Ì‰¹
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/backstab.mp3");

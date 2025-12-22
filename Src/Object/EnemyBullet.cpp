@@ -228,7 +228,7 @@ void EnemyBullet::Move(void)
 
 	//‰º•ûŒü‚ÌŽæ“¾
 	VECTOR downward = transform_.GetDown();
-	const float speed = 15.0f;
+	const float speed = 20.0f;
 	//‰¡ƒxƒNƒgƒ‹
 	VECTOR widthMovePow = VScale(forward, speed);
 

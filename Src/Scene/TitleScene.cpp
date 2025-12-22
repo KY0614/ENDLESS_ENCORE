@@ -16,7 +16,7 @@ namespace
 	//宣伝シーンへ遷移する時間
 	const int ADVERTISE_TIME = 1500;
 	//PushSpaceSEの音量
-	const int PUSH_SPACE_SE_VOLUME = 40;
+	const int PUSH_SPACE_SE_VOLUME = 60;
 	//スペースキー押下時のSE音量が下がるフレーム間隔
 	const int PUSH_SPACE_SE_VOLUME_DECREASE_FRAME = 3;
 	//SEフェードアウトにかける総時間
@@ -50,19 +50,8 @@ void TitleScene::LoadData(void)
 
 void TitleScene::Init(void)
 {
-	//SE音量設定
-	pushSpaceSEVolume_ = PUSH_SPACE_SE_VOLUME;	
-	//BGM
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::TITLE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_BGM).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::TITLE, 35);
-	sound.Play(SoundManager::SOUND::TITLE);
-	//SE
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PUSH_SPACE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE_SE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::PUSH_SPACE, pushSpaceSEVolume_);
-
+	//サウンド初期化
+	InitSound();
 	//テージ
 	stage_ = std::make_shared<Stage>();
 	stage_->Init();
@@ -83,36 +72,8 @@ void TitleScene::Init(void)
 	postEffectScreen_ = MakeScreen(
 		Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, true);
 
-	// ポストエフェクト用(セピア)
-	sepiaMaterial_ = std::make_unique<PixelMaterial>("Sepiatone.cso", 1);
-	sepiaMaterial_->AddConstBuf({ 1.0f, 1.0f, 1.0f, 1.0f });
-	sepiaMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
-	sepiaRenderer_ = std::make_unique<PixelRenderer>(*sepiaMaterial_);
-	sepiaRenderer_->MakeSquereVertex(
-		Vector2(0, 0),
-		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
-	);
-
-	// ポストエフェクト用(ビネット)
-	vignetteMaterial_ = std::make_unique<PixelMaterial>("Vignette.cso", 1);
-	vignetteMaterial_->AddConstBuf({ 3.0f, 0.0f, 0.0f, 0.0f });
-	vignetteMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
-	vignetteRenderer_ = std::make_unique<PixelRenderer>(*vignetteMaterial_);
-	vignetteRenderer_->MakeSquereVertex(
-		Vector2(0, 0),
-		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
-	);
-	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
-	// ポストエフェクト用(線ノイズ)
-	filmNoiseMaterial_ = std::make_unique<PixelMaterial>("FilmNoise.cso", 2);
-	filmNoiseMaterial_->AddConstBuf({ randomNoiseLineX, 0.0f, 0.0f, 0.0f });
-	filmNoiseMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
-	filmNoiseRenderer_ = std::make_unique<PixelRenderer>(*filmNoiseMaterial_);
-	filmNoiseRenderer_->MakeSquereVertex(
-		Vector2(0, 0),
-		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
-	);
-
+	//マテリアル初期化
+	InitMaterial();
 }
 
 void TitleScene::Update(void)
@@ -120,19 +81,20 @@ void TitleScene::Update(void)
 	//画面に出す黒い線のノイズのX座標をランダムに更新
 	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
 	filmNoiseMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
-
+	const int alphaChangeSpeed = 2;
+	const int maxAlpha = 255;
 	if (!isIncreaseAlpha_)
 	{
-		pushSpaceImgAlpha_+=2;
-		if (pushSpaceImgAlpha_ >= 255)
+		pushSpaceImgAlpha_ += alphaChangeSpeed;
+		if (pushSpaceImgAlpha_ >= maxAlpha)
 		{
-			pushSpaceImgAlpha_ = 255;
+			pushSpaceImgAlpha_ = maxAlpha;
 			isIncreaseAlpha_ = !isIncreaseAlpha_;
 		}
 	}
 	else
 	{
-		pushSpaceImgAlpha_-= 2;
+		pushSpaceImgAlpha_ -= alphaChangeSpeed;
 		if (pushSpaceImgAlpha_ <= 0)
 		{
 			pushSpaceImgAlpha_ = 0;
@@ -180,8 +142,9 @@ void TitleScene::Update(void)
 
 void TitleScene::Draw(void)
 {
-	DrawString(Application::SCREEN_SIZE_X/2, 
-		Application::SCREEN_SIZE_Y / 2, L"Push Enter or B", 0xFFFFFF);
+	//画面の比率
+	const float& screenAspectRatio = 
+		SceneManager::GetInstance().GetScreenAspectRatio();
 
 	stage_->Draw();
 
@@ -189,59 +152,113 @@ void TitleScene::Draw(void)
 	// ポストエフェクト(セピア)
 	//-----------------------------------------
 
-	//SetDrawScreen(postEffectScreen_);
+	SetDrawScreen(postEffectScreen_);
 
-	//// 画面を初期化
-	//ClearDrawScreen();
-	//sepiaRenderer_->Draw();
+	// 画面を初期化
+	ClearDrawScreen();
+	sepiaRenderer_->Draw();
 
-	//// メインに戻す
-	//SetDrawScreen(mainScreen);
-	//DrawGraph(0, 0, postEffectScreen_, false);
+	// メインに戻す
+	SetDrawScreen(mainScreen);
+	DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
 	// ポストエフェクト(ビネット)
 	//-----------------------------------------
-	//SetDrawScreen(postEffectScreen_);
+	SetDrawScreen(postEffectScreen_);
 
-	//// 画面を初期化
-	//ClearDrawScreen();
+	// 画面を初期化
+	ClearDrawScreen();
 
-	//vignetteRenderer_->Draw();
+	vignetteRenderer_->Draw();
 
-	//// メインに戻す
-	//SetDrawScreen(mainScreen);
-	//DrawGraph(0, 0, postEffectScreen_, false);
-	////-----------------------------------------
-	//// ポストエフェクト(線ノイズ)
-	////-----------------------------------------
-	//SetDrawScreen(postEffectScreen_);
+	// メインに戻す
+	SetDrawScreen(mainScreen);
+	DrawGraph(0, 0, postEffectScreen_, false);
+	//-----------------------------------------
+	// ポストエフェクト(線ノイズ)
+	//-----------------------------------------
+	SetDrawScreen(postEffectScreen_);
 
-	//// 画面を初期化
-	//ClearDrawScreen();
+	// 画面を初期化
+	ClearDrawScreen();
 
-	//filmNoiseRenderer_->Draw();
+	filmNoiseRenderer_->Draw();
 
-	//// メインに戻す
-	//SetDrawScreen(mainScreen);
-	//DrawGraph(0, 0, postEffectScreen_, false);
+	// メインに戻す
+	SetDrawScreen(mainScreen);
+	DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
 
 	//ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
 	SetDrawMode(DX_DRAWMODE_BILINEAR);
+	//ロゴ画像の大きさ
+	float logoScale = 1.5f;
 	//タイトルロゴ描画
 	const int titleLogoOffsetY = 100;
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
 		Application::SCREEN_SIZE_Y / 2 - titleLogoOffsetY,
-		1.5f, 0.0f,
+		logoScale * screenAspectRatio, 0.0f,
 		logoImg_, true);
 
+	//点滅させるためのアルファ値設定
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, pushSpaceImgAlpha_);
-
+	logoScale = 1.0f;
 	//プッシュスペース描画
 	const int pushSpaceOffsetY = 256;
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
 		Application::SCREEN_SIZE_Y - pushSpaceOffsetY,
-		1.0f, 0.0f,
+		logoScale * screenAspectRatio, 0.0f,
 		pushSpaceImg_, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
+void TitleScene::InitSound(void)
+{
+	//SE音量設定
+	pushSpaceSEVolume_ = PUSH_SPACE_SE_VOLUME;
+	//BGM
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::TITLE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_BGM).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::TITLE, 60);
+	sound.Play(SoundManager::SOUND::TITLE);
+	//SE
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PUSH_SPACE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::PUSH_SPACE, pushSpaceSEVolume_);
+
+}
+
+void TitleScene::InitMaterial(void)
+{
+
+	// ポストエフェクト用(セピア)
+	sepiaMaterial_ = std::make_unique<PixelMaterial>("Sepiatone.cso", 1);
+	sepiaMaterial_->AddConstBuf({ 1.0f, 1.0f, 1.0f, 1.0f });
+	sepiaMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	sepiaRenderer_ = std::make_unique<PixelRenderer>(*sepiaMaterial_);
+	sepiaRenderer_->MakeSquereVertex(
+		Vector2(0, 0),
+		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
+	);
+
+	// ポストエフェクト用(ビネット)
+	vignetteMaterial_ = std::make_unique<PixelMaterial>("Vignette.cso", 1);
+	vignetteMaterial_->AddConstBuf({ 3.0f, 0.0f, 0.0f, 0.0f });
+	vignetteMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	vignetteRenderer_ = std::make_unique<PixelRenderer>(*vignetteMaterial_);
+	vignetteRenderer_->MakeSquereVertex(
+		Vector2(0, 0),
+		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
+	);
+	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
+	// ポストエフェクト用(線ノイズ)
+	filmNoiseMaterial_ = std::make_unique<PixelMaterial>("FilmNoise.cso", 2);
+	filmNoiseMaterial_->AddConstBuf({ randomNoiseLineX, 0.0f, 0.0f, 0.0f });
+	filmNoiseMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	filmNoiseRenderer_ = std::make_unique<PixelRenderer>(*filmNoiseMaterial_);
+	filmNoiseRenderer_->MakeSquereVertex(
+		Vector2(0, 0),
+		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
+	);
 }

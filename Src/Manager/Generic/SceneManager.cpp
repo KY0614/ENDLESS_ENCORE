@@ -83,7 +83,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::TITLE);
+	DoChangeScene(SCENE_ID::GAME);
 }
 
 void SceneManager::Init3D(void)
@@ -226,20 +226,6 @@ void SceneManager::ChangeScene(SCENE_ID nextId)
 	isSceneChanging_ = true;
 }
 
-void SceneManager::ChangeScene(std::unique_ptr<SceneBase> _scene)
-{
-	if (scenes_.empty()) 
-	{
-		//空だったら新しく入れる
-		scenes_.push_back(std::move(_scene));
-	}
-	else 
-	{
-		//末尾のものを新しい物に入れ替える
-		scenes_.back() = std::move(_scene);
-	}
-}
-
 SceneManager::SCENE_ID SceneManager::GetSceneID(void)
 {
 	 return sceneId_;
@@ -259,13 +245,6 @@ std::weak_ptr<Camera> SceneManager::GetCamera(void) const
 std::weak_ptr<Fader> SceneManager::GetFader(void) const
 {
 	return fader_;
-}
-
-void SceneManager::PushScene(std::unique_ptr<SceneBase> _scene)
-{
-	//新しく積むのでもともと入っている奴はまだ削除されない
-	scenes_.push_back(std::move(_scene));
-	scenes_.back()->Init();
 }
 
 void SceneManager::PushScene(SCENE_ID _scene)
@@ -323,6 +302,12 @@ bool SceneManager::IsFadeInEnd(void)
 	//true:フェードイン終了 false:まだ終了していない
 	return fader_->GetState() == Fader::STATE::FADE_IN &&
 		fader_->IsEnd();
+}
+
+const float SceneManager::GetScreenAspectRatio(void) const
+{
+	return static_cast<float>(Application::SCREEN_SIZE_Y) /
+		static_cast<float>(Application::SCREEN_MAX_SIZE_Y);
 }
 
 SceneManager::SceneManager(void)

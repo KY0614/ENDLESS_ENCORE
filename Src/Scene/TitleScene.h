@@ -88,4 +88,7 @@ private:
 	int pushSpaceSEVolume_;
 	int seVolumeDecreaseFrame_;
 
+	void InitSound(void);
+
+	void InitMaterial(void);
 };

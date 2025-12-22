@@ -50,9 +50,11 @@ public:
 	// リソースの破棄
 	void Destroy(void);
 
-	// 状態遷移
+	/// <summary>
+	/// 状態遷移
+	/// </summary>
+	/// <param name="nextId">遷移先のシーンID</param>
 	void ChangeScene(SCENE_ID nextId);
-	void ChangeScene(std::unique_ptr<SceneBase> _scene);
 
 	// シーンIDの取得
 	SCENE_ID GetSceneID(void);
@@ -62,19 +64,17 @@ public:
 
 	// カメラの取得
 	std::weak_ptr<Camera> GetCamera(void) const;
+
+	// フェーダーの取得
 	std::weak_ptr<Fader> GetFader(void) const;
 
 	/// <summary>
 	/// シーンを新しく積む
 	/// </summary>
-	/// <param name="_scene">シーン情報</param>
-	void PushScene(std::unique_ptr<SceneBase>_scene);
+	/// <param name="_scene">積むシーンID</param>
 	void PushScene(SCENE_ID _scene);
 
-	/// <summary>
-	/// 最後に追加したシーンを削除する。
-	/// </summary>
-	/// <param name=""></param>
+	// 最後に追加したシーンを削除する
 	void PopScene(void);
 
 	/// <summary>
@@ -111,6 +111,12 @@ public:
 	/// </summary>
 	/// <returns>true:終了 false:フェードイン中</returns>
 	bool IsFadeInEnd(void);
+
+	/// <summary>
+	/// 画面比率を取得する
+	/// </summary>
+	/// <returns>画面の比率</returns>
+	const float GetScreenAspectRatio(void) const;
 
 private:
 
@@ -149,8 +155,8 @@ private:
 	int mainScreen_;
 
 	//画面揺らし用
-	int shakeFrame_;	//
-	float shakeRate_;
+	int shakeFrame_;	//揺らしフレーム数
+	float shakeRate_;	//揺らし強度
 
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする

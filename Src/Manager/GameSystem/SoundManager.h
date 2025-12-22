@@ -28,6 +28,7 @@ public:
 
 		//enemy—p
 		FIRE,		//“G‚Ì’eSE
+		FLAME,		//“G‚Ì’eSE
 		BACKSTAB,		//“G‚Ì’eSE
 
 		//PLAYER—p

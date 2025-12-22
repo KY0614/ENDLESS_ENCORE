@@ -56,6 +56,7 @@ public:
 		PARRY_SE,
 		WAKE_UP_SE,
 		FIRE_SE,
+		FLAME_SE,
 		BACKSTAB_SE,
 	};
 

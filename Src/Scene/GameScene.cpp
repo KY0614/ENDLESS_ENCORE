@@ -80,7 +80,6 @@ void GameScene::Init(void)
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 25);
 
 	//í“¬BGM
 	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
@@ -238,7 +237,7 @@ void GameScene::InitStateExplore(void)
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	SoundManager& sound = SoundManager::GetInstance();
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 30);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 60);
 	sound.Play(SoundManager::SOUND::EXPLORE);
 }
 

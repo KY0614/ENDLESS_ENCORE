@@ -131,6 +131,9 @@ void Enemy::Init(void)
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::BACKSTAB,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::BACKSTAB_SE).handleId_);
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FLAME,
+	ResourceManager::GetInstance().Load(ResourceManager::SRC::FLAME_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 70);
 
 	//3Dモデルの初期化
 	Init3DModel();
@@ -418,6 +421,8 @@ void Enemy::ChangeStateCharge(void)
 
 void Enemy::ChangeStateAttackCharge(void)
 {
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Play(SoundManager::SOUND::FLAME);
 	//アニメーションを途中から再生
 	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 26.0f, -1.0f, false, true);
 	EffectChargeAtk();
