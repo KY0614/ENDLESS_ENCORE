@@ -1,3 +1,4 @@
+#include <DxLib.h>
 #include "../Application.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/SceneManager.h"
