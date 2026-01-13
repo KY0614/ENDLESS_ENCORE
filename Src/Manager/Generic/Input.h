@@ -82,9 +82,9 @@ private:
 	InputData_t currentInput_;	//そのイベントに対応するボタンが押されている状態か
 	InputData_t lastInput_;		//そのイベントに対応するボタンが押されている状態か(直前)
 
+	//アナログ入力対応表
 	using AnalogInputTable_t =
 		std::unordered_map < AnalogInputType, std::function<bool(const XINPUT_STATE&)>>;
-
 	AnalogInputTable_t analogInputTable_;
 
 

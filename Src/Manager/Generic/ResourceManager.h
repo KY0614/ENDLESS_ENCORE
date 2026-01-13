@@ -81,9 +81,6 @@ public:
 	// リソースの複製ロード(モデル用)
 	int LoadModelDuplicate(SRC src);
 
-	// stringからSRCに変換（ステージオブジェクトがstringで管理されているため）
-	SRC StringToSRC(const std::string& name);
-
 	//シーンごとにデータを読み込むことにする
 	void InitTitle(void);
 	void InitMovie(void);

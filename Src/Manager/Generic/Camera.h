@@ -27,22 +27,10 @@ public:
 
 	static constexpr VECTOR DEFAULT_CAMERA_POS = { 0.0f, 500.0f, -800.0f };			//カメラの初期座標
 
-	static constexpr VECTOR RELATIVE_C2T_POS = { 0.0f, 165.0f, 200.0f };			//カメラ位置から注視点までの相対座標
-
-	static constexpr VECTOR RELATIVE_F2C_POS_FOLLOW = { 0.0f, 500.0f, -500.0f };	//追従対象からカメラ位置までの相対座標(完全追従)
-
 	//カメラのX回転上限度角
 	static constexpr float LIMIT_X_UP_RAD = 90.0f * (DX_PI_F / 180.0f);
 	static constexpr float LIMIT_X_DW_RAD = 90.0f * (DX_PI_F / 180.0f);
 
-	//カメラ揺らし関連の定数--------------------------------------------------------------------
-
-	static constexpr float TIME_SHAKE = 0.5f;		//時間
-
-	static constexpr float WIDTH_SHAKE = 5.0f;		//幅
-
-	static constexpr float SPEED_SHAKE = 40.0f;		//スピード
-	
 	//カメラモード
 	enum class MODE
 	{
@@ -58,12 +46,29 @@ public:
 		PAUSE,		//一時停止
 	};
 
+	//コンストラクタ
 	Camera(void);
+	//デストラクタ
 	~Camera(void);
 
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
 	void Init(void);
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
 	void Update(void);
+
+	/// <summary>
+	/// 状態ごとの描画前処理
+	/// </summary>
 	void SetBeforeDraw(void);
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
 	void Draw(void);
 
 	//カメラ位置
@@ -80,8 +85,10 @@ public:
 	//カメラの前方方向
 	VECTOR GetForward(void) const;
 
-	MODE GetMode(void)const { return mode_; }
-
+	/// <summary>
+	/// カメラがアクションを終了したかどうか
+	/// </summary>
+	/// <returns>true:終了,false:まだ終了していない</returns>
 	const bool& IsActionEnd() const { return isActionEnd_; }
 
 	//カメラモードの変更
@@ -105,18 +112,6 @@ public:
 		const float& distance,
 		const VECTOR& targetPos,
 		const float& craneUpSpeed);
-
-	/// <summary>
-	/// トラックカメラの設定(一定速度)
-	/// </summary>
-	/// <param name="startPos">移動開始地点</param>
-	/// <param name="endPos">移動終了地点</param>
-	/// <param name="moveDir">移動方向</param>
-	/// <param name="moveSpeed">移動速度</param>
-	void SetTrackCamera(
-		const VECTOR& startPos,
-		const VECTOR& endPos,
-		const float& moveSpeed);
 
 	/// <summary>
 	/// トラックカメラの設定（イージングQuadOut)
@@ -192,24 +187,20 @@ private:
 	VECTOR trackStartPos_;		//開始位置
 	VECTOR trackEndPos_;		//終了位置
 	VECTOR trackDir_;			//移動方向
-	float trackSpeed_;			//移動速度
 	float trackTotalTime_;		//総移動時間
 	float trackElapsedTime_;	//経過時間
 
 	//ドリーインカメラ用
-	VECTOR dollyInStartPos_;	//開始位置
-	VECTOR dollyInObjectPos_;	//被写体の座標
+	VECTOR dollyInStartPos_;		//開始位置
+	VECTOR dollyInObjectPos_;		//被写体の座標
 	float object2CameraDistance_;	//カメラから被写体までの距離
 	float dollyInTotalTime_;		//総移動時間
 	float dollyInElapsedTime_;		//経過時間
 
-	//回り込むカメラ用
-	VECTOR surroundViewStartPos_;	//開始位置
-	VECTOR surroundViewTargetPos_;	//被写体の座標
-
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
 
+	//カメラアクションが終了したかどうか true:終了
 	bool isActionEnd_;
 
 	//カメラを初期位置に戻す

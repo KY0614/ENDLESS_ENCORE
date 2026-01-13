@@ -14,14 +14,15 @@
 
 namespace
 {
-	const float FPS_LIMIT_X_UP_RAD = -80.0f * (DX_PI_F / 180.0f);
-	const float FPS_LIMIT_X_DW_RAD = 70.0f * (DX_PI_F / 180.0f);
+	//マウス操作用
+	const float FPS_LIMIT_X_UP_RAD = -80.0f * (DX_PI_F / 180.0f);	//上限
+	const float FPS_LIMIT_X_DW_RAD = 70.0f * (DX_PI_F / 180.0f);	//下限
 }
 
 Camera::Camera(void)
 {
-	angles_ = VECTOR();
-	cameraUp_ = VECTOR();
+	angles_ = CommonUtility::VECTOR_ZERO;
+	cameraUp_ = CommonUtility::VECTOR_ZERO;
 	mode_ = MODE::NONE;
 	pos_ = CommonUtility::VECTOR_ZERO;
 	targetPos_ = CommonUtility::VECTOR_ZERO;
@@ -30,9 +31,12 @@ Camera::Camera(void)
 	craneUpStartPos_ = CommonUtility::VECTOR_ZERO;
 	craneUpTargetPos_ = CommonUtility::VECTOR_ZERO;
 	craneUpDistance_ = 0.0f;
+	craneUpSpeed_ = 0.0f;
 	trackStartPos_ = CommonUtility::VECTOR_ZERO;
+	trackEndPos_ = CommonUtility::VECTOR_ZERO;
 	trackDir_ = CommonUtility::VECTOR_ZERO;
-	trackSpeed_ = 0.0f;
+	trackTotalTime_ = 0.0f;
+	trackElapsedTime_ = 0.0f;
 	dollyInStartPos_ = CommonUtility::VECTOR_ZERO;
 	dollyInObjectPos_ = CommonUtility::VECTOR_ZERO;
 	object2CameraDistance_ = 0.0f;
@@ -57,7 +61,7 @@ void Camera::Init(void)
 	//カメラの初期設定
 	ChangeMode(MODE::FIXED_POINT);
 
-	//クリップ距離の初期設定
+	//カメラクリップ距離の初期設定
 	cameraNear_ = CAMERA_NEAR;
 	cameraFar_ = CAMERA_FAR;
 	localF2CPos_ = LOCAL_F2C_POS;
@@ -70,7 +74,6 @@ void Camera::Update(void)
 
 void Camera::SetBeforeDraw(void)
 {
-
 	//クリップ距離を設定する(SetDrawScreenでリセットされる)
 	SetCameraNearFar(cameraNear_, cameraFar_);
 
@@ -195,7 +198,6 @@ void Camera::ChangeMode(MODE mode)
 		targetPos_ = dollyInObjectPos_;
 		break;	
 	case Camera::MODE::FREE:
-		targetPos_ = VAdd(pos_, VGet(0.0f,0.0f,50.0f));
 		break;
 	}
 }
@@ -216,17 +218,6 @@ void Camera::SetCraneUpPos(
 	craneUpDistance_ = distance;
 	craneUpTargetPos_ = targetPos;
 	craneUpSpeed_ = craneUpSpeed;
-}
-
-void Camera::SetTrackCamera(
-	const VECTOR& startPos,
-	const VECTOR& endPos,
-	const float& moveSpeed)
-{
-	trackStartPos_ = startPos;
-	trackEndPos_ = endPos;
-	trackDir_ = VNorm(VSub(endPos, startPos));
-	trackSpeed_ = moveSpeed;
 }
 
 void Camera::SetTrackCameraQuadOut(
@@ -298,8 +289,8 @@ void Camera::SyncFollow(void)
 
 	//正面から設定されたX軸分、回転させる
 	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, CommonUtility::AXIS_X));
-
-	rot_ = Quaternion::Slerp(rot_, rot_, 0.1f);
+	const float rotTime = 0.1f;
+	rot_ = Quaternion::Slerp(rot_, rot_, rotTime);
 
 	//カメラの上方向
 	cameraUp_ = followRot.GetUp();
@@ -412,9 +403,9 @@ void Camera::SetBeforeDrawDollyIn(void)
 
 	//終了座標から現在座標までの距離を取得
 	float pos2StartPos = VSize(VSub(endPos, pos_));
-	//
+	//一定距離以下になったら終了
 	const float distance = 1.0f;
-	isActionEnd_ = pos2StartPos <= distance;;
+	isActionEnd_ = pos2StartPos <= distance;
 
 	if (isActionEnd_)return;
 

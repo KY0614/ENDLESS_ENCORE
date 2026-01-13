@@ -68,40 +68,6 @@ int ResourceManager::LoadModelDuplicate(SRC src)
 	return duId;
 }
 
-ResourceManager::SRC ResourceManager::StringToSRC(const std::string& name)
-{
-	static const std::unordered_map<std::string, SRC> map = 
-	{
-		//{ "Counter", SRC::COUNTER },
-		//{ "Table",   SRC::TABLE },
-		//{ "Sweets_Choco_Rack",  SRC::CHOCO_RACK },
-		//{ "Sweets_Choco",		SRC::SWEETS_CHOCO },
-		//{ "Sweets_Strawberry_Rack",   SRC::BERRY_RACK },
-		//{ "Sweets_Strawberry",  SRC::SWEETS_BERRY },
-		//{ "Coffee_Machine",   SRC::COFFEE_MACHINE },
-		//{ "Hot_Cup",		SRC::HOTCUP },
-		//{ "Cup_Hot_Rack",   SRC::HOTCUP_RACK },
-		//{ "Hot_Coffee",		SRC::HOTCOFFEE },
-		//{ "Ice_Dispenser",			SRC::ICEDISPENSER },
-		//{ "Ice",			SRC::ICE },
-		//{ "Ice_Cup",		SRC::ICECUP },
-		//{ "Cup_Ice_Rack",	SRC::ICECUP_RACK },
-		//{ "Ice_Coffee",		SRC::ICECOFFEE },
-		//{ "Cup_Lid_Rack",	SRC::CUPLID_RACK },
-		//{ "Hot_Cup_Lid",		SRC::HOTCUP_LID },
-		//{ "Ice_Cup_Lid",		SRC::ICECUP_LID },
-		//{ "Dust_Box",		SRC::DUSTBOX },
-		// 新しい要素はここに追加
-	};
-
-	auto it = map.find(name);
-	if (it != map.end()) {
-		return it->second;
-	}
-
-	return SRC::NONE; // 不正な名前が来たときのデフォルト対応
-}
-
 void ResourceManager::InitTitle(void)
 {
 	//推奨しませんが、どうしても使いたい方は
