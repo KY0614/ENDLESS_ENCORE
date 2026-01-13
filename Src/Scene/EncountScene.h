@@ -53,8 +53,15 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// エンカウント演出開始
+	/// </summary>
 	void Start(void);
 
+	/// <summary>
+	/// エンカウント演出が終了したかどうか取得
+	/// </summary>
+	/// <returns>true:終了　false：まだ終了していない</returns>
 	const bool& IsFinished(void) const { return isFinish_; }
 
 private:
@@ -67,16 +74,18 @@ private:
 	//状態管理(更新ステップ)
 	std::function<void(void)> stateUpdate_;
 
-	// フェード
-	std::unique_ptr<Fader> fader_;
-
+	//参照
 	Player& player_;			//プレイヤー参照
 	Enemy& enemy_;				//敵参照
 
-	float intervalTimer_;		//インターバルタイマー
-	bool isStateActioned_;
+	//インターバルタイマー
+	float intervalTimer_;	
 
-	bool isFinish_;				//シーン終了フラグ
+	//ライトアップ用フラグ true:ライトアップ済み false:ライトアップ待ち
+	bool isLightUp_;
+
+	//シーン終了フラグ
+	bool isFinish_;				
 
 	/// <summary>
 	/// 状態遷移
@@ -162,6 +171,9 @@ private:
 	/// </summary>
 	void UpdateFinish(void);
 
+	/// <summary>
+	/// デバッグ表示
+	/// </summary>
 	void DebugDraw(void);
 };
 

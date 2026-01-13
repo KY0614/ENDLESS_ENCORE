@@ -9,9 +9,21 @@
 
 namespace
 {
+	//プレイヤーの歩行開始位置
 	const VECTOR PLAYER_WALK_START_POS = { -50.0f, -210.0f, 1350.0f };
+	//プレイヤーの歩行終了位置
 	const VECTOR PLAYER_WALK_END_POS = { -50.0f, -210.0f, 1150.0f };
-	const float PLAYER_WALK_TOTAL_TIME = 3.0f;
+	//カメラの移動最大時間
+	const float CAMERA_MOVE_TIME_MAX = 3.0f;
+	//カメラの各注視点オフセット値	
+	const float CAMERA_PLAYER_HEAD_OFFSET_Y = 100.0f;	//プレイヤーの頭の高さ
+	const float CAMERA_PLAYER_CHEST_OFFSET_Y = 80.0f;	//プレイヤーの胸の高さ
+	const float CAMERA_ENEMY_HEAD_OFFSET_Y = 150.0f;	//敵の頭の高さ
+
+	//サウンドの最大音量
+	const int SOUND_VOLUME_MAX = 256;
+	//ライトアップSE音量（パーセンテージ)
+	const int LIGHT_UP_SE_VOLUME = 50;
 }
 
 EncountScene::EncountScene(
@@ -33,7 +45,7 @@ EncountScene::EncountScene(
 	stateChanges_.emplace(STATE::FINISH, std::bind(&EncountScene::ChangeStateFinish, this));
 
 	intervalTimer_ = 0.0f;
-	isStateActioned_ = false;
+	isLightUp_ = false;
 	isFinish_ = false;
 }
 
@@ -47,10 +59,11 @@ void EncountScene::LoadData(void)
 
 void EncountScene::Init(void)
 {
+	//サウンド設定
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::LIGHT_UP,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::LIGHT_UP_SE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 256 / 2);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, SOUND_VOLUME_MAX / 2);
 
 	//初期状態
 	ChangeState(STATE::NONE);
@@ -75,7 +88,6 @@ void EncountScene::Start(void)
 void EncountScene::ChangeState(STATE state)
 {
 	intervalTimer_ = 0.0f;
-	isStateActioned_ = false;
 	//状態変更
 	state_ = state;
 
@@ -104,7 +116,7 @@ void EncountScene::ChangeStatePlayerWalk(void)
 	mainCamera->SetTrackCameraQuadOut(
 		PLAYER_WALK_START_POS,
 		PLAYER_WALK_END_POS,
-		PLAYER_WALK_TOTAL_TIME);
+		CAMERA_MOVE_TIME_MAX);
 	mainCamera->ChangeMode(Camera::MODE::TRACK);
 	stateUpdate_ = std::bind(&EncountScene::UpdatePlayerWalk, this);
 }
@@ -116,15 +128,18 @@ void EncountScene::ChangeStatePlayerAttention(void)
 
 void EncountScene::ChangeStateBlackOut(void)
 {
+	//カメラをプレイヤーの後方左斜め後ろに固定
 	const VECTOR& playerBackLeft = VAdd(
 		player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
 	VECTOR pPos = VAdd(
 		player_.GetTransform().pos,
-		VScale(VNorm(playerBackLeft),100.0f));
-	const float cameraOffsetY = 100.0f;
-	pPos.y += cameraOffsetY;
+		VScale(VNorm(playerBackLeft), CAMERA_PLAYER_HEAD_OFFSET_Y));
+	//カメラの高さ調整
+	pPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	//注視点もプレイヤーの高さに合わせる
 	VECTOR targetPos = player_.GetTransform().pos;
-	targetPos.y += cameraOffsetY;
+	targetPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	//カメラ位置セット&固定
 	mainCamera->SetFixedPointPos(pPos, targetPos);
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateBlackOut, this);
@@ -137,16 +152,20 @@ void EncountScene::ChangeStateLookAround(void)
 
 void EncountScene::ChangeStateEnemySpotlight(void)
 {
+	//敵をエンカウント状態へ遷移
 	enemy_.ChangeState(Enemy::STATE::ENCOUNT);
+	//カメラをプレイヤーの後方に固定
+	float cameraOffsetY = 70.0f;//カメラの高さ調整
 	VECTOR pPos = VAdd(
 		player_.GetTransform().pos,
-		VScale(VNorm(player_.GetTransform().GetBack()), 70.0f));
-	const float cameraOffsetY = 100.0f;
-	pPos.x += -30.0f;
-	pPos.y += cameraOffsetY;
-	const VECTOR& pos = VGet(-50.0f, -210.0f, 1350.0f);
+		VScale(VNorm(player_.GetTransform().GetBack()), cameraOffsetY));
+	//カメラ位置調整(少し左後ろに)
+	const float cameraOffsetX = -30.0f;
+	pPos.x += cameraOffsetX;
+	pPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	//注視点を敵の位置にセット
 	VECTOR targetPos = enemy_.GetTransform().pos;
-	targetPos.y += cameraOffsetY;
+	targetPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;//カメラの高さ調整
 	mainCamera->SetFixedPointPos(pPos, targetPos);
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemySpotlight, this);
@@ -154,16 +173,22 @@ void EncountScene::ChangeStateEnemySpotlight(void)
 
 void EncountScene::ChangeStateEnemyAttention(void)
 {
+	//カメラをプレイヤーの後方に固定
+	float cameraOffsetY = 70.0f;//カメラの高さ調整
 	VECTOR pPos = VAdd(
 		player_.GetTransform().pos,
-		VScale(VNorm(player_.GetTransform().GetBack()), 70.0f));
-	const float cameraOffsetY = 100.0f;
-	pPos.x += -30.0f;
-	pPos.y += cameraOffsetY;
-	const VECTOR& pos = VGet(-50.0f, -210.0f, 1350.0f);
+		VScale(VNorm(player_.GetTransform().GetBack()), cameraOffsetY));
+	//カメラ位置調整(少し左後ろに)
+	const float cameraOffsetX = -30.0f;
+	pPos.x += cameraOffsetX;
+	pPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	//注視点を敵の位置にセット
 	VECTOR targetPos = enemy_.GetTransform().pos;
-	targetPos.y += 150.0f;
-	mainCamera->SetDollyInQuadOut(pPos, targetPos, 100.0f, 5.0f);
+	targetPos.y += CAMERA_ENEMY_HEAD_OFFSET_Y;
+	//ドリーインを行う合計の時間
+	const float dollyInTotalTime = 5.0f;
+	float distance = VSize(VSub(player_.GetTransform().pos, enemy_.GetTransform().pos));
+	mainCamera->SetDollyInQuadOut(pPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
 	mainCamera->ChangeMode(Camera::MODE::DOLLY_IN);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttention, this);
 }
@@ -224,10 +249,12 @@ void EncountScene::UpdatePlayerAttention(void)
 		//プレイヤーから見て左斜め前方向
 		VECTOR dir = VAdd(player_.GetTransform().GetLeft(), player_.GetTransform().GetForward());
 		VECTOR startPos = VAdd(player_.GetTransform().pos, VScale(dir, distance));
-		VECTOR endPos = VGet(startPos.x, startPos.y + 100.0f, startPos.z);
+		VECTOR endPos = VGet(startPos.x, startPos.y + CAMERA_PLAYER_HEAD_OFFSET_Y, startPos.z);
+		//カメラのクレーンアップ移動距離
 		const float moveDistance = 100.0f;
 		VECTOR target = player_.GetTransform().pos;
-		target.y += 80.0f;
+		target.y += CAMERA_PLAYER_CHEST_OFFSET_Y;
+		//クレーンアップ移動速度
 		const float craneUpSpeed = 0.5f;
 		mainCamera->SetCraneUpPos(startPos, moveDistance, target, craneUpSpeed);
 		mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
@@ -262,8 +289,10 @@ void EncountScene::UpdateBlackOut(void)
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	if (intervalTimer_ >= intervalBlackOut)
 	{
-		sound.AdjustVolume(SoundManager::SOUND::LIGHT_UP, 50);
+		//ライトアップSE再生
+		sound.AdjustVolume(SoundManager::SOUND::LIGHT_UP, LIGHT_UP_SE_VOLUME);
 		sound.Play(SoundManager::SOUND::LIGHT_UP);
+		//暗転処理(フォグの開始距離と終了距離を設定)
 		const float blackOutFogStart = 50.0f;
 		const float blackOutFogEnd = 1000.0f;
 		SceneManager::GetInstance().SetFog(blackOutFogStart, blackOutFogEnd);
@@ -277,7 +306,7 @@ void EncountScene::UpdateLookAround(void)
 {
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
-	//プレイヤーが周りをキョロキョロする状態へ移行するまでの時間
+	//プレイヤーが周りをキョロキョロする状態へ移行するまでの時間(少し経ってからアニメーションさせたいので)
 	const float intervalLookAround = 0.7f;
 	if (intervalTimer_ >= intervalLookAround &&
 		player_.GetState() != Player::STATE::LOOK_AROUND)
@@ -287,7 +316,8 @@ void EncountScene::UpdateLookAround(void)
 	}
 
 	//キョロキョロが終わったら次の状態へ
-	if (intervalTimer_ >= 1.5f &&
+	const float playerLookAroundIntervalTime = 1.5f;
+	if (intervalTimer_ >= playerLookAroundIntervalTime &&
 		player_.GetState() == Player::STATE::LOOK_AROUND)
 	{
 		ChangeState(STATE::ENEMY_SPOTLIGHT);
@@ -302,17 +332,19 @@ void EncountScene::UpdateEnemySpotlight(void)
 	const float intervalLightUp = 2.0f;
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
-	if (!isStateActioned_ &&
+	if (!isLightUp_ &&
 		intervalTimer_ >= intervalLightUp)
 	{
-		isStateActioned_ = true;
-		sound.AdjustVolume(SoundManager::SOUND::LIGHT_UP, 50);
+		isLightUp_ = true;
+		//ライトアップSE再生
+		sound.AdjustVolume(SoundManager::SOUND::LIGHT_UP, LIGHT_UP_SE_VOLUME);
 		sound.Play(SoundManager::SOUND::LIGHT_UP);
+		//フォグをリセット(明るくする)
 		SceneManager::GetInstance().ResetFog();
 	}
-	//一定時間経ったらライトアップ
+	//ライトアップから一定時間経ったら次の状態へ
 	const float intervalStateChange = intervalLightUp + 1.0f;
-	if (isStateActioned_ &&
+	if (isLightUp_ &&
 		intervalTimer_ >= intervalStateChange)
 	{
 		ChangeState(STATE::ENEMY_ATTENTION);

@@ -5,7 +5,7 @@
 #include <list>
 #include "../../Common/Vector2.h"
 
-// 推奨しませんが、どうしても使いたい方は
+//カメラ取得
 #define mainCamera SceneManager::GetInstance().GetCamera().lock()
 
 class SceneBase;
@@ -15,7 +15,7 @@ class Camera;
 class SceneManager
 {
 public:
-
+	// ライトの方向のデフォルト値
 	static constexpr VECTOR LIGHT_DIR = { 0.0f, -0.5f, 0.3f }; // デフォルトのライト方向
 
 	// シーン管理用
@@ -42,9 +42,25 @@ public:
 	// インスタンスの取得
 	static SceneManager& GetInstance(void);
 
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
 	void Init(void);
+
+	/// <summary>
+	/// 3D用の設定初期化処理
+	/// </summary>
+	/// <param name=""></param>
 	void Init3D(void);
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
 	void Update(void);
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
 	void Draw(void);
 
 	// リソースの破棄
@@ -82,9 +98,17 @@ public:
 	/// </summary>
 	/// <param name="scene">ジャンプ先シーン</param>
 	void JumpScene(std::unique_ptr<SceneBase> scene);
-
+	
+	/// <summary>
+	/// フォグの開始位置と終了位置を設定
+	/// </summary>
+	/// <param name="fogStart">フォグの開始位置</param>
+	/// <param name="fogEnd">フォグの終了位置</param>
 	void SetFog(const int fogStart,const int fogEnd);
 
+	/// <summary>
+	/// フォグの設定をリセット
+	/// </summary>
 	void ResetFog(void);
 
 	/// <summary>
@@ -92,6 +116,9 @@ public:
 	/// </summary>
 	void StartShakeScreen(void);
 
+	/// <summary>
+	/// ゲームシーンへ遷移
+	/// </summary>
 	void SceneID2Game(void) { sceneId_ = SCENE_ID::GAME; }
 
 	/// <summary>
@@ -175,12 +202,14 @@ private:
 	// フェード
 	void Fade(void);
 
+	/// <summary>
+	/// 画面揺らしの処理
+	/// </summary>
 	void ShakeScreen(void);
 
 	//SCENE_IDからシーンを生成する
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
-
 
 	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)

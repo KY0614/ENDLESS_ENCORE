@@ -28,6 +28,10 @@ namespace
 {
 	//画面揺らしのフレーム数
 	const int SHAKE_FRAME = 60;
+
+	//フォグの開始・終了距離
+	const float FOG_START = 10000.0f;	//フォグ開始距離
+	const float FOG_END = 20000.0f;		//フォグ終了距離
 }
 
 SceneManager* SceneManager::instance_ = nullptr;
@@ -69,8 +73,8 @@ void SceneManager::Init(void)
 	preTime_ = std::chrono::system_clock::now();
 
 	//フォグ
-	fogStart_ = 10000.0f;
-	fogEnd_ = 20000.0f;
+	fogStart_ = FOG_START;
+	fogEnd_ = FOG_END;
 
 	//ライトの向き
 	lightDir_ = LIGHT_DIR;
@@ -89,7 +93,10 @@ void SceneManager::Init(void)
 void SceneManager::Init3D(void)
 {
 	//背景色設定
-	SetBackgroundColor(64, 64, 128);
+	const int bgColorRed = 64;
+	const int bgColorGreen = 64;
+	const int bgColorBlue = 128;
+	SetBackgroundColor(bgColorRed, bgColorGreen, bgColorBlue);
 
 	//Zバッファを有効にする
 	SetUseZBuffer3D(true);
