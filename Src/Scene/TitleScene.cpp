@@ -15,6 +15,8 @@ namespace
 {
 	//宣伝シーンへ遷移する時間
 	const int ADVERTISE_TIME = 1500;
+	//PushSpace画像のアルファ値最大
+	const int PUSH_SPACE_IMG_ALPHA_MAX = 255;
 	//PushSpaceSEの音量
 	const int PUSH_SPACE_SE_VOLUME = 60;
 	//スペースキー押下時のSE音量が下がるフレーム間隔
@@ -23,17 +25,20 @@ namespace
 	const float SE_FADE_OUT_TOTALTIME = 6.0f;
 	//フェードアウト開始までの間隔時間
 	const float INTERVAL_TIME = 1.5f;
+	//定点カメラの位置
+	const VECTOR CAMERA_FIXED_POINT_POS = VGet(0.0f, -109.0f, -65.0f);			//カメラの位置
+	const VECTOR CAMERA_FIXED_POINT_TARGET_POS = VGet(0.0f, -153.0f, 2863.0f);	//カメラの注視点位置
 }
 
 TitleScene::TitleScene(void)
 {
-	toAdvertiseLoopTimer_ = 255;
+	toAdvertiseLoopTimer_ = 0;
 	logoImg_ = -1;
 	pushSpaceImg_ = -1;
 	pushSpaceImgAlpha_ = 0;
+	alphaChangeSpeed_ = 0;
 	intervalTimer_ = 0.0f;
 	isPushSpace_ = false;
-	isIncreaseAlpha_ = false;
 	pushSpaceSEVolume_ = 0;
 	seVolumeDecreaseFrame_ = 0;
 	postEffectScreen_ = 0;
@@ -62,13 +67,19 @@ void TitleScene::Init(void)
 	//プッシュスペース画像
 	pushSpaceImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE).handleId_;
 
+	//宣伝シーンへ遷移するまでのタイマー
 	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
 
-	mainCamera->SetFixedPointPos(VGet(0.0f, -109.0f, -65.0f),VGet(0.0f, -153.0f, 2863.0f));
+	//プッシュスペース画像のアルファ値変化速度
+	const int alphaChangeSpeed = 2;
+	alphaChangeSpeed_ = alphaChangeSpeed;
+
+	//定点カメラの座標設定
+	mainCamera->SetFixedPointPos(CAMERA_FIXED_POINT_POS, CAMERA_FIXED_POINT_TARGET_POS);
 	//定点カメラ
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
 
-	// ポストエフェクト用スクリーン
+	//ポストエフェクト用スクリーン
 	postEffectScreen_ = MakeScreen(
 		Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, true);
 
@@ -81,25 +92,14 @@ void TitleScene::Update(void)
 	//画面に出す黒い線のノイズのX座標をランダムに更新
 	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
 	filmNoiseMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
-	const int alphaChangeSpeed = 2;
-	const int maxAlpha = 255;
-	if (!isIncreaseAlpha_)
+
+	//プッシュスペース画像をゆっくり点滅させる
+	pushSpaceImgAlpha_ += alphaChangeSpeed_;
+	//アルファ値が最大値か最小値になったら変化速度の符号を反転させる
+	if (pushSpaceImgAlpha_ >= PUSH_SPACE_IMG_ALPHA_MAX || pushSpaceImgAlpha_ <= 0)
 	{
-		pushSpaceImgAlpha_ += alphaChangeSpeed;
-		if (pushSpaceImgAlpha_ >= maxAlpha)
-		{
-			pushSpaceImgAlpha_ = maxAlpha;
-			isIncreaseAlpha_ = !isIncreaseAlpha_;
-		}
-	}
-	else
-	{
-		pushSpaceImgAlpha_ -= alphaChangeSpeed;
-		if (pushSpaceImgAlpha_ <= 0)
-		{
-			pushSpaceImgAlpha_ = 0;
-			isIncreaseAlpha_ = !isIncreaseAlpha_;
-		}
+		alphaChangeSpeed_ *= -1; //符号を反転
+		pushSpaceImgAlpha_ = std::clamp(pushSpaceImgAlpha_, 0, PUSH_SPACE_IMG_ALPHA_MAX); //範囲外を補正
 	}
 
 	InputManager& ins = InputManager::GetInstance();
@@ -231,10 +231,12 @@ void TitleScene::InitSound(void)
 
 void TitleScene::InitMaterial(void)
 {
-
+	int materialConstBufSize = 1;
 	// ポストエフェクト用(セピア)
-	sepiaMaterial_ = std::make_unique<PixelMaterial>("Sepiatone.cso", 1);
-	sepiaMaterial_->AddConstBuf({ 1.0f, 1.0f, 1.0f, 1.0f });
+	sepiaMaterial_ = std::make_unique<PixelMaterial>("Sepiatone.cso", materialConstBufSize);
+	//モデルカラー
+	const FLOAT4 modelColor = { 1.0f,1.0f,1.0f,1.0f, };
+	sepiaMaterial_->AddConstBuf(modelColor);
 	sepiaMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
 	sepiaRenderer_ = std::make_unique<PixelRenderer>(*sepiaMaterial_);
 	sepiaRenderer_->MakeSquereVertex(
@@ -243,17 +245,23 @@ void TitleScene::InitMaterial(void)
 	);
 
 	// ポストエフェクト用(ビネット)
-	vignetteMaterial_ = std::make_unique<PixelMaterial>("Vignette.cso", 1);
-	vignetteMaterial_->AddConstBuf({ 3.0f, 0.0f, 0.0f, 0.0f });
+	vignetteMaterial_ = std::make_unique<PixelMaterial>("Vignette.cso", materialConstBufSize);
+	//ビネットの強さ
+	const float vignettePower = 3.0f;
+	vignetteMaterial_->AddConstBuf({ vignettePower, 0.0f, 0.0f, 0.0f });
 	vignetteMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
 	vignetteRenderer_ = std::make_unique<PixelRenderer>(*vignetteMaterial_);
 	vignetteRenderer_->MakeSquereVertex(
 		Vector2(0, 0),
 		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
 	);
-	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
+	materialConstBufSize = 2;
+	//ノイズを入れる線のX座標をランダムに決定
+	const int randomValue = 100;
+	const float random = 100.0f;
+	float randomNoiseLineX = static_cast<float>(rand() % randomValue) / random;
 	// ポストエフェクト用(線ノイズ)
-	filmNoiseMaterial_ = std::make_unique<PixelMaterial>("FilmNoise.cso", 2);
+	filmNoiseMaterial_ = std::make_unique<PixelMaterial>("FilmNoise.cso", materialConstBufSize);
 	filmNoiseMaterial_->AddConstBuf({ randomNoiseLineX, 0.0f, 0.0f, 0.0f });
 	filmNoiseMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
 	filmNoiseRenderer_ = std::make_unique<PixelRenderer>(*filmNoiseMaterial_);

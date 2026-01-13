@@ -72,8 +72,10 @@ private:
 	int logoImg_;
 	//プッシュスペース画像ハンドル
 	int pushSpaceImg_;
+	//プッシュスペース画像アルファ値
 	int pushSpaceImgAlpha_;
-	bool isIncreaseAlpha_;
+	//プッシュスペース画像アルファ値
+	int alphaChangeSpeed_;
 
 	//宣伝シーンへ遷移する用のタイマー
 	int toAdvertiseLoopTimer_;

@@ -4,7 +4,6 @@
 cbuffer cbParam : register(b4)
 {
 	float4 g_color;
-	float2 g_black_uv;
 }
 
 float4 main(PS_INPUT PSInput) : SV_TARGET

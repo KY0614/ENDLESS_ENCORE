@@ -653,10 +653,8 @@ void GameScene::UpdateBattleSecond(void)
 
 void GameScene::DrawBattleSecond(void)
 {
-
 	enemy_->DrawHPBar();
 	player_->DrawHPBar();
-
 }
 
 void GameScene::SkipBarDraw(void)
