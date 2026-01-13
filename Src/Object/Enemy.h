@@ -150,17 +150,17 @@ private:
 	//衝突チェック	
 	VECTOR gravHitPosDown_;	//重力方向の当たり判定位置
 	VECTOR gravHitPosUp_;	//重力と逆方向の当たり判定位置
-	VECTOR movedPos_;	//移動後の位置
-	VECTOR movePow_;	//移動量
+	VECTOR movedPos_;		//移動後の位置
+	VECTOR movePow_;		//移動量
 
 	//移動方向
 	VECTOR moveDir_;
 
 	//体力
 	float hp_;
+	//最大体力
 	float maxHp_;
 
-	bool isAttackedNear_;
 
 	//回転
 	Quaternion enemyRotY_;		//Y軸回転
@@ -175,19 +175,24 @@ private:
 	int hitCount_;			//ヒット回数(ダウンまでのカウント)
 	float stepDownTime_;	//ダウン中の時間経過
 
+	//状態毎のアクション完了フラグ
 	bool isStepActioned_;
 
+	//バックスタブ中かどうか
 	bool isBackstab_;
 
-	//チャージ攻撃
+	//チャージ攻撃済みかどうか
 	bool isChargeAtk_;
-	float charge_;
+	//チャージ量
+	float chargeRadius_;
 
+	//エンカウント済みかどうか
 	bool isEncount_;
 
-	//エフェクト
-	int effectChargeResId_;	//エフェクトリソースID
+	//チャージ中のエフェクト
+	int effectChargeResId_;		//エフェクトリソースID
 	int effectChargePlayId_;	//エフェクト再生ID
+	//チャージ攻撃時のエフェクト
 	int effectChargeAtkResId_;	//エフェクトリソースID
 	int effectChargeAtkPlayId_;	//エフェクト再生ID
 
@@ -440,9 +445,14 @@ private:
 	/// </summary>
 	void UpdateDebugImGui(void);
 
+	/// <summary>
+	/// デバッグ描画処理
+	/// </summary>
 	void DrawDebug(void);
 
+	//状態を遷移させる用の時間管理変数
 	float stateStep_;
+	//方向転換用の時間管理変数
 	float changeDirStep_;
 
 	int col_;

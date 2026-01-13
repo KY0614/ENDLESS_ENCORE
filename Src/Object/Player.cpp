@@ -1233,6 +1233,7 @@ void Player::DebugDraw(void)
 
 void Player::DrawParryCD(void)
 {
+	//パリィのクールダウン時間
 	const float progressRatio = stepParry_ / PARRY_TIME;
 
 	// 画面座標 (適宜調整してください)
@@ -1251,7 +1252,8 @@ void Player::DrawParryCD(void)
 
 	// ゲージの背景を描画
 	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, bgColor, true);
-
+	//テキストを少しずらす用の幅
+	const int textOffset = 10;
 	// クールダウン中の場合
 	if (stepParry_ > 0.0f)
 	{
@@ -1263,7 +1265,7 @@ void Player::DrawParryCD(void)
 		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
 
 		// テキスト表示 (クールダウン中)
-		DrawFormatString(GAUGE_X + GAUGE_W + 10, GAUGE_Y, cdColor, L"PARRY CD: %.1f", PARRY_TIME - stepParry_);
+		DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, cdColor, L"PARRY CD: %.1f", PARRY_TIME - stepParry_);
 	}
 	else // クールダウンが完了している場合
 	{
@@ -1273,7 +1275,7 @@ void Player::DrawParryCD(void)
 		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
 
 		// テキスト表示 (パリィ可能)
-		DrawFormatString(GAUGE_X + GAUGE_W + 10, GAUGE_Y, fgColor, L"PARRY READY");
+		DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, fgColor, L"PARRY READY");
 	}
 }
 
@@ -1285,10 +1287,13 @@ void Player::DrawHPBar(void)
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	// 背景（グレー）
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(100, 100, 100), TRUE);
-	// 現在HP（緑）
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, GetColor(0, 255, 0), TRUE);
+	//色の設定
+	const int barBackColor = GetColor(100, 100, 100);	//背景（グレー）
+	const int barColor = GetColor(0, 255, 0);			//現在HP（緑）
+	//背景
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, barBackColor, TRUE);
+	//現在HP
+	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, barColor, TRUE);
 
 	DrawParryCD();
 }

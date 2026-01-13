@@ -42,6 +42,12 @@ namespace
 	static const std::string KEY_MAX_HP = "maxHp";
 	static const std::string KEY_MAX_POS = "maxPosition";
 	static const std::string KEY_MIN_POS = "minPosition";
+	//近接攻撃当たり判定球のローカル座標
+	const VECTOR ATTACK_NEAR_SPHERE_POS = { 0.0f, 80.0f, 50.0f };
+	//チャージ攻撃当たり判定球のローカル座標
+	const VECTOR ATTACK_CHARGE_SPHERE_POS = { 0.0f, 40.0f, 0.0f };
+	//遠距離攻撃当たり判定球の半径
+	const float ATTACK_NEAR_SPHERE_RADIUS = 30.0f;
 	//回転にかける時間
 	const float TIME_ROT = 0.1f;
 	//敵の基本パラメータ
@@ -53,26 +59,25 @@ namespace
 	const float PLAYER_DISTANCE = 750.0f;		//維持するプレイヤーとの距離
 	const float FOLLOW_DISTANCE = 900.0f;		//追従距離
 	//状態ごとの時間
-	const float FOLLOW_TIME = 3.0f;
-	const float MOVE_TIME = 3.0f;
-	const float ATTACK_TIME = 1.0f;
-	const float ATTACK_FAR_TIME = 15.0f;
-	const float ATTACK_CHARGE_TIME = 30.0f;
-
+	const float FOLLOW_TIME = 3.0f;			//追従時間
+	const float MOVE_TIME = 3.0f;			//移動時間
+	const float ATTACK_TIME = 1.0f;			//攻撃後の待機時間
+	const float ATTACK_FAR_TIME = 15.0f;	//遠距離攻撃後の待機時間
+	const float ATTACK_CHARGE_TIME = 30.0f;	//ため攻撃後の待機時間
 	//ダメージ
-	const float ATTACK_DAMAGE = 10.0f;
-	const float NORMAL_DAMAGE = 10.0f;
-	const float BACKSTAB_DAMAGE = 50.0f;
-	const float CHARGE_DAMAGE = 100.0f;
-
+	const float ATTACK_DAMAGE = 10.0f;		//近接攻撃ダメージ
+	const float NORMAL_DAMAGE = 10.0f;		//遠距離攻撃ダメージ
+	const float BACKSTAB_DAMAGE = 50.0f;	//バックスタブダメージ
+	const float CHARGE_DAMAGE = 100.0f;		//ため攻撃ダメージ
 	//ダウンする時間
 	const float DOWN_TIME = 4.0f;
-
+	//視野角・視野範囲
 	const float VIEW_ANGLE = 40.0f;
 	const float VIEW_RANGE = 100.0f;
-
 	//重力加速度
 	const float GRAVITY_POW = 15.0f;
+	//バックスタブSE音量
+	const int BACKSTAB_SE_VOLUME = 70;
 }
 
 Enemy::Enemy(Player& player):
@@ -88,7 +93,6 @@ Enemy::Enemy(Player& player):
 	state_ = STATE::NONE;
 	prevState_ = STATE::NONE;
 	col_ = 0xff0000;
-	isAttackedNear_ = false;
 	isDown_ = false;
 	isStepActioned_ = false;
 	isBackstab_ = false;
@@ -100,7 +104,7 @@ Enemy::Enemy(Player& player):
 	circlingSpeedRad_ = DX_PI_F / 2.0f  * 0.1f;
 
 	stepRotTime_ = 0.0f;
-	charge_ = 0.0f;
+	chargeRadius_ = 0.0f;
 	moveDir_ = CommonUtility::VECTOR_ZERO;
 	isEncount_ = false;
 
@@ -275,12 +279,10 @@ void Enemy::InitCollider(void)
 	capsule_->SetLocalPosDown(cupsulePosDown);
 	capsule_->SetRadius(cupsuleRadius);
 
-	const VECTOR spherePos = { 0.0f, 80.0f, 50.0f };
-	const float sphereRadius = 30.0f;
 	//近接攻撃用の球体コライダ
 	sphereNear_ = std::make_unique<Sphere>(transform_);
-	sphereNear_->SetLocalPos(spherePos);
-	sphereNear_->SetRadius(sphereRadius);
+	sphereNear_->SetLocalPos(ATTACK_NEAR_SPHERE_POS);
+	sphereNear_->SetRadius(ATTACK_NEAR_SPHERE_RADIUS);
 
 	col_ = 0x000000;
 }
@@ -362,6 +364,7 @@ void Enemy::ChangeStateTurn(void)
 
 void Enemy::ChangeStateEncountFinish(void)
 {
+	//敵の向きを戦闘開始時の向きに設定
 	const float battleRotY = 180.0f;
 	transform_.quaRot =
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-battleRotY), 0.0f });
@@ -411,10 +414,12 @@ void Enemy::ChangeStateShotAll(void)
 
 void Enemy::ChangeStateCharge(void)
 {
+	//当たり判定球の初期化
 	sphereNear_->SetRadius(0.0f);
-	sphereNear_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
+	sphereNear_->SetLocalPos(ATTACK_CHARGE_SPHERE_POS);
 	//アニメーションを途中まで再生
-	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 0.0f, 26.0f);
+	const float animEndStep = 26.0f;
+	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 0.0f, animEndStep);
 	EffectCharge();
 	stateUpdate_ = std::bind(&Enemy::UpdateCharge, this);
 }
@@ -424,7 +429,8 @@ void Enemy::ChangeStateAttackCharge(void)
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Play(SoundManager::SOUND::FLAME);
 	//アニメーションを途中から再生
-	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, 26.0f, -1.0f, false, true);
+	const float animStartStep = 26.0f;
+	animationController_->Play((int)ANIM_TYPE::ATTACK_CHARGE, false, animStartStep, -1.0f, false, true);
 	EffectChargeAtk();
 	stateUpdate_ = std::bind(&Enemy::UpdateChargeAttack, this);
 }
@@ -432,14 +438,19 @@ void Enemy::ChangeStateAttackCharge(void)
 void Enemy::ChangeStateBackstab(void)
 {
 	//アニメーションを途中まで再生
-	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 0.0f, 26.0f);
+	const float animEndStep = 26.0f;
+	animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 0.0f, animEndStep);
 	stateUpdate_ = std::bind(&Enemy::UpdateBackstab, this);
 }
 
 void Enemy::ChangeStateDown(void)
 {
-	animationController_->Play((int)ANIM_TYPE::DOWN, true, 0.0f, 9.0f);
-	animationController_->SetEndLoop(1.0f, 9.0f, 10.0f);
+	//ダウンアニメーション再生(途中まで再生してループさせる)
+	const float animEndStep = 9.0f;
+	const float animLoopSpeed = 10.0f;
+	animationController_->Play((int)ANIM_TYPE::DOWN, true, 0.0f, animEndStep);
+	const float animStartStep = 1.0f;
+	animationController_->SetEndLoop(animStartStep, animEndStep, animLoopSpeed);
 	isDown_ = true;
 	stepDownTime_ = 0.0f;
 	stateUpdate_ = std::bind(&Enemy::UpdateDown, this);
@@ -449,8 +460,10 @@ void Enemy::ChangeStateDead(void)
 {
 	//死亡アニメーション再生
 	animationController_->Play((int)ANIM_TYPE::DEATH, false);
-	//バックスタブからの遷移だったら倒れたままのアニメーションを再生
-	if (prevState_ == STATE::BACKSTAB)animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 110.0f, -1.0f);
+	//バックスタブからの遷移だったら倒れたままのアニメーションを再生しておく
+	const float animStartStep = 110.0f;
+	if (prevState_ == STATE::BACKSTAB)animationController_->Play(
+		(int)ANIM_TYPE::BACKSTAB, false, animStartStep, -1.0f);
 	stateUpdate_ = std::bind(&Enemy::UpdateDead, this);
 }
 
@@ -655,7 +668,9 @@ void Enemy::UpdateShotOne(void)
 			if (player_.GetIsParry())
 			{
 				bullet->SetStateReverse();
-				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, 80.0f, 0.0f));
+				//ターゲット座標に高さを加えて胸のあたりを狙う
+				const float targetOffY = 80.0f;
+				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, targetOffY, 0.0f));
 				bullet->SetTargetPos(targetPos);
 				continue;
 			}
@@ -765,7 +780,9 @@ void Enemy::UpdateShotAll(void)
 			if (player_.GetIsParry())
 			{
 				bullet->SetStateReverse();
-				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, 80.0f, 0.0f));
+				//ターゲット座標に高さを加えて胸のあたりを狙う
+				const float targetOffY = 80.0f;
+				VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, targetOffY, 0.0f));
 				bullet->SetTargetPos(targetPos);
 				continue;
 			}
@@ -824,12 +841,13 @@ void Enemy::UpdateShotAll(void)
 void Enemy::UpdateCharge(void)
 {
 	//チャージで範囲を大きくする
-	charge_ += 1.5f;
-	sphereNear_->SetRadius(charge_);
+	const float chargeSpeed = 1.5f;
+	chargeRadius_ += chargeSpeed;
+	sphereNear_->SetRadius(chargeRadius_);
 	const float chargeRad = 250.0f;
-	if (charge_ > chargeRad)
+	if (chargeRadius_ > chargeRad)
 	{
-		charge_ = chargeRad;
+		chargeRadius_ = chargeRad;
 		ChangeState(STATE::ATTACK_CHARGE);
 		return;
 	}
@@ -846,10 +864,10 @@ void Enemy::UpdateChargeAttack(void)
 
 	if (animationController_->IsEnd())
 	{
-		charge_ = 0.0f;
+		chargeRadius_ = 0.0f;
 		//球体を近接用に戻す
-		sphereNear_->SetLocalPos({ 0.0f, 80.0f, 50.0f });
-		sphereNear_->SetRadius(30.0f);
+		sphereNear_->SetLocalPos(ATTACK_NEAR_SPHERE_POS);
+		sphereNear_->SetRadius(ATTACK_NEAR_SPHERE_RADIUS);
 		ChangeState(STATE::MOVE);
 		return;
 	}
@@ -885,15 +903,19 @@ void Enemy::UpdateBackstab(void)
 		stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 		if (stateStep_ > stopTime && !isBackstab_)
 		{
-			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 110.0f, false, true);
+			//途中から再生
+			const float animStartStep = 26.0f;
+			const float animEndStep = 110.0f;
+			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false,
+				animStartStep, animEndStep, false, true);
 			Damage(BACKSTAB_DAMAGE);
 			isBackstab_ = true;	
 			SoundManager& sound = SoundManager::GetInstance();
-			sound.AdjustVolume(SoundManager::SOUND::BACKSTAB, 70);
+			sound.AdjustVolume(SoundManager::SOUND::BACKSTAB, BACKSTAB_SE_VOLUME);
 			sound.Play(SoundManager::SOUND::BACKSTAB);
 		}
 	}
-
+	//アニメーションが最後まで再生されたら移動状態へ遷移
 	if (isBackstab_ && animationController_->IsEnd())
 	{
 		isBackstab_ = false;
@@ -907,7 +929,9 @@ void Enemy::UpdateDown(void)
 	if (stepDownTime_ > DOWN_TIME && isDown_)
 	{
 		isDown_ = false;
-		animationController_->Play((int)ANIM_TYPE::DOWN, false, 9.0f, -1.0f, false, true);
+		//途中から再生
+		const float animStartStep = 9.0f;
+		animationController_->Play((int)ANIM_TYPE::DOWN, false, animStartStep, -1.0f, false, true);
 	}
 	if (animationController_->IsEnd())
 	{
@@ -993,10 +1017,11 @@ bool Enemy::CheckBackstab(void)
 
 	//エネミーからプレイヤーまでのベクトル
 	VECTOR diff = VSub(pPos, transform_.pos);
-
 	//視野範囲にはいっているか判断(ピタゴラスの定理）
 	float distance = std::pow(diff.x, 2.0f) + std::pow(diff.z, 2.0f);
-	if (distance <= (std::pow(VIEW_RANGE, 2.0f)))
+	float viewRange = std::pow(VIEW_RANGE, 2.0f);
+	//視野範囲内に入っているか
+	if (distance <= viewRange)
 	{
 
 		//自分から見たプレイヤーの角度を求める
@@ -1106,7 +1131,7 @@ void Enemy::Collision(void)
 
 	// 衝突(重力)
 	CollisionGravity();
-
+	//移動後座標を反映
 	transform_.pos = movedPos_;
 }
 
@@ -1158,28 +1183,30 @@ void Enemy::CollisionCapsule(void)
 
 void Enemy::CollisionGravity(void)
 {
-	// 重力方向
+	//重力方向
 	VECTOR dirGravity = CommonUtility::DIR_D;
 
-	// 重力方向の反対
+	//重力方向の反対
 	VECTOR dirUpGravity = CommonUtility::DIR_U;
 
-	// 重力の強さ
-	float gravityPow = GRAVITY_POW;
-
-	float checkPow = 10.0f;
-	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
+	//重力
+	const float checkPow = 10.0f;
+	//2倍の長さで線を引く
+	const float checkLength = 2.0f;
+	//上方向のチェック開始位置
+	const float dotThreshold = 0.9f;
+	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * checkLength));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 	for (const auto c : colliders_)
 	{
 		//地面との衝突
 		auto hit = MV1CollCheck_Line(
 			c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
-
-		if (hit.HitFlag > 0 && VDot(dirGravity, CommonUtility::VECTOR_ZERO) > 0.9f)
+		
+		if (hit.HitFlag > 0 && VDot(dirGravity, CommonUtility::VECTOR_ZERO) > dotThreshold)
 		{
 			// 衝突地点から、少し上に移動
-			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
+			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, checkLength));
 		}
 	}
 }
@@ -1565,17 +1592,20 @@ void Enemy::DrawHPBar(void)
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
 	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
 	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
+	//色の設定
+	const int barBackColor = GetColor(100, 100, 100);	//背景（グレー）
+	const int barColor = GetColor(255, 0, 0);			//現在HP（赤）
 	// 背景（グレー）
 	DrawBox(posX,
 		posY,
 		posX + HP_BAR_WIDTH,
 		posY + HP_BAR_HEIGHT,
-		GetColor(100, 100, 100), TRUE);
+		barBackColor, TRUE);
 	// 現在HP（赤）
 	DrawBox(posX,
 		posY,
 		posX + barWidth,
 		posY + HP_BAR_HEIGHT,
-		GetColor(255, 0, 0), TRUE);
+		barColor, TRUE);
 
 }
