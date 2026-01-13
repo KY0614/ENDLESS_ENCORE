@@ -10,14 +10,16 @@ class ModelMaterial;
 class Stage
 {
 public:
-
+	//コンストラクタ
 	Stage(void);
 	//デストラクタ
 	~Stage(void);
 
 	/// <summary>
-	///	初期化
+	/// 初期化処理
 	/// </summary>
+	/// <param name="pos">ポイントライトの座標</param>
+	/// <param name="sPos">スポットライトの座標</param>
 	void Init(const VECTOR pos = {0.0f,-10000.0f,0.0f}, VECTOR sPos = { 0.0f,0.0f,0.0f });
 
 	/// <summary>
@@ -38,14 +40,19 @@ public:
 	/// <summary>
 	/// ステージのモデル情報を取得する
 	/// </summary>
-	/// <returns>現在のステージモデル情報</returns>
+	/// <returns>ステージモデル情報</returns>
 	const Transform& GetTransform(void){ return transform_; }
 
+	/// <summary>
+	/// 霧の壁のモデル情報を取得する
+	/// </summary>
+	/// <returns>霧の壁のモデル情報</returns>
 	const Transform& GetMistWallTransform(void) { return mistWallTransform_; }
 
+	/// <summary>
+	/// バトル中にする(バトル用の霧の壁を表示する)
+	/// </summary>
 	void IsBattle(void) { isBattle_ = true; }
-
-	void SetMistWall(const bool isVisible) { isBattle_ = isVisible; }
 
 private:
 	//ステージのマテリアルとレンダー
@@ -56,19 +63,19 @@ private:
 	std::unique_ptr<ModelMaterial> mistWallMaterial_;
 	std::unique_ptr<ModelRenderer> mistWallRenderer_;
 
-	int mistWallNoiseTex_;
-
 	//ステージ本体のモデル情報
 	Transform transform_;
 
 	//戦闘中に出す霧の壁のモデル情報
 	Transform mistWallTransform_;
+	//霧の壁のノイズテクスチャID
 	int noiseTextureId_;
+	//霧の壁のスクロール速度
 	float mistScrollSpeed_;
+	//霧の壁の溶解ラインのアルファ値
 	float dissolveAlphaLine_;
 
-	//std::unique_ptr<Cube> cube_;
-	std::unique_ptr<Box> cube_;
+	//std::unique_ptr<Box> cube_;
 
 	//戦闘中かどうか
 	bool isBattle_;		//true:戦闘中 false:戦闘中ではない
@@ -81,6 +88,8 @@ private:
 	/// <summary>
 	/// マテリアル初期化
 	/// </summary>
+	/// <param name="pos">ポイントライトの座標</param>
+	/// <param name="sPos">スポットライトの座標</param>
 	void InitMaterial(const VECTOR pos = { 0.0f,0.0f,0.0f }, VECTOR sPos = { 0.0f,0.0f,0.0f });
 
 	/// <summary>
@@ -93,4 +102,3 @@ private:
 	/// </summary>
 	void UpdateMistWallMaterialConstBuf(void);
 };
-

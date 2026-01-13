@@ -74,19 +74,36 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// HPバーの描画
+	/// </summary>
 	void DrawHPBar(void);
 
+	/// <summary>
+	/// デバッグシーン用更新処理
+	/// </summary>
 	void DebugUpdate(void);
 
+	/// <summary>
+	/// YOU DIEDの描画
+	/// </summary>
 	void DrawDead(void);
+
+	/// <summary>
+	/// VICTORYの描画
+	/// </summary>
 	void DrawVictory(void);
 
+	/// <summary>
+	/// 文字列を描画
+	/// </summary>
+	/// <param name="str">描画する文字列</param>
+	/// <param name="col">文字の色</param>
 	void DrawResultString(const std::wstring& str,int col);
 
 	/// <summary>
 	/// コライダーの削除
 	/// </summary>
-	/// <param name=""></param>
 	void ClearCollider(void);
 
 	/// <summary>
@@ -146,14 +163,29 @@ public:
 	/// <returns>true:パリィ中　false:パリィしてない</returns>
 	const bool& GetIsParry(void)const  { return isParry_; }
 
+	/// <summary>
+	/// 座標の設定
+	/// </summary>
+	/// <param name="pos">指定する座標</param>
 	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
+
+	/// <summary>
+	/// Z座標を設定
+	/// </summary>
+	/// <param name="pos">設定するZ座標</param>
 	void SetPosZ(const float& pos) { transform_.pos.z = pos; }
+
+	/// <summary>
+	/// HPを設定
+	/// </summary>
+	/// <param name="hp">指定するHP</param>
 	void SetHP(const float hp) { hp_ = hp; }
 
-	void SetRotateY(const Quaternion& rotY) { transform_.quaRot = rotY;  }
+	/// <summary>
+	/// バックスタブ用Y軸回転の設定
+	/// </summary>
+	/// <param name="rotY">設定するY軸回転値</param>
 	void SetBackstabRotY(const Quaternion& rotY);
-
-	void StageWalkReady(void);
 
 private:
 	Transform parryTransform_;
@@ -273,6 +305,12 @@ private:
 	/// <param name="maxHp">最大HP</param>
 	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
+	/// <summary>
+	/// エンカウント演出：ステージ上を歩く準備
+	/// </summary>
+	/// <param name=""></param>
+	void StageWalkReady(void);
+
 	//状態遷移処理--------------------------------------------------------
 
 	/// <summary>
@@ -350,8 +388,6 @@ private:
 	/// </summary>
 	/// <param name="">WASDで移動する処理</param>
 	void ProcessMove(void);
-
-	void SetMoveSpeed(const float speed) { speed_ = speed; }
 
 	//ジャンプ--------------------------------------------------------
 
@@ -448,6 +484,10 @@ private:
 	/// </summary>
 	void DebugDraw(void);
 
+	/// <summary>
+	/// パリィのクールダウン描画
+	/// </summary>
+	/// <param name=""></param>
 	void DrawParryCD(void);
 
 	int col_;

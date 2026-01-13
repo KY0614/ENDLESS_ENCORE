@@ -21,10 +21,10 @@ namespace
 	static const std::string KEY_STAGE = "Stage";
 	static const std::string KEY_THEATER = "Theater";
 	static const std::string KEY_MIST_WALL = "MistWall";
-
-	const float ALPHA_LINE_MAX = 1.1f;
-	const float ALPHA_LINE_MIN = -0.1f;
-	const float ALPHA_RANGE = 0.01f;
+	//ディゾルブの閾値最大値・最小値・範囲
+	const float ALPHA_LINE_MAX = 1.1f;	//閾値最大値
+	const float ALPHA_LINE_MIN = -0.1f;	//閾値最小値
+	const float ALPHA_RANGE = 0.01f;	//範囲
 }
 
 Stage::Stage(void)
@@ -44,12 +44,13 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 	//3Dモデル初期化
 	Init3DModel();
 
+	//マテリアル初期化
 	InitMaterial(pos, sPos);
 
-	cube_ = std::make_unique<Box>(transform_);
-	//cube_->SetLocalCenter(VGet(0.0f, -150.0f, 3000.0f));
-	cube_->SetLocalCenter(VGet(0.0f, 0.0f, 3000.0f));
-	cube_->SetSize(VGet(2700.0f/2.0f, 500.0f / 2.0f, 500.0f));
+	//cube_ = std::make_unique<Box>(transform_);
+	////cube_->SetLocalCenter(VGet(0.0f, -150.0f, 3000.0f));
+	//cube_->SetLocalCenter(VGet(0.0f, 0.0f, 3000.0f));
+	//cube_->SetSize(VGet(2700.0f/2.0f, 500.0f / 2.0f, 500.0f));
 }
 
 void Stage::Update(void)
@@ -163,15 +164,16 @@ void Stage::Init3DModel(void)
 	mistWallTransform_.quaRotLocal = Quaternion();
 	mistWallTransform_.MakeCollider(Collider::TYPE::STAGE);
 	mistWallTransform_.Update();
-
+	//ノイズテクスチャ読み込み
 	noiseTextureId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::NOISE_TEXTURE).handleId_;
 }
 
 void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 {
-	const int VS_CONST_BUF_NUM = 2;
-	const int PS_CONST_BUF_NUM = 7;
+	//シェーダー毎の定数バッファ数
+	int VS_CONST_BUF_NUM = 2;
+	int PS_CONST_BUF_NUM = 7;
 	//モデル描画用
 	stageMaterial_ = std::make_unique<ModelMaterial>(
 		"StdModelVS.cso", VS_CONST_BUF_NUM,
@@ -186,41 +188,52 @@ void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 	stageMaterial_->AddConstBufVS({ fogStart,fogEnd,0.0f,0.0f });
 
 	//ピクセルシェーダーの定数バッファ設定
-	stageMaterial_->AddConstBufPS({ 1.0f,1.0f,1.0f,1.0f });
+	//モデルカラー
+	const FLOAT4 modelColor = { 1.0f,1.0f,1.0f,1.0f };
+	stageMaterial_->AddConstBufPS(modelColor);
 
+	//ライトの方向
 	VECTOR lightDir = GetLightDirection();
 	stageMaterial_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,0.0f });
 
+	//環境光
 	float ambient = 0.0f;
-	stageMaterial_->AddConstBufPS({ ambient,ambient,ambient,1.0f });
+	stageMaterial_->AddConstBufPS({ ambient,ambient,ambient,ambient });
 
-	int fogColorR, fogColorG, fogColorB;
-	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
-	stageMaterial_->AddConstBufPS({ 0.1f,0.1f,0.1f,1.0f });
+	//フォグの色
+	const FLOAT4 fogColor = { 0.1f,0.1f,0.1f,1.0f };
+	stageMaterial_->AddConstBufPS(fogColor);
 
 	//ポイントライト
-	stageMaterial_->AddConstBufPS({ pos.x,pos.y,pos.z,500.0f });
+	const float pointLightRange = 500.0f;	//範囲
+	stageMaterial_->AddConstBufPS({ pos.x,pos.y,pos.z,pointLightRange });
 
 	//スポットライト
-	stageMaterial_->AddConstBufPS({ sPos.x,sPos.y,sPos.z,600.0f });
+	const float spotLightRange = 600.0f;	//範囲
+	stageMaterial_->AddConstBufPS({ sPos.x,sPos.y,sPos.z,spotLightRange });
 	VECTOR spotDir = CommonUtility::DIR_D;
-	stageMaterial_->AddConstBufPS({ spotDir.x,spotDir.y,spotDir.z,120.0f });
+	const float spotLightAngle = 120.0f;	//角度
+	stageMaterial_->AddConstBufPS({ spotDir.x,spotDir.y,spotDir.z,spotLightAngle });
 
 	stageRenderer_ = std::make_unique<ModelRenderer>(transform_.modelId, *stageMaterial_);
 
 	//霧の壁のマテリアル
+	//シェーダー毎の定数バッファ数
+	VS_CONST_BUF_NUM = 2;
+	PS_CONST_BUF_NUM = 4;
 	//モデル描画用
 	mistWallMaterial_ = std::make_unique<ModelMaterial>(
-		"MistWallVS.cso", 2,
-		"MistWallPS.cso", 4
+		"MistWallVS.cso", VS_CONST_BUF_NUM,
+		"MistWallPS.cso", PS_CONST_BUF_NUM
 	);
 	mistWallMaterial_->SetTextureAddress(ModelMaterial::TEXADDRESS::WRAP);
-	VECTOR uvScale = { 4.0f,4.0f,4.0f };
+	//UVスケール
+	const VECTOR uvScale = { 4.0f,4.0f,4.0f };
 	mistWallMaterial_->AddConstBufVS({ uvScale.x,uvScale.y,uvScale.z,uvScale.z });
 	mistWallMaterial_->AddConstBufVS({ mistScrollSpeed_,mistScrollSpeed_,mistScrollSpeed_,mistScrollSpeed_ });
 
 	//ピクセルシェーダーの定数バッファ設定
-	mistWallMaterial_->AddConstBufPS({ 1.0f,1.0f,1.0f,1.0f });
+	mistWallMaterial_->AddConstBufPS(modelColor);
 	//ライトの方向とスクロール時間
 	mistWallMaterial_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,mistScrollSpeed_ });
 	//環境光
@@ -229,13 +242,15 @@ void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 	//ディゾルブの閾値と範囲
 	mistWallMaterial_->AddConstBufPS({ dissolveAlphaLine_,ALPHA_RANGE,0.0f,0.0f });
 	//dissolveの輪郭線の色
-	mistWallMaterial_->AddConstBufPS({ 0.0f,0.0f,0.5f,1.0f });
+	const FLOAT4 edgeColor = { 0.0f,0.0f,0.5f,1.0f };
+	mistWallMaterial_->AddConstBufPS(edgeColor);
 	
 	//ディゾルブ
 	//mistWallMaterial_->AddConstBufPS({ dissolveSpeed_,dissolveSpeed_,dissolveSpeed_,dissolveSpeed_ });
-
-	mistWallMaterial_->SetTextureBuf(1, noiseTextureId_);
-
+	
+	//ノイズテクスチャ設定
+	const int noiseTextureSlot = 1;
+	mistWallMaterial_->SetTextureBuf(noiseTextureSlot, noiseTextureId_);
 	mistWallRenderer_ = std::make_unique<ModelRenderer>(mistWallTransform_.modelId, *mistWallMaterial_);
 
 }

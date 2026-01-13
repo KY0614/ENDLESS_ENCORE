@@ -39,6 +39,8 @@ namespace
 
 	//ジャンプ力
 	const float JUMP_POW = 9.0f; 
+	//XZ方向のジャンプ力減衰率
+	const float JUMP_POW_DECEL_RATE = 0.01f;
 	//重力加速度
 	const float GRAVITY_POW = 15.0f;
 
@@ -56,7 +58,9 @@ namespace
 	const float DODGE_TIME = 0.4f;		//回避(無敵)時間
 	const float PARRY_TIME = 0.3f;		//パリィ時間
 
+	//ステージを歩き始める位置(Z座標)
 	const float WALK_STAGE_POS_Z = 1150.0f;
+	//ステージを歩くスピード
 	const float WALK_SPEED_SLOW = 1.0f;
 }
 
@@ -109,6 +113,8 @@ Player::Player(void)
 	isActionEnd_ = false;
 	stepBackstab_ = 0.0f;
 	clothSE_ = false;
+
+	col_ = 0x000000;
 }
 
 Player::~Player(void)
@@ -130,26 +136,26 @@ void Player::Init(void)
 	Init3DModel();
 
 	//モデル描画用
-	material_ = std::make_unique<ModelMaterial>(
-		"RimLightVS.cso", 0,
-		"RimLightPS.cso", 5
-	);
-	//ピクセルシェーダーの定数バッファ設定
-	material_->AddConstBufPS({ 0.0f,0.0f,0.0f,0.1f });
-	//光の向き
-	VECTOR lightDir = GetLightDirection();
-	material_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,1.0f });
-	//環境光
-	float anbientCol = 0.2f;
-	material_->AddConstBufPS({ anbientCol,anbientCol,anbientCol,1.0f });
-	//カメラ位置
-	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
-	material_->AddConstBufPS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
-	//反射光の色(白色)
-	float specColor = 1.0f;
-	material_->AddConstBufPS({ specColor,specColor,specColor,0.0f });
+	//material_ = std::make_unique<ModelMaterial>(
+	//	"RimLightVS.cso", 0,
+	//	"RimLightPS.cso", 5
+	//);
+	////ピクセルシェーダーの定数バッファ設定
+	//material_->AddConstBufPS({ 0.0f,0.0f,0.0f,0.1f });
+	////光の向き
+	//VECTOR lightDir = GetLightDirection();
+	//material_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,1.0f });
+	////環境光
+	//float anbientCol = 0.2f;
+	//material_->AddConstBufPS({ anbientCol,anbientCol,anbientCol,1.0f });
+	////カメラ位置
+	//VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	//material_->AddConstBufPS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+	////反射光の色(白色)
+	//float specColor = 1.0f;
+	//material_->AddConstBufPS({ specColor,specColor,specColor,0.0f });
 
-	renderer_ = std::make_unique<ModelRenderer>(parryTransform_.modelId, *material_);
+	//renderer_ = std::make_unique<ModelRenderer>(parryTransform_.modelId, *material_);
 	//当たり判定の初期化
 	InitCollider();
 
@@ -174,8 +180,8 @@ void Player::Init(void)
 void Player::Update(void)
 {
 	//カメラ位置
-	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
-	material_->SetConstBufPS(3,{ cameraPos.x,cameraPos.y,cameraPos.z,1.0f });
+	//VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	//material_->SetConstBufPS(3,{ cameraPos.x,cameraPos.y,cameraPos.z,1.0f });
 
 	//HP制限(HPが最大HPを超えないようにする)
 	if (hp_ > maxHp_)
@@ -224,7 +230,9 @@ void Player::DebugUpdate(void)
 		hp_ = maxHp_;
 	}
 
-	transform_.pos.x = 100.0f;
+	//デバッグシーン中は移動させない
+	const float debugPosX = 100.0f;
+	transform_.pos.x = debugPosX;
 	transform_.pos.z = 0.0f;
 
 	//更新ステップ
@@ -277,13 +285,15 @@ void Player::DrawResultString(const std::wstring& str, int col)
 		}
 	}
 	stringAlpha_ += alphaSpeed;	//透明度を増加させる
+	const int fontSize = 64;
+	const int defaultFontSize = 16;
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, stringAlpha_);
-	SetFontSize(64);
+	SetFontSize(fontSize);
 	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
 	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
 		Application::SCREEN_SIZE_Y / 2 - diff / 2,
 		str.c_str(), col);
-	SetFontSize(16);
+	SetFontSize(defaultFontSize);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 }
@@ -331,7 +341,7 @@ void Player::Init3DModel(void)
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
-	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
+	const float scale = transformData.value(JsonManager::KEY_SCALE, 0.0f);
 	transform_.scl = { scale ,scale ,scale };
 	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	transform_.quaRot = Quaternion();
@@ -344,29 +354,34 @@ void Player::Init3DModel(void)
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 
-	parryTransform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-		ResourceManager::SRC::SPHERE));
-	parryTransform_.pos = transform_.pos;
-	parryTransform_.pos.y += 20.0f;
-	const float scl = 1.0f;
-	parryTransform_.scl = { scl,scl,scl };
-	parryTransform_.quaRot = Quaternion();
-	parryTransform_.Update();
+	//パリィ用モデルの設定（シェーダー用)
+	//parryTransform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
+	//	ResourceManager::SRC::SPHERE));
+	//parryTransform_.pos = transform_.pos;
+	//parryTransform_.pos.y += 20.0f;
+	//const float scl = 1.0f;
+	//parryTransform_.scl = { scl,scl,scl };
+	//parryTransform_.quaRot = Quaternion();
+	//parryTransform_.Update();
 }
 
 void Player::InitCollider(void)
 {
 	//カプセルコライダ
 	capsule_ = std::make_unique<Capsule>(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
-	capsule_->SetLocalPosDown({ 0.0f, 20.0f, 0.0f });
-	capsule_->SetRadius(20.0f);
+	const VECTOR localPosTop = { 0.0f, 110.0f, 0.0f };
+	const VECTOR localPosDown = { 0.0f, 20.0f, 0.0f };
+	const float capsuleRadius = 20.0f;
+	capsule_->SetLocalPosTop(localPosTop);
+	capsule_->SetLocalPosDown(localPosDown);
+	capsule_->SetRadius(capsuleRadius);
 
+	//球コライダ
+	const VECTOR localPos = { 0.0f, 40.0f, 0.0f };
+	const float sphereRadius = 80.0f;
 	sphere_ = std::make_unique<Sphere>(transform_);
-	sphere_->SetLocalPos({ 0.0f, 40.0f, 0.0f });
-	sphere_->SetRadius(80.0f);
-	//sphere_->SetLocalPos({ 0.0f, 80.0f, 70.0f });
-	//sphere_->SetRadius(40.0f);
+	sphere_->SetLocalPos(localPos);
+	sphere_->SetRadius(sphereRadius);
 
 	col_ = 0x000000;
 }
@@ -387,7 +402,7 @@ void Player::InitAnimation(void)
 	const char* KEY_EMPTY = "";
 	//アニメーション速度
 	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
-	const float animSpeedSlow = animSpeed / 2.0f;	//ゆっくり再生する速度
+	const float animSpeedSlow = animSpeed / 2.0f;	//ゆっくり再生する速度（半分)
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	//起き上がり
 	animationController_->Add((int)ANIM_TYPE::WAKE_UP, path + animPath.value(KEY_WAKE_UP, KEY_EMPTY),
@@ -421,6 +436,22 @@ void Player::InitAnimation(void)
 		animSpeed);
 }
 
+void Player::StageWalkReady(void)
+{
+	//ジャンプ中に遷移したらジャンプ力を無効にする
+	jumpPow_ = CommonUtility::VECTOR_ZERO;
+	//Jsonデータ取得
+	JsonManager& jsonM = JsonManager::GetInstance();
+	const json playerData = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
+	//パラメータを取得
+	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
+	//座標をステージ上の端(手前側)に設定
+	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
+	//正面を向かせる(Z軸方向)
+	transform_.quaRot = Quaternion();
+}
+
 void Player::ChangeState(const STATE& state)
 {
 	//行動終了判定をリセット
@@ -439,22 +470,6 @@ void Player::SetBackstabRotY(const Quaternion& rotY)
 	//バックスタブ終了後の回転も同じように設定
 	playerRotY_ = rotY;
 	goalQuaRot_ = rotY;
-}
-
-void Player::StageWalkReady(void)
-{
-	//ジャンプ中に遷移したらジャンプ力を無効にする
-	jumpPow_ = CommonUtility::VECTOR_ZERO;
-	//Jsonデータ取得
-	JsonManager& jsonM = JsonManager::GetInstance();
-	const json playerData = jsonM.GetJsonData(
-		JsonManager::JSON_DATA::PLAYER,KEY_PLAYER);
-	//パラメータを取得
-	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
-	//座標をステージ上の端(手前側)に設定
-	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
-	//正面を向かせる(Z軸方向)
-	transform_.quaRot = Quaternion();
 }
 
 void Player::ChangeStateNone(void)
@@ -621,7 +636,10 @@ void Player::UpdateBackstab(void)
 		if (stepBackstab_ > waitTime && !isActionEnd_)
 		{
 			isActionEnd_ = true;
-			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, 26.0f, 100.0f, false, true);
+			//アニメーションの続きを再生
+			const float animStartStep = 26.0f;
+			const float animEndStep = 100.0f;
+			animationController_->Play((int)ANIM_TYPE::BACKSTAB, false, animStartStep, animEndStep, false, true);
 		}
 	}
 	//バックスタブアニメーションが終了したらローカル回転を元に戻す
@@ -736,17 +754,17 @@ void Player::ProcessJump(void)
 		//ここでは、JUMP_POWを初速としてv0に相当する値を設定します
 		jumpPow_.y = JUMP_POW;
 
-		// ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
-		//jumpPow_.x = movePow_.x;
-		//jumpPow_.z = movePow_.z;
-
-		// ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
-		jumpPow_.x = movePow_.x * 0.01f;
-		jumpPow_.z = movePow_.z * 0.01f;
+		//ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
+		jumpPow_.x = movePow_.x * JUMP_POW_DECEL_RATE;
+		jumpPow_.z = movePow_.z * JUMP_POW_DECEL_RATE;
 
 		//無理やりアニメーション
-		animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
-		animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+		const float animStartStep = 13.0f;
+		const float animEndStep = 25.0f;
+		animationController_->Play((int)ANIM_TYPE::JUMP, true, animStartStep, animEndStep);
+		const float animLoopStep = 23.0f;
+		const float animLoopSpeed = 5.0f;
+		animationController_->SetEndLoop(animLoopStep, animEndStep, animLoopSpeed);
 	}
 }
 
@@ -754,6 +772,9 @@ void Player::ProcessDodge(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 	bool isHit = ins.IsInputTriggered("Dodge");
+	//アニメーションの途中まで再生してループさせるための値
+	const float animEndStep = 4.0f;		//回避アニメーションの終了位置
+	const float animLoopSpeed = 5.0f;	//ループ再生速度
 
 	//回避
 	if (isHit && !isJump_)
@@ -761,8 +782,9 @@ void Player::ProcessDodge(void)
 		//回避中はスピードを早くする
 		isDodge_ = true;
 		speed_ = SPEED_DODGE;
-		animationController_->Play((int)ANIM_TYPE::DODGE, true, 0.0f, 4.0f);
-		animationController_->SetEndLoop(4.0f, 4.0f, 5.0f);
+		//アニメーションを途中まで再生してループさせる
+		animationController_->Play((int)ANIM_TYPE::DODGE, true, 0.0f, animEndStep);
+		animationController_->SetEndLoop(animEndStep, animEndStep, animLoopSpeed);
 	}
 
 	if (!isDodge_ && !isDecelerate_)return;
@@ -776,16 +798,19 @@ void Player::ProcessDodge(void)
 		isDodge_ = false;
 		//速度減衰開始
 		isDecelerate_ = true;
-		animationController_->Play((int)ANIM_TYPE::DODGE,true,4.0f,-1.0f,false,true);
+		//アニメーションを途中から再生
+		animationController_->Play((int)ANIM_TYPE::DODGE,true, animEndStep,-1.0f,false,true);
 	}
 	//速度減速処理
 	if (isDecelerate_)
 	{
 		stepWalk_ = STEP_WALK2RUN;
 		//減速処理
+		//１を最大として、減速時間に応じて0から1までの割合を求める
 		float decelRate = (stepDodge_ - DODGE_TIME) / DODGE_DECELERATION_TIME;
+		const float maxRate = 1.0f;	//最大値
 		float currentSpeed = Easing::CubicOut(decelRate,
-			1.0f, SPEED_DODGE, SPEED_RUN);
+			maxRate, SPEED_DODGE, SPEED_RUN);
 		speed_ = currentSpeed;
 		//減速が終了したら走るスピードに戻す
 		if (stepDodge_ > DODGE_TIME + DODGE_DECELERATION_TIME)
@@ -807,7 +832,7 @@ void Player::ProcessParry(void)
 		sound.AdjustVolume(SoundManager::SOUND::PARRY,70);
 		sound.Play(SoundManager::SOUND::PARRY);
 		isParry_ = true;
-
+		//パリィエフェクト再生
 		EffectParry();
 	}
 
@@ -860,7 +885,7 @@ void Player::Collision(void)
 	//衝突(カプセル)
 	CollisionCapsule();
 
-	// 衝突(重力)
+	//衝突(重力)
 	CollisionGravity();
 	
 	//移動
@@ -889,7 +914,8 @@ void Player::CollisionCapsule(void)
 			//地面と異なり、衝突回避位置が不明なため、何度か移動させる
 			//この時、移動させる方向は、移動前座標に向いた方向であったり、
 			//衝突したポリゴンの法線方向だったりする
-			for (int tryCnt = 0; tryCnt < 10; tryCnt++)
+			const int maxTryCnt = 10;
+			for (int tryCnt = 0; tryCnt < maxTryCnt; tryCnt++)
 			{
 				//再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
 				//最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
@@ -900,7 +926,8 @@ void Player::CollisionCapsule(void)
 				if (pHit)
 				{
 					//法線の方向にちょっとだけ移動させる
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 2.0f));
+					const float adjustDist = 2.0f;
+					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, adjustDist));
 					//カプセルも一緒に移動させる
 					trans.pos = movedPos_;
 					trans.Update();
@@ -927,7 +954,7 @@ void Player::CollisionGravity(void)
 
 	// 重力の強さ
 	float gravityPow = GRAVITY_POW;
-
+	//重力落下チェック用の長さ
 	float checkPow = 10.0f;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
@@ -949,9 +976,12 @@ void Player::CollisionGravity(void)
 			//stepJump_ = 0.0f;
 			if (isJump_)
 			{
+				//ジャンプアニメーションを途中から再生
+				const float animStartStep = 29.0f;
+				const float animEndStep = 45.0f;
 				// 着地モーション
 				animationController_->Play(
-					(int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
+					(int)ANIM_TYPE::JUMP, false, animStartStep, animEndStep, false, true);
 			}
 			isJump_ = false;
 		}
@@ -1042,14 +1072,14 @@ void Player::EffectFootSmoke(void)
 		stepFootSmoke_ < 0.0f)
 	{
 
-		stepFootSmoke_ = speed_ == SPEED_RUN ? 0.5f : TERM_FOOT_SMOKE;
-		//stepFootSmoke_ = TERM_FOOT_SMOKE;
+		//stepFootSmoke_ = speed_ == SPEED_RUN ? 0.5f : TERM_FOOT_SMOKE;
+		stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 		//エフェクト再生
 		effectSmokePlayId_ = PlayEffekseer3DEffect(effectSmokeResId_);
 
 		//大きさ
-		float SCALE = 5.0f;
+		const float SCALE = 5.0f;
 		SetScalePlayingEffekseer3DEffect(effectSmokePlayId_, SCALE, SCALE, SCALE);
 
 		//位置の設定
@@ -1070,7 +1100,8 @@ void Player::EffectParry(void)
 	effectParryPlayId_ = PlayEffekseer3DEffect(effectParryResId_);
 
 	//再生速度の設定(少し早めに設定）
-	SetSpeedPlayingEffekseer3DEffect(effectParryPlayId_, 6.0f);
+	const float effectParrySpeed = 6.0f;
+	SetSpeedPlayingEffekseer3DEffect(effectParryPlayId_, effectParrySpeed);
 
 	//大きさの設定
 	//大きさ
