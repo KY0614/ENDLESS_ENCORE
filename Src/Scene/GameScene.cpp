@@ -26,7 +26,17 @@
 
 namespace
 {
-	const float SKIP_TIME = 2.0f; //スキップ判定時間
+	//スキップ判定時間
+	const float SKIP_TIME = 2.0f; 
+	//バトル中のZ位置制限
+	const float BATTLE_STAGE_Z = 938.0f;
+	//BGM音量
+	const int EXPLORE_BGM_VOLUME = 60;
+	const int BATTLE_BGM_VOLUME = 50;
+
+	//カメラの各注視点オフセット値	
+	const float CAMERA_PLAYER_HEAD_OFFSET_Y = 100.0f;	//プレイヤーの頭の高さ
+	const float CAMERA_PLAYER_CHEST_OFFSET_Y = 70.0f;	//プレイヤーの胸の高さ
 }
 
 GameScene::GameScene(void)
@@ -84,7 +94,7 @@ void GameScene::Init(void)
 	//戦闘BGM
 	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::BATTLE, 50);
+	sound.AdjustVolume(SoundManager::SOUND::BATTLE, BATTLE_BGM_VOLUME);
 
 	// ポイントライト
 	//std::unique_ptr<PointLight>light;
@@ -193,21 +203,21 @@ void GameScene::Draw(void)
 	//-----------------------------------------
 }
 
-VECTOR GameScene::GetPointLightPos()
-{
-	return pointLight_[0]->GetTransform().pos;
-}
-
-VECTOR GameScene::GetSpotLightPos()
-{
-	return spotLight_[0]->GetTransform().pos;
-}
+//VECTOR GameScene::GetPointLightPos()
+//{
+//	return pointLight_[0]->GetTransform().pos;
+//}
+//
+//VECTOR GameScene::GetSpotLightPos()
+//{
+//	return spotLight_[0]->GetTransform().pos;
+//}
 
 void GameScene::Backstab(void)
 {
 	VECTOR backDir = enemy_->GetTransform().GetBack();
 	//バックスタブ位置
-	const float distance = 60.0f;
+	const float distance = 60.0f;	//敵から少し離す
 	VECTOR target = VAdd(enemy_->GetTransform().pos, VScale(backDir, distance));
 	//ダウン中のバックスタブ判定
 	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
@@ -215,7 +225,6 @@ void GameScene::Backstab(void)
 		if (player_->GetIsParry())
 		{
 			player_->SetPos(target);
-			//player_->SetRotateY(enemy_->GetTransform().quaRot);
 			player_->SetBackstabRotY(enemy_->GetTransform().quaRot);
 			player_->ChangeState(Player::STATE::BACKSTAB);
 			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
@@ -235,25 +244,24 @@ void GameScene::InitStateExplore(void)
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
-
+	//BGM再生
 	SoundManager& sound = SoundManager::GetInstance();
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 60);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, EXPLORE_BGM_VOLUME);
 	sound.Play(SoundManager::SOUND::EXPLORE);
 }
 
 void GameScene::InitStateBattle(void)
 {
+	//霧の壁有効化
 	stage_->IsBattle();
+	//敵とプレイヤーの状態設定
 	enemy_->ChangeState(Enemy::STATE::MOVE);
 	enemy_->SetIsEncount(true);
 	enemy_->Update(); //状態変更後すぐに更新しておく
 	player_->ChangeState(Player::STATE::PLAY);
 	player_->Update(); //状態変更後すぐに更新しておく
 	player_->AddCollider(stage_->GetMistWallTransform().collider);
-	//mainCamera->SetFollow(&player_->GetTransform());
-	//mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 	SoundManager& sound = SoundManager::GetInstance();
-	//sound.AdjustVolume(SoundManager::SOUND::BATTLE, 50);
 	sound.Play(SoundManager::SOUND::BATTLE);
 }
 
@@ -273,14 +281,19 @@ void GameScene::ChangeStateLoading(void)
 
 void GameScene::ChangeStateWakeUp(void)
 {
+	//カメラセットアップ
+	//プレイヤーの右前方へ設定
 	VECTOR pos = player_->GetTransform().pos;
+	const float cameraDistance = 100.0f;
 	pos = VAdd(pos, VScale(
 		VAdd(player_->GetTransform().GetRight(),
-			player_->GetTransform().GetForward()), 100.0f));
+			player_->GetTransform().GetForward()), cameraDistance));
+	//注視点はプレイヤーの胸あたり
 	VECTOR targetPos = player_->GetTransform().pos;
-	targetPos.y += 70.0f;
+	targetPos.y += CAMERA_PLAYER_CHEST_OFFSET_Y;
+	//クレーンアップ速度
 	const float craneUpSpeed = 0.13f;
-	mainCamera->SetCraneUpPos(pos, 80.0f,targetPos, craneUpSpeed);
+	mainCamera->SetCraneUpPos(pos, CAMERA_PLAYER_CHEST_OFFSET_Y,targetPos, craneUpSpeed);
 	mainCamera->ChangeMode(Camera::MODE::CRANE_UP);
 	stateUpdate_ = std::bind(&GameScene::UpdateWakeUp, this);
 	stateDraw_ = std::bind(&GameScene::DrawWakeUp, this);
@@ -557,9 +570,10 @@ void GameScene::UpdateBattle(void)
 	//	return;
 	//}
 
-	if(player_->GetTransform().pos.z < 938.0f)
+	//Z位置制限（霧の壁の外にでないように)
+	if(player_->GetTransform().pos.z < BATTLE_STAGE_Z)
 	{
-		player_->SetPosZ(938.0f);
+		player_->SetPosZ(BATTLE_STAGE_Z);
 	}
 
 	player_->Update();
@@ -693,26 +707,26 @@ void GameScene::SkipBarDraw(void)
 
 }
 
-void GameScene::DrawMessage(const std::wstring& wStr)
-{
-	const int boxWidth = Application::SCREEN_SIZE_X - 100;
-	const int boxHeight = 200;
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-	DrawBox(100,
-		Application::SCREEN_SIZE_Y / 2 - boxHeight / 2,
-		boxWidth,
-		Application::SCREEN_SIZE_Y / 2 + boxHeight / 2,
-		0x000000, true);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	int diff = GetDrawStringWidth(wStr.c_str(), wStr.size(), NULL);
-	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
-		Application::SCREEN_SIZE_Y / 2 - 32,
-		wStr.c_str(), 0xFFFFFF);
-
-	const int lineY = Application::SCREEN_SIZE_Y / 2 + 16;
-	int lineX = (Application::SCREEN_SIZE_X / 2 - 150);
-
-}
+//void GameScene::DrawMessage(const std::wstring& wStr)
+//{
+//	const int boxWidth = Application::SCREEN_SIZE_X - 100;
+//	const int boxHeight = 200;
+//	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+//	DrawBox(100,
+//		Application::SCREEN_SIZE_Y / 2 - boxHeight / 2,
+//		boxWidth,
+//		Application::SCREEN_SIZE_Y / 2 + boxHeight / 2,
+//		0x000000, true);
+//	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+//	int diff = GetDrawStringWidth(wStr.c_str(), wStr.size(), NULL);
+//	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
+//		Application::SCREEN_SIZE_Y / 2 - 32,
+//		wStr.c_str(), 0xFFFFFF);
+//
+//	const int lineY = Application::SCREEN_SIZE_Y / 2 + 16;
+//	int lineX = (Application::SCREEN_SIZE_X / 2 - 150);
+//
+//}
 
 void GameScene::UpdateDebugImGui(void)
 {

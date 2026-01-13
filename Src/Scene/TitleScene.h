@@ -11,16 +11,6 @@ class TitleScene : public SceneBase
 {
 
 public:
-	static constexpr float HIGH_LIGHT_INTERVAL = 1.2f;
-
-	//UVスケール
-	static constexpr float TILLING_SIZE = 35.0f;
-
-	static constexpr float AMBIENT_COLOR = 0.2f;
-
-	static constexpr int LOGO_OFFSET_Y = 80;
-	static constexpr int LOGO_HEIGHT = 1024;
-	static constexpr int PUSHIMG_OFFSET_Y = 100;
 
 	//コンストラクタ
 	TitleScene(void);
@@ -53,18 +43,18 @@ private:
 	//ステージ
 	std::shared_ptr<Stage> stage_;
 
-	// ポストエフェクト用スクリーン
+	//ポストエフェクト用スクリーン
 	int postEffectScreen_;
 
-	// ポストエフェクト用(セピア調)
+	//ポストエフェクト用(セピア調)
 	std::unique_ptr<PixelMaterial> sepiaMaterial_;
 	std::unique_ptr<PixelRenderer> sepiaRenderer_;
 
-	// ポストエフェクト用(ビネット)周りを暗くするやつ
+	//ポストエフェクト用(ビネット)周りを暗くするやつ
 	std::unique_ptr<PixelMaterial> vignetteMaterial_;
 	std::unique_ptr<PixelRenderer> vignetteRenderer_;
 
-	// ポストエフェクト用(線ノイズ)
+	//ポストエフェクト用(線ノイズ)
 	std::unique_ptr<PixelMaterial> filmNoiseMaterial_;
 	std::unique_ptr<PixelRenderer> filmNoiseRenderer_;
 
@@ -90,7 +80,13 @@ private:
 	int pushSpaceSEVolume_;
 	int seVolumeDecreaseFrame_;
 
+	/// <summary>
+	/// サウンド初期化処理
+	/// </summary>
 	void InitSound(void);
 
+	/// <summary>
+	/// マテリアル初期化処理
+	/// </summary>
 	void InitMaterial(void);
 };

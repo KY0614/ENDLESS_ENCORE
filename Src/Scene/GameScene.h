@@ -20,14 +20,14 @@ public:
 	//状態
 	enum class STATE
 	{
-		NONE,		//初期化用
-		LOADING,	//読み込み
-		WAKE_UP,	//ゲーム開始
-		EXPLORE,	//探索
-		ENCOUNT,	//エンカウント演出
-		BATTLE,		//戦闘
-		ENEMY_SUMMON,//雑魚敵召喚
-		BATTLE_SECOND,//戦闘第2フェーズ
+		NONE,			//初期化用
+		LOADING,		//読み込み
+		WAKE_UP,		//ゲーム開始
+		EXPLORE,		//探索
+		ENCOUNT,		//エンカウント演出
+		BATTLE,			//戦闘
+		ENEMY_SUMMON,	//雑魚敵召喚
+		BATTLE_SECOND,	//戦闘第2フェーズ
 	};
 
 	//コンストラクタ
@@ -94,16 +94,27 @@ private:
 	//スキップ中かどうか
 	bool isSkip_;	
 
-	//
-	std::vector<std::unique_ptr<PointLight>> pointLight_;
-	std::vector<std::unique_ptr<SpotLight>> spotLight_;
+	//ポイントライト
+	//std::vector<std::unique_ptr<PointLight>> pointLight_;
+	////スポットライト
+	//std::vector<std::unique_ptr<SpotLight>> spotLight_;
 
+	//読み込み時間
 	float loadingTime_;
 
+	/// <summary>
+	/// バックスタブ処理
+	/// </summary>
 	void Backstab(void);
 
+	/// <summary>
+	/// 探索状態初期化処理
+	/// </summary>
 	void InitStateExplore(void);
 
+	/// <summary>
+	/// 戦闘状態初期化処理
+	/// </summary>
 	void InitStateBattle(void);
 
 	//状態遷移--------------------------------------------------------
@@ -232,7 +243,7 @@ private:
 	/// ゲーム中のメッセージ描画処理
 	/// </summary>
 	/// <param name="wStr">描画する文字列</param>
-	void DrawMessage(const std::wstring& wStr);
+	//void DrawMessage(const std::wstring& wStr);
 
 	/// <summary>
 	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)

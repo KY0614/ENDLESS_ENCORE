@@ -13,11 +13,19 @@ public:
 	/// </summary>
 	void LoadData(void) override;
 
-	//初期化処理
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
 	void Init(void) override;
-	//更新処理
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
 	void Update(void) override;
-	//描画処理*
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
 	void Draw(void) override;
 
 private:

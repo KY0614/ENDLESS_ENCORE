@@ -14,7 +14,9 @@
 namespace
 {
 	//宣伝シーンへ遷移する時間
-	const int ADVERTISE_TIME = 1500;
+	const int ADVERTISE_TIME = 300;
+	//BGMの音量
+	const int BGM_VOLUME = 60;
 	//PushSpace画像のアルファ値最大
 	const int PUSH_SPACE_IMG_ALPHA_MAX = 255;
 	//PushSpaceSEの音量
@@ -57,11 +59,12 @@ void TitleScene::Init(void)
 {
 	//サウンド初期化
 	InitSound();
-	//テージ
+
+	//ステージ
 	stage_ = std::make_shared<Stage>();
 	stage_->Init();
 
-	//タイトルロゴ
+	//タイトルロゴ画像
 	logoImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_LOGO).handleId_;
 
 	//プッシュスペース画像
@@ -90,7 +93,9 @@ void TitleScene::Init(void)
 void TitleScene::Update(void)
 {
 	//画面に出す黒い線のノイズのX座標をランダムに更新
-	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;
+	const int randomValue = 100;
+	const float random = 100.0f;
+	float randomNoiseLineX = static_cast<float>(rand() % randomValue) / random;
 	filmNoiseMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
 
 	//プッシュスペース画像をゆっくり点滅させる
@@ -126,6 +131,7 @@ void TitleScene::Update(void)
 	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
 	//インターバル時間を増やしていく
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	//SEフェードアウト処理(徐々に音量を下げていく)
 	if (intervalTimer_ < INTERVAL_TIME / 2.0f)return;
 
 	seVolumeDecreaseFrame_++;
@@ -133,7 +139,7 @@ void TitleScene::Update(void)
 	seVolumeDecreaseFrame_% PUSH_SPACE_SE_VOLUME_DECREASE_FRAME == 0 ? pushSpaceSEVolume_-- : 0;
 	sound.AdjustVolume(SoundManager::SOUND::PUSH_SPACE, pushSpaceSEVolume_);
 
-
+	//ゲームシーンへ遷移
 	if (intervalTimer_ > INTERVAL_TIME)
 	{
 		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::GAME);
@@ -220,7 +226,7 @@ void TitleScene::InitSound(void)
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::TITLE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_BGM).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::TITLE, 60);
+	sound.AdjustVolume(SoundManager::SOUND::TITLE, BGM_VOLUME);
 	sound.Play(SoundManager::SOUND::TITLE);
 	//SE
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PUSH_SPACE,
