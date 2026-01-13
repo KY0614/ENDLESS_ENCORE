@@ -36,23 +36,23 @@ public:
 	//アニメーションタイプ
 	enum class ANIM_TYPE
 	{
-		IDLE,
-		TURN,
-		WALK,
-		WALK_RIGHT,
-		WALK_LEFT,
-		RUN,
-		ATTACK_NEAR,
-		MAGIC_ILDE,
-		CAST_SPELL,
-		ATTACK_FAR_ONE,
-		ATTACK_FAR_ALL,
-		ATTACK_CHARGE,
-		DAMAGE,
-		BACKSTAB,
-		STAND_UP,
-		DOWN,
-		DEATH,
+		IDLE,			//待機
+		TURN,			//振り向き
+		WALK,			//歩行
+		WALK_RIGHT,		//右歩行
+		WALK_LEFT,		//左歩行
+		RUN,			//走行
+		ATTACK_NEAR,	//近接攻撃
+		MAGIC_ILDE,		//魔法待機
+		CAST_SPELL,		//魔法詠唱
+		ATTACK_FAR_ONE,	//遠距離攻撃(１つずつ発射）
+		ATTACK_FAR_ALL,	//遠距離攻撃(全弾同時発射)
+		ATTACK_CHARGE,	//ため攻撃
+		DAMAGE,			//ダメージ
+		BACKSTAB,		//バックスタブ(致命攻撃される)
+		STAND_UP,		//起き上がり
+		DOWN,			//ダウン
+		DEATH,			//死
 	};
 
 	//コンストラクタ
@@ -75,6 +75,9 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// HPバーの描画
+	/// </summary>
 	void DrawHPBar(void);
 
 	/// <summary>
@@ -88,6 +91,10 @@ public:
 	/// <param name="state">遷移したい状態</param>
 	void ChangeState(const STATE& state);
 
+	/// <summary>
+	/// 現在の状態を取得
+	/// </summary>
+	/// <returns>現在の状態</returns>
 	const STATE& GetState(void)const { return state_; }
 
 	/// <summary>
@@ -95,8 +102,6 @@ public:
 	/// </summary>
 	/// <returns>true:ダウン中　false:ダウンではない</returns>
 	const bool GetIsDown(void)const { return state_ == STATE::DOWN; }
-
-	const bool GetIsBackstab(void)const { return state_ == STATE::BACKSTAB;}
 
 	/// <summary>
 	/// 死亡しているかどうかを取得
@@ -110,10 +115,11 @@ public:
 	/// <returns>true:可能　false:不可能</returns>
 	bool CheckBackstab(void);
 
-	const float& GetHP(void) const { return hp_; }
-	const float& GetMaxHP(void) const { return maxHp_; }
-
-	const bool& SetIsEncount(const bool isEncount) { return isEncount_ = isEncount; }
+	/// <summary>
+	/// エンカウントしたかどうかを設定
+	/// </summary>
+	/// <param name="isEncount">ture:エンカウント済み、false：エンカウントしていない</param>
+	const void SetIsEncount(const bool isEncount) { isEncount_ = isEncount; }
 
 private:
 
