@@ -19,7 +19,7 @@ public:
 		NONE,
 		ENCOUNT,		//エンカウント(登場）
 		TURN,			//振り向く
-		ENCOUNT_FINISH,	//振り向く
+		ENCOUNT_FINISH,	//エンカウント演出終了
 		FOLLOW,			//追跡
 		WAIT,			//待機
 		MOVE,			//移動(左右に)

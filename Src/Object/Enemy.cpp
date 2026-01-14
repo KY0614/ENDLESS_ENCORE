@@ -481,6 +481,7 @@ void Enemy::UpdateFollow(void)
 	//追従処理
 	FollowPlayer(transform_.pos);
 
+	//当たり判定処理
 	Collision();
 
 	//回転処理
@@ -814,7 +815,7 @@ void Enemy::UpdateCharge(void)
 		ChangeState(STATE::ATTACK_CHARGE);
 		return;
 	}
-
+	//エフェクトが再生されていなかったら再生する
 	if (IsEffekseer3DEffectPlaying(effectChargePlayId_) < 0)
 	{
 		EffectCharge();
@@ -980,7 +981,6 @@ bool Enemy::CheckBackstab(void)
 	//視野範囲内に入っているか
 	if (distance <= viewRange)
 	{
-
 		//自分から見たプレイヤーの角度を求める
 		float rad = atan2(pPos.x - transform_.pos.x, pPos.z - transform_.pos.z);
 		float viewRad = rad - transform_.rot.y;
@@ -988,7 +988,6 @@ bool Enemy::CheckBackstab(void)
 			(CommonUtility::DegIn360(CommonUtility::Rad2DegF(viewRad)));
 
 		//視野角内に入っているか判断
-		//if (viewDeg <= VIEW_ANGLE || viewDeg >= (360.0f - VIEW_ANGLE))
 		if (viewDeg >= (180.0f - VIEW_ANGLE) && viewDeg <= (180.0f + VIEW_ANGLE))
 		{
 			return true;
