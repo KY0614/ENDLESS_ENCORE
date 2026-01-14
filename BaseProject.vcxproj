@@ -23,7 +23,6 @@
     <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
     <ClCompile Include="Src\Object\EnemyBullet.cpp" />
-    <ClCompile Include="Src\Object\ShotBase.cpp" />
     <ClCompile Include="Src\Object\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
@@ -70,7 +69,6 @@
     <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
     <ClInclude Include="Src\Object\EnemyBullet.h" />
-    <ClInclude Include="Src\Object\ShotBase.h" />
     <ClInclude Include="Src\Object\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
     <ClInclude Include="Src\Common\Easing.h" />
@@ -212,14 +210,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Src\Shader\PostEffect\Blur.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Src\Shader\PostEffect\FilmNoise.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

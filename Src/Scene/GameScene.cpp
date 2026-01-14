@@ -381,32 +381,18 @@ void GameScene::UpdateBattle(void)
 {
 	InputManager& ins = InputManager::GetInstance();
 
-	//敵の体力が半分以下で敵召喚状態へ遷移
-	//if (/*!enemy_->GetIsBackstab() &&*/
-	//	enemy_->GetHP() <= enemy_->GetMaxHP() / 2.0f)
-	//{
-	//	SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_OUT);
-	//	ChangeState(STATE::ENEMY_SUMMON);
-	//	return;
-	//}
-
 	//Z位置制限（霧の壁の外にでないように)
 	if(player_->GetTransform().pos.z < BATTLE_STAGE_Z)
 	{
 		player_->SetPosZ(BATTLE_STAGE_Z);
 	}
 
+	//各オブジェクト更新
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
 
-	if (ins.IsInputTriggered("Pause"))
-	{
-		//ポーズボタンが押されたらポーズシーンへ遷移
-		SceneManager::GetInstance().PushScene(SceneManager::SCENE_ID::PAUSE);
-		return;
-	}
-
+	//バックスタブ判定
 	Backstab();
 }
 

@@ -76,7 +76,7 @@ namespace
 	//重力加速度
 	const float GRAVITY_POW = 15.0f;
 	//バックスタブSE音量
-	const int BACKSTAB_SE_VOLUME = 70;
+	const int SE_VOLUME = 70;
 }
 
 Enemy::Enemy(Player& player):
@@ -141,7 +141,7 @@ void Enemy::Init(void)
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::BACKSTAB_SE).handleId_);
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FLAME,
 	ResourceManager::GetInstance().Load(ResourceManager::SRC::FLAME_SE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, 70);
+	sound.AdjustVolume(SoundManager::SOUND::FLAME, SE_VOLUME);
 
 	//3Dモデルの初期化
 	Init3DModel();
@@ -165,7 +165,18 @@ void Enemy::Init(void)
 
 void Enemy::Update(void)
 {
-	if (hp_ <= 0.0f)hp_ = 0.0f;
+	//死亡判定
+	if (hp_ <= 0.0f)
+	{
+		hitCount_ = 0;
+		for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+		{
+			//弾をすべて破棄状態にする
+			bullet->SetStateDestroy();
+		}
+		bullets_.clear();
+		ChangeState(STATE::DEAD);
+	}
 
 	//更新ステップ
 	stateUpdate_();
@@ -200,13 +211,6 @@ void Enemy::ChangeState(const STATE& state)
 	//状態変更
 	prevState_ = state_;
 	state_ = state;
-	//死亡判定
-	if (hp_ <= 0.0f)
-	{
-		hitCount_ = 0;
-		bullets_.clear();
-		state_ = STATE::DEAD;
-	}
 
 	//各状態遷移の初期処理
 	stateChanges_[state_]();
@@ -839,11 +843,7 @@ void Enemy::UpdateChargeAttack(void)
 		player_.GetCapsule().GetPosDown(),
 		player_.GetCapsule().GetRadius()))
 	{
-		//回避中だったらダメージを受けない
-		if (player_.GetIsDodge())
-		{
-			
-		}
+		//回避不可能なのでそのままダメージを与える
 		player_.Damage(CHARGE_DAMAGE);
 		isStepActioned_ = true;
 	}
@@ -868,7 +868,7 @@ void Enemy::UpdateBackstab(void)
 			Damage(BACKSTAB_DAMAGE);
 			isBackstab_ = true;	
 			SoundManager& sound = SoundManager::GetInstance();
-			sound.AdjustVolume(SoundManager::SOUND::BACKSTAB, BACKSTAB_SE_VOLUME);
+			sound.AdjustVolume(SoundManager::SOUND::BACKSTAB, SE_VOLUME);
 			sound.Play(SoundManager::SOUND::BACKSTAB);
 		}
 	}

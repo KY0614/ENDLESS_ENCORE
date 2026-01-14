@@ -36,7 +36,7 @@ void Application::Init(void)
 	isEnd_ = false;
 
 	//アプリケーションの初期設定
-	SetWindowText(L"2025_AGS_Winter");
+	SetWindowText(L"ENDLESS ENCORE");
 
 	//ウィンドウサイズ
 	windowSize_ = { SCREEN_SIZE_X ,SCREEN_SIZE_Y };
@@ -80,7 +80,7 @@ void Application::Run(void)
 	auto& imGuiWrapper = ImGuiWrapper::GetInstance();
 
 	//ゲームループ
-	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0 && !isEnd_)
+	while (ProcessMessage() == 0 && !isEnd_)
 	{
 		inputManager.Update();
 		imGuiWrapper.Update();

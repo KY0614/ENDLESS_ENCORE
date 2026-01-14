@@ -367,17 +367,20 @@ void Camera::SetBeforeDrawTrack(void)
 {
 	//終了座標から現在座標までの距離を取得
 	float pos2StartPos = VSize(VSub(trackEndPos_, pos_));
+	//一定距離以下になったら行動済みにする
 	const float distance = 1.0f;
 	isActionEnd_ = pos2StartPos <= distance;
-
 	if (isActionEnd_)return;
 
 	//経過時間
 	trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
 	// 各軸ごとにQuadOutイージングで補間
-	pos_.x = Easing::QuadOut(trackElapsedTime_, trackTotalTime_, trackStartPos_.x, trackEndPos_.x);
-	pos_.y = Easing::QuadOut(trackElapsedTime_, trackTotalTime_, trackStartPos_.y, trackEndPos_.y);
-	pos_.z = Easing::QuadOut(trackElapsedTime_, trackTotalTime_, trackStartPos_.z, trackEndPos_.z);
+	pos_.x = Easing::QuadOut(
+		trackElapsedTime_,trackTotalTime_, trackStartPos_.x, trackEndPos_.x);
+	pos_.y = Easing::QuadOut(
+		trackElapsedTime_, trackTotalTime_, trackStartPos_.y, trackEndPos_.y);
+	pos_.z = Easing::QuadOut(
+		trackElapsedTime_, trackTotalTime_, trackStartPos_.z, trackEndPos_.z);
 
 	//注視座標はカメラの正面に設置
 	const float lookDistance = 50.0f;
@@ -405,9 +408,12 @@ void Camera::SetBeforeDrawDollyIn(void)
 	//経過時間
 	dollyInElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
 	// 各軸ごとにQuadOutイージングで補間
-	pos_.x = Easing::QuadOut(dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.x, endPos.x);
-	pos_.y = Easing::QuadOut(dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.y, endPos.y);
-	pos_.z = Easing::QuadOut(dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.z, endPos.z);
+	pos_.x = Easing::QuadOut(
+		dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.x, endPos.x);
+	pos_.y = Easing::QuadOut(
+		dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.y, endPos.y);
+	pos_.z = Easing::QuadOut(
+		dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.z, endPos.z);
 }
 
 void Camera::SetBeforeDrawSurroundView(void)

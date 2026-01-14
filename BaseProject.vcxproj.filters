@@ -180,9 +180,6 @@
     <ClCompile Include="Src\Object\EnemyBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\ShotBase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Common\FpsController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -458,9 +455,6 @@
     <ClInclude Include="Src\Object\EnemyBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\ShotBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Common\FpsController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -483,7 +477,6 @@
   <ItemGroup>
     <FxCompile Include="Src\Shader\Model\StdModelPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\StdModelVS.hlsl" />
-    <FxCompile Include="Src\Shader\PostEffect\Blur.hlsl" />
     <FxCompile Include="Src\Shader\Model\ShieldPS.hlsl" />
     <FxCompile Include="Src\Shader\Model\ShieldVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\MistWallVS.hlsl" />

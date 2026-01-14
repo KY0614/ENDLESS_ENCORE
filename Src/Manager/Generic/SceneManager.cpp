@@ -21,6 +21,8 @@ namespace
 	//フォグの開始・終了距離
 	const float FOG_START = 10000.0f;	//フォグ開始距離
 	const float FOG_END = 20000.0f;		//フォグ終了距離
+
+	const float SHAKE_RATE = 0.95f;
 }
 
 SceneManager* SceneManager::instance_ = nullptr;
@@ -182,6 +184,7 @@ void SceneManager::Draw(void)
 	if (shakeFrame_ > 0)
 	{
 		Vector2 pos;
+		//画面を揺らす
 		const int shakeFrameRate = 3;
 		const int shakePadding = 5;
 		pos.x = (int)(((shakeFrame_ % shakeFrameRate) * shakePadding) * shakeRate_);
@@ -390,10 +393,11 @@ void SceneManager::Fade(void)
 
 void SceneManager::ShakeScreen(void)
 {
+	//画面揺らし
 	if (shakeFrame_ > 0)
 	{
 		shakeFrame_--;
-		shakeRate_ *= 0.95f;
+		shakeRate_ *= SHAKE_RATE;
 	}
 	else 
 	{
