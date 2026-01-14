@@ -1,9 +1,6 @@
 #pragma once
 #include "Common/Transform.h"
 
-class Cube;
-class Box;
-
 class ModelRenderer;
 class ModelMaterial;
 
@@ -31,11 +28,6 @@ public:
 	/// 描画処理
 	/// </summary>
 	void Draw(void);
-
-	/// <summary>
-	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
-	/// </summary>
-	void UpdateDebugImGui(void);
 
 	/// <summary>
 	/// ステージのモデル情報を取得する
@@ -74,8 +66,6 @@ private:
 	float mistScrollSpeed_;
 	//霧の壁の溶解ラインのアルファ値
 	float dissolveAlphaLine_;
-
-	//std::unique_ptr<Box> cube_;
 
 	//戦闘中かどうか
 	bool isBattle_;		//true:戦闘中 false:戦闘中ではない

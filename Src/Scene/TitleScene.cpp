@@ -13,8 +13,6 @@
 
 namespace
 {
-	//宣伝シーンへ遷移する時間
-	const int ADVERTISE_TIME = 300;
 	//BGMの音量
 	const int BGM_VOLUME = 60;
 	//PushSpace画像のアルファ値最大
@@ -34,7 +32,6 @@ namespace
 
 TitleScene::TitleScene(void)
 {
-	toAdvertiseLoopTimer_ = 0;
 	logoImg_ = -1;
 	pushSpaceImg_ = -1;
 	pushSpaceImgAlpha_ = 0;
@@ -51,10 +48,6 @@ TitleScene::~TitleScene(void)
 	DeleteGraph(postEffectScreen_);
 }
 
-void TitleScene::LoadData(void)
-{
-}
-
 void TitleScene::Init(void)
 {
 	//サウンド初期化
@@ -69,9 +62,6 @@ void TitleScene::Init(void)
 
 	//プッシュスペース画像
 	pushSpaceImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE).handleId_;
-
-	//宣伝シーンへ遷移するまでのタイマー
-	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
 
 	//プッシュスペース画像のアルファ値変化速度
 	const int alphaChangeSpeed = 2;
@@ -116,19 +106,10 @@ void TitleScene::Update(void)
 		sound.Play(SoundManager::SOUND::PUSH_SPACE);
 	}
 
-	//一定時間経過で宣伝シーンへ遷移
-	//if (--toAdvertiseLoopTimer_ <= 0)
-	//{
-	//	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
-	//	SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::ADVERTISE);
-	//	return;
-	//}
-
 	stage_->Update();
 
 	if (!isPushSpace_)return;
-	//宣伝シーンに遷移しないようにタイマーをリセット
-	toAdvertiseLoopTimer_ = ADVERTISE_TIME;
+
 	//インターバル時間を増やしていく
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	//SEフェードアウト処理(徐々に音量を下げていく)

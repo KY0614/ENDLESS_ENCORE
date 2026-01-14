@@ -34,11 +34,6 @@ public:
 	~EncountScene(void);
 
 	/// <summary>
-	/// ƒf[ƒ^“Çˆ—
-	/// </summary>
-	void LoadData(void) override;
-
-	/// <summary>
 	/// ‰Šú‰»ˆ—
 	/// </summary>
 	void Init(void) override;

@@ -19,38 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Object\Navigate.cpp" />
-    <ClCompile Include="Src\Object\SpotLight.cpp" />
-    <ClCompile Include="Src\Object\PointLight.cpp" />
     <ClCompile Include="Src\Scene\EncountScene.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\GeometryBase.cpp" />
-    <ClCompile Include="Src\Scene\DebugScene.cpp" />
-    <ClCompile Include="Src\Object\ItemPrevew.cpp" />
-    <ClCompile Include="Src\Object\GimmickObject.cpp" />
-    <ClCompile Include="Src\Scene\PauseScene\CharacterScene.cpp" />
-    <ClCompile Include="Src\Scene\PauseScene\OptionScene.cpp" />
-    <ClCompile Include="Src\Scene\PauseScene\InventoryScene.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\ColliderBase.cpp" />
     <ClCompile Include="Src\Common\FpsController.cpp" />
-    <ClCompile Include="Src\Manager\Generic\CollisionManager.cpp" />
-    <ClCompile Include="Src\Utility\DrawUtiity.cpp" />
-    <ClCompile Include="Src\Manager\Transition\PushTransitor.cpp" />
-    <ClCompile Include="Src\Manager\Transition\FadeTransitor.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
     <ClCompile Include="Src\Object\EnemyBullet.cpp" />
     <ClCompile Include="Src\Object\ShotBase.cpp" />
-    <ClCompile Include="Src\Scene\AdvertiseScene.cpp" />
-    <ClCompile Include="Src\Utility\ModelFrameUtility.cpp" />
-    <ClCompile Include="Src\Object\Common\ControllerAnimation.cpp" />
     <ClCompile Include="Src\Object\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
-    <ClCompile Include="Src\Scene\PauseScene\KeyConfigScene.cpp" />
-    <ClCompile Include="Src\Scene\PauseScene\ExplainScene.cpp" />
-    <ClCompile Include="Src\Scene\PauseScene.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
     <ClCompile Include="Src\Manager\Generic\Input.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\Cube.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Sphere.cpp" />
     <ClCompile Include="Src\Common\DebugDrawFormat.cpp" />
     <ClCompile Include="Src\Libs\ImGuiWrapper.cpp" />
@@ -65,9 +42,6 @@
     <ClCompile Include="Src\Renderer\ModelRenderer.cpp" />
     <ClCompile Include="Src\Renderer\PixelMaterial.cpp" />
     <ClCompile Include="Src\Renderer\PixelRenderer.cpp" />
-    <ClCompile Include="Src\Scene\ResultScene.cpp" />
-    <ClCompile Include="Src\Scene\MovieScene.cpp" />
-    <ClCompile Include="Src\Scene\SelectScene.cpp" />
     <ClCompile Include="Src\Object\ActorBase.cpp" />
     <ClCompile Include="Src\Application.cpp" />
     <ClCompile Include="Src\Common\Fader.cpp" />
@@ -88,47 +62,19 @@
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Scene\TitleScene.cpp" />
     <ClCompile Include="Src\Utility\CommonUtility.cpp" />
-    <ClCompile Include="Src\Scene\TutorialScene.cpp" />
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
-    <ClCompile Include="Src\Manager\Transition\Transitor.cpp" />
-    <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
-    <ClCompile Include="Src\Object\StateList\Enemy\BaseState.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
-    <ClCompile Include="Src\Object\SummonEnemyBase.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Object\Navigate.h" />
-    <ClInclude Include="Src\Object\SpotLight.h" />
-    <ClInclude Include="Src\Object\PointLight.h" />
     <ClInclude Include="Src\Scene\EncountScene.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\GeometryBase.h" />
-    <ClInclude Include="Src\Scene\DebugScene.h" />
-    <ClInclude Include="Src\Object\ItemPrevew.h" />
-    <ClInclude Include="Src\Object\GimmickObject.h" />
-    <ClInclude Include="Src\Scene\PauseScene\CharacterScene.h" />
-    <ClInclude Include="Src\Scene\PauseScene\OptionScene.h" />
-    <ClInclude Include="Src\Scene\PauseScene\InventoryScene.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\ColliderBase.h" />
     <ClInclude Include="Src\Common\FpsController.h" />
-    <ClInclude Include="Src\Manager\Generic\CollisionManager.h" />
-    <ClInclude Include="Src\Utility\DrawUtiity.h" />
-    <ClInclude Include="Src\Manager\Transition\PushTransitor.h" />
-    <ClInclude Include="Src\Manager\Transition\FadeTransitor.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
     <ClInclude Include="Src\Object\EnemyBullet.h" />
     <ClInclude Include="Src\Object\ShotBase.h" />
-    <ClInclude Include="Src\Scene\AdvertiseScene.h" />
-    <ClInclude Include="Src\Utility\ModelFrameUtility.h" />
-    <ClInclude Include="Src\Object\Common\ControllerAnimation.h" />
     <ClInclude Include="Src\Object\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
-    <ClInclude Include="Src\Scene\PauseScene\KeyConfigScene.h" />
-    <ClInclude Include="Src\Scene\PauseScene\ExplainScene.h" />
-    <ClInclude Include="Src\Scene\PauseScene.h" />
     <ClInclude Include="Src\Common\Easing.h" />
     <ClInclude Include="Src\Manager\Generic\Input.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\Cube.h" />
     <ClInclude Include="Src\Object\Common\Geometry\Sphere.h" />
     <ClInclude Include="Src\Libs\nlohmann\adl_serializer.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\byte_container_with_subtype.hpp" />
@@ -190,9 +136,6 @@
     <ClInclude Include="Src\Renderer\ModelRenderer.h" />
     <ClInclude Include="Src\Renderer\PixelMaterial.h" />
     <ClInclude Include="Src\Renderer\PixelRenderer.h" />
-    <ClInclude Include="Src\Scene\ResultScene.h" />
-    <ClInclude Include="Src\Scene\MovieScene.h" />
-    <ClInclude Include="Src\Scene\SelectScene.h" />
     <ClInclude Include="Src\Object\ActorBase.h" />
     <ClInclude Include="Src\Application.h" />
     <ClInclude Include="Src\Common\Fader.h" />
@@ -213,13 +156,8 @@
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Scene\TitleScene.h" />
     <ClInclude Include="Src\Utility\CommonUtility.h" />
-    <ClInclude Include="Src\Scene\TutorialScene.h" />
     <ClInclude Include="Src\Utility\StringUtility.h" />
-    <ClInclude Include="Src\Manager\Transition\Transitor.h" />
-    <ClInclude Include="Src\Manager\Transition\WipeTransitor.h" />
-    <ClInclude Include="Src\Object\StateList\Enemy\BaseState.h" />
     <ClInclude Include="Src\Object\Stage.h" />
-    <ClInclude Include="Src\Object\SummonEnemyBase.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />
@@ -247,30 +185,6 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <FxCompile Include="Src\Shader\Model\PointLightPS.hlsl">
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Src\Shader\Model\PointLightVS.hlsl">
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Src\Shader\Model\RimLightPS.hlsl">
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Src\Shader\Model\RimLightVS.hlsl">
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-    </FxCompile>
     <FxCompile Include="Src\Shader\Model\ShieldPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -280,22 +194,6 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Src\Shader\Model\ShieldVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Src\Shader\Model\SpotLightPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)/Data/Shader/%(Filename).cso</ObjectFileOutput>
-    </FxCompile>
-    <FxCompile Include="Src\Shader\Model\SpotLightVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>

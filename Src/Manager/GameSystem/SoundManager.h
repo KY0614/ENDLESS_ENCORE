@@ -37,31 +37,6 @@ public:
 
 		TITLE,		//タイトルBGM
 		PUSH_SPACE,	//スペースキーを押してくださいSE
-
-		TUTORIAL,
-		NEXT_PAGE,
-		RETURN_PAGE,
-		NOT_PAGE,
-		OPEN_DOOR,
-
-		GAME,
-		TIMER,
-		TIMER_FAST,
-		COUNT_DOWN,
-		GAME_START,
-		GAME_FINISH,
-		PICK_UP,
-		ADD_STOCK,
-		PAYING,
-		MENU_BACK,
-		MENU_OPEN,
-		MENU_CLOSE,
-		PUT_ON,
-
-		RESULT,
-		NORMAL,
-		GOOD,
-		GREATE,
 	};
 
 	struct SOUND_DATA

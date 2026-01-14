@@ -2,8 +2,6 @@
 #include <functional>
 #include <map>
 #include "ActorBase.h"
-#include "PointLight.h"
-#include "SpotLight.h"
 
 class Sphere;
 

@@ -53,10 +53,6 @@ EncountScene::~EncountScene(void)
 {
 }
 
-void EncountScene::LoadData(void)
-{
-}
-
 void EncountScene::Init(void)
 {
 	//ƒTƒEƒ“ƒhİ’è

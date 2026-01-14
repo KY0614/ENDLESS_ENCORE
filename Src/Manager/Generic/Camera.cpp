@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <EffekseerForDXLib.h>
 #include "../../Application.h"
-#include "../../Libs/ImGui/imgui.h"
 #include "../../Common/Vector2.h"
 #include "../../Common/Easing.h"
 #include "../../Utility/CommonUtility.h"
@@ -119,12 +118,6 @@ void Camera::SetBeforeDraw(void)
 
 	//DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
-
-#ifdef _DEBUG
-
-	UpdateDebugImGui();
-
-#endif // _DEBUG
 }
 
 void Camera::Draw(void)
@@ -478,21 +471,4 @@ void Camera::SetBeforeDrawMouse(void)
 	ProcessMouseMove();
 	//追従
 	SyncFollow();
-}
-
-void Camera::UpdateDebugImGui(void)
-{
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("Camera");
-
-	ImGui::SliderFloat("fixedPointPosX", &fixedPointPos_.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("fixedPointPosY", &fixedPointPos_.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("fixedPointPosZ", &fixedPointPos_.z, -10000.0f, 10000.0f);
-
-	ImGui::SliderFloat("fixedPointTargetPosX", &fixedPointTargetPos_.x, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("fixedPointTargetPosY", &fixedPointTargetPos_.y, -10000.0f, 10000.0f);
-	ImGui::SliderFloat("fixedPointTargetPosZ", &fixedPointTargetPos_.z, -10000.0f, 10000.0f);
-
-	//終了処理
-	ImGui::End();
 }

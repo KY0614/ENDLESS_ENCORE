@@ -3,21 +3,10 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "../../Application.h"
-#include "../../Libs/ImGui/imgui.h"
 #include "../../Utility/CommonUtility.h"
 #include "../../Common/Fader.h"
 #include "../../Scene/TitleScene.h"
-#include "../../Scene/DebugScene.h"
-#include "../../Scene/AdvertiseScene.h"
-#include "../../Scene/MovieScene.h"
-#include "../../Scene/SelectScene.h"
-#include "../../Scene/PauseScene.h"
-#include "../../Scene/PauseScene/InventoryScene.h"
-#include "../../Scene/PauseScene/OptionScene.h"
-#include "../../Scene/PauseScene/CharacterScene.h"
-#include "../../Scene/TutorialScene.h"
 #include "../../Scene/GameScene.h"
-#include "../../Scene/ResultScene.h"
 #include "../GameSystem/SoundManager.h"
 #include "JsonManager.h"
 #include "Camera.h"
@@ -55,7 +44,6 @@ void SceneManager::Init(void)
 	SoundManager::CreateInstance();
 	JsonManager::CreateInstance();
 	JsonManager::CreateInstance();
-	//UIManager::CreateInstance();
 
 	sceneId_ = SCENE_ID::NONE;
 	waitSceneId_ = SCENE_ID::NONE;
@@ -87,7 +75,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::GAME);
+	DoChangeScene(SCENE_ID::TITLE);
 }
 
 void SceneManager::Init3D(void)
@@ -153,18 +141,12 @@ void SceneManager::Update(void)
 
 	//カメラ更新
 	camera_->Update();
-#ifdef _DEBUG
-
-	UpdateDebugImGui();
-
-#endif // _DEBUG
 }
 
 void SceneManager::Draw(void)
 {
 	//描画先グラフィック領域の指定
 	//(３Ｄ描画で使用するカメラの設定などがリセットされる)
-	//SetDrawScreen(DX_SCREEN_BACK);
 	SetDrawScreen(mainScreen_);
 	//画面を初期化
 	ClearDrawScreen();
@@ -176,8 +158,6 @@ void SceneManager::Draw(void)
 	UpdateEffekseer3D();
 
 	//描画
-	//scene_->Draw();
-	//for (auto& scene : scenes_ | std::ranges::views::reverse)
 	for (auto& scene : scenes_)
 	{
 		scene->Draw();
@@ -191,9 +171,6 @@ void SceneManager::Draw(void)
 	
 	//暗転・明転
 	fader_->Draw();
-
-	//int call = GetDrawCallCount();
-	//DrawFormatString(0,400,0Xffffff,L"call : %d", call);
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
@@ -217,7 +194,6 @@ void SceneManager::Destroy(void)
 {
 	SoundManager::GetInstance().Destroy();
 	JsonManager::GetInstance().Destroy();
-	//UIManager::GetInstance().Destroy();
 	DeleteGraph(mainScreen_);
 	delete instance_;
 }
@@ -277,7 +253,7 @@ void SceneManager::JumpScene(std::unique_ptr<SceneBase> scene)
 	scenes_.push_back(std::move(scene));
 }
 
-void SceneManager::SetFog(const int fogStart, const int fogEnd)
+void SceneManager::SetFog(const float fogStart, const float fogEnd)
 {
 	SetFogStartEnd(fogStart, fogEnd);
 }
@@ -333,6 +309,13 @@ SceneManager::SceneManager(void)
 
 	camera_ = nullptr;
 	lightDir_ = CommonUtility::VECTOR_ZERO;
+
+	shakeRate_ = 0.0f;
+	shakeFrame_ = 0;
+
+	mainScreen_ = -1;
+	fogStart_ = FOG_START;
+	fogEnd_ = FOG_END;
 }
 
 void SceneManager::ResetDeltaTime(void)
@@ -349,7 +332,6 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	resM.Release();
 	jsonM.Release();
 	SoundManager::GetInstance().Release();
-	//UIManager::GetInstance().Release();
 
 	//シーンを変更する
 	sceneId_ = sceneId;
@@ -372,7 +354,6 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	}
 
 	scenes_.back()->Init();
-	//scene_->Init();
 
 	ResetDeltaTime();
 
@@ -420,7 +401,6 @@ void SceneManager::ShakeScreen(void)
 	}
 }
 
-
 template<typename T>
 std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 {
@@ -440,29 +420,6 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 		jsonM.InitTitle();
 		break;
 
-	case SceneManager::SCENE_ID::DEBUG:
-		scene = std::make_unique<DebugScene>();
-		resM.InitGame();
-		jsonM.InitGame();
-		break;
-
-	case SceneManager::SCENE_ID::ADVERTISE:
-		scene = std::make_unique<AdvertiseScene>();
-		break;
-
-	case SceneManager::SCENE_ID::MOVIE:
-		scene = std::make_unique<MovieScene>();
-		break;
-
-	case SceneManager::SCENE_ID::SELECT:
-		scene = std::make_unique<SelectScene>();
-		break;
-
-	case SceneManager::SCENE_ID::TUTORIAL:
-		scene = std::make_unique<TutorialScene>();
-		resM.InitTutorial();
-		break;
-
 	case SceneManager::SCENE_ID::GAME:
 		scene = std::make_unique<GameScene>();
 		resM.InitGame();
@@ -470,46 +427,8 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 		
 		break;
 
-	case SceneManager::SCENE_ID::PAUSE:
-		scene = std::make_unique<PauseScene>();
-		break;
-
-	case SceneManager::SCENE_ID::INVENTORY:
-		scene = std::make_unique<InventoryScene>();
-		break;
-
-	case SceneManager::SCENE_ID::CHARACTER:
-		scene = std::make_unique<CharacterScene>();
-		break;
-
-	case SceneManager::SCENE_ID::OPTION:
-		scene = std::make_unique<OptionScene>();
-		break;
-
-	case SceneManager::SCENE_ID::RESULT:
-		scene = std::make_unique<ResultScene>();
-		resM.InitResult();
-		break;
-
 	default:
 		break;
 	}
-	//scene->LoadData();
 	return scene;
-}
-
-void SceneManager::UpdateDebugImGui(void)
-{
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("SceneM");
-
-	//位置
-	ImGui::InputFloat("LightDir", &lightDir_.x);
-	ImGui::SliderFloat("LightDirX", &lightDir_.x, -1.0f, 1.0f);
-	ImGui::SliderFloat("LightDirY", &lightDir_.y, -1.0f, 1.0f);
-	ImGui::SliderFloat("LightDirZ", &lightDir_.z, -1.0f, 1.0f);
-	
-	//SetFogStartEnd(fogStart_, fogEnd_);
-	//終了処理
-	ImGui::End();
 }

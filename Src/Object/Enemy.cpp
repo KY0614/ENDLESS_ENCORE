@@ -1,7 +1,6 @@
 #include <random>
 #include <EffekseerForDXLib.h>
 #include "../Application.h"
-#include "../Libs/ImGui/imgui.h"
 #include "../Utility/CommonUtility.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
@@ -92,7 +91,6 @@ Enemy::Enemy(Player& player):
 	movedPos_ = CommonUtility::VECTOR_ZERO;
 	state_ = STATE::NONE;
 	prevState_ = STATE::NONE;
-	col_ = 0xff0000;
 	isDown_ = false;
 	isStepActioned_ = false;
 	isBackstab_ = false;
@@ -106,7 +104,13 @@ Enemy::Enemy(Player& player):
 	stepRotTime_ = 0.0f;
 	chargeRadius_ = 0.0f;
 	moveDir_ = CommonUtility::VECTOR_ZERO;
+	movePow_ = CommonUtility::VECTOR_ZERO;
 	isEncount_ = false;
+
+	effectChargeResId_ = -1;
+	effectChargePlayId_ = -1;
+	effectChargeAtkResId_ = -1;
+	effectChargeAtkPlayId_ = -1;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
@@ -168,12 +172,6 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
-
-#ifdef _DEBUG
-
-	UpdateDebugImGui();
-
-#endif // _DEBUG
 }
 
 void Enemy::Draw(void)
@@ -193,25 +191,6 @@ void Enemy::Draw(void)
 
 	//丸影描画
 	DrawShadow();
-
-#ifdef _DEBUG
-
-	DrawDebug();
-#endif // _DEBUG
-
-}
-
-void Enemy::DebugUpdate(void)
-{
-	transform_.pos = { -100.0f,0.0f,0.0f };
-
-	//更新ステップ
-	stateUpdate_();
-
-	animationController_->Update();
-	transform_.Update();
-
-	UpdateDebugImGui();
 }
 
 void Enemy::ChangeState(const STATE& state)
@@ -283,8 +262,6 @@ void Enemy::InitCollider(void)
 	sphereNear_ = std::make_unique<Sphere>(transform_);
 	sphereNear_->SetLocalPos(ATTACK_NEAR_SPHERE_POS);
 	sphereNear_->SetRadius(ATTACK_NEAR_SPHERE_RADIUS);
-
-	col_ = 0x000000;
 }
 
 void Enemy::InitAnimation(void)
@@ -348,10 +325,6 @@ void Enemy::ChangeStateNone(void)
 
 void Enemy::ChangeStateEncount(void)
 {
-	//const float encountRotY = 180.0f;
-	//transform_.quaRot =
-	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(encountRotY), 0.0f });
-
 	isEncount_ = true;
 	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
 }
@@ -368,8 +341,6 @@ void Enemy::ChangeStateEncountFinish(void)
 	const float battleRotY = 180.0f;
 	transform_.quaRot =
 		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-battleRotY), 0.0f });
-	//transform_.quaRotLocal = 
-	//	Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(battleRotY), 0.0f });
 	stateUpdate_ = std::bind(&Enemy::UpdateEncountFinish, this);
 }
 
@@ -381,9 +352,6 @@ void Enemy::ChangeStateWait(void)
 
 void Enemy::ChangeStateFollow(void)
 {
-	//歩きアニメーション再生
-	//animationController_->Play((int)ANIM_TYPE::RUN);
-
 	stateUpdate_ = std::bind(&Enemy::UpdateFollow, this);
 }
 
@@ -567,14 +535,12 @@ void Enemy::UpdateMove(void)
 
 void Enemy::UpdateAttackNear(void)
 {
+	//回転処理
 	Rotate();
-
-	col_ = 0xff0000;
 
 	//アニメーションが終わったら移動状態へ戦記
 	if (animationController_->IsEnd())
 	{
-		col_ = 0x00ff00;
 		ChangeState(STATE::MOVE);
 		return;
 	}
@@ -590,7 +556,6 @@ void Enemy::UpdateAttackNear(void)
 		{
 			Damage(NORMAL_DAMAGE);
 			ChangeState(STATE::DOWN);
-			col_ = 0x00ff00;
 			return;
 		}
 	}
@@ -734,12 +699,6 @@ void Enemy::UpdateShotAll(void)
 
 	//遠距離攻撃の状態
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	//if (stateStep_ > ATTACK_FAR_TIME)
-	//{
-	//	hitCount_ = 0;
-	//	ChangeState(STATE::MOVE);
-	//	return;
-	//}
 
 	//弾を順々に準備状態にする
 	const float bulletInterval = 0.4f;
@@ -860,8 +819,6 @@ void Enemy::UpdateCharge(void)
 
 void Enemy::UpdateChargeAttack(void)
 {
-	col_ = 0x000000;
-
 	if (animationController_->IsEnd())
 	{
 		chargeRadius_ = 0.0f;
@@ -883,9 +840,9 @@ void Enemy::UpdateChargeAttack(void)
 		player_.GetCapsule().GetRadius()))
 	{
 		//回避中だったらダメージを受けない
-		if (!player_.GetIsDodge())
+		if (player_.GetIsDodge())
 		{
-			col_ = 0xFFFFFF;
+			
 		}
 		player_.Damage(CHARGE_DAMAGE);
 		isStepActioned_ = true;
@@ -1385,208 +1342,17 @@ const json Enemy::GetJsonData(void)const
 	const json data = jsonM.GetJsonData(
 		JsonManager::JSON_DATA::ENEMY,KEY_ENEMY);
 
-	//データが含まれていない場合はエラーメッセージを出す
-	//if (!data.contains(KEY_ENEMY))assert(0 && "データが存在しないか不正なデータです");
-	//const json& param = data[KEY_ENEMY];
 	return data;
-}
-
-void Enemy::UpdateDebugImGui(void)
-{
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("Enemy");
-
-	ImGui::InputFloat3("pos", &transform_.pos.x);
-
-	//HP用スライダー
-	ImGui::SliderFloat("HP", &hp_, 0.0f,maxHp_);
-
-	static float maxHpMax_ = 100.0f;
-	//最大HP用の最大値
-	ImGui::InputFloat("MaxHP Max", &maxHpMax_, 0.0f);
-
-	//最大HP用スライダー
-	ImGui::SliderFloat("MaxHP", &maxHp_, 0.0f, maxHpMax_);
-
-	//弾数用スライダー
-	static int bulletNum = 5;
-	ImGui::SliderInt("Bullet Num", &bulletNum, 0, 10);
-
-	//状態変更ボタン
-	if (ImGui::Button("None"))
-	{
-		ChangeState(STATE::NONE);
-	}
-	if (ImGui::Button("Move"))
-	{
-		ChangeState(STATE::MOVE);
-	}
-	if (ImGui::Button("Kick"))
-	{
-		ChangeState(STATE::ATTACK_NEAR);
-	}
-	if (ImGui::Button("SetStateShot One"))
-	{
-		CreateBullet(bulletNum);
-		ChangeState(STATE::SHOT_ONE);
-	}
-	if (ImGui::Button("SetStateShot All"))
-	{
-		CreateBullet(bulletNum);
-		ChangeState(STATE::SHOT_ALL);
-	}
-	if (ImGui::Button("Charge"))
-	{
-		ChangeState(STATE::CHARGE);
-	}
-	if (ImGui::Button("Charge Attack"))
-	{
-		ChangeState(STATE::ATTACK_CHARGE);
-	}
-	if (ImGui::Button("Backstab"))
-	{
-		ChangeState(STATE::BACKSTAB);
-	}
-	if (ImGui::Button("Down"))
-	{
-		ChangeState(STATE::DOWN);
-	}
-	if (ImGui::Button("Dead"))
-	{
-		ChangeState(STATE::DEAD);
-	}
-	//角度
-	VECTOR rotDeg = VECTOR();
-	rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().x);
-	rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().y);
-	rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().z);
-	ImGui::Text("angle(deg)");
-	ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
-	ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
-	ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
-
-	//ローカル角度
-	VECTOR localRotDeg = VECTOR();
-	localRotDeg.x = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().x);
-	localRotDeg.y = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().y);
-	localRotDeg.z = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().z);
-	ImGui::Text("localAngle(deg)");
-	ImGui::SliderFloat("LocalRotX", &rotDeg.x, 0.0f, 360.0f);
-	ImGui::SliderFloat("LocalRotY", &rotDeg.y, 0.0f, 360.0f);
-	ImGui::SliderFloat("LocalRotZ", &rotDeg.z, 0.0f, 360.0f);
-
-	//終了処理
-	ImGui::End();
-}
-
-void Enemy::DrawDebug(void)
-{
-	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
-	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
-	VECTOR right = VScale(transform_.GetRight(), 120.0f);
-	forward.y += 150.0f;
-	right.y += 150.0f;
-	DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
-	DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
-
-	DrawSphere3D(VAdd(transform_.pos, right), 10.0f, 16, 0xFFFFFF, 0xFFFFFF, true);
-	if (!bullets_.empty()) {
-		DrawFormatString(0, 200, 0xffffff, L"E X: %.2f Y: %.2f Z: %.2f",
-			bullets_[0]->GetTransform().pos.x, bullets_[0]->GetTransform().pos.y, bullets_[0]->GetTransform().pos.z);
-	}
-
-	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
-
-	switch (state_)
-	{
-	case Enemy::STATE::NONE:
-		break;
-	case Enemy::STATE::TURN:
-		DrawFormatString(0, 120, 0xFFFFFF, L"TURN");
-		break;
-	case Enemy::STATE::ENCOUNT_FINISH:
-		DrawFormatString(0, 120, 0xFFFFFF, L"ENCOUNT_FINISH");
-		break;
-	case Enemy::STATE::FOLLOW:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"FOLLOW");
-		break;
-	case Enemy::STATE::MOVE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"MOVE");
-		break;
-	case Enemy::STATE::ATTACK_NEAR:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_NEAR");
-		break;
-	case Enemy::STATE::SHOT_ONE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ONE");
-		break;
-	case Enemy::STATE::SHOT_ALL:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"SHOT_ALL");
-		break;
-	case Enemy::STATE::CHARGE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"CHARGE");
-		break;
-	case Enemy::STATE::ATTACK_CHARGE:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"ATTACK_CHARGE");
-		break;
-	case Enemy::STATE::DOWN:
-		DrawFormatString(pos.x, pos.z + 80.0f, 0xFFFFFF, L"DOWN");
-		break;
-	default:
-		break;
-	}
-
-	sphereNear_->Draw(col_);
-
-	//ラジアンに変換
-	float viewRad = CommonUtility::Deg2RadF(VIEW_ANGLE);
-
-	//角度から方向を取得
-	//自分の座標
-	VECTOR centerPos = transform_.pos;
-
-	//前方方向を決める
-	float forwardX = sinf(transform_.rot.y);
-	float forwardZ = cosf(transform_.rot.y);
-
-	//前方方向の座標
-	VECTOR forwardPos = centerPos;
-	forwardPos.x += forwardX * VIEW_RANGE;
-	forwardPos.z += forwardZ * VIEW_RANGE;
-	//後方方向の座標
-	VECTOR backPos = centerPos;
-	backPos.x -= forwardX * VIEW_RANGE;
-	backPos.z -= forwardZ * VIEW_RANGE;
-
-	//右斜め30度方向を決める
-	float rightX = sinf(transform_.rot.y + viewRad);
-	float rightZ = cosf(transform_.rot.y + viewRad);
-
-	VECTOR rightPos = centerPos;
-	rightPos.x -= rightX * VIEW_RANGE;
-	rightPos.z -= rightZ * VIEW_RANGE;
-
-	//左斜め30度方向を決める
-	float leftX = sinf(transform_.rot.y - viewRad);
-	float leftZ = cosf(transform_.rot.y - viewRad);
-
-	//左斜め30度方向の座標
-	VECTOR leftPos = centerPos;
-	leftPos.x -= leftX * VIEW_RANGE;
-	leftPos.z -= leftZ * VIEW_RANGE;
-
-	DrawTriangle3D(backPos, centerPos, leftPos, 0xffdead, true);
-	DrawTriangle3D(centerPos, backPos, rightPos, 0xffdead, true);
-
 }
 
 void Enemy::DrawHPBar(void)
 {
 	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
+	const float barOffset = 100.0f;
+	const int HP_BAR_X = static_cast<int>(pos.x - barOffset);// HPバーの左上X座標
+	const int HP_BAR_Y = static_cast<int>(pos.z + barOffset);// HPバーの左上Y座標
 
-	const int HP_BAR_X = pos.x - 100.0f;// HPバーの左上X座標
-	const int HP_BAR_Y = pos.z + 100.0f;// HPバーの左上Y座標
-
-	const int HP_BAR_WIDTH = maxHp_;    // HPバーの最大幅
+	const int HP_BAR_WIDTH = static_cast<int>(maxHp_);    // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);

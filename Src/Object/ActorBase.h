@@ -10,14 +10,6 @@ class ActorBase
 
 public:
 
-	//当たり判定情報
-	struct ColliderParameter
-	{
-		std::unique_ptr<Geometry> geometry_;	//形状情報
-		std::shared_ptr<Collider> ownCollider_;	//自身の当たり判定情報
-		std::shared_ptr<Collider> hitCollider_;	//相手の当たり判定情報
-	};
-
 	//コンストラクタ
 	ActorBase(void);
 
@@ -50,13 +42,4 @@ protected:
 	/// 影の描画処理
 	/// </summary>
 	void DrawShadow(void);
-
-	/// <summary>
-	/// 当たり判定作成(形状情報作成後)
-	/// </summary>
-	/// <param name="_tag">自身の当たり判定タグ</param>
-	/// <param name="_Geometry">自身の形状情報</param>
-	/// <param name="_notHitTags">衝突させないタグ</param>
-	void MakeCollider(const std::set<Collider::TYPE> _tag, std::unique_ptr<Geometry> _geometry, const std::set<Collider::TYPE> _notHitTags = {});
-
 };

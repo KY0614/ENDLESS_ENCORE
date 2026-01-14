@@ -188,7 +188,7 @@ public:
 	void SetBackstabRotY(const Quaternion& rotY);
 
 private:
-	Transform parryTransform_;
+	//マテリアル・レンダラー
 	std::unique_ptr<ModelMaterial> material_;
 	std::unique_ptr<ModelRenderer> renderer_;
 	//アニメーション
@@ -472,23 +472,15 @@ private:
 	/// </summary>
 	void EffectParry(void);
 
+	/// <summary>
+	/// パリィエフェクト位置の更新
+	/// </summary>
+	/// <param name=""></param>
 	void EffectParryPosUpdate(void);
-
-	/// <summary>
-	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
-	/// </summary>
-	void UpdateDebugImGui(void);
-
-	/// <summary>
-	/// デバッグ用の描画処理
-	/// </summary>
-	void DebugDraw(void);
 
 	/// <summary>
 	/// パリィのクールダウン描画
 	/// </summary>
 	/// <param name=""></param>
 	void DrawParryCD(void);
-
-	int col_;
 };

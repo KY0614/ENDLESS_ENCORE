@@ -81,11 +81,6 @@ public:
 	void DrawHPBar(void);
 
 	/// <summary>
-	/// デバッグシーン用の更新処理
-	/// </summary>
-	void DebugUpdate(void);
-
-	/// <summary>
 	/// 状態変更
 	/// </summary>
 	/// <param name="state">遷移したい状態</param>
@@ -434,27 +429,26 @@ private:
 	/// <returns>true:全て破棄状態　false:未破棄</returns>
 	bool CheckBulletDestroy(void);
 
-
+	/// <summary>
+	/// チャージエフェクトの再生
+	/// </summary>
 	void EffectCharge(void);
+
+	/// <summary>
+	/// チャージ攻撃エフェクトの再生
+	/// </summary>
+	/// <param name=""></param>
 	void EffectChargeAtk(void);
 
+	/// <summary>
+	/// Jsonデータ取得
+	/// </summary>
+	/// <returns>Jsonデータ</returns>
 	const nlohmann::json GetJsonData(void)const;
-
-	/// <summary>
-	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
-	/// </summary>
-	void UpdateDebugImGui(void);
-
-	/// <summary>
-	/// デバッグ描画処理
-	/// </summary>
-	void DrawDebug(void);
 
 	//状態を遷移させる用の時間管理変数
 	float stateStep_;
 	//方向転換用の時間管理変数
 	float changeDirStep_;
-
-	int col_;
 };
 

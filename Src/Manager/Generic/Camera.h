@@ -225,15 +225,12 @@ private:
 	void SetBeforeDrawFree(void);
 	void SetBeforeDrawMouse(void);
 
-	float cameraNear_;
-	float cameraFar_;
+	//カメラクリップ距離
+	float cameraNear_;	//カメラクリップ：NEAR
+	float cameraFar_;	//カメラクリップ：FAR
 
+	//追従位置からカメラ位置までの相対座標
 	VECTOR localF2CPos_;
 	VECTOR localF2TPos_;
-
-	/// <summary>
-	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
-	/// </summary>
-	void UpdateDebugImGui(void);
 };
 

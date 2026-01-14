@@ -1,4 +1,3 @@
-#include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Utility/CommonUtility.h"
 #include "../Renderer/ModelRenderer.h"
@@ -8,8 +7,6 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/JsonManager.h"
-#include "Common/Geometry/Cube.h"
-#include "Common/Geometry/Box.h"
 #include "Stage.h"
 
 // 長いのでnamespaceの省略
@@ -46,11 +43,6 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 
 	//マテリアル初期化
 	InitMaterial(pos, sPos);
-
-	//cube_ = std::make_unique<Box>(transform_);
-	////cube_->SetLocalCenter(VGet(0.0f, -150.0f, 3000.0f));
-	//cube_->SetLocalCenter(VGet(0.0f, 0.0f, 3000.0f));
-	//cube_->SetSize(VGet(2700.0f/2.0f, 500.0f / 2.0f, 500.0f));
 }
 
 void Stage::Update(void)
@@ -85,12 +77,6 @@ void Stage::Update(void)
 
 	transform_.Update();
 	mistWallTransform_.Update();
-
-#ifdef _DEBUG
-
-	UpdateDebugImGui();
-
-#endif // _DEBUG
 }
 
 void Stage::Draw(void)
@@ -101,28 +87,6 @@ void Stage::Draw(void)
 
 	if (!isBattle_)return;
 	mistWallRenderer_->Draw();
-}
-
-void Stage::UpdateDebugImGui(void)
-{
-
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("Stage");
-
-	//霧の壁の位置調整
-	ImGui::InputFloat3("Pos", &mistWallTransform_.pos.x);
-	ImGui::SliderFloat("PosX", &mistWallTransform_.pos.x, -5000.0f, 5000.0f);
-	ImGui::SliderFloat("PosY", &mistWallTransform_.pos.y, -5000.0f, 5000.0f);
-	ImGui::SliderFloat("PosZ", &mistWallTransform_.pos.z, -5000.0f, 5000.0f);
-
-	//霧の壁の位置調整
-	ImGui::InputFloat3("Scale", &mistWallTransform_.scl.x);
-	ImGui::SliderFloat("ScaleX", &mistWallTransform_.scl.x, 0.0f, 1000.0f);
-	ImGui::SliderFloat("ScaleY", &mistWallTransform_.scl.y, 0.0f, 1000.0f);
-	ImGui::SliderFloat("ScaleZ", &mistWallTransform_.scl.z, 0.0f, 1000.0f);
-
-	//終了処理
-	ImGui::End();
 }
 
 void Stage::Init3DModel(void)
@@ -236,18 +200,13 @@ void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 	mistWallMaterial_->AddConstBufPS(modelColor);
 	//ライトの方向とスクロール時間
 	mistWallMaterial_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,mistScrollSpeed_ });
-	//環境光
-	//ambient = 0.5f;
-	//mistWallMaterial_->AddConstBufPS({ ambient,ambient,ambient,ambient });
+
 	//ディゾルブの閾値と範囲
 	mistWallMaterial_->AddConstBufPS({ dissolveAlphaLine_,ALPHA_RANGE,0.0f,0.0f });
 	//dissolveの輪郭線の色
 	const FLOAT4 edgeColor = { 0.0f,0.0f,0.5f,1.0f };
 	mistWallMaterial_->AddConstBufPS(edgeColor);
-	
-	//ディゾルブ
-	//mistWallMaterial_->AddConstBufPS({ dissolveSpeed_,dissolveSpeed_,dissolveSpeed_,dissolveSpeed_ });
-	
+
 	//ノイズテクスチャ設定
 	const int noiseTextureSlot = 1;
 	mistWallMaterial_->SetTextureBuf(noiseTextureSlot, noiseTextureId_);

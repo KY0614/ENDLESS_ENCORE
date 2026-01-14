@@ -11,6 +11,8 @@ namespace
 {
 	//弾の生存時間
 	const float LIFE_TIME = 8.0f;
+	//SEの音量
+	const int FIRE_SE_VOLUME = 70;
 }
 
 EnemyBullet::EnemyBullet(Transform& parent)
@@ -51,8 +53,7 @@ void EnemyBullet::Init(void)
 	
 	transform_.pos = parentTran_.pos;
 	transform_.quaRot = parentTran_.quaRot;
-	transform_.quaRotLocal =
-		Quaternion::Euler({ CommonUtility::Deg2RadF(-90.0f),0.0f, 0.0f });
+	transform_.quaRotLocal = Quaternion();
 	transform_.Update();
 
 	//当たり判定用の球を生成
@@ -76,16 +77,6 @@ void EnemyBullet::Init(void)
 
 void EnemyBullet::Update(void)
 {
-	//if (!isAlive_)return;
-
-	//発射もしくは反射状態ではない場合は回転の同期を行う
-	//if (GetState() == STATE::NONE ||
-	//	GetState() == STATE::READY)
-	//{
-	//	//同期
-	//	SyncParentRotate();
-	//}
-
 	//更新ステップ
 	stateUpdate_();
 
@@ -99,9 +90,6 @@ void EnemyBullet::Draw(void)
 
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
-
-	//当たり判定用の球の描画
-    //sphere_->Draw(); 
 }
 
 void EnemyBullet::SetOffsetPos(const VECTOR& offset)
@@ -146,7 +134,7 @@ void EnemyBullet::ChangeStateNone(void)
 void EnemyBullet::ChangeStateReady(void)
 {
 	SoundManager& sound = SoundManager::GetInstance();
-	sound.AdjustVolume(SoundManager::SOUND::PARRY, 70);
+	sound.AdjustVolume(SoundManager::SOUND::FIRE, FIRE_SE_VOLUME);
 	sound.Play(SoundManager::SOUND::FIRE);
 	SetIsAlive(true);
 	EffectFire();
@@ -161,12 +149,15 @@ void EnemyBullet::ChangeStateShot(void)
 void EnemyBullet::ChangeStateReverse(void)
 {
 	//エフェクトの色変更(水色っぽく変更)
+	const int effectColorG = 128;
+	const int effectColorB = 255;
+	const int effectAlpha = 255;
 	SetColorPlayingEffekseer3DEffect(
 		effectFirePlayId_,
 		0,
-		128,
-		255,
-		255
+		effectColorG,
+		effectColorB,
+		effectAlpha
 	);
 	stateUpdate_ = std::bind(&EnemyBullet::UpdateReverse, this);
 }

@@ -137,21 +137,13 @@ void Input::ResetTable()
 	},
 	};
 
-	inputTable_["Reset"] = { {PeripheralType::KEYBOARD,KEY_INPUT_R},
-							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
-							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
-
-	inputTable_["Next"] = { {PeripheralType::KEYBOARD,KEY_INPUT_N},
-							/*{PeripheralType::gamepad, PAD_INPUT_A},*/
-							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
-
 	inputTable_["Decide"] = { {PeripheralType::KEYBOARD,KEY_INPUT_SPACE},
 							{PeripheralType::GAMEPAD, PAD_INPUT_B},
-							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
+							};
 
 	inputTable_["Parry"] = { {PeripheralType::KEYBOARD,KEY_INPUT_SPACE},
 							{PeripheralType::GAMEPAD, PAD_INPUT_B},
-							/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
+							};
 
 	inputTable_["Dodge"] = { {PeripheralType::KEYBOARD,KEY_INPUT_LSHIFT},
 							{PeripheralType::GAMEPAD, PAD_INPUT_A},
@@ -162,7 +154,7 @@ void Input::ResetTable()
 
 	inputTable_["Jump"] = { {PeripheralType::KEYBOARD,KEY_INPUT_E},
 							{PeripheralType::GAMEPAD, PAD_INPUT_X},
-							/*{PeripheralType::x_analog,(int)AnalogInputType::r_trigger}*/ };
+							};
 
 	inputTable_["Up"] = {	{PeripheralType::KEYBOARD,KEY_INPUT_W},
 							{PeripheralType::GAMEPAD,PAD_INPUT_UP},
@@ -180,11 +172,6 @@ void Input::ResetTable()
 							{PeripheralType::GAMEPAD,PAD_INPUT_LEFT},
 							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_LEFT} };
 
-
-	inputTable_["CameraShake"] = { {PeripheralType::KEYBOARD,KEY_INPUT_X},
-		/*{PeripheralType::gamepad, PAD_INPUT_A},*/
-		/*{PeripheralType::x_analog,(int)AnalogInputType::l_trigger}*/ };
-
 	inputTable_["CameraUp"] = { {PeripheralType::KEYBOARD,KEY_INPUT_UP},
 					{PeripheralType::X_ANALOG,(int)AnalogInputType::R_UP} };
 
@@ -196,26 +183,6 @@ void Input::ResetTable()
 
 	inputTable_["CameraLeft"] = { {PeripheralType::KEYBOARD,KEY_INPUT_LEFT},
 							{PeripheralType::X_ANALOG,(int)AnalogInputType::R_RIGHT} };
-	
-	inputTable_["I"] = { {PeripheralType::KEYBOARD,KEY_INPUT_I},
-					/*{PeripheralType::GAMEPAD,PAD_INPUT_UP},*/
-					{PeripheralType::X_ANALOG,(int)AnalogInputType::R_UP} };
-
-	inputTable_["K"] = { {PeripheralType::KEYBOARD,KEY_INPUT_K},
-							/*{PeripheralType::GAMEPAD,PAD_INPUT_DOWN},*/
-							{PeripheralType::X_ANALOG,(int)AnalogInputType::R_DOWN} };
-
-	inputTable_["L"] = { {PeripheralType::KEYBOARD,KEY_INPUT_L},
-							/*{PeripheralType::GAMEPAD,PAD_INPUT_RIGHT},*/
-							{PeripheralType::X_ANALOG,(int)AnalogInputType::R_LEFT} };
-
-	inputTable_["J"] = { {PeripheralType::KEYBOARD,KEY_INPUT_J},
-							/*{PeripheralType::GAMEPAD,PAD_INPUT_LEFT},*/
-							{PeripheralType::X_ANALOG,(int)AnalogInputType::R_RIGHT} };
-
-	inputTable_["CameraRise"] = { {PeripheralType::KEYBOARD,KEY_INPUT_Q}};
-
-	inputTable_["CameraDescent"] = { {PeripheralType::KEYBOARD,KEY_INPUT_E} };
 }
 
 void Input::Save()

@@ -1,5 +1,4 @@
 #include <DxLib.h>
-#include "../../Utility/ModelFrameUtility.h"
 #include "../../Utility/StringUtility.h"
 #include "../../Utility/CommonUtility.h"
 #include "../../Manager/Generic/SceneManager.h"
@@ -191,11 +190,6 @@ void AnimationController::Update(void)
 
 	//˜‚ÌˆÊ’u‚ª‚¸‚ê‚é‚Ì‚Å•â³
 	playAnim_.firstPos.y = post.y;
-
-	//ˆÚ“®—Ê‚ğ‘Å‚¿Á‚·
-	//ModelFrameUtility::SetFrameLocalMatrixPos(modelId_, frmNo, playAnim_.firstPos);
-	ModelFrameUtility::SetFrameAnimAttachLocalMatrixPos(modelId_, playAnim_.attachNo,
-		frmNo, playAnim_.firstPos);
 }
 
 void AnimationController::SetEndLoop(float startStep, float endStep, float speed)

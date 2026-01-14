@@ -104,7 +104,7 @@ public:
 	/// </summary>
 	/// <param name="fogStart">フォグの開始位置</param>
 	/// <param name="fogEnd">フォグの終了位置</param>
-	void SetFog(const int fogStart,const int fogEnd);
+	void SetFog(const float fogStart,const float fogEnd);
 
 	/// <summary>
 	/// フォグの設定をリセット
@@ -210,9 +210,4 @@ private:
 	//SCENE_IDからシーンを生成する
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
-
-	/// <summary>
-	/// デバッグ用ImGuiの更新(ウィンドウを表示し、各種変数を操作可能にする)
-	/// </summary>
-	void UpdateDebugImGui(void);
 };

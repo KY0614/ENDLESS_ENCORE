@@ -19,11 +19,6 @@ public:
 	~TitleScene(void);
 
 	/// <summary>
-	/// データ読込処理
-	/// </summary>
-	void LoadData(void) override;
-
-	/// <summary>
 	/// 初期化処理
 	/// </summary>
 	void Init(void) override;
@@ -66,9 +61,6 @@ private:
 	int pushSpaceImgAlpha_;
 	//プッシュスペース画像アルファ値
 	int alphaChangeSpeed_;
-
-	//宣伝シーンへ遷移する用のタイマー
-	int toAdvertiseLoopTimer_;
 
 	//フェードアウト開始するまでのインターバル時間
 	float intervalTimer_;

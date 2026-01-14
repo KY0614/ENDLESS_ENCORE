@@ -2,7 +2,6 @@
 #include<EffekseerForDXLib.h>
 #include "../Application.h"
 #include "../Libs/nlohmann/json.hpp"
-#include "../Libs/ImGui/imgui.h"
 #include "../Utility/CommonUtility.h"
 #include "../Common/Easing.h"
 #include "../Manager/GameSystem/SoundManager.h"
@@ -113,8 +112,6 @@ Player::Player(void)
 	isActionEnd_ = false;
 	stepBackstab_ = 0.0f;
 	clothSE_ = false;
-
-	col_ = 0x000000;
 }
 
 Player::~Player(void)
@@ -123,6 +120,7 @@ Player::~Player(void)
 
 void Player::Init(void)
 {
+	//サウンドの登録
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PARRY,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::PARRY_SE).handleId_);
@@ -135,27 +133,6 @@ void Player::Init(void)
 	//3Dモデルの初期化
 	Init3DModel();
 
-	//モデル描画用
-	//material_ = std::make_unique<ModelMaterial>(
-	//	"RimLightVS.cso", 0,
-	//	"RimLightPS.cso", 5
-	//);
-	////ピクセルシェーダーの定数バッファ設定
-	//material_->AddConstBufPS({ 0.0f,0.0f,0.0f,0.1f });
-	////光の向き
-	//VECTOR lightDir = GetLightDirection();
-	//material_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,1.0f });
-	////環境光
-	//float anbientCol = 0.2f;
-	//material_->AddConstBufPS({ anbientCol,anbientCol,anbientCol,1.0f });
-	////カメラ位置
-	//VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
-	//material_->AddConstBufPS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
-	////反射光の色(白色)
-	//float specColor = 1.0f;
-	//material_->AddConstBufPS({ specColor,specColor,specColor,0.0f });
-
-	//renderer_ = std::make_unique<ModelRenderer>(parryTransform_.modelId, *material_);
 	//当たり判定の初期化
 	InitCollider();
 
@@ -179,10 +156,6 @@ void Player::Init(void)
 
 void Player::Update(void)
 {
-	//カメラ位置
-	//VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
-	//material_->SetConstBufPS(3,{ cameraPos.x,cameraPos.y,cameraPos.z,1.0f });
-
 	//HP制限(HPが最大HPを超えないようにする)
 	if (hp_ > maxHp_)
 	{
@@ -198,14 +171,6 @@ void Player::Update(void)
 	animationController_->Update();
 
 	transform_.Update();
-	parryTransform_.pos = transform_.pos;
-	parryTransform_.pos.y += 20.0f;
-	parryTransform_.Update();
-#ifdef _DEBUG
-
-	UpdateDebugImGui();
-
-#endif // _DEBUG
 }
 
 void Player::Draw(void)
@@ -215,11 +180,6 @@ void Player::Draw(void)
 
 	//丸影描画
 	DrawShadow();
-	//renderer_->Draw();
-
-#ifdef _DEBUG
-	DebugDraw();
-#endif // _DEBUG
 }
 
 void Player::DebugUpdate(void)
@@ -242,12 +202,6 @@ void Player::DebugUpdate(void)
 	animationController_->Update();
 
 	transform_.Update();
-
-#ifdef _DEBUG
-
-	UpdateDebugImGui();
-
-#endif // _DEBUG
 }
 
 void Player::DrawDead(void)
@@ -353,16 +307,6 @@ void Player::Init3DModel(void)
 	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
-
-	//パリィ用モデルの設定（シェーダー用)
-	//parryTransform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-	//	ResourceManager::SRC::SPHERE));
-	//parryTransform_.pos = transform_.pos;
-	//parryTransform_.pos.y += 20.0f;
-	//const float scl = 1.0f;
-	//parryTransform_.scl = { scl,scl,scl };
-	//parryTransform_.quaRot = Quaternion();
-	//parryTransform_.Update();
 }
 
 void Player::InitCollider(void)
@@ -382,8 +326,6 @@ void Player::InitCollider(void)
 	sphere_ = std::make_unique<Sphere>(transform_);
 	sphere_->SetLocalPos(localPos);
 	sphere_->SetRadius(sphereRadius);
-
-	col_ = 0x000000;
 }
 
 void Player::InitAnimation(void)
@@ -542,13 +484,10 @@ void Player::UpdateWakeUp(void)
 		clothSE_ = true;
 	}
 	//起き上がりアニメーションが終了したら待機状態へ移行
-	if(animationController_->IsEnd()/* &&
-		animationController_->GetPlayType() == (int)ANIM_TYPE::WAKE_UP*/)
+	if(animationController_->IsEnd())
 	{
 		isActionEnd_ = true;
 		animationController_->Play((int)ANIM_TYPE::IDLE);
-		//ChangeState(STATE::PLAY);
-		//return;
 	}
 }
 
@@ -837,11 +776,11 @@ void Player::ProcessParry(void)
 	}
 
 	if (!isParry_)return;
+	//パリィ時間経過判定
 	stepParry_ += SceneManager::GetInstance().GetDeltaTime();
-	col_ = 0xff0000;
+	//パリィ時間を超えたらパリィ終了
 	if(stepParry_ > PARRY_TIME)
 	{
-		col_ = 0x000000;
 		isParry_ = false;
 		stepParry_ = 0.0f;
 	}
@@ -853,7 +792,7 @@ void Player::SetGoalRotate(double rotRad)
 	VECTOR cameraRot = mainCamera->GetAngles();
 	Quaternion axis =
 		Quaternion::AngleAxis(
-			/*(double)cameraRot.y + */rotRad, CommonUtility::AXIS_Y);
+			rotRad, CommonUtility::AXIS_Y);
 	
 	//現在設定されている回転との角度差を取る
 	double angleDiff = Quaternion::Angle(axis, goalQuaRot_);
@@ -1125,112 +1064,6 @@ void Player::EffectParryPosUpdate(void)
 		transform_.pos.z);
 }
 
-void Player::UpdateDebugImGui(void)
-{
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("Player");
-
-	ImGui::InputFloat3("pos", &transform_.pos.x);
-
-	//HP用スライダー
-	ImGui::SliderFloat("HP", &hp_, 0.0f, maxHp_);
-
-	static float maxHpMax_ = 500.0f;
-	//最大HP用の最大値
-	ImGui::InputFloat("MaxHP Max", &maxHpMax_, 0.0f);
-
-	//最大HP用スライダー
-	ImGui::SliderFloat("MaxHP", &maxHp_, 0.0f, maxHpMax_);
-
-	//通常ジャンプ・無限ジャンプ切り替えボタン
-	if (ImGui::Button("Normal Jump"))
-	{
-		isJumpUnlimited_ = false;
-	}
-	if (ImGui::Button("Unlimited Jump"))
-	{
-		isJumpUnlimited_ = true;
-	}
-
-	//状態変更ボタン
-	if (ImGui::Button("None"))
-	{
-		ChangeState(STATE::NONE);
-	}
-	if (ImGui::Button("Play"))
-	{
-		ChangeState(STATE::PLAY);
-	}
-	if (ImGui::Button("Dead"))
-	{
-		ChangeState(STATE::DEAD);
-	}
-
-	////角度
-	//VECTOR rotDeg = VECTOR();
-	//rotDeg.x = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().x);
-	//rotDeg.y = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().y);
-	//rotDeg.z = CommonUtility::Rad2DegF(transform_.quaRot.ToEuler().z);
-	//ImGui::Text("angle(deg)");
-	//ImGui::SliderFloat("RotX", &rotDeg.x, 0.0f, 360.0f);
-	//ImGui::SliderFloat("RotY", &rotDeg.y, 0.0f, 360.0f);
-	//ImGui::SliderFloat("RotZ", &rotDeg.z, 0.0f, 360.0f);
-
-	////ローカル角度
-	//VECTOR localRotDeg = VECTOR();
-	//localRotDeg.x = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().x);
-	//localRotDeg.y = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().y);
-	//localRotDeg.z = CommonUtility::Rad2DegF(transform_.quaRotLocal.ToEuler().z);
-	//ImGui::Text("localAngle(deg)");
-	//ImGui::SliderFloat("LocalRotX", &rotDeg.x, 0.0f, 360.0f);
-	//ImGui::SliderFloat("LocalRotY", &rotDeg.y, 0.0f, 360.0f);
-	//ImGui::SliderFloat("LocalRotZ", &rotDeg.z, 0.0f, 360.0f);
-
-	//終了処理
-	ImGui::End();
-}
-
-void Player::DebugDraw(void)
-{
-	VECTOR linePos = VAdd(transform_.pos, VGet(0.0f, 150.0f, 0.0f));
-	VECTOR forward = VScale(transform_.GetForward(), 100.0f);
-	VECTOR right = VScale(transform_.GetRight(), 120.0f);
-	//forward.y += 150.0f;
-	//right.y += 150.0f;
-	//DrawLine3D(linePos, VAdd(transform_.pos, forward), 0x00ffff);
-	//DrawLine3D(linePos, VAdd(transform_.pos, right), 0xff0000);
-
-	//VECTOR dir = VAdd(transform_.GetLeft(), transform_.GetForward());
-	//VECTOR pos = VAdd(transform_.pos, VScale(dir,30.0f));
-	//DrawSphere3D(pos,15.0f,16,0x00ff00,0x00ff00,true);
-	//switch (state_)
-	//{
-	//case Player::STATE::NONE:
-	//	break;
-	//case Player::STATE::STAGE_WALK:
-	//	DrawFormatString(0, 60, 0xFF0000, L"STAGE_WALK");
-	//	break;
-	//case Player::STATE::LOOK_AROUND:
-	//	DrawFormatString(0, 60, 0xFF0000, L"LOOK_AROUND");
-	//	break;
-	//case Player::STATE::WAIT:
-	//	DrawFormatString(0, 60, 0xFF0000, L"WAIT");
-	//	break;
-	//case Player::STATE::PLAY:
-	//	DrawFormatString(0, 60, 0xFF0000, L"PLAY");
-	//	break;
-	//case Player::STATE::BACKSTAB:
-	//	break;
-	//case Player::STATE::DEAD:
-	//	break;
-	//default:
-	//	break;
-	//}
-	
-	//球体描画（色指定あり）
-	//sphere_->Draw(col_);
-}
-
 void Player::DrawParryCD(void)
 {
 	//パリィのクールダウン時間
@@ -1283,7 +1116,7 @@ void Player::DrawHPBar(void)
 {
 	const int HP_BAR_X = 20;         // HPバーの左上X座標
 	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
-	const int HP_BAR_WIDTH = maxHp_; // HPバーの最大幅
+	const int HP_BAR_WIDTH = static_cast<float>(maxHp_); // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
@@ -1294,6 +1127,6 @@ void Player::DrawHPBar(void)
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, barBackColor, TRUE);
 	//現在HP
 	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, barColor, TRUE);
-
+	//パリィクールダウン表示
 	DrawParryCD();
 }
