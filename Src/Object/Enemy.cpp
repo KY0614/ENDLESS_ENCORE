@@ -64,8 +64,9 @@ namespace
 	const float ATTACK_FAR_TIME = 15.0f;	//遠距離攻撃後の待機時間
 	const float ATTACK_CHARGE_TIME = 30.0f;	//ため攻撃後の待機時間
 	//ダメージ
-	const float ATTACK_DAMAGE = 10.0f;		//近接攻撃ダメージ
-	const float NORMAL_DAMAGE = 10.0f;		//遠距離攻撃ダメージ
+	const float ATTACK_NEAR_DAMAGE = 20.0f;		//近接攻撃ダメージ
+	const float ATTACK_FAR_DAMAGE = 10.0f;		//遠距離攻撃ダメージ
+	const float PARRY_DAMAGE = 15.0f;		//パリィされたときに受けるダメージ
 	const float BACKSTAB_DAMAGE = 50.0f;	//バックスタブダメージ
 	const float CHARGE_DAMAGE = 100.0f;		//ため攻撃ダメージ
 	//ダウンする時間
@@ -96,17 +97,12 @@ Enemy::Enemy(Player& player):
 	isBackstab_ = false;
 	isChargeAtk_ = false;
 	hitCount_ = 0;
-	currentAngle_ = 0.0f;               // 初期角度は適当に設定 (atan2で初期化しても良い)
 	stepDownTime_ = 0.0f;
-	// 例: 1秒で 90度（π/2 ラジアン）回転する速度
-	circlingSpeedRad_ = DX_PI_F / 2.0f  * 0.1f;
-
 	stepRotTime_ = 0.0f;
 	chargeRadius_ = 0.0f;
 	moveDir_ = CommonUtility::VECTOR_ZERO;
 	movePow_ = CommonUtility::VECTOR_ZERO;
 	isEncount_ = false;
-
 	effectChargeResId_ = -1;
 	effectChargePlayId_ = -1;
 	effectChargeAtkResId_ = -1;
@@ -559,7 +555,7 @@ void Enemy::UpdateAttackNear(void)
 	{
 		if (player_.GetIsParry())
 		{
-			Damage(NORMAL_DAMAGE);
+			Damage(PARRY_DAMAGE);
 			ChangeState(STATE::DOWN);
 			return;
 		}
@@ -578,7 +574,7 @@ void Enemy::UpdateAttackNear(void)
 	{
 		//回避中だったらダメージを受けない
 		if (player_.GetIsDodge())return;
-		player_.Damage(ATTACK_DAMAGE);
+		player_.Damage(ATTACK_NEAR_DAMAGE);
 		//画面揺らし
 		SceneManager::GetInstance().StartShakeScreen();
 		isStepActioned_ = true;
@@ -656,7 +652,7 @@ void Enemy::UpdateShotOne(void)
 			//回避中だったらダメージを受けない
 			if (player_.GetIsDodge())continue;
 			//ダメージ処理(当たった弾は破棄)
-			player_.Damage(ATTACK_DAMAGE);
+			player_.Damage(ATTACK_FAR_DAMAGE);
 			SceneManager::GetInstance().StartShakeScreen();
 			bullet->SetStateDestroy();
 		}
@@ -668,7 +664,7 @@ void Enemy::UpdateShotOne(void)
 		{
 			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
-			Damage(NORMAL_DAMAGE);
+			Damage(PARRY_DAMAGE);
 			bullet->SetStateDestroy();
 			hitCount_++;
 			continue;
@@ -765,7 +761,7 @@ void Enemy::UpdateShotAll(void)
 				continue;
 			}
 			//ダメージ処理(当たった弾は破棄)
-			player_.Damage(ATTACK_DAMAGE);
+			player_.Damage(ATTACK_FAR_DAMAGE);
 			SceneManager::GetInstance().StartShakeScreen();
 			bullet->SetStateDestroy();
 		}
@@ -777,7 +773,7 @@ void Enemy::UpdateShotAll(void)
 		{
 			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
-			Damage(NORMAL_DAMAGE);
+			Damage(PARRY_DAMAGE);
 			bullet->SetStateDestroy();
 			hitCount_++;
 			continue;

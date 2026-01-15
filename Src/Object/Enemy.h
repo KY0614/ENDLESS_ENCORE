@@ -162,9 +162,6 @@ private:
 	Quaternion goalQuaRot_;		//目標回転
 	float stepRotTime_;			//回転完了までの時間経過
 
-	float currentAngle_;        // プレイヤーを中心とした現在の角度 (ラジアン)
-	float circlingSpeedRad_;    // 円周移動の角速度 (ラジアン/秒)
-
 	//ダウン
 	bool isDown_;			//ダウン中かどうか	
 	int hitCount_;			//ヒット回数(ダウンまでのカウント)
