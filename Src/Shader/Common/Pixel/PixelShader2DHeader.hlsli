@@ -7,5 +7,6 @@ struct PS_INPUT
     float2 TexCoords0 : TEXCOORD2;      //テクスチャ座標
 };
 
-Texture2D tex : register(t0);               //テクスチャ
-SamplerState texSampler : register(s0);     //サンプラー
+SamplerState texSampler         :       register(s0); //サンプラー
+Texture2D tex                   :       register(t0); //テクスチャ
+Texture2D noiseTexture          :       register(t1); // ディフューズマップテクスチャ

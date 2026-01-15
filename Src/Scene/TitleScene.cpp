@@ -1,4 +1,5 @@
 #include <DxLib.h>
+#include <random>
 #include "../Application.h"
 #include "../Common/Easing.h"
 #include "../Renderer/PixelMaterial.h"
@@ -28,6 +29,8 @@ namespace
 	//定点カメラの位置
 	const VECTOR CAMERA_FIXED_POINT_POS = VGet(0.0f, -109.0f, -65.0f);			//カメラの位置
 	const VECTOR CAMERA_FIXED_POINT_TARGET_POS = VGet(0.0f, -153.0f, 2863.0f);	//カメラの注視点位置
+	
+	const float VIGNETTE_POWER = 3.0f; //ビネットの強さ
 }
 
 TitleScene::TitleScene(void)
@@ -82,12 +85,18 @@ void TitleScene::Init(void)
 
 void TitleScene::Update(void)
 {
+	//0.0～1.0の範囲でランダムに決定(uv座標用)
+	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;//0.0～1.0fにおさめるので100.0fで割る
+	//白の強さ（0.0～0.08fにおさめるので81で割った余りを1000.0fで割る）
+	float whitePow = static_cast<float>(rand() % 81) / 1000.0f;
+	std::uniform_real_distribution<float> uv(0.0f, 1.0f);
+	// 乱数生成器の初期化
+	std::random_device rd; //非決定的な乱数生成器
+	std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
 	//画面に出す黒い線のノイズのX座標をランダムに更新
-	const int randomValue = 100;
-	const float random = 100.0f;
-	float randomNoiseLineX = static_cast<float>(rand() % randomValue) / random;
-	filmNoiseMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
-	retroTheaterMaterial_->SetConstBuf(1, { randomNoiseLineX, randomNoiseLineX, 0.0f, 0.0f });
+	retroTheaterMaterial_->SetConstBuf(1, { randomNoiseLineX, uv(engine), uv(engine), whitePow });
+	filmScrollTime_ = SceneManager::GetInstance().GetDeltaTime() * 0.1f;
+	retroTheaterMaterial_->SetConstBuf(2, { VIGNETTE_POWER, filmScrollTime_, 0.0f, 0.0f });
 
 	//プッシュスペース画像をゆっくり点滅させる
 	pushSpaceImgAlpha_ += alphaChangeSpeed_;
@@ -150,45 +159,6 @@ void TitleScene::Draw(void)
 	SetDrawScreen(mainScreen);
 	DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
-	// ポストエフェクト(セピア)
-	//-----------------------------------------
-
-	//SetDrawScreen(postEffectScreen_);
-
-	//// 画面を初期化
-	//ClearDrawScreen();
-	//sepiaRenderer_->Draw();
-
-	//// メインに戻す
-	//SetDrawScreen(mainScreen);
-	//DrawGraph(0, 0, postEffectScreen_, false);
-	////-----------------------------------------
-	//// ポストエフェクト(ビネット)
-	////-----------------------------------------
-	//SetDrawScreen(postEffectScreen_);
-
-	//// 画面を初期化
-	//ClearDrawScreen();
-
-	//vignetteRenderer_->Draw();
-
-	//// メインに戻す
-	//SetDrawScreen(mainScreen);
-	//DrawGraph(0, 0, postEffectScreen_, false);
-	////-----------------------------------------
-	//// ポストエフェクト(線ノイズ)
-	////-----------------------------------------
-	//SetDrawScreen(postEffectScreen_);
-
-	//// 画面を初期化
-	//ClearDrawScreen();
-
-	//filmNoiseRenderer_->Draw();
-
-	//// メインに戻す
-	//SetDrawScreen(mainScreen);
-	//DrawGraph(0, 0, postEffectScreen_, false);
-	//-----------------------------------------
 
 	//ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
 	SetDrawMode(DX_DRAWMODE_BILINEAR);
@@ -223,65 +193,36 @@ void TitleScene::InitSound(void)
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_BGM).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::TITLE, BGM_VOLUME);
 	sound.Play(SoundManager::SOUND::TITLE);
-	//SE
+	//ゲーム開始ボタンを押した時のSE
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PUSH_SPACE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE_SE).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::PUSH_SPACE, pushSpaceSEVolume_);
-
 }
 
 void TitleScene::InitMaterial(void)
 {
-	int materialConstBufSize = 1;
-	// ポストエフェクト用(セピア)
-	sepiaMaterial_ = std::make_unique<PixelMaterial>("Sepiatone.cso", materialConstBufSize);
+	//マテリアルの定数バッファサイズ
+	int materialConstBufSize = 3;
+	// ポストエフェクト用
+	retroTheaterMaterial_ = std::make_unique<PixelMaterial>(
+		"RetroTheater.cso", materialConstBufSize);	
+	retroTheaterMaterial_->SetTextureAddress(PixelMaterial::TEXADDRESS::WRAP);
 	//モデルカラー
 	const FLOAT4 modelColor = { 1.0f,1.0f,1.0f,1.0f, };
-	sepiaMaterial_->AddConstBuf(modelColor);
-	sepiaMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
-	sepiaRenderer_ = std::make_unique<PixelRenderer>(*sepiaMaterial_);
-	sepiaRenderer_->MakeSquereVertex(
-		Vector2(0, 0),
-		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
-	);
-
-	// ポストエフェクト用(ビネット)
-	vignetteMaterial_ = std::make_unique<PixelMaterial>("Vignette.cso", materialConstBufSize);
-	//ビネットの強さ
-	const float vignettePower = 3.0f;
-	vignetteMaterial_->AddConstBuf({ vignettePower, 0.0f, 0.0f, 0.0f });
-	vignetteMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
-	vignetteRenderer_ = std::make_unique<PixelRenderer>(*vignetteMaterial_);
-	vignetteRenderer_->MakeSquereVertex(
-		Vector2(0, 0),
-		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
-	);
-	materialConstBufSize = 2;
+	retroTheaterMaterial_->AddConstBuf(modelColor);
 	//ノイズを入れる線のX座標をランダムに決定
 	const int randomValue = 100;
 	const float random = 100.0f;
 	float randomNoiseLineX = static_cast<float>(rand() % randomValue) / random;
-	// ポストエフェクト用(線ノイズ)
-	filmNoiseMaterial_ = std::make_unique<PixelMaterial>("FilmNoise.cso", materialConstBufSize);
-	filmNoiseMaterial_->AddConstBuf({ randomNoiseLineX, 0.0f, 0.0f, 0.0f });
-	filmNoiseMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
-	filmNoiseRenderer_ = std::make_unique<PixelRenderer>(*filmNoiseMaterial_);
-	filmNoiseRenderer_->MakeSquereVertex(
-		Vector2(0, 0),
-		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
-	);
-
-	materialConstBufSize = 3;
-	// ポストエフェクト用
-	retroTheaterMaterial_ = std::make_unique<PixelMaterial>(
-		"RetroTheater.cso", materialConstBufSize);
-	//モデルカラー
-	retroTheaterMaterial_->AddConstBuf(modelColor);
-	//ノイズを入れる線のX座標をランダムに決定
 	retroTheaterMaterial_->AddConstBuf({ randomNoiseLineX,randomNoiseLineX,0.0f,0.0f, });
 	//ビネットの強さ
-	retroTheaterMaterial_->AddConstBuf({ vignettePower, 0.0f, 0.0f, 0.0f });
+	retroTheaterMaterial_->AddConstBuf({ VIGNETTE_POWER, 0.0f, 0.0f, 0.0f });
 	retroTheaterMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	//ノイズテクスチャ読み込み
+	noiseTextureId_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::FILM_NOISE).handleId_;
+	//ノイズテクスチャ設定
+	retroTheaterMaterial_->AddTextureBuf(noiseTextureId_);
 	retroTheaterRenderer_ = std::make_unique<PixelRenderer>(*retroTheaterMaterial_);
 	retroTheaterRenderer_->MakeSquereVertex(
 		Vector2(0, 0),

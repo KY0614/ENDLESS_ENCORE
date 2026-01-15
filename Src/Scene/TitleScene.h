@@ -66,6 +66,11 @@ private:
 	//プッシュスペース画像アルファ値
 	int alphaChangeSpeed_;
 
+	//ノイズテクスチャID（黒いシミっぽい画像)
+	int noiseTextureId_;
+
+	float filmScrollTime_;
+
 	//フェードアウト開始するまでのインターバル時間
 	float intervalTimer_;
 

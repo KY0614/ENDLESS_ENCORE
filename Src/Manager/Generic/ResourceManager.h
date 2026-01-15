@@ -18,10 +18,10 @@ public:
 		TITLE_LOGO,
 		PUSH_SPACE,
 		PUSH_SPACE_SE,
+		FILM_NOISE,
 
 		PLAYER,
 		PLAYER_SHADOW,
-		SPHERE,
 		FOOT_SMOKE,
 		PARRY_EFKT,
 
@@ -33,12 +33,10 @@ public:
 
 		ENEMY,
 		ENEMY_BULLET,
-		SKY_DOME,
 
 		COIN,
 
 		//ステージオブジェクト
-		FLOOR,
 		THEATER,
 		MIST_WALL,
 		NOISE_TEXTURE,

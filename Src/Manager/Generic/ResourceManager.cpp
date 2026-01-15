@@ -92,6 +92,10 @@ void ResourceManager::InitTitle(void)
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Theater/large_theater.mv1");
 	resourcesMap_.emplace(SRC::THEATER, std::move(res));
 
+	//ノイズ用画像
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "FilmNoise.png");
+	resourcesMap_.emplace(SRC::FILM_NOISE, std::move(res));
+
 	//音------------------------------------------------------------------------
 
 	//BGM
@@ -160,10 +164,6 @@ void ResourceManager::InitGame(void)
 	//プレイヤー
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
 	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
-
-	//ー
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Sphere.mv1");
-	resourcesMap_.emplace(SRC::SPHERE, std::move(res));
 
 	//プレイヤー影
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
