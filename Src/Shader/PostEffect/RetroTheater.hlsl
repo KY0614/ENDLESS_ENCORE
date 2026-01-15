@@ -48,8 +48,7 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
 	//ビネットの強度を計算
     float vignette = 1.0f - saturate(dis * g_vine_pow);
 
-	//UV座標とテクスチャを参照して、最適な色を取得する
-    float4 ret = tex.Sample(texSampler, PSInput.uv);
+    //色にビネットを乗算
     dstCol.rgb *= vignette;
     
     return dstCol;
