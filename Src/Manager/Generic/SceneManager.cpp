@@ -22,7 +22,8 @@ namespace
 	const float FOG_START = 10000.0f;	//フォグ開始距離
 	const float FOG_END = 20000.0f;		//フォグ終了距離
 
-	const float SHAKE_RATE = 0.95f;
+	//画面揺れの減衰率
+	const float SHAKE_DECEL_RATE = 0.95f;
 }
 
 SceneManager* SceneManager::instance_ = nullptr;
@@ -397,7 +398,7 @@ void SceneManager::ShakeScreen(void)
 	if (shakeFrame_ > 0)
 	{
 		shakeFrame_--;
-		shakeRate_ *= SHAKE_RATE;
+		shakeRate_ *= SHAKE_DECEL_RATE;
 	}
 	else 
 	{

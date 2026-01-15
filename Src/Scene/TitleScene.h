@@ -42,6 +42,10 @@ private:
 	int postEffectScreen_;
 
 	//ポストエフェクト用(セピア調)
+	std::unique_ptr<PixelMaterial> retroTheaterMaterial_;
+	std::unique_ptr<PixelRenderer> retroTheaterRenderer_;
+
+	//ポストエフェクト用(セピア調)
 	std::unique_ptr<PixelMaterial> sepiaMaterial_;
 	std::unique_ptr<PixelRenderer> sepiaRenderer_;
 

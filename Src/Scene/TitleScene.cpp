@@ -87,6 +87,7 @@ void TitleScene::Update(void)
 	const float random = 100.0f;
 	float randomNoiseLineX = static_cast<float>(rand() % randomValue) / random;
 	filmNoiseMaterial_->SetConstBuf(0, { randomNoiseLineX, 0.0f, 0.0f, 0.0f });
+	retroTheaterMaterial_->SetConstBuf(1, { randomNoiseLineX, randomNoiseLineX, 0.0f, 0.0f });
 
 	//プッシュスペース画像をゆっくり点滅させる
 	pushSpaceImgAlpha_ += alphaChangeSpeed_;
@@ -136,44 +137,57 @@ void TitleScene::Draw(void)
 	stage_->Draw();
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
+	// ポストエフェクト
+	//-----------------------------------------
+
+	SetDrawScreen(postEffectScreen_);
+
+	// 画面を初期化
+	ClearDrawScreen();
+	retroTheaterRenderer_->Draw();
+
+	// メインに戻す
+	SetDrawScreen(mainScreen);
+	DrawGraph(0, 0, postEffectScreen_, false);
+	//-----------------------------------------
 	// ポストエフェクト(セピア)
 	//-----------------------------------------
 
-	SetDrawScreen(postEffectScreen_);
+	//SetDrawScreen(postEffectScreen_);
 
-	// 画面を初期化
-	ClearDrawScreen();
-	sepiaRenderer_->Draw();
+	//// 画面を初期化
+	//ClearDrawScreen();
+	//sepiaRenderer_->Draw();
 
-	// メインに戻す
-	SetDrawScreen(mainScreen);
-	DrawGraph(0, 0, postEffectScreen_, false);
-	//-----------------------------------------
-	// ポストエフェクト(ビネット)
-	//-----------------------------------------
-	SetDrawScreen(postEffectScreen_);
+	//// メインに戻す
+	//SetDrawScreen(mainScreen);
+	//DrawGraph(0, 0, postEffectScreen_, false);
+	////-----------------------------------------
+	//// ポストエフェクト(ビネット)
+	////-----------------------------------------
+	//SetDrawScreen(postEffectScreen_);
 
-	// 画面を初期化
-	ClearDrawScreen();
+	//// 画面を初期化
+	//ClearDrawScreen();
 
-	vignetteRenderer_->Draw();
+	//vignetteRenderer_->Draw();
 
-	// メインに戻す
-	SetDrawScreen(mainScreen);
-	DrawGraph(0, 0, postEffectScreen_, false);
-	//-----------------------------------------
-	// ポストエフェクト(線ノイズ)
-	//-----------------------------------------
-	SetDrawScreen(postEffectScreen_);
+	//// メインに戻す
+	//SetDrawScreen(mainScreen);
+	//DrawGraph(0, 0, postEffectScreen_, false);
+	////-----------------------------------------
+	//// ポストエフェクト(線ノイズ)
+	////-----------------------------------------
+	//SetDrawScreen(postEffectScreen_);
 
-	// 画面を初期化
-	ClearDrawScreen();
+	//// 画面を初期化
+	//ClearDrawScreen();
 
-	filmNoiseRenderer_->Draw();
+	//filmNoiseRenderer_->Draw();
 
-	// メインに戻す
-	SetDrawScreen(mainScreen);
-	DrawGraph(0, 0, postEffectScreen_, false);
+	//// メインに戻す
+	//SetDrawScreen(mainScreen);
+	//DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
 
 	//ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
@@ -256,4 +270,22 @@ void TitleScene::InitMaterial(void)
 		Vector2(0, 0),
 		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
 	);
+
+	materialConstBufSize = 3;
+	// ポストエフェクト用
+	retroTheaterMaterial_ = std::make_unique<PixelMaterial>(
+		"RetroTheater.cso", materialConstBufSize);
+	//モデルカラー
+	retroTheaterMaterial_->AddConstBuf(modelColor);
+	//ノイズを入れる線のX座標をランダムに決定
+	retroTheaterMaterial_->AddConstBuf({ randomNoiseLineX,randomNoiseLineX,0.0f,0.0f, });
+	//ビネットの強さ
+	retroTheaterMaterial_->AddConstBuf({ vignettePower, 0.0f, 0.0f, 0.0f });
+	retroTheaterMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	retroTheaterRenderer_ = std::make_unique<PixelRenderer>(*retroTheaterMaterial_);
+	retroTheaterRenderer_->MakeSquereVertex(
+		Vector2(0, 0),
+		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
+	);
+
 }

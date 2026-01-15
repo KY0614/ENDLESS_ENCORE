@@ -484,5 +484,6 @@
     <FxCompile Include="Src\Shader\PostEffect\Sepiatone.hlsl" />
     <FxCompile Include="Src\Shader\PostEffect\Vignette.hlsl" />
     <FxCompile Include="Src\Shader\PostEffect\FilmNoise.hlsl" />
+    <FxCompile Include="Src\Shader\PostEffect\RetroTheater.hlsl" />
   </ItemGroup>
 </Project>
