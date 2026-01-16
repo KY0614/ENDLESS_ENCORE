@@ -33,7 +33,7 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
         dstCol = (0.0f, 0.0f, 0.0f);
     }
     
-    //シミノイズ
+    //シミノイズ-----------------------------------------------------------
     float noiseScale = 0.03f;
     float2 localUV = (PSInput.uv - g_noise_uv) / noiseScale + 0.5f;
     // 画像の範囲内だけ処理
@@ -54,35 +54,37 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     sepia.b = dot(dstCol.rgb, float3(0.272f, 0.534f, 0.131f));
     //白の強さ加算
     sepia.rgb += (g_sepia_white_pow, g_sepia_white_pow, g_sepia_white_pow);
-    dstCol.rgb = lerp(dstCol.rbg, sepia, 1.0f);
+    dstCol.rgb = lerp(dstCol.rgb, sepia, 1.0f);
     
     //フィルムのパーフォレーション（送り穴、画面端の白黒のやつ）----------
-    //画面端のフィルムの幅（黒いやつ)
-    float filmWidth = 0.12f;
+    float filmWidth = 0.12f;    //画面端のフィルムの幅（黒いやつ)
+    float holeWidth = 0.08f;    //穴の横幅
+    float holeHeight = 0.45f;   //穴の縦幅
+    float holeMarginX = 0.02f;  //穴の左右マージン
+    float holeMarginY = 0.005f; //穴の上下マージン
+    float holePitch = 0.18f;    //穴の縦方向ピッチ
+
     //左側の範囲
-    float leftBand = step(PSInput.uv.x, filmWidth);
-    //右側の範囲
-    float rightBand = step(1.0f - filmWidth, PSInput.uv.x);
-    //左右どちらかの範囲に入っているかどうか
-    float bandMask = max(leftBand, rightBand);
+    float sideFilm = step(PSInput.uv.x, filmWidth) + step(1.0f - filmWidth, PSInput.uv.x);
+    //最大値を1.0に固定
+    sideFilm = saturate(sideFilm);
 
-    //白い四角形（フィルム穴）の範囲
-    float holeWidth = 0.08f;
-    //フィルムと穴と間
-    float filmHoleSpace = 0.02f;
-    float hole = step(holeWidth, 0.05f);
-    //穴の範囲を決めるため範囲の(左側の)
-    float leftRect = step(filmHoleSpace, PSInput.uv.x) * step(PSInput.uv.x, filmWidth - filmHoleSpace);
-    float rightRect = step(0.9f, PSInput.uv.x) * step(PSInput.uv.x, 0.98f);
-    float yRect = step(0.4f, PSInput.uv.y) * step(PSInput.uv.y, 0.5f);
-    float rectMask = (leftRect + rightRect) * yRect;
+    //穴のY座標を周期的に配置
+    float uvY = frac((PSInput.uv.y + g_film_scroll) / holePitch);
+    float holeY = step(holeMarginY, uvY) * step(uvY, holeMarginY + holeHeight);
 
-    // 黒帯と白四角の合成
-    float3 bandColor = float3(0.0f, 0.0f, 0.0f);
-    float3 rectColor = float3(1.0f, 1.0f, 1.0f);
-    float3 perfColor = lerp(bandColor, rectColor, rectMask);
-    dstCol.rgb = lerp(dstCol.rgb, perfColor, bandMask);
+    //左右の穴範囲
+    float leftHole = step(holeMarginX, PSInput.uv.x) * step(PSInput.uv.x, holeMarginX + holeWidth);
+    float rightHole = step(1.0f - holeMarginX - holeWidth, PSInput.uv.x) * step(PSInput.uv.x, 1.0f - holeMarginX);
 
+    //穴の合成
+    float holeMask = (leftHole + rightHole) * holeY;
+    holeMask = saturate(holeMask);
+
+    //黒帯→白穴の合成
+    float3 filmColor = lerp(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 1.0f), holeMask);
+    dstCol.rgb = lerp(dstCol.rgb, filmColor, sideFilm);
+    
     //ビネット----------------------------------------------------------
     float2 uv = PSInput.uv;
     float x = abs(uv.x - 0.5f); // 0.0～1.0f → -0.5～0.5 → 0.0～0.5

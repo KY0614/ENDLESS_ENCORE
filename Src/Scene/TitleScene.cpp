@@ -1,7 +1,6 @@
 #include <DxLib.h>
 #include <random>
 #include "../Application.h"
-#include "../Common/Easing.h"
 #include "../Renderer/PixelMaterial.h"
 #include "../Renderer/PixelRenderer.h"
 #include "../Manager/GameSystem/SoundManager.h"
@@ -16,6 +15,8 @@ namespace
 {
 	//BGMの音量
 	const int BGM_VOLUME = 60;
+	//フィルム回転の音量
+	const int FILM_SCROLL_VOLUME = 40;
 	//PushSpace画像のアルファ値最大
 	const int PUSH_SPACE_IMG_ALPHA_MAX = 255;
 	//PushSpaceSEの音量
@@ -37,6 +38,7 @@ TitleScene::TitleScene(void)
 {
 	logoImg_ = -1;
 	pushSpaceImg_ = -1;
+	noiseTextureId_ = -1;
 	pushSpaceImgAlpha_ = 0;
 	alphaChangeSpeed_ = 0;
 	intervalTimer_ = 0.0f;
@@ -44,6 +46,7 @@ TitleScene::TitleScene(void)
 	pushSpaceSEVolume_ = 0;
 	seVolumeDecreaseFrame_ = 0;
 	postEffectScreen_ = 0;
+	filmScrollTime_ = 0.0f;
 }
 
 TitleScene::~TitleScene(void)
@@ -61,10 +64,12 @@ void TitleScene::Init(void)
 	stage_->Init();
 
 	//タイトルロゴ画像
-	logoImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_LOGO).handleId_;
+	logoImg_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::TITLE_LOGO).handleId_;
 
 	//プッシュスペース画像
-	pushSpaceImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE).handleId_;
+	pushSpaceImg_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::PUSH_SPACE).handleId_;
 
 	//プッシュスペース画像のアルファ値変化速度
 	const int alphaChangeSpeed = 2;
@@ -95,7 +100,8 @@ void TitleScene::Update(void)
 	std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
 	//画面に出す黒い線のノイズのX座標をランダムに更新
 	retroTheaterMaterial_->SetConstBuf(1, { randomNoiseLineX, uv(engine), uv(engine), whitePow });
-	filmScrollTime_ = SceneManager::GetInstance().GetDeltaTime() * 0.1f;
+	const float scrollSpeed = 0.5f;
+	filmScrollTime_ += SceneManager::GetInstance().GetDeltaTime() * scrollSpeed;
 	retroTheaterMaterial_->SetConstBuf(2, { VIGNETTE_POWER, filmScrollTime_, 0.0f, 0.0f });
 
 	//プッシュスペース画像をゆっくり点滅させる
@@ -165,7 +171,7 @@ void TitleScene::Draw(void)
 	//ロゴ画像の大きさ
 	float logoScale = 1.5f;
 	//タイトルロゴ描画
-	const int titleLogoOffsetY = 100;
+	const int titleLogoOffsetY = 120;
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
 		Application::SCREEN_SIZE_Y / 2 - titleLogoOffsetY,
 		logoScale * screenAspectRatio, 0.0f,
@@ -175,7 +181,7 @@ void TitleScene::Draw(void)
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, pushSpaceImgAlpha_);
 	logoScale = 1.0f;
 	//プッシュスペース描画
-	const int pushSpaceOffsetY = 256;
+	const int pushSpaceOffsetY = 276;
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
 		Application::SCREEN_SIZE_Y - pushSpaceOffsetY,
 		logoScale * screenAspectRatio, 0.0f,
@@ -193,6 +199,11 @@ void TitleScene::InitSound(void)
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::TITLE_BGM).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::TITLE, BGM_VOLUME);
 	sound.Play(SoundManager::SOUND::TITLE);
+	//フィルムスクロールSE
+	sound.Add(SoundManager::TYPE::LOOP_SE, SoundManager::SOUND::FILM_SCROLL,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::FILM_SCROLL_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::FILM_SCROLL, FILM_SCROLL_VOLUME);
+	sound.Play(SoundManager::SOUND::FILM_SCROLL);
 	//ゲーム開始ボタンを押した時のSE
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PUSH_SPACE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::PUSH_SPACE_SE).handleId_);
@@ -228,5 +239,4 @@ void TitleScene::InitMaterial(void)
 		Vector2(0, 0),
 		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
 	);
-
 }

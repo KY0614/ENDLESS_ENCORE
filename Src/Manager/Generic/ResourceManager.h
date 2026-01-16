@@ -17,11 +17,15 @@ public:
 		//タイトル関連
 		TITLE_LOGO,
 		PUSH_SPACE,
-		PUSH_SPACE_SE,
 		FILM_NOISE,
 
 		PLAYER,
 		PLAYER_SHADOW,
+		PLAYER_HP_BAR,
+		PLAYER_HP_BACK_BAR,
+		PLAYER_HP_BAR_FRAME,
+		PLAYER_PARYY_BAR,
+		PLAYER_PARYY_CD_BAR,
 		FOOT_SMOKE,
 		PARRY_EFKT,
 
@@ -43,15 +47,17 @@ public:
 		ROCK,
 
 		//音
-		TITLE_BGM,
-		EXPLORE_BGM,
-		LIGHT_UP_SE,
-		GAME_BGM,
-		PARRY_SE,
-		WAKE_UP_SE,
-		FIRE_SE,
-		FLAME_SE,
-		BACKSTAB_SE,
+		TITLE_BGM,		//タイトルBGM
+		PUSH_SPACE_SE,	//プッシュスペースSE
+		FILM_SCROLL_SE,	//フィルムスクロールSE
+		EXPLORE_BGM,	//探索BGM
+		LIGHT_UP_SE,	//ライトアップSE
+		BATTLE_BGM,		//バトルBGM
+		PARRY_SE,		//パリィSE
+		WAKE_UP_SE,		//起き上がるSE(布が擦れる音)
+		FIRE_SE,		//火炎SE（火を噴く音）		
+		EXPLOSION_SE,	//爆発SE（ため攻撃用の音）
+		BACKSTAB_SE,	//致命攻撃SE(ぐさって音)
 	};
 
 	// 明示的にインステンスを生成する
@@ -77,12 +83,8 @@ public:
 
 	//シーンごとにデータを読み込むことにする
 	void InitTitle(void);
-	void InitMovie(void);
-	void InitSelect(void);
-	void InitTutorial(void);
 	void InitGame(void);
 	void InitPause(void);
-	void InitResult(void);
 
 private:
 

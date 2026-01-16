@@ -102,32 +102,15 @@ void ResourceManager::InitTitle(void)
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Title.mp3");
 	resourcesMap_.emplace(SRC::TITLE_BGM, std::move(res));
 
-	//SE
+	//上映開始のSE
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Push_Space.mp3");
 	resourcesMap_.emplace(SRC::PUSH_SPACE_SE, std::move(res));
 
+	//フィルムがまわるSE
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/FilmScroll.mp3");
+	resourcesMap_.emplace(SRC::FILM_SCROLL_SE, std::move(res));
+
 	//--------------------------------------------------------------------------
-}
-
-void ResourceManager::InitMovie(void)
-{
-}
-
-void ResourceManager::InitSelect(void)
-{
-}
-
-void ResourceManager::InitTutorial(void)
-{
-	using RES = Resource;
-	using RES_T = RES::TYPE;
-	static std::string PATH_IMG = Application::PATH_IMAGE;
-	static std::string PATH_MDL = Application::PATH_MODEL;
-	static std::string PATH_EFF = Application::PATH_EFFECT;
-	static std::string PATH_SND = Application::PATH_SOUND;
-
-	std::unique_ptr<Resource> res;
-
 }
 
 void ResourceManager::InitGame(void)
@@ -169,6 +152,26 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
 	resourcesMap_.emplace(SRC::PLAYER_SHADOW, std::move(res));
 
+	//プレイヤーHPバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBar.png");
+	resourcesMap_.emplace(SRC::PLAYER_HP_BAR, std::move(res));
+
+	//プレイヤーHPバー背景
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarBack.png");
+	resourcesMap_.emplace(SRC::PLAYER_HP_BACK_BAR, std::move(res));
+
+	//プレイヤーHPバーの額縁
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarFrame.png");
+	resourcesMap_.emplace(SRC::PLAYER_HP_BAR_FRAME, std::move(res));
+
+	//プレイヤーパリィバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/ParryBar.png");
+	resourcesMap_.emplace(SRC::PLAYER_PARYY_BAR, std::move(res));
+
+	//プレイヤーパリィバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/ParryCDBar.png");
+	resourcesMap_.emplace(SRC::PLAYER_PARYY_CD_BAR, std::move(res));
+
 	//コイン
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Coin.mv1");
 	resourcesMap_.emplace(SRC::COIN, std::move(res));
@@ -180,7 +183,7 @@ void ResourceManager::InitGame(void)
 	//音------------------------------------------------------------------------
 	//BGM
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Battle.mp3");
-	resourcesMap_.emplace(SRC::GAME_BGM, std::move(res));
+	resourcesMap_.emplace(SRC::BATTLE_BGM, std::move(res));
 	//BGM
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Explore.mp3");
 	resourcesMap_.emplace(SRC::EXPLORE_BGM, std::move(res));
@@ -205,7 +208,7 @@ void ResourceManager::InitGame(void)
 		
 	//爆発
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/flame.mp3");
-	resourcesMap_.emplace(SRC::FLAME_SE, std::move(res));
+	resourcesMap_.emplace(SRC::EXPLOSION_SE, std::move(res));
 	
 	//炎の音
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/backstab.mp3");
@@ -248,24 +251,6 @@ void ResourceManager::InitPause(void)
 	static std::string PATH_SND = Application::PATH_SOUND;
 
 	std::unique_ptr<Resource> res;
-}
-
-void ResourceManager::InitResult(void)
-{
-	using RES = Resource;
-	using RES_T = RES::TYPE;
-	static std::string PATH_IMG = Application::PATH_IMAGE;
-	static std::string PATH_MDL = Application::PATH_MODEL;
-	static std::string PATH_EFF = Application::PATH_EFFECT;
-	static std::string PATH_SND = Application::PATH_SOUND;
-
-	std::unique_ptr<Resource> res;
-
-	//PushSpace画像
-	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "PleaseKey.png");
-	resourcesMap_.emplace(SRC::PUSH_SPACE, std::move(res));
-
-	//音------------------------------------------------------------------------
 }
 
 ResourceManager::ResourceManager(void)

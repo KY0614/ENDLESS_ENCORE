@@ -15,8 +15,8 @@ public:
 	static constexpr const char* KEY_ANIMATION = "Animation";
 	static constexpr const char* KEY_ANIM_SPEED = "defaultSpeed";
 	static constexpr const char* KEY_PARAMETER = "Parameter";
-	static constexpr const char* KEY_HP = "hp";
-	static constexpr const char* KEY_MAX_HP = "maxHp";
+	static constexpr const char* KEY_HP = "hp";				//‘Ì—Í
+	static constexpr const char* KEY_MAX_HP = "maxHp";		//Å‘å‘Ì—Í
 
 	//jsonƒf[ƒ^‚Ìí—Ş
 	enum class JSON_DATA

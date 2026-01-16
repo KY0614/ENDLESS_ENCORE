@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\UI\BarUI.cpp" />
+    <ClCompile Include="Src\Object\UI\UIBase.cpp" />
     <ClCompile Include="Src\Scene\EncountScene.cpp" />
     <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
@@ -65,6 +67,8 @@
     <ClCompile Include="Src\Object\Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\UI\BarUI.h" />
+    <ClInclude Include="Src\Object\UI\UIBase.h" />
     <ClInclude Include="Src\Scene\EncountScene.h" />
     <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />

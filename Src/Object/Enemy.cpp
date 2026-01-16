@@ -21,26 +21,25 @@ namespace
 {
 	//JSONキー名を定義
 	static const std::string KEY_ENEMY = "Enemy";
-	static const std::string KEY_IDLE = "Idle";
-	static const std::string KEY_TURN = "Turn";
-	static const std::string KEY_WALK = "Walk";
-	static const std::string KEY_WALK_RIGHT = "Walk Right";
-	static const std::string KEY_WALK_LEFT = "Walk Left";
-	static const std::string KEY_RUN = "Run";
-	static const std::string KEY_ATK_NEAR = "Attack_Near";
-	static const std::string KEY_ATK_FAR_ONE = "Attack_Far_One";
-	static const std::string KEY_ATK_FAR_ALL = "Attack_Far_All";
-	static const std::string KEY_ATK_CHARGE = "Attack_Charge";
-	static const std::string KEY_DAMAGE = "Damage";
-	static const std::string KEY_DOWN = "Down";
-	static const std::string KEY_BACKSTAB = "Backstab";
-	static const std::string KEY_MAGIC_IDLE = "Magic Idle";
-	static const std::string KEY_CAST_SPELL = "Cast Spell";
-	static const std::string KEY_STAND_UP = "Stand Up";
-	static const std::string KEY_DEATH = "Death";
-	static const std::string KEY_MAX_HP = "maxHp";
-	static const std::string KEY_MAX_POS = "maxPosition";
-	static const std::string KEY_MIN_POS = "minPosition";
+	//アニメーションキー名
+	static const std::string KEY_IDLE = "Idle";		//待機
+	static const std::string KEY_TURN = "Turn";		//振り向き
+	static const std::string KEY_WALK = "Walk";		//歩き
+	static const std::string KEY_WALK_RIGHT = "Walk Right";		//右歩き
+	static const std::string KEY_WALK_LEFT = "Walk Left";		//左歩き
+	static const std::string KEY_RUN = "Run";		//走り
+	static const std::string KEY_ATK_NEAR = "Attack_Near";		//近接攻撃
+	static const std::string KEY_ATK_FAR_ONE = "Attack_Far_One";//遠距離攻撃（単発）
+	static const std::string KEY_ATK_FAR_ALL = "Attack_Far_All";//遠距離攻撃（全弾）
+	static const std::string KEY_ATK_CHARGE = "Attack_Charge";	//ため攻撃
+	static const std::string KEY_DAMAGE = "Damage";	//ダメージ
+	static const std::string KEY_DOWN = "Down";		//ダウン
+	static const std::string KEY_BACKSTAB = "Backstab";			//バックスタブ
+	static const std::string KEY_MAGIC_IDLE = "Magic Idle";		//魔法待機
+	static const std::string KEY_CAST_SPELL = "Cast Spell";		//魔法詠唱
+	static const std::string KEY_STAND_UP = "Stand Up";			//立ち上がり
+	static const std::string KEY_DEATH = "Death";				//死亡
+
 	//近接攻撃当たり判定球のローカル座標
 	const VECTOR ATTACK_NEAR_SPHERE_POS = { 0.0f, 80.0f, 50.0f };
 	//チャージ攻撃当たり判定球のローカル座標
@@ -64,8 +63,8 @@ namespace
 	const float ATTACK_FAR_TIME = 15.0f;	//遠距離攻撃後の待機時間
 	const float ATTACK_CHARGE_TIME = 30.0f;	//ため攻撃後の待機時間
 	//ダメージ
-	const float ATTACK_NEAR_DAMAGE = 20.0f;		//近接攻撃ダメージ
-	const float ATTACK_FAR_DAMAGE = 10.0f;		//遠距離攻撃ダメージ
+	const float ATTACK_NEAR_DAMAGE = 20.0f;	//近接攻撃ダメージ
+	const float ATTACK_FAR_DAMAGE = 10.0f;	//遠距離攻撃ダメージ
 	const float PARRY_DAMAGE = 15.0f;		//パリィされたときに受けるダメージ
 	const float BACKSTAB_DAMAGE = 50.0f;	//バックスタブダメージ
 	const float CHARGE_DAMAGE = 100.0f;		//ため攻撃ダメージ
@@ -136,7 +135,7 @@ void Enemy::Init(void)
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::BACKSTAB,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::BACKSTAB_SE).handleId_);
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FLAME,
-	ResourceManager::GetInstance().Load(ResourceManager::SRC::FLAME_SE).handleId_);
+	ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLOSION_SE).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::FLAME, SE_VOLUME);
 
 	//3Dモデルの初期化

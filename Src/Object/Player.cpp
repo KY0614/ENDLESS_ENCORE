@@ -1,5 +1,6 @@
 #include <cassert>
 #include<EffekseerForDXLib.h>
+#include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Libs/nlohmann/json.hpp"
 #include "../Utility/CommonUtility.h"
@@ -16,6 +17,7 @@
 #include "Common/Geometry/Capsule.h"
 #include "Common/Geometry/Sphere.h"
 #include "Common/Collider.h"
+#include "UI/BarUI.h"
 #include "Player.h"
 
 // 長いのでnamespaceの省略
@@ -130,6 +132,18 @@ void Player::Init(void)
 
 	colliders_.clear();
 
+	hpBar_ = std::make_unique<BarUI>();
+	hpBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_HP_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
+	hpBar_->Init();
+	hpBar_->SetBarPos({20, 20});
+	hpBar_->SetActive(true);
+
+	parryCDBar_ = std::make_unique<BarUI>();
+	parryCDBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
+	parryCDBar_->Init();
+	parryCDBar_->SetBarPos({50, 50});
+	parryCDBar_->SetActive(true);
+
 	//3Dモデルの初期化
 	Init3DModel();
 
@@ -171,6 +185,7 @@ void Player::Update(void)
 	animationController_->Update();
 
 	transform_.Update();
+	//UpdateDebugImGui();
 }
 
 void Player::Draw(void)
@@ -1092,24 +1107,39 @@ void Player::DrawParryCD(void)
 	{
 		// クールダウン中の色で現在の進行度を描画
 		// ゲージは左から右へ満たされていく (回復していく)
-		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + currentGaugeWidth, GAUGE_Y + GAUGE_H, cdColor, TRUE);
-
-		// ゲージの枠を描画
-		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
-
+		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + currentGaugeWidth, GAUGE_Y + GAUGE_H, cdColor, TRUE);
+		//// ゲージの枠を描画
+		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
 		// テキスト表示 (クールダウン中)
 		DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, cdColor, L"PARRY CD: %.1f", PARRY_TIME - stepParry_);
+	
+		parryCDBar_->SetBarSize({ currentGaugeWidth, GAUGE_H });
+		parryCDBar_->SetBarMaxWidth(GAUGE_W);
+		parryCDBar_->DrawParryCD();
 	}
 	else // クールダウンが完了している場合
 	{
 		// パリィ可能な緑色で全体を描画
-		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, fgColor, TRUE);
-		// ゲージの枠を描画
-		DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
-
+		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, fgColor, TRUE);
+		//// ゲージの枠を描画
+		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
 		// テキスト表示 (パリィ可能)
 		DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, fgColor, L"PARRY READY");
+
+		parryCDBar_->SetBarSize({ GAUGE_W, GAUGE_H });
+		parryCDBar_->SetBarMaxWidth(GAUGE_W);
+		parryCDBar_->DrawParry();
 	}
+}
+
+void Player::UpdateDebugImGui(void)
+{
+	ImGui::Begin("Player");
+	if (ImGui::Button("Damage"))
+	{
+		Damage(10.0f);
+	}
+	ImGui::End();
 }
 
 void Player::DrawHPBar(void)
@@ -1120,13 +1150,18 @@ void Player::DrawHPBar(void)
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	//色の設定
-	const int barBackColor = GetColor(100, 100, 100);	//背景（グレー）
-	const int barColor = GetColor(0, 255, 0);			//現在HP（緑）
-	//背景
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, barBackColor, TRUE);
-	//現在HP
-	DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, barColor, TRUE);
+	int hpBarWidth = static_cast<int>(480 * hp);
+	////色の設定
+	//const int barBackColor = GetColor(100, 100, 100);	//背景（グレー）
+	//const int barColor = GetColor(0, 255, 0);			//現在HP（緑）
+	////背景
+	//DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, barBackColor, TRUE);
+	////現在HP
+	//DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, barColor, TRUE);
 	//パリィクールダウン表示
 	DrawParryCD();
+
+	hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
+	hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);
+	hpBar_->Draw();
 }

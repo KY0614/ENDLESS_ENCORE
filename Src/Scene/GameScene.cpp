@@ -55,15 +55,8 @@ GameScene::~GameScene(void)
 
 void GameScene::Init(void)
 {
-	//探索BGM
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
-
-	//戦闘BGM
-	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::GAME_BGM).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::BATTLE, BATTLE_BGM_VOLUME);
+	//サウンド初期化
+	InitSound();
 
 	//ステージ
 	stage_ = std::make_shared<Stage>();
@@ -104,6 +97,19 @@ void GameScene::Draw(void)
 {
 	//更新ステップ
 	stateDraw_();
+}
+
+void GameScene::InitSound(void)
+{
+	//探索BGM
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::EXPLORE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLORE_BGM).handleId_);
+
+	//戦闘BGM
+	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::BATTLE_BGM).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::BATTLE, BATTLE_BGM_VOLUME);
 }
 
 void GameScene::Backstab(void)
@@ -298,6 +304,7 @@ void GameScene::DrawExplore(void)
 	player_->Draw();
 #ifdef _DEBUG
 	DrawString(0, 0, L"探索ステージ", 0xffffff);
+	//player_->DrawHPBar();
 #endif
 	
 }

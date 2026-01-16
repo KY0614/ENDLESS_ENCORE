@@ -32,7 +32,7 @@ void SoundManager::Add(const TYPE _type, const SOUND _sound, const int _data)
 	//再生するときデータの種類によって
 	//ループ再生か単発かを判断する
 	int mode = -1;
-	if (_type == TYPE::BGM) mode = DX_PLAYTYPE_LOOP;
+	if (_type == TYPE::BGM || _type == TYPE::LOOP_SE) mode = DX_PLAYTYPE_LOOP;
 	else mode = DX_PLAYTYPE_BACK;
 
 	//新規データのため情報を追加

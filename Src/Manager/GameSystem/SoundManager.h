@@ -14,7 +14,8 @@ public:
 	enum class TYPE {
 		NONE,
 		BGM,
-		SE
+		SE,
+		LOOP_SE,
 	};
 
 	enum class SOUND {
@@ -36,7 +37,8 @@ public:
 		PARRY,		//パリィSE
 
 		TITLE,		//タイトルBGM
-		PUSH_SPACE,	//スペースキーを押してくださいSE
+		PUSH_SPACE,	//ゲーム開始SE
+		FILM_SCROLL,//フィルムスクロールBGM(
 	};
 
 	struct SOUND_DATA

@@ -80,7 +80,7 @@ void Application::Run(void)
 	auto& imGuiWrapper = ImGuiWrapper::GetInstance();
 
 	//ƒQ[ƒ€ƒ‹[ƒv
-	while (ProcessMessage() == 0 && !isEnd_)
+	while (ProcessMessage() == 0 && !isEnd_ )
 	{
 		inputManager.Update();
 		imGuiWrapper.Update();
@@ -91,8 +91,6 @@ void Application::Run(void)
 		RenderVertex();
 
 		imGuiWrapper.Draw();
-
-		//fps_->Draw();
 
 		ScreenFlip();
 

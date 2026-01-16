@@ -6,6 +6,7 @@
 #include <DxLib.h>
 #include "ActorBase.h"
 
+class BarUI;
 class AnimationController;
 class Collider;
 class Capsule;
@@ -188,6 +189,8 @@ public:
 	void SetBackstabRotY(const Quaternion& rotY);
 
 private:
+	std::unique_ptr<BarUI> hpBar_;	//HPバー
+	std::unique_ptr<BarUI> parryCDBar_;	//HPバー
 	//マテリアル・レンダラー
 	std::unique_ptr<ModelMaterial> material_;
 	std::unique_ptr<ModelRenderer> renderer_;
@@ -483,4 +486,9 @@ private:
 	/// </summary>
 	/// <param name=""></param>
 	void DrawParryCD(void);
+
+
+	void UpdateDebugImGui(void);
+
+
 };

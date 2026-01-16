@@ -74,6 +74,11 @@ private:
 	bool isSkip_;	
 
 	/// <summary>
+	/// サウンド初期化処理
+	/// </summary>
+	void InitSound(void);
+
+	/// <summary>
 	/// バックスタブ処理
 	/// </summary>
 	void Backstab(void);
