@@ -302,6 +302,11 @@ void GameScene::DrawExplore(void)
 
 	//プレイヤー描画
 	player_->Draw();
+
+	SetFontSize(24);
+	DrawString(81, 81, L"ステージ上に行ってみよう", 0x000000);
+	DrawString(80, 80, L"ステージ上に行ってみよう", 0xffffff);
+	SetFontSize(16);
 #ifdef _DEBUG
 	DrawString(0, 0, L"探索ステージ", 0xffffff);
 	//player_->DrawHPBar();
@@ -314,7 +319,7 @@ void GameScene::UpdateEncount(void)
 	InputManager& ins = InputManager::GetInstance();
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
 	//スペースキー長押しでスキップ
-	if (ins.IsInputPressed("Parry"))
+	if (ins.IsInputPressed("Parry") && skipTimer_ < SKIP_TIME)
 	{
 		isSkip_ = true;
 		skipTimer_ += SceneManager::GetInstance().GetDeltaTime();

@@ -172,6 +172,10 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/ParryCDBar.png");
 	resourcesMap_.emplace(SRC::PLAYER_PARYY_CD_BAR, std::move(res));
 
+	//プレイヤーパリィバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/EnemyHPBar.png");
+	resourcesMap_.emplace(SRC::ENEMY_HP_BAR, std::move(res));
+
 	//コイン
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Coin.mv1");
 	resourcesMap_.emplace(SRC::COIN, std::move(res));
@@ -197,6 +201,10 @@ void ResourceManager::InitGame(void)
 	//パリィ
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Barrior.mp3");
 	resourcesMap_.emplace(SRC::PARRY_SE, std::move(res));
+	
+	//パリィ
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/damage.mp3");
+	resourcesMap_.emplace(SRC::DAMAGE_SE, std::move(res));
 	
 	//起き上がるときの音
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Wake_Up.mp3");

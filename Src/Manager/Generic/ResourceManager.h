@@ -37,6 +37,7 @@ public:
 
 		ENEMY,
 		ENEMY_BULLET,
+		ENEMY_HP_BAR,
 
 		COIN,
 
@@ -54,6 +55,7 @@ public:
 		LIGHT_UP_SE,	//ライトアップSE
 		BATTLE_BGM,		//バトルBGM
 		PARRY_SE,		//パリィSE
+		DAMAGE_SE,		//
 		WAKE_UP_SE,		//起き上がるSE(布が擦れる音)
 		FIRE_SE,		//火炎SE（火を噴く音）		
 		EXPLOSION_SE,	//爆発SE（ため攻撃用の音）

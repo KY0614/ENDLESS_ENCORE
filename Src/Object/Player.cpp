@@ -129,6 +129,9 @@ void Player::Init(void)
 	
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::WAKE_UP,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::WAKE_UP_SE).handleId_);
+	
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
 
 	colliders_.clear();
 
@@ -418,6 +421,14 @@ void Player::ChangeState(const STATE& state)
 
 	//各状態遷移の初期処理
 	stateChanges_[state_]();
+}
+
+void Player::Damage(float subHp)
+{
+	if (hp_ <= 0.0f)return;
+	hp_ -= subHp;
+	//ダメージ音再生
+	SoundManager::GetInstance().Play(SoundManager::SOUND::DAMAGE);
 }
 
 void Player::SetBackstabRotY(const Quaternion& rotY)

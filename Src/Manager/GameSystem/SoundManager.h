@@ -30,7 +30,8 @@ public:
 		//enemy—p
 		FIRE,		//“G‚Ì’eSE
 		FLAME,		//“G‚Ì’eSE
-		BACKSTAB,		//“G‚Ì’eSE
+		BACKSTAB,	//“G‚Ì’eSE
+		DAMAGE,
 
 		//PLAYER—p
 		WAKE_UP,	//‹N°SE

@@ -10,6 +10,7 @@
 #include "Common/AnimationController.h"
 #include "Common/Geometry/Capsule.h"
 #include "Common/Geometry/Sphere.h"
+#include "UI/BarUI.h"
 #include "Player.h"
 #include "EnemyBullet.h"
 #include "Enemy.h"
@@ -134,10 +135,14 @@ void Enemy::Init(void)
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::BACKSTAB,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::BACKSTAB_SE).handleId_);
+
 	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FLAME,
 	ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLOSION_SE).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::FLAME, SE_VOLUME);
 
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::DAMAGE, SE_VOLUME);
 	//3Dモデルの初期化
 	Init3DModel();
 
@@ -153,6 +158,18 @@ void Enemy::Init(void)
 
 	effectChargeAtkResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::EXPLOSIVE_EFFECT).handleId_;
+
+	hpBar_ = std::make_unique<BarUI>();
+	hpBar_->SetBarUISrc(ResourceManager::SRC::ENEMY_HP_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
+	hpBar_->Init();
+	const int HP_BAR_WIDTH = static_cast<int>(maxHp_);    // HPバーの最大幅
+	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
+	float hp = hp_ / maxHp_;
+	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
+	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
+	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
+	hpBar_->SetBarPos({ posX, posY });
+	hpBar_->SetActive(true);
 
 	//初期の状態を設定
 	ChangeState(STATE::NONE);
@@ -555,6 +572,8 @@ void Enemy::UpdateAttackNear(void)
 		if (player_.GetIsParry())
 		{
 			Damage(PARRY_DAMAGE);
+			//ダメージ音再生
+			SoundManager::GetInstance().Play(SoundManager::SOUND::DAMAGE);
 			ChangeState(STATE::DOWN);
 			return;
 		}
@@ -664,6 +683,8 @@ void Enemy::UpdateShotOne(void)
 			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
 			Damage(PARRY_DAMAGE);
+			//ダメージ音再生
+			SoundManager::GetInstance().Play(SoundManager::SOUND::DAMAGE);
 			bullet->SetStateDestroy();
 			hitCount_++;
 			continue;
@@ -773,6 +794,8 @@ void Enemy::UpdateShotAll(void)
 			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
 			Damage(PARRY_DAMAGE);
+			//ダメージ音再生
+			SoundManager::GetInstance().Play(SoundManager::SOUND::DAMAGE);
 			bullet->SetStateDestroy();
 			hitCount_++;
 			continue;
@@ -1341,11 +1364,6 @@ const json Enemy::GetJsonData(void)const
 
 void Enemy::DrawHPBar(void)
 {
-	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
-	const float barOffset = 100.0f;
-	const int HP_BAR_X = static_cast<int>(pos.x - barOffset);// HPバーの左上X座標
-	const int HP_BAR_Y = static_cast<int>(pos.z + barOffset);// HPバーの左上Y座標
-
 	const int HP_BAR_WIDTH = static_cast<int>(maxHp_);    // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
 	float hp = hp_ / maxHp_;
@@ -1356,16 +1374,19 @@ void Enemy::DrawHPBar(void)
 	const int barBackColor = GetColor(100, 100, 100);	//背景（グレー）
 	const int barColor = GetColor(255, 0, 0);			//現在HP（赤）
 	// 背景（グレー）
-	DrawBox(posX,
-		posY,
-		posX + HP_BAR_WIDTH,
-		posY + HP_BAR_HEIGHT,
-		barBackColor, TRUE);
-	// 現在HP（赤）
-	DrawBox(posX,
-		posY,
-		posX + barWidth,
-		posY + HP_BAR_HEIGHT,
-		barColor, TRUE);
+	//DrawBox(posX,
+	//	posY,
+	//	posX + HP_BAR_WIDTH,
+	//	posY + HP_BAR_HEIGHT,
+	//	barBackColor, TRUE);
+	//// 現在HP（赤）
+	//DrawBox(posX,
+	//	posY,
+	//	posX + barWidth,
+	//	posY + HP_BAR_HEIGHT,
+	//	barColor, TRUE);
 
+	hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
+	hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);
+	hpBar_->Draw();
 }

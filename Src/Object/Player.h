@@ -150,7 +150,7 @@ public:
 	/// ダメージを与える
 	/// </summary>
 	/// <param name="subHp">ダメージ量</param>
-	void Damage(float subHp) { hp_ -= subHp; }
+	void Damage(float subHp);
 
 	/// <summary>
 	/// 回避中かどうかを取得する

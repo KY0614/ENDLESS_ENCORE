@@ -4,6 +4,7 @@
 #include "../Libs/nlohmann/json.hpp"
 #include "ActorBase.h"
 
+class BarUI;
 class AnimationController;
 class Sphere;
 class Player;
@@ -117,7 +118,7 @@ public:
 	const void SetIsEncount(const bool isEncount) { isEncount_ = isEncount; }
 
 private:
-
+	std::unique_ptr<BarUI> hpBar_;	//HPバー
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 
