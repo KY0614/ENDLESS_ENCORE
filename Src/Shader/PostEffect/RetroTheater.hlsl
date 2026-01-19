@@ -34,14 +34,16 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     }
     
     //シミノイズ-----------------------------------------------------------
-    float noiseScale = 0.03f;
-    float2 localUV = (PSInput.uv - g_noise_uv) / noiseScale + 0.5f;
-    // 画像の範囲内だけ処理
+    float noiseScale = 0.03f;   //ノイズの拡大率
+    float uvCenter = 0.5f;      //ノイズの中心位置
+    //ノイズ用UVを計算
+    float2 localUV = (PSInput.uv - g_noise_uv) / noiseScale + uvCenter;
+    //localUVが0.0～1.0fの範囲内かチェックし、
+    //範囲内の場合のみノイズを合成する
     if (localUV.x >= 0.0f && localUV.x <= 1.0f && localUV.y >= 0.0f && localUV.y <= 1.0f)
     {
         //ノイズ用の画像
         float4 noiseCol = noiseTexture.Sample(texSampler, localUV);
-
         //シミノイズを合成
         dstCol.rgb = lerp(dstCol.rgb, noiseCol.rgb, noiseCol.a);
     }
@@ -63,24 +65,19 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     float holeMarginX = 0.02f;  //穴の左右マージン
     float holeMarginY = 0.005f; //穴の上下マージン
     float holePitch = 0.18f;    //穴の縦方向ピッチ
-
     //左側の範囲
     float sideFilm = step(PSInput.uv.x, filmWidth) + step(1.0f - filmWidth, PSInput.uv.x);
     //最大値を1.0に固定
     sideFilm = saturate(sideFilm);
-
     //穴のY座標を周期的に配置
     float uvY = frac((PSInput.uv.y + g_film_scroll) / holePitch);
     float holeY = step(holeMarginY, uvY) * step(uvY, holeMarginY + holeHeight);
-
     //左右の穴範囲
     float leftHole = step(holeMarginX, PSInput.uv.x) * step(PSInput.uv.x, holeMarginX + holeWidth);
     float rightHole = step(1.0f - holeMarginX - holeWidth, PSInput.uv.x) * step(PSInput.uv.x, 1.0f - holeMarginX);
-
     //穴の合成
     float holeMask = (leftHole + rightHole) * holeY;
     holeMask = saturate(holeMask);
-
     //黒帯→白穴の合成
     float3 filmColor = lerp(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 1.0f), holeMask);
     dstCol.rgb = lerp(dstCol.rgb, filmColor, sideFilm);

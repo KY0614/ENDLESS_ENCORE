@@ -444,6 +444,8 @@ private:
 	/// <returns>Jsonデータ</returns>
 	const nlohmann::json GetJsonData(void)const;
 
+	void DebugImGui(void);
+
 	//状態を遷移させる用の時間管理変数
 	float stateStep_;
 	//方向転換用の時間管理変数

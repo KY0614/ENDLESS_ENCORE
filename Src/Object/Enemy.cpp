@@ -1,5 +1,6 @@
 #include <random>
 #include <EffekseerForDXLib.h>
+#include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Utility/CommonUtility.h"
 #include "../Manager/GameSystem/SoundManager.h"
@@ -195,6 +196,7 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
+	DebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -1360,6 +1362,15 @@ const json Enemy::GetJsonData(void)const
 		JsonManager::JSON_DATA::ENEMY,KEY_ENEMY);
 
 	return data;
+}
+
+void Enemy::DebugImGui(void)
+{
+	ImGui::Begin("Enemy");
+
+	ImGui::Text("isDown_: %d", isDown_);
+
+	ImGui::End();
 }
 
 void Enemy::DrawHPBar(void)
