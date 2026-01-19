@@ -41,21 +41,9 @@ private:
 	//ポストエフェクト用スクリーン
 	int postEffectScreen_;
 
-	//ポストエフェクト用(セピア調)
+	//ポストエフェクト用(映写機風)マテリアルとレンダラー
 	std::unique_ptr<PixelMaterial> retroTheaterMaterial_;
 	std::unique_ptr<PixelRenderer> retroTheaterRenderer_;
-
-	//ポストエフェクト用(セピア調)
-	std::unique_ptr<PixelMaterial> sepiaMaterial_;
-	std::unique_ptr<PixelRenderer> sepiaRenderer_;
-
-	//ポストエフェクト用(ビネット)周りを暗くするやつ
-	std::unique_ptr<PixelMaterial> vignetteMaterial_;
-	std::unique_ptr<PixelRenderer> vignetteRenderer_;
-
-	//ポストエフェクト用(線ノイズ)
-	std::unique_ptr<PixelMaterial> filmNoiseMaterial_;
-	std::unique_ptr<PixelRenderer> filmNoiseRenderer_;
 
 	//タイトルロゴ画像ハンドル
 	int logoImg_;
