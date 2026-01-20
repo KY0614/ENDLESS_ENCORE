@@ -176,4 +176,5 @@ private:
 	/// </summary>
 	void SkipBarDraw(void);
 	
+	void UpdateDebugImGui(void);
 };

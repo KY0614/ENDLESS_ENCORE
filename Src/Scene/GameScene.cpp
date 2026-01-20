@@ -1,5 +1,6 @@
 #include <DxLib.h>
 #include<EffekseerForDXLib.h>
+#include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Common/Fader.h"
 #include "../Utility/CommonUtility.h"
@@ -91,6 +92,8 @@ void GameScene::Update(void)
 {
 	//更新ステップ
 	stateUpdate_();
+
+	UpdateDebugImGui();
 }
 
 void GameScene::Draw(void)
@@ -267,12 +270,8 @@ void GameScene::DrawWakeUp(void)
 	player_->Draw();
 
 	if (!isSkip_)return;
-	SkipBarDraw();
 
-#ifdef _DEBUG
-	DrawString(0, 0, L"ゲーム開始", 0xffffff);
-#endif
-	
+	SkipBarDraw();	
 }
 
 void GameScene::UpdateExplore(void)
@@ -303,15 +302,6 @@ void GameScene::DrawExplore(void)
 	//プレイヤー描画
 	player_->Draw();
 
-	SetFontSize(24);
-	DrawString(81, 81, L"ステージ上に行ってみよう", 0x000000);
-	DrawString(80, 80, L"ステージ上に行ってみよう", 0xffffff);
-	SetFontSize(16);
-#ifdef _DEBUG
-	DrawString(0, 0, L"探索ステージ", 0xffffff);
-	//player_->DrawHPBar();
-#endif
-	
 }
 
 void GameScene::UpdateEncount(void)
@@ -383,10 +373,6 @@ void GameScene::DrawEncount(void)
 
 	if (!isSkip_)return;
 	SkipBarDraw();
-#ifdef _DEBUG
-	DrawString(0, 0, L"エンカウント", 0xffffff);
-#endif
-	
 }
 
 void GameScene::UpdateBattle(void)
@@ -468,4 +454,35 @@ void GameScene::SkipBarDraw(void)
 	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + (int)(GAUGE_W * progressRatio), GAUGE_Y + GAUGE_H,
 		skipColor, TRUE);
 
+}
+
+void GameScene::UpdateDebugImGui(void)
+{
+	
+	ImGui::Begin("GameScene");
+
+	
+	if (ImGui::Button("Explore"))
+	{
+		InitStateExplore();
+		ChangeState(STATE::EXPLORE);
+	}
+	if (ImGui::Button("Encount"))
+	{
+		enemy_->ChangeState(Enemy::STATE::NONE);
+		player_->ChangeState(Player::STATE::NONE);
+		ChangeState(STATE::ENCOUNT);
+		encountScene_->Start();
+	}
+	if (ImGui::Button("Battle"))
+	{
+		player_->SetPos({ 10.0, -217.0, 900.0 });
+		InitStateBattle();
+		mainCamera->SetFollow(&player_->GetTransform());
+		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+		ChangeState(STATE::BATTLE);
+	}
+
+	
+	ImGui::End();
 }
