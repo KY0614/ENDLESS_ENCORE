@@ -578,8 +578,9 @@ void Player::UpdatePlay(void)
 	Collision();
 
 	//歩きエフェクト
-	EffectFootSmoke();
+	//EffectFootSmoke();
 
+	//パリィエフェクト位置更新
 	EffectParryPosUpdate();
 
 	//重力方向に沿って回転させる

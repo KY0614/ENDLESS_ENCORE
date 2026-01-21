@@ -3,23 +3,28 @@
 #include <map>
 #include <vector>
 #include <string>
+#include "../Common/Vector2.h"
 
 class Tutorial
 {
 public:
 	//チュートリアルの種類
-	enum class TUTORIAL_TYPE
+	enum class STATE
 	{
+		NONE,		//なし
 		MOVE,		//移動
 		CAMERA,		//カメラ操作
+		DASH,		//ダッシュ
 		JUMP,		//ジャンプ
 		DODGE,		//回避
 		PARRY,		//パリィ
 	};
 
+	//チュートリアルステップ構造体
 	struct TutorialStep
 	{
-		TUTORIAL_TYPE type;		//チュートリアルの種類
+		STATE state_;			//チュートリアルの種類
+		Vector2 pos_;			//チュートリアル表示位置
 		std::string keyGuide_;	//キーガイドの文字列
 		std::string controllerGuide_; //コントローラーガイドの文字列
 		float requiredTime_;	//クリアに必要な時間
@@ -27,8 +32,11 @@ public:
 		bool isCompleted;		//クリアしたかどうか
 	};
 
-	//コンストラクタ
-	Tutorial(void);
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="firstStep">最初に表示するチュートリアル</param>
+	Tutorial(const TutorialStep& firstStep);
 	//デストラクタ
 	~Tutorial(void);
 
@@ -47,36 +55,95 @@ public:
 	/// </summary>
 	void Draw(void);
 
-	void SetTutorialOrder(const std::vector<TUTORIAL_TYPE> order);
+	/// <summary>
+	/// チュートリアルステップ追加
+	/// </summary>
+	/// <param name="tutorialStep">追加するチュートリアル(２個目以降に表示するもの)</param>
+	void AddTutorialStep(const TutorialStep& tutorialStep);
 
 private:
 	//現在のチュートリアルタイプ
-	TUTORIAL_TYPE tutorialType_; 
+	STATE state_; 
 
 	//状態管理(状態遷移時初期処理)
-	std::map<TUTORIAL_TYPE, std::function<void(void)>> stateChanges_;
+	std::map<STATE, std::function<void(void)>> stateChanges_;
 
 	//状態管理(更新ステップ)
 	std::function<void(void)> stateUpdate_;
 
-	//チュートリアル
-	std::vector<TUTORIAL_TYPE> tutorialStep_;
+	//チュートリアルステップリスト
+	std::vector<TutorialStep> step_;
 
-	//現在のチュートリアルインデックス
-	int currentTutorialIndex_; 
+	//現在のチュートリアルステップインデックス
+	int currentStepIndex_; 
 
-	void ChangeState(TUTORIAL_TYPE type);
+	//状態遷移--------------------------------------------------------
 
+	/// <summary>
+	/// 状態変更
+	/// </summary>
+	/// <param name="state">遷移したい状態</param>
+	void ChangeState(STATE type);
+
+	/// <summary>
+	/// 状態遷移：NONE
+	/// </summary>
+	void ChangeStateNone(void);
+
+	/// <summary>
+	/// 状態遷移：MOVE
+	/// </summary>
 	void ChangeStateMove(void);
+
+	/// <summary>
+	/// 状態遷移：CAMERA
+	/// </summary>
 	void ChangeStateCamera(void);
+
+	/// <summary>
+	/// 状態遷移：JUMP
+	/// </summary>
 	void ChangeStateJump(void);
+
+	/// <summary>
+	/// 状態遷移：DODGE
+	/// </summary>
 	void ChangeStateDodge(void);
+
+	/// <summary>
+	/// 状態遷移：PARRY
+	/// </summary>
 	void ChangeStateParry(void);
 
+	//更新ステップ--------------------------------------------------------
+
+	/// <summary>
+	/// 更新：NONE
+	/// </summary>
+	void UpdateNone(void);
+
+	/// <summary>
+	/// 更新：MOVE
+	/// </summary>
 	void UpdateMove(void);
+
+	/// <summary>
+	/// 更新：CAMERA
+	/// </summary>
 	void UpdateCamera(void);
+
+	/// <summary>
+	/// 更新：JUMP
+	/// </summary>
 	void UpdateJump(void);
-	void UpdateJump(void);
+
+	/// <summary>
+	/// 更新：DODGE
+	/// </summary>
 	void UpdateDodge(void);
+
+	/// <summary>
+	/// 更新：PARRY
+	/// </summary>
 	void UpdateParry(void);
 };

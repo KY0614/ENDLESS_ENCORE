@@ -3,13 +3,11 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Common/Fader.h"
-#include "../Utility/CommonUtility.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/ResourceManager.h"
-#include "../Object/Common/Geometry/Sphere.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
@@ -398,11 +396,10 @@ void GameScene::DrawBattle(void)
 {
 	//ƒvƒŒƒCƒ„[•`‰æ
 	stage_->Draw();
-	//“G•`‰æ
-	enemy_->Draw();
 	//ƒvƒŒƒCƒ„[•`‰æ
 	player_->Draw();
-
+	//“G•`‰æ
+	enemy_->Draw();
 
 	if(enemy_->GetIsDead())
 	{

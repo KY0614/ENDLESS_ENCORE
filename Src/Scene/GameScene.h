@@ -7,6 +7,7 @@
 class Player;
 class Enemy;
 class Stage;
+class Tutorial;
 class EncountScene;
 
 class GameScene : public SceneBase

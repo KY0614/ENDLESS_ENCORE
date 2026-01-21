@@ -157,7 +157,6 @@ private:
 	//Å‘å‘Ì—Í
 	float maxHp_;
 
-
 	//‰ñ“]
 	Quaternion enemyRotY_;		//Y²‰ñ“]
 	Quaternion goalQuaRot_;		//–Ú•W‰ñ“]
