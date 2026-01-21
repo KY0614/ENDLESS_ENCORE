@@ -66,6 +66,8 @@ private:
 	std::shared_ptr<Enemy> enemy_;
 	//ステージ
 	std::shared_ptr<Stage> stage_;
+	//チュートリアル
+	std::shared_ptr<Tutorial> tutorial_;
 	//エンカウント演出
 	std::unique_ptr<EncountScene> encountScene_;
 

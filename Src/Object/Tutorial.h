@@ -29,7 +29,6 @@ public:
 		std::string controllerGuide_; //コントローラーガイドの文字列
 		float requiredTime_;	//クリアに必要な時間
 		int requiredNum_;		//クリアに必要な回数
-		bool isCompleted;		//クリアしたかどうか
 	};
 
 	/// <summary>
@@ -83,7 +82,7 @@ private:
 	/// 状態変更
 	/// </summary>
 	/// <param name="state">遷移したい状態</param>
-	void ChangeState(STATE type);
+	void ChangeState(STATE state);
 
 	/// <summary>
 	/// 状態遷移：NONE
@@ -146,4 +145,6 @@ private:
 	/// 更新：PARRY
 	/// </summary>
 	void UpdateParry(void);
+
+	void DebugImGuiUpdate(void);
 };

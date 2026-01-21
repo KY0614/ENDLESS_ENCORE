@@ -124,13 +124,6 @@ void Input::Update(void)
 void Input::ResetTable()
 {
 	inputTable_ = {
-	{"Enter",{
-		{PeripheralType::KEYBOARD,KEY_INPUT_RETURN},
-		{PeripheralType::GAMEPAD,PAD_INPUT_B},//selectボタン
-		//{PeripheralType::mouse,MOUSE_INPUT_LEFT}}//左クリック	
-		}
-	},
-
 	{"Pause",{
 		{PeripheralType::KEYBOARD,KEY_INPUT_P},
 		{PeripheralType::GAMEPAD,PAD_INPUT_R}}	//STARTボタン

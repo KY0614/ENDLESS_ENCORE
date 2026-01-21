@@ -11,6 +11,7 @@
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
+#include "../Object/Tutorial.h"
 #include "EncountScene.h"
 #include "GameScene.h"
 
@@ -57,10 +58,6 @@ void GameScene::Init(void)
 	//サウンド初期化
 	InitSound();
 
-	//ステージ
-	stage_ = std::make_shared<Stage>();
-	stage_->Init();
-
 	//プレイヤー
 	player_ = std::make_shared<Player>();
 	player_->Init();
@@ -68,6 +65,31 @@ void GameScene::Init(void)
 	//敵
 	enemy_ = std::make_shared<Enemy>(*player_);
 	enemy_->Init();
+
+	//ステージ
+	stage_ = std::make_shared<Stage>();
+	stage_->Init();
+
+	//チュートリアル
+	Tutorial::TutorialStep firstStep = {
+		Tutorial::STATE::MOVE,
+		{0,Application::SCREEN_SIZE_Y / 2},
+		"WASDで移動",
+		"左スティックで移動",
+		2.0f,
+		0
+	};
+	Tutorial::TutorialStep secondStep = {
+		Tutorial::STATE::CAMERA,
+		{0,Application::SCREEN_SIZE_Y / 2},
+		"矢印キーでカメラ操作",
+		"右スティックでカメラ操作",
+		1.5f,
+		0
+	};
+	tutorial_ = std::make_shared<Tutorial>(firstStep);
+	tutorial_->Init();
+	tutorial_->AddTutorialStep(secondStep);
 
 	//演出シーン
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
@@ -289,6 +311,7 @@ void GameScene::UpdateExplore(void)
 	//更新
 	player_->Update();
 	stage_->Update();
+	tutorial_->Update();
 	encountScene_->Update();
 }
 
@@ -299,6 +322,9 @@ void GameScene::DrawExplore(void)
 
 	//プレイヤー描画
 	player_->Draw();
+
+	//チュートリアル描画
+	tutorial_->Draw();
 
 }
 
