@@ -38,7 +38,7 @@ public:
 		CRANE_UP,	//カメラを上昇させる(向き固定)
 		TRACK,		//左右に移動させる(向き固定)
 		DOLLY,		//被写体に対してカメラを前後移動させる
-		ZOOM_OUT,	//ズームアウト
+		ZOOM_OUT_DOLLY,	//ズームアウトしながらドリー移動
 		FIXED_POINT,//固定カメラ
 		FOLLOW,		//追従
 		FREE,		//自由
@@ -118,7 +118,7 @@ public:
 	/// <param name="startPos">移動開始地点</param>
 	/// <param name="endPos">移動終了地点</param>
 	/// <param name="totalMoveTime">移動にかかる総時間</param>
-	void SetTrackCameraQuadOut(
+	void SetTrackQuadOut(
 		const VECTOR& startPos,
 		const VECTOR& endPos,
 		const float& totalMoveTime = 1.0f);
@@ -130,11 +130,26 @@ public:
 	/// <param name="objectPos">被写体の座標</param>
 	/// <param name="object2CameraDistance">カメラから被写体までの距離</param>
 	/// <param name="totalMoveTime">移動にかかる総時間</param>
-	void SetDollyInQuadOut(
+	void SetDollyQuadOut(
 		const VECTOR& startPos,
 		const VECTOR& endPos,
 		const VECTOR& objectPos,
 		const float& object2CameraDistance,
+		const float& totalMoveTime = 1.0f);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="endFov"></param>
+	/// <param name="startPos"></param>
+	/// <param name="endPos"></param>
+	/// <param name="targetPos"></param>
+	/// <param name="totalMoveTime"></param>
+	void SetZoomOutDolly(
+		const float& endFov,
+		const VECTOR& startPos,
+		const VECTOR& endPos, 
+		const VECTOR& targetPos,
 		const float& totalMoveTime = 1.0f);
 
 	//追従対象の設定
@@ -194,9 +209,17 @@ private:
 	VECTOR dollyStartPos_;		//開始位置
 	VECTOR dollyEndPos_;		//終了位置
 	VECTOR dollyObjectPos_;		//被写体の座標
-	float object2CameraDistance_;	//カメラから被写体までの距離
+	float object2CameraDistance_;//カメラから被写体までの距離
 	float dollyTotalTime_;		//総移動時間
-	float dollyElapsedTime_;		//経過時間
+	float dollyElapsedTime_;	//経過時間
+
+	//ズームアウト用
+	VECTOR zoomOutDollyStartPos_;	//開始位置
+	VECTOR zoomOutDollyEndPos_;		//終了位置
+	VECTOR zoomOutDollyTargetPos_;	//被写体の座標
+	float zoomOutFov_;				//最終FOV
+	float zoomOutDollyTotalTime_;		//総移動時間
+	float zoomOutDollyElapsedTime_;		//経過時間
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
@@ -219,7 +242,7 @@ private:
 	void SetBeforeDrawCraneUp(void);
 	void SetBeforeDrawTrack(void);
 	void SetBeforeDrawDolly(void);
-	void SetBeforeDrawSurroundView(void);
+	void SetBeforeDrawZoomOutDolly(void);
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawTopFixed(void);
 	void SetBeforeDrawFollow(void);

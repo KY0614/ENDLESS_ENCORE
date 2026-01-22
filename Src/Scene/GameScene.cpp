@@ -383,6 +383,7 @@ void GameScene::UpdateEncount(void)
 		isSkip_ = false;
 		skipTimer_ = 0.0f;
 	}
+
 	//エンカウントシーンが終了し、
 	// フェードアウトが完了したらバトル状態へ遷移
 	if ((encountScene_->IsFinished() || skipTimer_ >= SKIP_TIME) &&

@@ -17,6 +17,8 @@ namespace
 	//マウス操作用
 	const float FPS_LIMIT_X_UP_RAD = -80.0f * (DX_PI_F / 180.0f);	//上限
 	const float FPS_LIMIT_X_DW_RAD = 70.0f * (DX_PI_F / 180.0f);	//下限
+	//視野角
+	const float DEFAULT_CAMERA_FOV = 60.0f;
 }
 
 Camera::Camera(void)
@@ -50,7 +52,13 @@ Camera::Camera(void)
 	localF2TPos_ = CommonUtility::VECTOR_ZERO;
 	isLockOn_ = false;
 	isActionEnd_ = false;
-	fov_ = 60.0f;
+	fov_ = 0.0f;
+	zoomOutDollyStartPos_ = CommonUtility::VECTOR_ZERO;
+	zoomOutDollyEndPos_ = CommonUtility::VECTOR_ZERO;
+	zoomOutDollyTargetPos_ = CommonUtility::VECTOR_ZERO;
+	zoomOutFov_ = 0.0f;
+	zoomOutDollyTotalTime_ = 0.0f;
+	zoomOutDollyElapsedTime_ = 0.0f;
 }
 
 Camera::~Camera(void)
@@ -67,6 +75,8 @@ void Camera::Init(void)
 	cameraFar_ = CAMERA_FAR;
 	localF2CPos_ = LOCAL_F2C_POS;
 	localF2TPos_ = LOCAL_F2T_POS;
+	//視野角の初期設定
+	fov_ = DEFAULT_CAMERA_FOV;
 }
 
 void Camera::Update(void)
@@ -219,7 +229,7 @@ void Camera::SetCraneUpPos(
 	craneUpSpeed_ = craneUpSpeed;
 }
 
-void Camera::SetTrackCameraQuadOut(
+void Camera::SetTrackQuadOut(
 	const VECTOR& startPos,
 	const VECTOR& endPos,
 	const float& totalMoveTime)
@@ -233,7 +243,7 @@ void Camera::SetTrackCameraQuadOut(
 	trackElapsedTime_ = 0.0f;
 }
 
-void Camera::SetDollyInQuadOut(
+void Camera::SetDollyQuadOut(
 	const VECTOR& startPos,
 	const VECTOR& endPos,
 	const VECTOR& objectPos,
@@ -248,6 +258,21 @@ void Camera::SetDollyInQuadOut(
 	float totalDistance = VSize(VSub(dollyObjectPos_, startPos));
 	dollyTotalTime_ = totalMoveTime;
 	dollyElapsedTime_ = 0.0f;
+}
+
+void Camera::SetZoomOutDolly(
+	const float& endFov,
+	const VECTOR& startPos,
+	const VECTOR& endPos,
+	const VECTOR& targetPos,
+	const float& totalMoveTime)
+{
+	zoomOutFov_ = endFov;
+	zoomOutDollyStartPos_ = startPos;
+	zoomOutDollyEndPos_ = endPos;
+	zoomOutDollyTargetPos_ = targetPos;
+	zoomOutDollyTotalTime_ = totalMoveTime;
+	zoomOutDollyElapsedTime_ = 0.0f;
 }
 
 void Camera::SetDefault(void)
@@ -428,8 +453,27 @@ void Camera::SetBeforeDrawDolly(void)
 		dollyElapsedTime_, dollyTotalTime_, dollyStartPos_.z, dollyEndPos_.z);
 }
 
-void Camera::SetBeforeDrawSurroundView(void)
+void Camera::SetBeforeDrawZoomOutDolly(void)
 {
+	//終了座標から現在座標までの距離を取得
+	float pos2StartPos = VSize(VSub(zoomOutDollyEndPos_, pos_));
+	//一定距離以下になったら終了
+	const float distance = 1.0f;
+	isActionEnd_ = pos2StartPos <= distance;
+
+	if (isActionEnd_)return;
+
+	//経過時間
+	zoomOutDollyElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	//制限時間内に収める
+	zoomOutDollyElapsedTime_ = std::clamp(zoomOutDollyElapsedTime_, 0.0f, zoomOutDollyTotalTime_);
+	// 各軸ごとにQuadOutイージングで補間
+	pos_.x = Easing::QuadOut(
+		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_, zoomOutDollyStartPos_.x, zoomOutDollyEndPos_.x);
+	pos_.y = Easing::QuadOut(
+		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_, zoomOutDollyStartPos_.y, zoomOutDollyEndPos_.y);
+	pos_.z = Easing::QuadOut(
+		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_, zoomOutDollyStartPos_.z, zoomOutDollyEndPos_.z);
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)

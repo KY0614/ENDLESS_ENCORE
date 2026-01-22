@@ -378,6 +378,7 @@ void Enemy::ChangeStateCastSpell(void)
 
 void Enemy::ChangeStateAttackPlayer(void)
 {
+	animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
 	stateUpdate_ = std::bind(&Enemy::UpdateAttackPlayer, this);
 }
 

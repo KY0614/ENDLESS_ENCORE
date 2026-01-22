@@ -113,7 +113,7 @@ void EncountScene::ChangeStatePlayerWalk(void)
 	player_.ChangeState(Player::STATE::STAGE_WALK);
 	//カメラをトラック移動させる(ステージからプレイヤーに向かって)
 	//足元を映すように
-	mainCamera->SetTrackCameraQuadOut(
+	mainCamera->SetTrackQuadOut(
 		PLAYER_WALK_START_POS,
 		PLAYER_WALK_END_POS,
 		CAMERA_MOVE_TIME_MAX);
@@ -193,7 +193,7 @@ void EncountScene::ChangeStateEnemyAttention(void)
 	targetPos.y += CAMERA_ENEMY_HEAD_OFFSET_Y;
 	//ドリーインを行う合計の時間
 	const float dollyInTotalTime = 5.0f;
-	mainCamera->SetDollyInQuadOut(startPos, endPos,targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
+	mainCamera->SetDollyQuadOut(startPos, endPos,targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
 	mainCamera->ChangeMode(Camera::MODE::DOLLY);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttention, this);
 }
@@ -219,8 +219,8 @@ void EncountScene::ChangeStateEnemyCastSpell(void)
 	//注視点を敵の位置にセット
 	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Spine2");
 	//ドリーを行う合計の時間
-	const float dollyTotalTime = 6.0f;
-	mainCamera->SetDollyInQuadOut(startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyTotalTime);
+	const float dollyTotalTime = 5.0f;
+	mainCamera->SetDollyQuadOut(startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyTotalTime);
 	mainCamera->ChangeMode(Camera::MODE::DOLLY);
 	enemy_.ChangeState(Enemy::STATE::CAST_SPELL);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyCastSpell, this);
@@ -229,19 +229,18 @@ void EncountScene::ChangeStateEnemyCastSpell(void)
 void EncountScene::ChangeStateEnemyAttack(void)
 {
 	//カメラを敵の右斜め前からスタート
-	float distance = 80.0f;//カメラとの距離
-	const VECTOR& enemyForwardRight = VAdd(
-		enemy_.GetTransform().GetForward(), enemy_.GetTransform().GetRight());
-	VECTOR pos = VAdd(
+	const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
+	//終了座標(目的位置)を計算
+	//被写体から距離を取った位置を終了座標とする
+	const float distance = 160.0f;
+	VECTOR endPos = VAdd(
 		enemy_.GetTransform().pos,
-		VScale(enemyForwardRight, distance));
-	//カメラの高さ調整
-	pos.y += CAMERA_ENEMY_HEAD_OFFSET_Y;
+		VScale(enemyForward, distance));
+	endPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
 	//注視点を敵の位置にセット
-	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Spine2");
-	mainCamera->SetFixedPointPos(pos, targetPos);
+	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Head");
+	mainCamera->SetFixedPointPos(endPos, targetPos);
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
-	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyCastSpell, this);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttack, this);
 }
 
@@ -442,6 +441,14 @@ void EncountScene::UpdateEnemyCastSpell(void)
 
 void EncountScene::UpdateEnemyAttack(void)
 {
+	//一定時間経過
+	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
+	const float moveInterval = 1.8f;
+	if(intervalTimer_ >= moveInterval)
+	{
+		//mainCamera->SetDollyQuadOut(startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
+		//mainCamera->ChangeMode(Camera::MODE::ZOOM_OUT);
+	}
 }
 
 void EncountScene::UpdateFinish(void)
