@@ -10,15 +10,15 @@ Tutorial::Tutorial(const TutorialStep& firstStep)
 	//最初のチュートリアルを追加
 	step_.push_back(firstStep);
 	state_ = STATE::NONE;
-	currentStepIndex_ = 0;
+	viewGuide_ = "";
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Tutorial::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Tutorial::ChangeStateMove, this));
-	stateChanges_.emplace(STATE::CAMERA, std::bind(&Tutorial::ChangeStateMove, this));
-	stateChanges_.emplace(STATE::DASH, std::bind(&Tutorial::ChangeStateMove, this));
-	stateChanges_.emplace(STATE::JUMP, std::bind(&Tutorial::ChangeStateMove, this));
-	stateChanges_.emplace(STATE::DODGE, std::bind(&Tutorial::ChangeStateMove, this));
-	stateChanges_.emplace(STATE::PARRY, std::bind(&Tutorial::ChangeStateMove, this));
+	stateChanges_.emplace(STATE::CAMERA, std::bind(&Tutorial::ChangeStateCamera, this));
+	stateChanges_.emplace(STATE::DASH, std::bind(&Tutorial::ChangeStateDash, this));
+	stateChanges_.emplace(STATE::JUMP, std::bind(&Tutorial::ChangeStateJump, this));
+	stateChanges_.emplace(STATE::DODGE, std::bind(&Tutorial::ChangeStateDodge, this));
+	stateChanges_.emplace(STATE::PARRY, std::bind(&Tutorial::ChangeStateParry, this));
 }
 
 Tutorial::~Tutorial(void)
@@ -27,6 +27,7 @@ Tutorial::~Tutorial(void)
 
 void Tutorial::Init(void)
 {
+	viewGuide_ = step_.front().keyGuide_;
 	ChangeState(step_.front().state_);
 }
 
@@ -43,16 +44,39 @@ void Tutorial::Draw(void)
 	//表示するチュートリアルが無ければ終了
 	if (step_.front().state_ == STATE::NONE)return;
 
+	if (CheckHitKeyAll() > 0)viewGuide_ = step_.front().keyGuide_;
+	else if (GetJoypadInputState(DX_INPUT_PAD1) > 0)viewGuide_ = step_.front().controllerGuide_;
+
 	DrawFormatString(
 		step_.front().pos_.x,
 		step_.front().pos_.y,
 		0xFFFFFF,
-		StringUtility::StringToWstring(step_.front().keyGuide_).c_str());
+		StringUtility::StringToWstring(viewGuide_).c_str());
 }
 
 void Tutorial::AddTutorialStep(const TutorialStep& tutorialStep)
 {
 	step_.push_back(tutorialStep);
+}
+
+void Tutorial::NextStep(void)
+{
+	//時間と回数が0以下になったらクリア
+	if (step_.front().requiredTime_ <= 0.0f &&
+		step_.front().requiredNum_ <= 0)
+	{
+		step_.erase(step_.begin());
+		if(step_.empty())
+		{
+			//チュートリアル終了
+			TutorialStep endStep;
+			endStep.state_ = STATE::NONE;
+			step_.push_back(endStep);
+		}
+		//状態変更
+		ChangeState(step_.front().state_);
+		return;
+	}
 }
 
 void Tutorial::ChangeState(STATE state)
@@ -77,6 +101,11 @@ void Tutorial::ChangeStateMove(void)
 void Tutorial::ChangeStateCamera(void)
 {
 	stateUpdate_ = std::bind(&Tutorial::UpdateCamera, this);
+}
+
+void Tutorial::ChangeStateDash(void)
+{
+	stateUpdate_ = std::bind(&Tutorial::UpdateDash, this);
 }
 
 void Tutorial::ChangeStateJump(void)
@@ -109,13 +138,8 @@ void Tutorial::UpdateMove(void)
 	{
 		step_.front().requiredTime_ -= SceneManager::GetInstance().GetDeltaTime();
 	}
-	//時間と回数が0以下になったらクリア
-	if (step_.front().requiredTime_ <= 0.0f &&
-		step_.front().requiredNum_ <= 0)
-	{
-		step_.erase(step_.begin());
-		ChangeState(step_.front().state_);
-	}
+	//次のステップへ
+	NextStep();
 }
 
 void Tutorial::UpdateCamera(void)
@@ -129,13 +153,12 @@ void Tutorial::UpdateCamera(void)
 	{
 		step_.front().requiredTime_ -= SceneManager::GetInstance().GetDeltaTime();
 	}
-	//時間と回数が0以下になったらクリア
-	if (step_.front().requiredTime_ <= 0.0f &&
-		step_.front().requiredNum_ <= 0)
-	{
-		step_.erase(step_.begin());
-		ChangeState(step_.front().state_);
-	}
+	//次のステップへ
+	NextStep();
+}
+
+void Tutorial::UpdateDash(void)
+{
 }
 
 void Tutorial::UpdateJump(void)

@@ -73,8 +73,12 @@ private:
 	//チュートリアルステップリスト
 	std::vector<TutorialStep> step_;
 
-	//現在のチュートリアルステップインデックス
-	int currentStepIndex_; 
+	std::string viewGuide_;
+
+	/// <summary>
+	/// 次のステップへ進む
+	/// </summary>
+	void NextStep(void);
 
 	//状態遷移--------------------------------------------------------
 
@@ -98,6 +102,11 @@ private:
 	/// 状態遷移：CAMERA
 	/// </summary>
 	void ChangeStateCamera(void);
+
+	/// <summary>
+	/// 状態遷移：DASH
+	/// </summary>
+	void ChangeStateDash(void);
 
 	/// <summary>
 	/// 状態遷移：JUMP
@@ -130,6 +139,11 @@ private:
 	/// 更新：CAMERA
 	/// </summary>
 	void UpdateCamera(void);
+
+	/// <summary>
+	/// 更新：DASH
+	/// </summary>
+	void UpdateDash(void);
 
 	/// <summary>
 	/// 更新：JUMP
