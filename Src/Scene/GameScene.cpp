@@ -129,9 +129,9 @@ void GameScene::Init(void)
 	mainCamera->SetTarget(&enemy_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
+	//コライダー登録
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
-	enemy_->AddCollider(stage_->GetMistWallTransform().collider);
 
 	//初期状態設定
 	ChangeState(STATE::WAKE_UP);
@@ -209,6 +209,7 @@ void GameScene::InitStateBattle(void)
 	enemy_->ChangeState(Enemy::STATE::MOVE);
 	enemy_->SetIsEncount(true);
 	enemy_->Update(); //状態変更後すぐに更新しておく
+	enemy_->AddCollider(stage_->GetMistWallTransform().collider);
 	player_->ChangeState(Player::STATE::PLAY);
 	player_->Update(); //状態変更後すぐに更新しておく
 	player_->AddCollider(stage_->GetMistWallTransform().collider);

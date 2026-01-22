@@ -84,7 +84,7 @@ private:
 
 	//アナログ入力対応表
 	using AnalogInputTable_t =
-		std::unordered_map < AnalogInputType, std::function<bool(const XINPUT_STATE&)>>;
+		std::unordered_map<AnalogInputType, std::function<bool(const XINPUT_STATE&)>>;
 	AnalogInputTable_t analogInputTable_;
 
 

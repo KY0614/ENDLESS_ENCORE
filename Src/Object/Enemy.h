@@ -20,6 +20,8 @@ public:
 		NONE,
 		ENCOUNT,		//エンカウント(登場）
 		TURN,			//振り向く
+		CAST_SPELL,		//魔法詠唱
+		ATTACK_PLAYER,	//プレイヤーへ攻撃
 		ENCOUNT_FINISH,	//エンカウント演出終了
 		FOLLOW,			//追跡
 		WAIT,			//待機
@@ -231,6 +233,14 @@ private:
 	/// </summary>
 	void ChangeStateTurn(void);
 	/// <summary>
+	/// 状態遷移：CAST_SPELL
+	/// </summary>
+	void ChangeStateCastSpell(void);
+	/// <summary>
+	/// 状態遷移：ATTACK_PLAYER
+	/// </summary>
+	void ChangeStateAttackPlayer(void);
+	/// <summary>
 	/// 状態遷移：ENCOUNT_FINISH
 	/// </summary>
 	void ChangeStateEncountFinish(void);
@@ -293,6 +303,14 @@ private:
 	/// </summary>
 	void UpdateTurn(void);
 	/// <summary>
+	/// 更新：CAST_SPELL
+	/// </summary>
+	void UpdateCastSpell(void);
+	/// <summary>
+	/// 更新：ATTACK_PLAYER
+	/// </summary>
+	void UpdateAttackPlayer(void);
+	/// <summary>
 	/// 更新：WAIT
 	/// </summary>
 	void UpdateEncountFinish(void);
@@ -341,6 +359,7 @@ private:
 	/// </summary>
 	void UpdateDead(void);
 
+	//--------------------------------------------------------
 
 	/// <summary>
 	/// ダメージを与える
@@ -361,6 +380,7 @@ private:
 	float CheckPlayerDistance(void);
 
 	bool IsCastSpell(void);
+	bool IsSpellAttack(void);
 
 	/// <summary>
 	/// プレイヤーを追従する処理
@@ -407,10 +427,16 @@ private:
 	//弾--------------------------------------------------------
 	
 	/// <summary>
-	/// 弾の生成
+	/// 複数の弾の生成
 	/// </summary>
 	/// <param name="createNum">生成する数</param>
-	void CreateBullet(const int createNum);
+	void CreateBullets(const int createNum);
+
+	/// <summary>
+	/// 弾を１つずつ発射する
+	/// </summary>
+	/// <param name="shotInterval">発射間隔</param>
+	void ShootBulletOne(const float shotInterval);
 
 	/// <summary>
 	/// 生成した弾全てが準備状態かチェックする

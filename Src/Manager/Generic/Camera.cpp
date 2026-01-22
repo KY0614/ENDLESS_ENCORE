@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include <algorithm>
 #include <EffekseerForDXLib.h>
+#include "../../Libs/ImGui/imgui.h"
 #include "../../Application.h"
 #include "../../Common/Vector2.h"
 #include "../../Common/Easing.h"
@@ -36,11 +37,11 @@ Camera::Camera(void)
 	trackDir_ = CommonUtility::VECTOR_ZERO;
 	trackTotalTime_ = 0.0f;
 	trackElapsedTime_ = 0.0f;
-	dollyInStartPos_ = CommonUtility::VECTOR_ZERO;
-	dollyInObjectPos_ = CommonUtility::VECTOR_ZERO;
+	dollyStartPos_ = CommonUtility::VECTOR_ZERO;
+	dollyObjectPos_ = CommonUtility::VECTOR_ZERO;
 	object2CameraDistance_ = 0.0f;
-	dollyInTotalTime_ = 0.0f;
-	dollyInElapsedTime_ = 0.0f;
+	dollyTotalTime_ = 0.0f;
+	dollyElapsedTime_ = 0.0f;
 	followTransform_ = nullptr;
 	targetTransform_ = nullptr;
 	cameraNear_ = 0.0f;
@@ -49,6 +50,7 @@ Camera::Camera(void)
 	localF2TPos_ = CommonUtility::VECTOR_ZERO;
 	isLockOn_ = false;
 	isActionEnd_ = false;
+	fov_ = 60.0f;
 }
 
 Camera::~Camera(void)
@@ -90,8 +92,8 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawTrack();
 		break;
 
-	case Camera::MODE::DOLLY_IN:
-		SetBeforeDrawDollyIn();
+	case Camera::MODE::DOLLY:
+		SetBeforeDrawDolly();
 		break;
 
 	case Camera::MODE::FOLLOW:
@@ -116,8 +118,12 @@ void Camera::SetBeforeDraw(void)
 		cameraUp_
 	);
 
+	SetupCamera_Perspective(fov_ * DX_PI_F / 180.0f);
+
 	//DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
+	DebugImGui();
+
 }
 
 void Camera::Draw(void)
@@ -186,9 +192,9 @@ void Camera::ChangeMode(MODE mode)
 	case Camera::MODE::TRACK:
 		pos_ = trackStartPos_;
 		break;
-	case Camera::MODE::DOLLY_IN:
-		pos_ = dollyInStartPos_;
-		targetPos_ = dollyInObjectPos_;
+	case Camera::MODE::DOLLY:
+		pos_ = dollyStartPos_;
+		targetPos_ = dollyObjectPos_;
 		break;	
 	case Camera::MODE::FREE:
 		break;
@@ -229,17 +235,19 @@ void Camera::SetTrackCameraQuadOut(
 
 void Camera::SetDollyInQuadOut(
 	const VECTOR& startPos,
+	const VECTOR& endPos,
 	const VECTOR& objectPos,
 	const float& object2CameraDistance,
 	const float& totalMoveTime)
 {
-	dollyInStartPos_ = startPos;
-	dollyInObjectPos_ = objectPos;
+	dollyStartPos_ = startPos;
+	dollyEndPos_ = endPos;
+	dollyObjectPos_ = objectPos;
 	object2CameraDistance_ = object2CameraDistance;
 	// 総移動距離から総移動時間を計算
-	float totalDistance = VSize(VSub(dollyInObjectPos_, startPos));
-	dollyInTotalTime_ = totalMoveTime;
-	dollyInElapsedTime_ = 0.0f;
+	float totalDistance = VSize(VSub(dollyObjectPos_, startPos));
+	dollyTotalTime_ = totalMoveTime;
+	dollyElapsedTime_ = 0.0f;
 }
 
 void Camera::SetDefault(void)
@@ -374,6 +382,8 @@ void Camera::SetBeforeDrawTrack(void)
 
 	//経過時間
 	trackElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	//制限時間内に収める
+	trackElapsedTime_ = std::clamp(trackElapsedTime_, 0.0f, trackTotalTime_);
 	// 各軸ごとにQuadOutイージングで補間
 	pos_.x = Easing::QuadOut(
 		trackElapsedTime_,trackTotalTime_, trackStartPos_.x, trackEndPos_.x);
@@ -389,16 +399,16 @@ void Camera::SetBeforeDrawTrack(void)
 		VGet(-trackDir_.z, trackDir_.y, -trackDir_.x), lookDistance));
 }
 
-void Camera::SetBeforeDrawDollyIn(void)
+void Camera::SetBeforeDrawDolly(void)
 {
 	//終了座標(目的位置)を計算
 	//被写体から距離を取った位置を終了座標とする
 	VECTOR endPos = VSub(
-		dollyInObjectPos_,
-		VScale(VNorm(VSub(dollyInObjectPos_, dollyInStartPos_)), object2CameraDistance_));
+		dollyObjectPos_,
+		VScale(VNorm(VSub(dollyObjectPos_, dollyStartPos_)), object2CameraDistance_));
 
 	//終了座標から現在座標までの距離を取得
-	float pos2StartPos = VSize(VSub(endPos, pos_));
+	float pos2StartPos = VSize(VSub(dollyEndPos_, pos_));
 	//一定距離以下になったら終了
 	const float distance = 1.0f;
 	isActionEnd_ = pos2StartPos <= distance;
@@ -406,14 +416,16 @@ void Camera::SetBeforeDrawDollyIn(void)
 	if (isActionEnd_)return;
 
 	//経過時間
-	dollyInElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	dollyElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
+	//制限時間内に収める
+	dollyElapsedTime_ = std::clamp(dollyElapsedTime_, 0.0f, dollyTotalTime_);
 	// 各軸ごとにQuadOutイージングで補間
 	pos_.x = Easing::QuadOut(
-		dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.x, endPos.x);
+		dollyElapsedTime_, dollyTotalTime_, dollyStartPos_.x, dollyEndPos_.x);
 	pos_.y = Easing::QuadOut(
-		dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.y, endPos.y);
+		dollyElapsedTime_, dollyTotalTime_, dollyStartPos_.y, dollyEndPos_.y);
 	pos_.z = Easing::QuadOut(
-		dollyInElapsedTime_, dollyInTotalTime_, dollyInStartPos_.z, endPos.z);
+		dollyElapsedTime_, dollyTotalTime_, dollyStartPos_.z, dollyEndPos_.z);
 }
 
 void Camera::SetBeforeDrawSurroundView(void)
@@ -477,4 +489,17 @@ void Camera::SetBeforeDrawMouse(void)
 	ProcessMouseMove();
 	//追従
 	SyncFollow();
+}
+
+void Camera::DebugImGui(void)
+{
+	ImGui::Begin("Camera");
+
+	ImGui::InputFloat("Fov", &fov_);
+	InputManager& ins = InputManager::GetInstance();
+	if (ins.IsInputTriggered("CameraRight"))fov_ += 2.0f;
+	if (ins.IsInputTriggered("CameraLeft"))fov_ -= 2.0f;
+	ImGui::SliderFloat("Fov_", &fov_, 8.0f, 170.0);
+
+	ImGui::End();
 }

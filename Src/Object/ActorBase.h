@@ -22,6 +22,8 @@ public:
 
 	const Transform& GetTransform(void) const;
 
+	const VECTOR& GetFramePos(const std::wstring& frameName) const;
+
 	/// <summary>
 	/// 衝突判定に用いられるコライダーを追加する
 	/// </summary>

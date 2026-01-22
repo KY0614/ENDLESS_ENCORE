@@ -1,3 +1,4 @@
+#include "../Libs/ImGui/imgui.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
 #include "../Common/Fader.h"
@@ -19,6 +20,7 @@ namespace
 	const float CAMERA_PLAYER_HEAD_OFFSET_Y = 100.0f;	//プレイヤーの頭の高さ
 	const float CAMERA_PLAYER_CHEST_OFFSET_Y = 80.0f;	//プレイヤーの胸の高さ
 	const float CAMERA_ENEMY_HEAD_OFFSET_Y = 150.0f;	//敵の頭の高さ
+	const float CAMERA_ENEMY_CHEST_OFFSET_Y = 80.0f;	//敵の頭の高さ
 
 	//サウンドの最大音量
 	const int SOUND_VOLUME_MAX = 256;
@@ -42,6 +44,8 @@ EncountScene::EncountScene(
 	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&EncountScene::ChangeStateLookAround, this));
 	stateChanges_.emplace(STATE::ENEMY_SPOTLIGHT, std::bind(&EncountScene::ChangeStateEnemySpotlight, this));
 	stateChanges_.emplace(STATE::ENEMY_ATTENTION, std::bind(&EncountScene::ChangeStateEnemyAttention, this));
+	stateChanges_.emplace(STATE::ENEMY_CAST_SPELL, std::bind(&EncountScene::ChangeStateEnemyCastSpell, this));
+	stateChanges_.emplace(STATE::ENEMY_ATTACK, std::bind(&EncountScene::ChangeStateEnemyAttack, this));
 	stateChanges_.emplace(STATE::FINISH, std::bind(&EncountScene::ChangeStateFinish, this));
 
 	intervalTimer_ = 0.0f;
@@ -69,11 +73,11 @@ void EncountScene::Update(void)
 {
 	//更新ステップ
 	stateUpdate_();
+	DebugImGuiUpdate();
 }
 
 void EncountScene::Draw(void)
 {
-	//DebugDraw();
 }
 
 void EncountScene::Start(void)
@@ -124,7 +128,7 @@ void EncountScene::ChangeStatePlayerAttention(void)
 
 void EncountScene::ChangeStateBlackOut(void)
 {
-	//カメラをプレイヤーの後方左斜め後ろに固定
+	//カメラをプレイヤーの左斜め後ろに固定
 	const VECTOR& playerBackLeft = VAdd(
 		player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
 	VECTOR pPos = VAdd(
@@ -171,22 +175,74 @@ void EncountScene::ChangeStateEnemyAttention(void)
 {
 	//カメラをプレイヤーの後方に固定
 	float cameraOffsetY = 70.0f;//カメラの高さ調整
-	VECTOR pPos = VAdd(
+	VECTOR startPos = VAdd(
 		player_.GetTransform().pos,
 		VScale(VNorm(player_.GetTransform().GetBack()), cameraOffsetY));
 	//カメラ位置調整(少し左後ろに)
 	const float cameraOffsetX = -30.0f;
-	pPos.x += cameraOffsetX;
-	pPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	startPos.x += cameraOffsetX;
+	startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	//終了座標(目的位置)を計算
+	//被写体から距離を取った位置を終了座標とする
+	VECTOR endPos = VSub(
+		enemy_.GetTransform().pos,
+		VScale(VNorm(VSub(enemy_.GetTransform().pos, startPos)), CAMERA_PLAYER_HEAD_OFFSET_Y));
+	endPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
 	//注視点を敵の位置にセット
 	VECTOR targetPos = enemy_.GetTransform().pos;
 	targetPos.y += CAMERA_ENEMY_HEAD_OFFSET_Y;
 	//ドリーインを行う合計の時間
 	const float dollyInTotalTime = 5.0f;
-	float distance = VSize(VSub(player_.GetTransform().pos, enemy_.GetTransform().pos));
-	mainCamera->SetDollyInQuadOut(pPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
-	mainCamera->ChangeMode(Camera::MODE::DOLLY_IN);
+	mainCamera->SetDollyInQuadOut(startPos, endPos,targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
+	mainCamera->ChangeMode(Camera::MODE::DOLLY);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttention, this);
+}
+
+void EncountScene::ChangeStateEnemyCastSpell(void)
+{
+	//カメラを敵の右斜め前からスタート
+	float distance = 80.0f;//カメラとの距離
+	const VECTOR& enemyForwardRight = VAdd(
+		enemy_.GetTransform().GetForward(), enemy_.GetTransform().GetRight());
+	VECTOR startPos = VAdd(
+		enemy_.GetTransform().pos,
+		VScale(enemyForwardRight, distance));
+	//カメラの高さ調整
+	startPos.y += CAMERA_ENEMY_HEAD_OFFSET_Y;
+	//終了座標(目的位置)を計算
+	//被写体から距離を取った位置を終了座標とする
+	distance = 180.0f;
+	VECTOR endPos = VAdd(
+		enemy_.GetTransform().pos,
+		VScale(enemyForwardRight, distance));
+	endPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	//注視点を敵の位置にセット
+	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Spine2");
+	//ドリーを行う合計の時間
+	const float dollyTotalTime = 6.0f;
+	mainCamera->SetDollyInQuadOut(startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyTotalTime);
+	mainCamera->ChangeMode(Camera::MODE::DOLLY);
+	enemy_.ChangeState(Enemy::STATE::CAST_SPELL);
+	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyCastSpell, this);
+}
+
+void EncountScene::ChangeStateEnemyAttack(void)
+{
+	//カメラを敵の右斜め前からスタート
+	float distance = 80.0f;//カメラとの距離
+	const VECTOR& enemyForwardRight = VAdd(
+		enemy_.GetTransform().GetForward(), enemy_.GetTransform().GetRight());
+	VECTOR pos = VAdd(
+		enemy_.GetTransform().pos,
+		VScale(enemyForwardRight, distance));
+	//カメラの高さ調整
+	pos.y += CAMERA_ENEMY_HEAD_OFFSET_Y;
+	//注視点を敵の位置にセット
+	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Spine2");
+	mainCamera->SetFixedPointPos(pos, targetPos);
+	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
+	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyCastSpell, this);
+	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttack, this);
 }
 
 void EncountScene::ChangeStateFinish(void)
@@ -352,23 +408,40 @@ void EncountScene::UpdateEnemyAttention(void)
 {
 	//一定時間経ったら振り向き開始
 	const float intervalLightUp = 1.2f;
+	//状態遷移するまでに少し間隔をあける時間
+	const float changeInterval = 5.0f;
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	//振り向きが終わったらプレイヤーは待機状態
 	//エンカウント演出は終了状態へ
-	if (enemy_.GetState() == Enemy::STATE::ENCOUNT_FINISH &&
+	if (/*enemy_.GetState() == Enemy::STATE::ENCOUNT_FINISH &&*/
+		intervalTimer_ >= changeInterval &&
 		mainCamera->IsActionEnd())
 	{
 		player_.ChangeState(Player::STATE::WAIT);
-		ChangeState(STATE::FINISH);
+		ChangeState(STATE::ENEMY_CAST_SPELL);
 		return;
 	}
 	//経過時間が一定時間たったら敵は振り向き状態へ遷移
 	if (intervalTimer_ >= intervalLightUp	&&
 		enemy_.GetState() == Enemy::STATE::ENCOUNT)
 	{
+		intervalTimer_ = 0.0f;
 		enemy_.ChangeState(Enemy::STATE::TURN);
 	}
+}
+
+void EncountScene::UpdateEnemyCastSpell(void)
+{
+	if (mainCamera->IsActionEnd())
+	{
+		ChangeState(STATE::ENEMY_ATTACK);
+		return;
+	}
+}
+
+void EncountScene::UpdateEnemyAttack(void)
+{
 }
 
 void EncountScene::UpdateFinish(void)
@@ -414,4 +487,50 @@ void EncountScene::DebugDraw(void)
 	default:
 		break;
 	}
+}
+
+void EncountScene::DebugImGuiUpdate(void)
+{
+	ImGui::Begin("Encount");
+
+	switch (state_)
+	{
+	case EncountScene::STATE::NONE:
+		break;
+	case EncountScene::STATE::FADE:
+		ImGui::Text("FADE");
+		break;
+	case EncountScene::STATE::PLAYER_WALK:
+		ImGui::Text("PLAYER_WALK");
+		break;
+	case EncountScene::STATE::PLAYER_ATTENTION:
+		ImGui::Text("PLAYER_ATTENTION");
+		break;
+	case EncountScene::STATE::BLACK_OUT:
+		ImGui::Text("BLACK_OUT");
+		break;
+	case EncountScene::STATE::LOOK_AROUND:
+		ImGui::Text("LOOK_AROUND");
+		break;
+	case EncountScene::STATE::ENEMY_SPOTLIGHT:
+		ImGui::Text("ENEMY_SPOTLIGHT");
+		break;
+	case EncountScene::STATE::ENEMY_ATTENTION:
+		ImGui::Text("ENEMY_ATTENTION");
+		break;
+	case EncountScene::STATE::ENEMY_CAST_SPELL:
+		ImGui::Text("ENEMY_CAST_SPELL");
+		break;
+	case EncountScene::STATE::ENEMY_ATTACK:
+		ImGui::Text("ENEMY_ATTACK");
+		break;
+	case EncountScene::STATE::FINISH:
+		ImGui::Text("FINISH");
+		break;
+	default:
+		break;
+	}
+
+
+	ImGui::End();
 }

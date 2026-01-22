@@ -37,8 +37,8 @@ public:
 		NONE,
 		CRANE_UP,	//カメラを上昇させる(向き固定)
 		TRACK,		//左右に移動させる(向き固定)
-		DOLLY_IN,	//被写体に対してカメラを前後移動させる
-		SURROUND_VIEW,//被写体に対して回り込むカメラ
+		DOLLY,		//被写体に対してカメラを前後移動させる
+		ZOOM_OUT,	//ズームアウト
 		FIXED_POINT,//固定カメラ
 		FOLLOW,		//追従
 		FREE,		//自由
@@ -77,7 +77,6 @@ public:
 	VECTOR GetAngles(void) const;
 	//カメラの注視点
 	VECTOR GetTargetPos(void) const;
-
 	//カメラ角度
 	Quaternion GetQuaRot(void) const;
 	//X回転を抜いたカメラ角度
@@ -133,6 +132,7 @@ public:
 	/// <param name="totalMoveTime">移動にかかる総時間</param>
 	void SetDollyInQuadOut(
 		const VECTOR& startPos,
+		const VECTOR& endPos,
 		const VECTOR& objectPos,
 		const float& object2CameraDistance,
 		const float& totalMoveTime = 1.0f);
@@ -190,12 +190,13 @@ private:
 	float trackTotalTime_;		//総移動時間
 	float trackElapsedTime_;	//経過時間
 
-	//ドリーインカメラ用
-	VECTOR dollyInStartPos_;		//開始位置
-	VECTOR dollyInObjectPos_;		//被写体の座標
+	//ドリーカメラ用
+	VECTOR dollyStartPos_;		//開始位置
+	VECTOR dollyEndPos_;		//終了位置
+	VECTOR dollyObjectPos_;		//被写体の座標
 	float object2CameraDistance_;	//カメラから被写体までの距離
-	float dollyInTotalTime_;		//総移動時間
-	float dollyInElapsedTime_;		//経過時間
+	float dollyTotalTime_;		//総移動時間
+	float dollyElapsedTime_;		//経過時間
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
@@ -217,7 +218,7 @@ private:
 	//モード別更新ステップ
 	void SetBeforeDrawCraneUp(void);
 	void SetBeforeDrawTrack(void);
-	void SetBeforeDrawDollyIn(void);
+	void SetBeforeDrawDolly(void);
 	void SetBeforeDrawSurroundView(void);
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawTopFixed(void);
@@ -232,5 +233,9 @@ private:
 	//追従位置からカメラ位置までの相対座標
 	VECTOR localF2CPos_;
 	VECTOR localF2TPos_;
+
+	float fov_;	//視野角
+
+	void DebugImGui(void);
 };
 

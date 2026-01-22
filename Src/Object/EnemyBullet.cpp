@@ -46,11 +46,8 @@ void EnemyBullet::Init(void)
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::FIRE_SE).handleId_);
 
 	//ƒ‚ƒfƒ‹‚ÌŠî–{İ’è
-	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
-		ResourceManager::SRC::ENEMY_BULLET));
 	const float scl = 1.0f;
 	transform_.scl = { scl ,scl ,scl };
-	
 	transform_.pos = parentTran_.pos;
 	transform_.quaRot = parentTran_.quaRot;
 	transform_.quaRotLocal = Quaternion();
@@ -85,11 +82,6 @@ void EnemyBullet::Update(void)
  
 void EnemyBullet::Draw(void)
 {
-	//”­Ëó‘Ô‚Å‚È‚¯‚ê‚Î•`‰æ‚µ‚È‚¢
-	if (!isAlive_)return;
-
-	//ƒ‚ƒfƒ‹‚Ì•`‰æ
-	MV1DrawModel(transform_.modelId);
 }
 
 void EnemyBullet::SetOffsetPos(const VECTOR& offset)

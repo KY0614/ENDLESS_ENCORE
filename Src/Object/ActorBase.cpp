@@ -33,6 +33,11 @@ const Transform& ActorBase::GetTransform(void) const
 	return transform_;
 }
 
+const VECTOR& ActorBase::GetFramePos(const std::wstring& frameName) const
+{
+	return MV1GetFramePosition(transform_.modelId, MV1SearchFrame(transform_.modelId, frameName.c_str()));
+}
+
 void ActorBase::AddCollider(std::weak_ptr<Collider> collider)
 {
 	colliders_.emplace_back(collider);

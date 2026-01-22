@@ -22,9 +22,10 @@ public:
 		LOOK_AROUND,			//周りを見渡す
 		ENEMY_SPOTLIGHT,		//敵をスポットライトで照らす
 		ENEMY_ATTENTION,        //敵が出現
-		ENEMY_TURN,				//敵が振り向く
+
 		ENEMY_CAST_SPELL,		//敵が魔法を唱える
 		ENEMY_ATTACK,			//敵が攻撃する
+
 		FINISH					//終了
 	};
 
@@ -124,6 +125,14 @@ private:
 	/// </summary>
 	void ChangeStateEnemyAttention(void);
 	/// <summary>
+	/// 状態遷移：ENEMY_CAST_SPELL
+	/// </summary>
+	void ChangeStateEnemyCastSpell(void);
+	/// <summary>
+	/// 状態遷移：ENEMY_ATTACK
+	/// </summary>
+	void ChangeStateEnemyAttack(void);
+	/// <summary>
 	/// 状態遷移：FINISH
 	/// </summary>
 	void ChangeStateFinish(void);
@@ -163,6 +172,14 @@ private:
 	/// </summary>
 	void UpdateEnemyAttention(void);
 	/// <summary>
+	/// 更新：ENEMY_CAST_SPELL
+	/// </summary>
+	void UpdateEnemyCastSpell(void);
+	/// <summary>
+	/// 更新：ENEMY_ATTACK
+	/// </summary>
+	void UpdateEnemyAttack(void);
+	/// <summary>
 	/// 更新：FINISH
 	/// </summary>
 	void UpdateFinish(void);
@@ -171,5 +188,7 @@ private:
 	/// デバッグ表示
 	/// </summary>
 	void DebugDraw(void);
+
+	void DebugImGuiUpdate(void);
 };
 
