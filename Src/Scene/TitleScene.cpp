@@ -30,8 +30,8 @@ namespace
 	//定点カメラの位置
 	const VECTOR CAMERA_FIXED_POINT_POS = VGet(0.0f, -109.0f, -65.0f);			//カメラの位置
 	const VECTOR CAMERA_FIXED_POINT_TARGET_POS = VGet(0.0f, -153.0f, 2863.0f);	//カメラの注視点位置
-	
-	const float VIGNETTE_POWER = 3.0f; //ビネットの強さ
+	//ビネットの強さ
+	const float VIGNETTE_POWER = 3.0f; 
 }
 
 TitleScene::TitleScene(void)
@@ -145,10 +145,7 @@ void TitleScene::Update(void)
 
 void TitleScene::Draw(void)
 {
-	//画面の比率
-	const float& screenAspectRatio = 
-		SceneManager::GetInstance().GetScreenAspectRatio();
-
+	//ステージ描画
 	stage_->Draw();
 
 	int mainScreen = SceneManager::GetInstance().GetMainScreen();
@@ -165,26 +162,31 @@ void TitleScene::Draw(void)
 	SetDrawScreen(mainScreen);
 	DrawGraph(0, 0, postEffectScreen_, false);
 	//-----------------------------------------
+	
+	//画面の比率
+	const float& screenAspectRatio =
+		SceneManager::GetInstance().GetScreenAspectRatio();
 
 	//ロゴを小さめに縮小しているのでジャギーが目立たないようにバイリニア法で描画
 	SetDrawMode(DX_DRAWMODE_BILINEAR);
 	//ロゴ画像の大きさ
 	float logoScale = 1.5f;
+	//ロゴのY座標(画面を10分割したうちの4/10の位置)
+	int logoPosY = (Application::SCREEN_SIZE_Y / 10) * 4;
 	//タイトルロゴ描画
-	const int titleLogoOffsetY = 120;
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
-		Application::SCREEN_SIZE_Y / 2 - titleLogoOffsetY,
+		logoPosY,
 		logoScale * screenAspectRatio, 0.0f,
 		logoImg_, true);
 
 	//点滅させるためのアルファ値設定
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, pushSpaceImgAlpha_);
-	logoScale = 1.0f;
+	//ロゴのY座標(画面を10分割したうちの8/10の位置)
+	logoPosY = (Application::SCREEN_SIZE_Y / 10) * 7;
 	//プッシュスペース描画
-	const int pushSpaceOffsetY = 276;
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
-		Application::SCREEN_SIZE_Y - pushSpaceOffsetY,
-		logoScale * screenAspectRatio, 0.0f,
+		logoPosY,
+		screenAspectRatio, 0.0f,
 		pushSpaceImg_, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
@@ -229,6 +231,7 @@ void TitleScene::InitMaterial(void)
 	//ビネットの強さ
 	retroTheaterMaterial_->AddConstBuf({ VIGNETTE_POWER, 0.0f, 0.0f, 0.0f });
 	retroTheaterMaterial_->AddTextureBuf(SceneManager::GetInstance().GetMainScreen());
+	
 	//ノイズテクスチャ読み込み
 	noiseTextureId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::FILM_NOISE).handleId_;

@@ -81,7 +81,7 @@ void ResourceManager::InitTitle(void)
 	std::unique_ptr<Resource> res;
 
 	//PushSpace‰æ‘œ
-	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Push_Space_.png");
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Push_Space.png");
 	resourcesMap_.emplace(SRC::PUSH_SPACE, std::move(res));
 
 	//ƒ^ƒCƒgƒ‹ƒƒS
