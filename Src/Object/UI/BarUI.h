@@ -5,6 +5,7 @@
 class BarUI : public UIBase
 {
 public:
+	//バーUI情報構造体
 	struct BarUIInfo
 	{
 		Vector2 pos_;	//位置

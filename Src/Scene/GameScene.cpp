@@ -71,6 +71,7 @@ void GameScene::Init(void)
 	stage_->Init();
 
 	//チュートリアル
+	//移動
 	Tutorial::TutorialStep firstStep = {
 		Tutorial::STATE::MOVE,
 		{0,Application::SCREEN_SIZE_Y / 2},
@@ -79,7 +80,7 @@ void GameScene::Init(void)
 		2.0f,
 		0
 	};
-	Tutorial::TutorialStep secondStep = {
+	Tutorial::TutorialStep cameraStep = {
 		Tutorial::STATE::CAMERA,
 		{0,Application::SCREEN_SIZE_Y / 2},
 		"矢印キーでカメラ操作",
@@ -87,9 +88,37 @@ void GameScene::Init(void)
 		1.5f,
 		0
 	};
+	Tutorial::TutorialStep jumpStep = {
+		Tutorial::STATE::JUMP,
+		{0,Application::SCREEN_SIZE_Y / 2},
+		"Eキーでジャンプ",
+		"Yボタンでジャンプ",
+		0.0f,
+		1
+	};
+	Tutorial::TutorialStep DodgeStep = {
+		Tutorial::STATE::DODGE,
+		{0,Application::SCREEN_SIZE_Y / 2},
+		"左Shiftキーで回避",
+		"Aボタンで回避",
+		0.0f,
+		1
+	};
+	Tutorial::TutorialStep ParryStep = {
+		Tutorial::STATE::PARRY,
+		{0,Application::SCREEN_SIZE_Y / 2},
+		"Spaceキーでパリィ",
+		"Bボタンでパリィ",
+		0.0f,
+		1
+	};
+	//チュートリアル
 	tutorial_ = std::make_shared<Tutorial>(firstStep);
 	tutorial_->Init();
-	tutorial_->AddTutorialStep(secondStep);
+	tutorial_->AddTutorialStep(cameraStep);
+	tutorial_->AddTutorialStep(jumpStep);
+	tutorial_->AddTutorialStep(DodgeStep);
+	tutorial_->AddTutorialStep(ParryStep);
 
 	//演出シーン
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
@@ -325,7 +354,7 @@ void GameScene::DrawExplore(void)
 
 	//チュートリアル描画
 	tutorial_->Draw();
-
+	player_->DrawHPBar();
 }
 
 void GameScene::UpdateEncount(void)
@@ -436,11 +465,6 @@ void GameScene::DrawBattle(void)
 
 	enemy_->DrawHPBar();
 	player_->DrawHPBar();
-
-#ifdef _DEBUG
-	DrawString(0, 0, L"バトル", 0xffffff);
-#endif
-
 }
 
 void GameScene::SkipBarDraw(void)

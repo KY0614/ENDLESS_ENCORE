@@ -163,14 +163,38 @@ void Tutorial::UpdateDash(void)
 
 void Tutorial::UpdateJump(void)
 {
+	InputManager& ins = InputManager::GetInstance();
+
+	if (ins.IsInputTriggered("Jump"))
+	{
+		step_.front().requiredNum_--;
+	}
+	//次のステップへ
+	NextStep();
 }
 
 void Tutorial::UpdateDodge(void)
 {
+	InputManager& ins = InputManager::GetInstance();
+
+	if (ins.IsInputTriggered("Dodge"))
+	{
+		step_.front().requiredNum_--;
+	}
+	//次のステップへ
+	NextStep();
 }
 
 void Tutorial::UpdateParry(void)
 {
+	InputManager& ins = InputManager::GetInstance();
+
+	if (ins.IsInputTriggered("Parry"))
+	{
+		step_.front().requiredNum_--;
+	}
+	//次のステップへ
+	NextStep();
 }
 
 void Tutorial::DebugImGuiUpdate(void)

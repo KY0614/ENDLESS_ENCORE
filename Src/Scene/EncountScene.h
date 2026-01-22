@@ -23,7 +23,8 @@ public:
 		ENEMY_SPOTLIGHT,		//敵をスポットライトで照らす
 		ENEMY_ATTENTION,        //敵が出現
 		ENEMY_TURN,				//敵が振り向く
-		FADE2FINISH,			//敵が振り向く
+		ENEMY_CAST_SPELL,		//敵が魔法を唱える
+		ENEMY_ATTACK,			//敵が攻撃する
 		FINISH					//終了
 	};
 

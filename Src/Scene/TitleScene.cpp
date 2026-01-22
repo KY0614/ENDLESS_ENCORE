@@ -181,7 +181,7 @@ void TitleScene::Draw(void)
 
 	//点滅させるためのアルファ値設定
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, pushSpaceImgAlpha_);
-	//ロゴのY座標(画面を10分割したうちの8/10の位置)
+	//ロゴのY座標(画面を10分割したうちの7/10の位置)
 	logoPosY = (Application::SCREEN_SIZE_Y / 10) * 7;
 	//プッシュスペース描画
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
