@@ -33,6 +33,11 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	/// <param name=""></param>
+	void UpdateImGui(void) override;
 private:
 
 	//ステージ

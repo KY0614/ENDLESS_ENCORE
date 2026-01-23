@@ -35,8 +35,6 @@ void Tutorial::Update(void)
 {
 	//更新ステップ
 	stateUpdate_();
-
-	DebugImGuiUpdate();
 }
 
 void Tutorial::Draw(void)
@@ -197,13 +195,9 @@ void Tutorial::UpdateParry(void)
 	NextStep();
 }
 
-void Tutorial::DebugImGuiUpdate(void)
+void Tutorial::UpdateImGui(void)
 {
-	ImGui::Begin("Tutorial");
-
 	ImGui::Text("Step STATE: %d", step_.front().state_);
 	ImGui::Text("Step Time: %.2f", step_.front().requiredTime_);
 	ImGui::Text("Step Num: %d", step_.front().requiredNum_);
-
-	ImGui::End();
 }

@@ -1,5 +1,6 @@
 #include <DxLib.h>
 #include <random>
+#include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Renderer/PixelMaterial.h"
 #include "../Renderer/PixelRenderer.h"
@@ -189,6 +190,11 @@ void TitleScene::Draw(void)
 		screenAspectRatio, 0.0f,
 		pushSpaceImg_, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
+void TitleScene::UpdateImGui(void)
+{
+	ImGui::Text("Title Scene");
 }
 
 void TitleScene::InitSound(void)

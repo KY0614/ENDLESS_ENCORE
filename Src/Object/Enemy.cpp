@@ -198,7 +198,6 @@ void Enemy::Update(void)
 
 	animationController_->Update();
 	transform_.Update();
-	DebugImGui();
 }
 
 void Enemy::Draw(void)
@@ -524,6 +523,10 @@ void Enemy::UpdateCastSpell(void)
 
 void Enemy::UpdateAttackPlayer(void)
 {
+	if (IsSpellAttack())
+	{
+		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
+	}
 }
 
 void Enemy::UpdateEncountFinish(void)
@@ -1441,13 +1444,9 @@ const json Enemy::GetJsonData(void)const
 	return data;
 }
 
-void Enemy::DebugImGui(void)
+void Enemy::UpdateImGui(void)
 {
-	ImGui::Begin("Enemy");
-
 	ImGui::Text("isDown_: %d", isDown_);
-
-	ImGui::End();
 }
 
 void Enemy::DrawHPBar(void)

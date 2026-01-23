@@ -188,6 +188,11 @@ public:
 	/// <param name="rotY">設定するY軸回転値</param>
 	void SetBackstabRotY(const Quaternion& rotY);
 
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	/// <param name=""></param>
+	void UpdateImGui(void);
 private:
 	std::unique_ptr<BarUI> hpBar_;	//HPバー
 	std::unique_ptr<BarUI> parryCDBar_;	//HPバー
@@ -486,9 +491,5 @@ private:
 	/// </summary>
 	/// <param name=""></param>
 	void DrawParryCD(void);
-
-
-	void UpdateDebugImGui(void);
-
 
 };

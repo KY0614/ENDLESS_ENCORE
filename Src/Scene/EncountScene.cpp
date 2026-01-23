@@ -50,7 +50,9 @@ EncountScene::EncountScene(
 
 	intervalTimer_ = 0.0f;
 	isLightUp_ = false;
+	isSlowMotion_ = false;
 	isFinish_ = false;
+	slowMotionFrame_ = 0;
 }
 
 EncountScene::~EncountScene(void)
@@ -59,11 +61,11 @@ EncountScene::~EncountScene(void)
 
 void EncountScene::Init(void)
 {
-	//サウンド設定
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::LIGHT_UP,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::LIGHT_UP_SE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, SOUND_VOLUME_MAX / 2);
+	//サウンド初期化
+	InitSound();
+
+	//スローモーション用フレームカウンター初期化
+	slowMotionFrame_ = 2;
 
 	//初期状態
 	ChangeState(STATE::NONE);
@@ -73,16 +75,88 @@ void EncountScene::Update(void)
 {
 	//更新ステップ
 	stateUpdate_();
-	DebugImGuiUpdate();
 }
 
 void EncountScene::Draw(void)
 {
+	//カメラ開始座標
+	const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
+	const float distance = 160.0f;
+	VECTOR startPos = VAdd(
+		enemy_.GetTransform().pos,
+		VScale(enemyForward, distance));
+	startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+	DrawSphere3D(startPos, 20.0f, 16, 0x00FF00, 0x00FF00, true);
+
+	//カメラ終了座標
+	const VECTOR& playerBackLeft = VAdd(
+		player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
+	VECTOR endPos = VAdd(
+		player_.GetTransform().pos,
+		VScale(playerBackLeft, 30.0f));
+	endPos.y += 30.0f;
+	DrawSphere3D(endPos, 20.0f, 16, 0xFF0000, 0xFF0000, true);
+
+	//敵とプレイヤーの中間地点
+	VECTOR p2EPos = VScale(
+		VAdd(player_.GetTransform().pos, enemy_.GetTransform().pos), 0.5f);
+	DrawSphere3D(p2EPos, 20.0f, 16, 0xFF00FF, 0xFF00FF, true);
 }
 
 void EncountScene::Start(void)
 {
 	ChangeStateFade();
+}
+
+void EncountScene::UpdateImGui(void)
+{
+	switch (state_)
+	{
+	case EncountScene::STATE::NONE:
+		ImGui::Text("NONE");
+		break;
+	case EncountScene::STATE::FADE:
+		ImGui::Text("FADE");
+		break;
+	case EncountScene::STATE::PLAYER_WALK:
+		ImGui::Text("PLAYER_WALK");
+		break;
+	case EncountScene::STATE::PLAYER_ATTENTION:
+		ImGui::Text("PLAYER_ATTENTION");
+		break;
+	case EncountScene::STATE::BLACK_OUT:
+		ImGui::Text("BLACK_OUT");
+		break;
+	case EncountScene::STATE::LOOK_AROUND:
+		ImGui::Text("LOOK_AROUND");
+		break;
+	case EncountScene::STATE::ENEMY_SPOTLIGHT:
+		ImGui::Text("ENEMY_SPOTLIGHT");
+		break;
+	case EncountScene::STATE::ENEMY_ATTENTION:
+		ImGui::Text("ENEMY_ATTENTION");
+		break;
+	case EncountScene::STATE::ENEMY_CAST_SPELL:
+		ImGui::Text("ENEMY_CAST_SPELL");
+		break;
+	case EncountScene::STATE::ENEMY_ATTACK:
+		ImGui::Text("ENEMY_ATTACK");
+		break;
+	case EncountScene::STATE::FINISH:
+		ImGui::Text("FINISH");
+		break;
+	default:
+		break;
+	}
+}
+
+void EncountScene::InitSound(void)
+{
+	//サウンド設定
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::LIGHT_UP,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::LIGHT_UP_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, SOUND_VOLUME_MAX / 2);
 }
 
 void EncountScene::ChangeState(STATE state)
@@ -444,11 +518,34 @@ void EncountScene::UpdateEnemyAttack(void)
 	//一定時間経過
 	intervalTimer_ += SceneManager::GetInstance().GetDeltaTime();
 	const float moveInterval = 1.8f;
-	if(intervalTimer_ >= moveInterval)
+	if(intervalTimer_ >= moveInterval && !IsSlowMotion())
 	{
-		//mainCamera->SetDollyQuadOut(startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
-		//mainCamera->ChangeMode(Camera::MODE::ZOOM_OUT);
+		StartSlowMotion();
+		enemy_.ChangeState(Enemy::STATE::ATTACK_PLAYER);
+		VECTOR playerPos = player_.GetTransform().pos;
+		VECTOR enemyPos = enemy_.GetTransform().pos;
+		VECTOR targetPos = VScale(VAdd(playerPos, enemyPos), 0.5f);
+		////カメラを敵の前からスタート
+		//const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
+		////被写体から距離を取った位置を開始座標とする
+		//const float distance = 160.0f;
+		//VECTOR startPos = VAdd(
+		//	enemy_.GetTransform().pos,
+		//	VScale(enemyForward, distance));
+		//startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+		////注視点を敵の位置にセット
+		//VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Head");
+		//mainCamera->SetZoomOutDolly(30.0f,
+		//	startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
+		//mainCamera->ChangeMode(Camera::MODE::ZOOM_OUT_DOLLY);
+
+		mainCamera->ChangeMode(Camera::MODE::FREE);
+		mainCamera->SetTargetPos(targetPos);
 	}
+
+	if (!IsSlowMotion())return;
+	//スローモーション時間経過
+	//slowMotionFrame_++;
 }
 
 void EncountScene::UpdateFinish(void)
@@ -459,85 +556,4 @@ void EncountScene::UpdateFinish(void)
 	{
 		isFinish_ = true;
 	}
-}
-
-void EncountScene::DebugDraw(void)
-{
-	switch (state_)
-	{
-	case EncountScene::STATE::NONE:
-		break;
-	case EncountScene::STATE::FADE:
-		DrawFormatString(0, 100, 0xFFFFFF, L"FADE");
-		break;
-	case EncountScene::STATE::PLAYER_WALK:
-		DrawFormatString(0, 100, 0xFFFFFF, L"PLAYER_WALK");
-		break;
-	case EncountScene::STATE::PLAYER_ATTENTION:
-		DrawFormatString(0, 100, 0xFFFFFF, L"PLAYER_ATTENTION");
-		break;
-	case EncountScene::STATE::BLACK_OUT:
-		DrawFormatString(0, 100, 0xFFFFFF, L"BLACK_OUT");
-		break;
-	case EncountScene::STATE::LOOK_AROUND:
-		DrawFormatString(0, 100, 0xFFFFFF, L"LOOK_AROUND");
-		break;
-	case EncountScene::STATE::ENEMY_SPOTLIGHT:
-		DrawFormatString(0, 100, 0xFFFFFF, L"ENEMY_SPOTLIGHT");
-		break;
-	case EncountScene::STATE::ENEMY_ATTENTION:
-		DrawFormatString(0, 100, 0xFFFFFF, L"ENEMY_ATTENTION");
-		break;
-	case EncountScene::STATE::FINISH:
-		DrawFormatString(0, 100, 0xFFFFFF, L"FINISH");
-		break;
-	default:
-		break;
-	}
-}
-
-void EncountScene::DebugImGuiUpdate(void)
-{
-	ImGui::Begin("Encount");
-
-	switch (state_)
-	{
-	case EncountScene::STATE::NONE:
-		break;
-	case EncountScene::STATE::FADE:
-		ImGui::Text("FADE");
-		break;
-	case EncountScene::STATE::PLAYER_WALK:
-		ImGui::Text("PLAYER_WALK");
-		break;
-	case EncountScene::STATE::PLAYER_ATTENTION:
-		ImGui::Text("PLAYER_ATTENTION");
-		break;
-	case EncountScene::STATE::BLACK_OUT:
-		ImGui::Text("BLACK_OUT");
-		break;
-	case EncountScene::STATE::LOOK_AROUND:
-		ImGui::Text("LOOK_AROUND");
-		break;
-	case EncountScene::STATE::ENEMY_SPOTLIGHT:
-		ImGui::Text("ENEMY_SPOTLIGHT");
-		break;
-	case EncountScene::STATE::ENEMY_ATTENTION:
-		ImGui::Text("ENEMY_ATTENTION");
-		break;
-	case EncountScene::STATE::ENEMY_CAST_SPELL:
-		ImGui::Text("ENEMY_CAST_SPELL");
-		break;
-	case EncountScene::STATE::ENEMY_ATTACK:
-		ImGui::Text("ENEMY_ATTACK");
-		break;
-	case EncountScene::STATE::FINISH:
-		ImGui::Text("FINISH");
-		break;
-	default:
-		break;
-	}
-
-
-	ImGui::End();
 }

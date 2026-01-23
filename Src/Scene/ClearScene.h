@@ -24,6 +24,11 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// ImGuiXVˆ—
+	/// </summary>
+	/// <param name=""></param>
+	void UpdateImGui(void) override;
 private:
 
 };

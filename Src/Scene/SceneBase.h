@@ -21,6 +21,8 @@ public:
 	// •`‰æˆ—
 	virtual void Draw(void) = 0;
 
+	// ImGuiXVˆ—
+	virtual void UpdateImGui(void) = 0;
 protected:
 
 };

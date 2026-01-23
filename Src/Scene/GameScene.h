@@ -45,6 +45,11 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	/// <param name=""></param>
+	void UpdateImGui(void) override;
 private:
 
 	//状態管理
@@ -75,6 +80,9 @@ private:
 	float skipTimer_;
 	//スキップ中かどうか
 	bool isSkip_;	
+
+	//スローモーション用フレームカウント
+	int slowMotionFrameCount_;
 
 	/// <summary>
 	/// サウンド初期化処理
@@ -178,6 +186,6 @@ private:
 	/// スキップバーの描画処理
 	/// </summary>
 	void SkipBarDraw(void);
-	
-	void UpdateDebugImGui(void);
+
+	void ObjectUpdateImGui(void);
 };

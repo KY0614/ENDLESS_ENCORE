@@ -188,7 +188,6 @@ void Player::Update(void)
 	animationController_->Update();
 
 	transform_.Update();
-	//UpdateDebugImGui();
 }
 
 void Player::Draw(void)
@@ -1144,14 +1143,13 @@ void Player::DrawParryCD(void)
 	}
 }
 
-void Player::UpdateDebugImGui(void)
+void Player::UpdateImGui(void)
 {
-	ImGui::Begin("Player");
 	if (ImGui::Button("Damage"))
 	{
-		Damage(10.0f);
+		const float damage = 10.0f;
+		Damage(damage);
 	}
-	ImGui::End();
 }
 
 void Player::DrawHPBar(void)

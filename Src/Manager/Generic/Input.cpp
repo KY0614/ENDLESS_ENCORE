@@ -165,6 +165,15 @@ void Input::ResetTable()
 							{PeripheralType::GAMEPAD,PAD_INPUT_LEFT},
 							{PeripheralType::X_ANALOG,(int)AnalogInputType::L_LEFT} };
 
+	inputTable_["CameraRise"] = { {PeripheralType::KEYBOARD,KEY_INPUT_O}};
+
+	inputTable_["CameraDescent"] = { {PeripheralType::KEYBOARD,KEY_INPUT_U}};
+
+	inputTable_["CameraMoveUp"] = { {PeripheralType::KEYBOARD,KEY_INPUT_I}};
+	inputTable_["CameraMoveDown"] = { {PeripheralType::KEYBOARD,KEY_INPUT_K}};
+	inputTable_["CameraMoveLeft"] = { {PeripheralType::KEYBOARD,KEY_INPUT_J}};
+	inputTable_["CameraMoveRight"] = { {PeripheralType::KEYBOARD,KEY_INPUT_L}};
+
 	inputTable_["CameraUp"] = { {PeripheralType::KEYBOARD,KEY_INPUT_UP},
 					{PeripheralType::X_ANALOG,(int)AnalogInputType::R_UP} };
 

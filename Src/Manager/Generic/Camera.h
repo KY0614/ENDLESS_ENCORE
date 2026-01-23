@@ -93,6 +93,8 @@ public:
 	//カメラモードの変更
 	void ChangeMode(MODE mode);
 
+	void SetTargetPos(const VECTOR& targetPos) { targetPos_ = targetPos; }
+
 	/// <summary>
 	/// 固定カメラの設定
 	/// </summary>
@@ -158,6 +160,7 @@ public:
 	//注視対象の設定
 	void SetTarget(const Transform* target);
 
+	void UpdateImGui(void);
 private:
 
 	//カメラが追従対象とするTransform
@@ -249,16 +252,7 @@ private:
 	void SetBeforeDrawFree(void);
 	void SetBeforeDrawMouse(void);
 
-	//カメラクリップ距離
-	float cameraNear_;	//カメラクリップ：NEAR
-	float cameraFar_;	//カメラクリップ：FAR
-
-	//追従位置からカメラ位置までの相対座標
-	VECTOR localF2CPos_;
-	VECTOR localF2TPos_;
-
-	float fov_;	//視野角
-
-	void DebugImGui(void);
+	//視野角
+	float fov_;	
 };
 

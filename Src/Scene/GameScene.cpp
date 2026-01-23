@@ -40,7 +40,7 @@ GameScene::GameScene(void)
 
 	skipTimer_ = 0.0f;
 	isSkip_ = false;
-
+	slowMotionFrameCount_ = 0;
 	//状態管理
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
@@ -142,7 +142,10 @@ void GameScene::Update(void)
 	//更新ステップ
 	stateUpdate_();
 
-	UpdateDebugImGui();
+#ifdef _DEBUG
+	//各オブジェクトのImGui更新
+	ObjectUpdateImGui();
+#endif // _DEBUG
 }
 
 void GameScene::Draw(void)
@@ -410,6 +413,10 @@ void GameScene::UpdateEncount(void)
 		return;
 	}
 
+	//スローモーション処理
+	if (encountScene_->IsSlowMotion())slowMotionFrameCount_++;
+	//スローモーション中でなければ通常更新
+	//if (slowMotionFrameCount_ % encountScene_->GetSloMotionFrame() != 0)return;
 	//各オブジェクト更新
 	encountScene_->Update();
 	player_->Update();
@@ -505,11 +512,10 @@ void GameScene::SkipBarDraw(void)
 
 }
 
-void GameScene::UpdateDebugImGui(void)
+void GameScene::UpdateImGui(void)
 {
-	
-	ImGui::Begin("GameScene");
-
+	ImGui::Text("GameScene");
+	ImGui::Text("slowFrameCnt : %d", slowMotionFrameCount_);
 	
 	if (ImGui::Button("Explore"))
 	{
@@ -531,7 +537,41 @@ void GameScene::UpdateDebugImGui(void)
 		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 		ChangeState(STATE::BATTLE);
 	}
+}
 
-	
+void GameScene::ObjectUpdateImGui(void)
+{
+	ImGui::Begin("Object");
+
+	if (ImGui::BeginTabBar("TabBar"))
+	{
+		//プレイヤーのImGui
+		if (ImGui::BeginTabItem("Player"))
+		{
+			player_->UpdateImGui();
+			ImGui::EndTabItem();
+		}
+		//敵のImGui
+		if (ImGui::BeginTabItem("Enemy"))
+		{
+			enemy_->UpdateImGui();
+			ImGui::EndTabItem();
+		}
+		//チュートリアルのImGui
+		if (ImGui::BeginTabItem("Tutorial"))
+		{
+			tutorial_->UpdateImGui();
+			ImGui::EndTabItem();
+		}
+		//エンカウントのImGui
+		if (ImGui::BeginTabItem("Encount"))
+		{
+			encountScene_->UpdateImGui();
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
+	}
+
 	ImGui::End();
 }

@@ -60,6 +60,7 @@ public:
 	/// <param name="tutorialStep">追加するチュートリアル(２個目以降に表示するもの)</param>
 	void AddTutorialStep(const TutorialStep& tutorialStep);
 
+	void UpdateImGui(void);
 private:
 	//現在のチュートリアルタイプ
 	STATE state_; 
@@ -160,5 +161,4 @@ private:
 	/// </summary>
 	void UpdateParry(void);
 
-	void DebugImGuiUpdate(void);
 };

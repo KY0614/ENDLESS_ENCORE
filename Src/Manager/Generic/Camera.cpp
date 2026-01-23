@@ -40,16 +40,13 @@ Camera::Camera(void)
 	trackTotalTime_ = 0.0f;
 	trackElapsedTime_ = 0.0f;
 	dollyStartPos_ = CommonUtility::VECTOR_ZERO;
+	dollyEndPos_ = CommonUtility::VECTOR_ZERO;
 	dollyObjectPos_ = CommonUtility::VECTOR_ZERO;
 	object2CameraDistance_ = 0.0f;
 	dollyTotalTime_ = 0.0f;
 	dollyElapsedTime_ = 0.0f;
 	followTransform_ = nullptr;
 	targetTransform_ = nullptr;
-	cameraNear_ = 0.0f;
-	cameraFar_ = 0.0f;
-	localF2CPos_ = CommonUtility::VECTOR_ZERO;
-	localF2TPos_ = CommonUtility::VECTOR_ZERO;
 	isLockOn_ = false;
 	isActionEnd_ = false;
 	fov_ = 0.0f;
@@ -70,11 +67,6 @@ void Camera::Init(void)
 	//カメラの初期設定
 	ChangeMode(MODE::FIXED_POINT);
 
-	//カメラクリップ距離の初期設定
-	cameraNear_ = CAMERA_NEAR;
-	cameraFar_ = CAMERA_FAR;
-	localF2CPos_ = LOCAL_F2C_POS;
-	localF2TPos_ = LOCAL_F2T_POS;
 	//視野角の初期設定
 	fov_ = DEFAULT_CAMERA_FOV;
 }
@@ -86,7 +78,7 @@ void Camera::Update(void)
 void Camera::SetBeforeDraw(void)
 {
 	//クリップ距離を設定する(SetDrawScreenでリセットされる)
-	SetCameraNearFar(cameraNear_, cameraFar_);
+	SetCameraNearFar(CAMERA_NEAR, CAMERA_FAR);
 
 	switch (mode_)
 	{
@@ -127,13 +119,21 @@ void Camera::SetBeforeDraw(void)
 		targetPos_, 
 		cameraUp_
 	);
+	if (mode_ == MODE::FREE)
+	{
+		SetCameraPositionAndAngle(
+			pos_,
+			angles_.x,
+			angles_.y,
+			angles_.z
+		);
+	}
 
+	//視野角の設定
 	SetupCamera_Perspective(fov_ * DX_PI_F / 180.0f);
 
 	//DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
-	DebugImGui();
-
 }
 
 void Camera::Draw(void)
@@ -307,7 +307,7 @@ void Camera::SyncFollow(void)
 	targetPos_ = VAdd(pos, localPos);
 
 	//カメラ位置
-	localPos = rot_.PosAxis(localF2CPos_);
+	localPos = rot_.PosAxis(LOCAL_F2C_POS);
 	pos_ = VAdd(pos, localPos);
 
 	//正面から設定されたY軸分、回転させる
@@ -329,8 +329,8 @@ void Camera::ProcessRot(void)
 	//回転軸と量を決める
 	float rotPow = 1.5f * DX_PI_F / 180.0f;
 	//回転処理
-	if (ins.IsInputPressed("CameraUp")) { angles_.x += rotPow; }
-	if (ins.IsInputPressed("CameraDown")) { angles_.x -= rotPow; }
+	if (ins.IsInputPressed("CameraDown")) { angles_.x += rotPow; }
+	if (ins.IsInputPressed("CameraUp")) { angles_.x -= rotPow; }
 	if (ins.IsInputPressed("CameraLeft")) { angles_.y -= rotPow; }
 	if (ins.IsInputPressed("CameraRight")) { angles_.y += rotPow; }
 
@@ -348,12 +348,12 @@ void Camera::ProcessRot(void)
 void Camera::ProcessMove(void)
 {
 	InputManager& ins = InputManager::GetInstance();
-	const float moveSpeed = 5.0f;
+	const float moveSpeed = 10.0f;
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
-	if (ins.IsInputPressed("CameraUp"))	pos_.z += moveSpeed; targetPos_.z += moveSpeed;
-	if (ins.IsInputPressed("CameraDown"))	pos_.z -= moveSpeed; targetPos_.z -= moveSpeed;
-	if (ins.IsInputPressed("CameraRight"))	pos_.x += moveSpeed; targetPos_.x += moveSpeed;
-	if (ins.IsInputPressed("CameraLeft"))	pos_.x -= moveSpeed; targetPos_.x -= moveSpeed;
+	if (ins.IsInputPressed("CameraMoveUp"))	pos_.z += moveSpeed; targetPos_.z += moveSpeed;
+	if (ins.IsInputPressed("CameraMoveDown"))	pos_.z -= moveSpeed; targetPos_.z -= moveSpeed;
+	if (ins.IsInputPressed("CameraMoveRight"))	pos_.x += moveSpeed; targetPos_.x += moveSpeed;
+	if (ins.IsInputPressed("CameraMoveLeft"))	pos_.x -= moveSpeed; targetPos_.x -= moveSpeed;
 
 	if (ins.IsInputPressed("CameraRise"))	pos_.y += moveSpeed;	targetPos_.y += moveSpeed;
 	if (ins.IsInputPressed("CameraDescent"))pos_.y -= moveSpeed;	targetPos_.y -= moveSpeed;
@@ -467,13 +467,16 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 	zoomOutDollyElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
 	//制限時間内に収める
 	zoomOutDollyElapsedTime_ = std::clamp(zoomOutDollyElapsedTime_, 0.0f, zoomOutDollyTotalTime_);
-	// 各軸ごとにQuadOutイージングで補間
-	pos_.x = Easing::QuadOut(
-		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_, zoomOutDollyStartPos_.x, zoomOutDollyEndPos_.x);
-	pos_.y = Easing::QuadOut(
-		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_, zoomOutDollyStartPos_.y, zoomOutDollyEndPos_.y);
-	pos_.z = Easing::QuadOut(
-		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_, zoomOutDollyStartPos_.z, zoomOutDollyEndPos_.z);
+	// 各軸ごとにQuadInOutイージングで補間
+	pos_.x = Easing::QuadInOut(
+		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
+		zoomOutDollyStartPos_.x, zoomOutDollyEndPos_.x);
+	pos_.y = Easing::QuadInOut(
+		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
+		zoomOutDollyStartPos_.y, zoomOutDollyEndPos_.y);
+	pos_.z = Easing::QuadInOut(
+		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
+		zoomOutDollyStartPos_.z, zoomOutDollyEndPos_.z);
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)
@@ -499,7 +502,7 @@ void Camera::SetBeforeDrawFree(void)
 {
 	//カメラ操作
 	ProcessRot();
-
+	//移動操作
 	ProcessMove();	
 }
 
@@ -535,15 +538,10 @@ void Camera::SetBeforeDrawMouse(void)
 	SyncFollow();
 }
 
-void Camera::DebugImGui(void)
+void Camera::UpdateImGui(void)
 {
-	ImGui::Begin("Camera");
+	ImGui::Text("targetPos: %.2f, %.2f, %.2f", targetPos_.x, targetPos_.y, targetPos_.z);
 
 	ImGui::InputFloat("Fov", &fov_);
-	InputManager& ins = InputManager::GetInstance();
-	if (ins.IsInputTriggered("CameraRight"))fov_ += 2.0f;
-	if (ins.IsInputTriggered("CameraLeft"))fov_ -= 2.0f;
-	ImGui::SliderFloat("Fov_", &fov_, 8.0f, 170.0);
-
-	ImGui::End();
+	ImGui::SliderFloat("Fov_Slider", &fov_, 8.0f, 170.0);
 }

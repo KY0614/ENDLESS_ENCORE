@@ -2,6 +2,7 @@
 #include <chrono>
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
+#include "../../Libs//ImGui//imgui.h"
 #include "../../Application.h"
 #include "../../Utility/CommonUtility.h"
 #include "../../Common/Fader.h"
@@ -143,6 +144,8 @@ void SceneManager::Update(void)
 
 	//ƒJƒƒ‰XV
 	camera_->Update();
+
+	SceneUpdateImGui();
 }
 
 void SceneManager::Draw(void)
@@ -319,6 +322,8 @@ SceneManager::SceneManager(void)
 	mainScreen_ = -1;
 	fogStart_ = FOG_START;
 	fogEnd_ = FOG_END;
+
+	sceneName_ = std::string();
 }
 
 void SceneManager::ResetDeltaTime(void)
@@ -405,6 +410,31 @@ void SceneManager::ShakeScreen(void)
 	}
 }
 
+void SceneManager::SceneUpdateImGui(void)
+{
+	ImGui::Begin("Scenes");
+
+	if (ImGui::BeginTabBar("Scenes_TabBar"))
+	{
+		if (ImGui::BeginTabItem(sceneName_.c_str()))
+		{
+			for (auto& scene : scenes_)
+			{
+				scene->UpdateImGui();
+			}
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Camera"))
+		{
+			camera_->UpdateImGui();
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+
+	ImGui::End();
+}
+
 template<typename T>
 std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 {
@@ -422,13 +452,14 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 		scene = std::make_unique<TitleScene>();
 		resM.InitTitle();
 		jsonM.InitTitle();
+		sceneName_ = "Title Scene";
 		break;
 
 	case SceneManager::SCENE_ID::GAME:
 		scene = std::make_unique<GameScene>();
 		resM.InitGame();
 		jsonM.InitGame();
-		
+		sceneName_ = "Game Scene";
 		break;
 
 	default:

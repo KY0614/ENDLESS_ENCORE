@@ -56,10 +56,34 @@ public:
 	void Start(void);
 
 	/// <summary>
+	/// スローモーション開始
+	/// </summary>
+	void StartSlowMotion(void) { isSlowMotion_ = true; }
+
+	/// <summary>
+	/// スローモーションするかどうか取得
+	/// </summary>
+	/// <returns>true:スローモーション中、false:スローモーションしない</returns>
+	const bool& IsSlowMotion(void)const { return isSlowMotion_; }
+
+	/// <summary>
+	///　スローモーション用フレーム取得
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns>スローモーション用フレーム</returns>
+	const int& GetSloMotionFrame(void)const { return slowMotionFrame_; }
+
+	/// <summary>
 	/// エンカウント演出が終了したかどうか取得
 	/// </summary>
 	/// <returns>true:終了　false：まだ終了していない</returns>
 	const bool& IsFinished(void) const { return isFinish_; }
+
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	/// <param name=""></param>
+	void UpdateImGui(void) override;
 
 private:
 	//状態管理
@@ -81,8 +105,18 @@ private:
 	//ライトアップ用フラグ true:ライトアップ済み false:ライトアップ待ち
 	bool isLightUp_;
 
+	//スロー更新フラグ
+	bool isSlowMotion_;	
+	//スローモーションフレーム
+	int slowMotionFrame_;
+
 	//シーン終了フラグ
 	bool isFinish_;				
+
+	/// <summary>
+	/// サウンド初期化処理
+	/// </summary>
+	void InitSound(void);
 
 	/// <summary>
 	/// 状態遷移
@@ -183,12 +217,5 @@ private:
 	/// 更新：FINISH
 	/// </summary>
 	void UpdateFinish(void);
-
-	/// <summary>
-	/// デバッグ表示
-	/// </summary>
-	void DebugDraw(void);
-
-	void DebugImGuiUpdate(void);
 };
 

@@ -119,6 +119,12 @@ public:
 	/// <param name="isEncount">ture:エンカウント済み、false：エンカウントしていない</param>
 	const void SetIsEncount(const bool isEncount) { isEncount_ = isEncount; }
 
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	/// <param name=""></param>
+	void UpdateImGui(void);
+
 private:
 	std::unique_ptr<BarUI> hpBar_;	//HPバー
 	//アニメーション
@@ -468,8 +474,6 @@ private:
 	/// </summary>
 	/// <returns>Jsonデータ</returns>
 	const nlohmann::json GetJsonData(void)const;
-
-	void DebugImGui(void);
 
 	//状態を遷移させる用の時間管理変数
 	float stateStep_;

@@ -185,6 +185,8 @@ private:
 	int shakeFrame_;	//揺らしフレーム数
 	float shakeRate_;	//揺らし強度
 
+	std::string sceneName_;
+
 	// デフォルトコンストラクタをprivateにして、
 	// 外部から生成できない様にする
 	SceneManager(void);
@@ -210,4 +212,6 @@ private:
 	//SCENE_IDからシーンを生成する
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
+
+	void SceneUpdateImGui(void);
 };
