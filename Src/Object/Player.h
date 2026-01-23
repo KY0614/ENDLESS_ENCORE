@@ -31,6 +31,7 @@ public:
 		WAKE_UP,	//起き上がる
 		STAGE_WALK,	//ステージ上を歩く
 		LOOK_AROUND,//周りを見渡す
+		ATTACKED_ENEMY,	//敵に攻撃される
 		WAIT,		//戦闘開始前の待機
 		PLAY,		//操作可能
 		BACKSTAB,	//バックスタブ
@@ -44,6 +45,7 @@ public:
 		IDLE,		//通常
 		WALK_SLOW,	//ゆっくり歩く
 		LOOK_AROUND,//周りを見渡す
+		ATTACKED,	//攻撃をされる
 		WALK,		//歩く
 		RUN,		//走り
 		JUMP,		//ジャンプ
@@ -338,6 +340,10 @@ private:
 	/// </summary>
 	void ChangeStateLookAround(void);
 	/// <summary>
+	/// 状態遷移：ATTACKED_ENEMY
+	/// </summary>
+	void ChangeStateAttackedEnemy(void);
+	/// <summary>
 	/// 状態遷移：WAIT
 	/// </summary>
 	void ChangeStateWait(void);
@@ -372,6 +378,10 @@ private:
 	/// 更新：LOOK_AROUND
 	/// </summary>
 	void UpdateLookAround(void);
+	/// <summary>
+	/// 更新：ATTACKED_ENEMY
+	/// </summary>
+	void UpdateAttackedEnemy(void);
 	/// <summary>
 	/// 更新：WAIT
 	/// </summary>

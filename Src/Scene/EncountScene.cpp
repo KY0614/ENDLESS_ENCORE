@@ -93,8 +93,8 @@ void EncountScene::Draw(void)
 		player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
 	VECTOR endPos = VAdd(
 		player_.GetTransform().pos,
-		VScale(playerBackLeft, 30.0f));
-	endPos.y += 30.0f;
+		VScale(playerBackLeft, 80.0f));
+	endPos.y += player_.GetFramePos(L"mixamorig:Spine").y;
 	DrawSphere3D(endPos, 20.0f, 16, 0xFF0000, 0xFF0000, true);
 
 	//敵とプレイヤーの中間地点
@@ -315,6 +315,7 @@ void EncountScene::ChangeStateEnemyAttack(void)
 	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Head");
 	mainCamera->SetFixedPointPos(endPos, targetPos);
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
+	player_.ChangeState(Player::STATE::ATTACKED_ENEMY);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttack, this);
 }
 
@@ -535,7 +536,7 @@ void EncountScene::UpdateEnemyAttack(void)
 		//startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
 		////注視点を敵の位置にセット
 		//VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Head");
-		//mainCamera->SetZoomOutDolly(30.0f,
+		//mainCamera->SetZoomOutDolly(110.0f,
 		//	startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
 		//mainCamera->ChangeMode(Camera::MODE::ZOOM_OUT_DOLLY);
 

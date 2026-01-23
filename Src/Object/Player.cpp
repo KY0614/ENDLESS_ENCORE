@@ -31,6 +31,7 @@ namespace
 	static const std::string KEY_IDLE = "Idle";
 	static const std::string KEY_WALK = "Walk";
 	static const std::string KEY_LOOK_AROUND = "LookAround";
+	static const std::string KEY_ATTACKED = "Attacked";
 	static const std::string KEY_RUN = "Run";
 	static const std::string KEY_JUMP = "Jump";
 	static const std::string KEY_DODGE = "Dodge";
@@ -61,6 +62,8 @@ namespace
 
 	//ステージを歩き始める位置(Z座標)
 	const float WALK_STAGE_POS_Z = 1150.0f;
+	//攻撃を受けるZ座標
+	const float ATTACKED_POS_Z = 2244.0f;
 	//ステージを歩くスピード
 	const float WALK_SPEED_SLOW = 1.0f;
 }
@@ -76,6 +79,7 @@ Player::Player(void)
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&Player::ChangeStateWakeUp, this));
 	stateChanges_.emplace(STATE::STAGE_WALK, std::bind(&Player::ChangeStateStageWalk, this));
 	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&Player::ChangeStateLookAround, this));
+	stateChanges_.emplace(STATE::ATTACKED_ENEMY, std::bind(&Player::ChangeStateAttackedEnemy, this));
 	stateChanges_.emplace(STATE::WAIT, std::bind(&Player::ChangeStateWait, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
@@ -375,6 +379,9 @@ void Player::InitAnimation(void)
 	//周りを見渡す
 	animationController_->Add((int)ANIM_TYPE::LOOK_AROUND, path + animPath.value(KEY_LOOK_AROUND, KEY_EMPTY),
 		animSpeed);
+	//攻撃をされる
+	animationController_->Add((int)ANIM_TYPE::ATTACKED, path + animPath.value(KEY_ATTACKED, KEY_EMPTY),
+		animSpeed);
 	//歩く
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
@@ -439,6 +446,21 @@ void Player::SetBackstabRotY(const Quaternion& rotY)
 	goalQuaRot_ = rotY;
 }
 
+void Player::UpdateImGui(void)
+{
+	//座標
+	ImGui::InputFloat3("Pos", &transform_.pos.x);
+	ImGui::SliderFloat("PosX", &transform_.pos.x,-10000.0f,10000.0f);
+	ImGui::SliderFloat("PosY", &transform_.pos.y,-10000.0f,10000.0f);
+	ImGui::SliderFloat("PosZ", &transform_.pos.z,-10000.0f,10000.0f);
+
+	if (ImGui::Button("Damage"))
+	{
+		const float damage = 10.0f;
+		Damage(damage);
+	}
+}
+
 void Player::ChangeStateNone(void)
 {
 	stateUpdate_ = std::bind(&Player::UpdateNone, this);
@@ -463,6 +485,14 @@ void Player::ChangeStateLookAround(void)
 	//周りを見渡すアニメーションに変更
 	animationController_->Play((int)ANIM_TYPE::LOOK_AROUND,false);
 	stateUpdate_ = std::bind(&Player::UpdateLookAround, this);
+}
+
+void Player::ChangeStateAttackedEnemy(void)
+{
+	//
+	animationController_->Play((int)ANIM_TYPE::ATTACKED);
+	transform_.pos.z = ATTACKED_POS_Z;
+	stateUpdate_ = std::bind(&Player::UpdateAttackedEnemy, this);
 }
 
 void Player::ChangeStateWait(void)
@@ -540,6 +570,10 @@ void Player::UpdateStageWalk(void)
 }
 
 void Player::UpdateLookAround(void)
+{
+}
+
+void Player::UpdateAttackedEnemy(void)
 {
 }
 
@@ -1140,15 +1174,6 @@ void Player::DrawParryCD(void)
 		parryCDBar_->SetBarSize({ GAUGE_W, GAUGE_H });
 		parryCDBar_->SetBarMaxWidth(GAUGE_W);
 		parryCDBar_->DrawParry();
-	}
-}
-
-void Player::UpdateImGui(void)
-{
-	if (ImGui::Button("Damage"))
-	{
-		const float damage = 10.0f;
-		Damage(damage);
 	}
 }
 

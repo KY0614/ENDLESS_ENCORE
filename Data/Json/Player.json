@@ -13,6 +13,7 @@
       "Idle": "Idle.mv1",
       "Walk": "Walking.mv1",
       "LookAround": "Look Around.mv1",
+      "Attacked": "Attacked.mv1",
       "Run": "Running.mv1",
       "Jump": "Jump.mv1",
       "Dodge": "Dash.mv1",

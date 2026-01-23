@@ -2,7 +2,6 @@
 #include <DxLib.h>
 #include "../../Common/Quaternion.h"
 class Transform;
-class Planet;
 
 class Camera
 {
@@ -167,8 +166,6 @@ private:
 	const Transform* followTransform_;
 	//’‹‘ÎÛ‚Æ‚·‚éTransform
 	const Transform* targetTransform_;
-
-	std::weak_ptr<Planet> planet_;
 
 	//ƒJƒƒ‰ƒ‚[ƒh
 	MODE mode_;
