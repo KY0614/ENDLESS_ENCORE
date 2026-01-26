@@ -381,7 +381,7 @@ void Player::InitAnimation(void)
 		animSpeed);
 	//UŒ‚‚ð‚³‚ê‚é
 	animationController_->Add((int)ANIM_TYPE::ATTACKED, path + animPath.value(KEY_ATTACKED, KEY_EMPTY),
-		animSpeed);
+		animSpeedSlow);
 	//•à‚­
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);

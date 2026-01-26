@@ -9,6 +9,8 @@
 
 namespace 
 {
+	//弾の速度
+	const float BULLET_SPEED = 20.0f;
 	//弾の生存時間
 	const float LIFE_TIME = 8.0f;
 	//SEの音量
@@ -64,6 +66,9 @@ void EnemyBullet::Init(void)
 
 	//初期状態は非生存状態
 	SetIsAlive(false);
+
+	//速度の設定
+	SetSpeed(BULLET_SPEED);
 
 	//生存時間の設定
 	SetLifeTime(LIFE_TIME);
@@ -211,9 +216,8 @@ void EnemyBullet::Move(void)
 
 	//下方向の取得
 	VECTOR downward = transform_.GetDown();
-	const float speed = 20.0f;
 	//横ベクトル
-	VECTOR widthMovePow = VScale(forward, speed);
+	VECTOR widthMovePow = VScale(forward, speed_);
 
 	//移動
 	//前方

@@ -83,6 +83,8 @@ private:
 
 	//スローモーション用フレームカウント
 	int slowMotionFrameCount_;
+	int slowMotionFrame_;
+	float slowMotionSpeed_;
 
 	/// <summary>
 	/// サウンド初期化処理
@@ -132,9 +134,8 @@ private:
 	/// </summary>
 	void ChangeStateBattle(void);
 
-	//状態ごとの更新と描画--------------------------------------------------------
-
-	//ゲーム開始
+	//状態ごとの更新と描画
+	//ゲーム開始-----------------------------------------------------
 
 	/// <summary>
 	/// ゲーム開始の更新処理
@@ -146,7 +147,7 @@ private:
 	/// </summary>
 	void DrawWakeUp(void);
 
-	//探索
+	//探索-----------------------------------------------------
 
 	/// <summary>
 	/// 探索フェーズの更新処理
@@ -170,7 +171,7 @@ private:
 	/// </summary>
 	void DrawEncount(void);
 
-	//戦闘
+	//戦闘-----------------------------------------------------
 
 	/// <summary>
 	/// ゲーム中の更新処理
@@ -182,10 +183,15 @@ private:
 	/// </summary>
 	void DrawBattle(void);
 
+	//---------------------------------------------------------
+
 	/// <summary>
 	/// スキップバーの描画処理
 	/// </summary>
 	void SkipBarDraw(void);
 
+	/// <summary>
+	/// オブジェクトのImGui更新処理
+	/// </summary>
 	void ObjectUpdateImGui(void);
 };

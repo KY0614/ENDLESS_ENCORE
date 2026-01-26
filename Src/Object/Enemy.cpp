@@ -527,6 +527,17 @@ void Enemy::UpdateAttackPlayer(void)
 	{
 		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
 	}
+	//’e‚Ìó‘ÔXV
+	bullets_.front()->Update();
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	const float bulletInterval = 0.5f;
+	if (stateStep_ > bulletInterval)
+	{
+		bullets_.front()->SetStateShot();
+		VECTOR targetPos = player_.GetTransform().pos;
+		targetPos.y = player_.GetFramePos(L"mixamorig:Spine").y;
+		bullets_.front()->SetTargetPos(player_.GetTransform().pos);
+	}
 }
 
 void Enemy::UpdateEncountFinish(void)

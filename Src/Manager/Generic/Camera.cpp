@@ -98,6 +98,10 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawDolly();
 		break;
 
+	case Camera::MODE::ZOOM_OUT_DOLLY:
+		SetBeforeDrawZoomOutDolly();
+		break;
+
 	case Camera::MODE::FOLLOW:
 		SetBeforeDrawFollow();
 		break;
@@ -119,6 +123,8 @@ void Camera::SetBeforeDraw(void)
 		targetPos_, 
 		cameraUp_
 	);
+
+	//自由視点カメラの場合、角度からカメラを設定し直す
 	if (mode_ == MODE::FREE)
 	{
 		SetCameraPositionAndAngle(
@@ -206,6 +212,10 @@ void Camera::ChangeMode(MODE mode)
 		pos_ = dollyStartPos_;
 		targetPos_ = dollyObjectPos_;
 		break;	
+	case Camera::MODE::ZOOM_OUT_DOLLY:
+		pos_ = zoomOutDollyStartPos_;
+		targetPos_ = zoomOutDollyTargetPos_;
+		break;	
 	case Camera::MODE::FREE:
 		break;
 	}
@@ -237,8 +247,6 @@ void Camera::SetTrackQuadOut(
 	trackStartPos_ = startPos;
 	trackEndPos_ = endPos;
 	trackDir_ = VNorm(VSub(endPos, startPos));
-	// 総移動距離から総移動時間を計算
-	float totalDistance = VSize(VSub(endPos, startPos));
 	trackTotalTime_ = totalMoveTime;
 	trackElapsedTime_ = 0.0f;
 }
@@ -254,8 +262,6 @@ void Camera::SetDollyQuadOut(
 	dollyEndPos_ = endPos;
 	dollyObjectPos_ = objectPos;
 	object2CameraDistance_ = object2CameraDistance;
-	// 総移動距離から総移動時間を計算
-	float totalDistance = VSize(VSub(dollyObjectPos_, startPos));
 	dollyTotalTime_ = totalMoveTime;
 	dollyElapsedTime_ = 0.0f;
 }
@@ -466,15 +472,22 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 	//経過時間
 	zoomOutDollyElapsedTime_ += SceneManager::GetInstance().GetDeltaTime();
 	//制限時間内に収める
-	zoomOutDollyElapsedTime_ = std::clamp(zoomOutDollyElapsedTime_, 0.0f, zoomOutDollyTotalTime_);
-	// 各軸ごとにQuadInOutイージングで補間
-	pos_.x = Easing::QuadInOut(
+	zoomOutDollyElapsedTime_ = std::clamp(
+		zoomOutDollyElapsedTime_, 0.0f, zoomOutDollyTotalTime_);
+
+	//視野角の補間
+	fov_ = Easing::QuadOut(
+		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
+		fov_, zoomOutFov_);
+
+	//各軸ごとにQuadOutイージングで補間
+	pos_.x = Easing::QuadOut(
 		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
 		zoomOutDollyStartPos_.x, zoomOutDollyEndPos_.x);
-	pos_.y = Easing::QuadInOut(
+	pos_.y = Easing::QuadOut(
 		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
 		zoomOutDollyStartPos_.y, zoomOutDollyEndPos_.y);
-	pos_.z = Easing::QuadInOut(
+	pos_.z = Easing::QuadOut(
 		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
 		zoomOutDollyStartPos_.z, zoomOutDollyEndPos_.z);
 }
@@ -541,7 +554,7 @@ void Camera::SetBeforeDrawMouse(void)
 void Camera::UpdateImGui(void)
 {
 	ImGui::Text("targetPos: %.2f, %.2f, %.2f", targetPos_.x, targetPos_.y, targetPos_.z);
-
+	ImGui::Text("Pos: %.2f, %.2f, %.2f", pos_.x, pos_.y, pos_.z);
 	ImGui::InputFloat("Fov", &fov_);
 	ImGui::SliderFloat("Fov_Slider", &fov_, 8.0f, 170.0);
 }

@@ -3,6 +3,7 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Common/Fader.h"
+#include "../Common/Easing.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
@@ -28,6 +29,10 @@ namespace
 	//カメラの各注視点オフセット値	
 	const float CAMERA_PLAYER_HEAD_OFFSET_Y = 100.0f;	//プレイヤーの頭の高さ
 	const float CAMERA_PLAYER_CHEST_OFFSET_Y = 70.0f;	//プレイヤーの胸の高さ
+
+	//スローモーション関連
+	const float SLOW_MOTION_SPEED = 0.1f; //スローモーションの速度
+	const float SLOW_MOTION_SPEED_ACCEL = 1.2f; //スローモーションの加速度
 }
 
 GameScene::GameScene(void)
@@ -41,6 +46,8 @@ GameScene::GameScene(void)
 	skipTimer_ = 0.0f;
 	isSkip_ = false;
 	slowMotionFrameCount_ = 0;
+	slowMotionFrame_ = 1;
+	slowMotionSpeed_ = 0.0f;
 	//状態管理
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
@@ -259,6 +266,7 @@ void GameScene::ChangeStateEncount(void)
 {
 	skipTimer_ = 0.0f;
 	isSkip_ = false;
+	slowMotionSpeed_ = SLOW_MOTION_SPEED;
 	stateUpdate_ = std::bind(&GameScene::UpdateEncount, this);
 	stateDraw_ = std::bind(&GameScene::DrawEncount, this);
 }
@@ -414,11 +422,29 @@ void GameScene::UpdateEncount(void)
 	}
 
 	//スローモーション処理
-	if (encountScene_->IsSlowMotion())slowMotionFrameCount_++;
-	//スローモーション中でなければ通常更新
-	//if (slowMotionFrameCount_ % encountScene_->GetSloMotionFrame() != 0)return;
-	//各オブジェクト更新
+	//if (encountScene_->IsSlowMotion() &&
+	//	slowMotionFrameCount_++ > 60.0f)slowMotionFrameCount_ = 0.0f;
+	//エンカウントシーン更新
 	encountScene_->Update();
+	//スローモーション中でなければ通常更新
+	if (encountScene_->IsSlowMotion())
+	{
+		//slowMotionFrame_ += 0.1f; // 徐々に遅くする
+		if (slowMotionFrame_ > 60) // 完全停止
+		{
+			//終了処理など
+			return;
+		}
+		slowMotionFrameCount_++;
+		if(slowMotionFrameCount_ > 60) 
+		{
+			slowMotionFrameCount_ = 0;
+			slowMotionFrame_++;
+		}
+		if (slowMotionFrameCount_ % slowMotionFrame_ != 0)
+			return; // このフレームは処理しない
+	}
+	//各オブジェクト更新
 	player_->Update();
 	enemy_->Update();
 	stage_->Update();
@@ -516,7 +542,8 @@ void GameScene::UpdateImGui(void)
 {
 	ImGui::Text("GameScene");
 	ImGui::Text("slowFrameCnt : %d", slowMotionFrameCount_);
-	
+	ImGui::Text("slowMotionFrame : %d", slowMotionFrame_);
+
 	if (ImGui::Button("Explore"))
 	{
 		InitStateExplore();

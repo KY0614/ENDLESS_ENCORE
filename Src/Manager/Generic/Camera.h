@@ -141,7 +141,7 @@ public:
 	/// <summary>
 	/// 
 	/// </summary>
-	/// <param name="endFov"></param>
+	/// <param name="endFov">ÅI“I‚È‹–ìŠp(60‚æ‚è‘å‚«‚¢)</param>
 	/// <param name="startPos"></param>
 	/// <param name="endPos"></param>
 	/// <param name="targetPos"></param>

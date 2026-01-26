@@ -3,6 +3,7 @@
 #include "../Object/Enemy.h"
 #include "../Common/Fader.h"
 #include "../Manager/Generic/Camera.h"
+#include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/GameSystem/SoundManager.h"
@@ -20,7 +21,6 @@ namespace
 	const float CAMERA_PLAYER_HEAD_OFFSET_Y = 100.0f;	//プレイヤーの頭の高さ
 	const float CAMERA_PLAYER_CHEST_OFFSET_Y = 80.0f;	//プレイヤーの胸の高さ
 	const float CAMERA_ENEMY_HEAD_OFFSET_Y = 150.0f;	//敵の頭の高さ
-	const float CAMERA_ENEMY_CHEST_OFFSET_Y = 80.0f;	//敵の頭の高さ
 
 	//サウンドの最大音量
 	const int SOUND_VOLUME_MAX = 256;
@@ -46,13 +46,14 @@ EncountScene::EncountScene(
 	stateChanges_.emplace(STATE::ENEMY_ATTENTION, std::bind(&EncountScene::ChangeStateEnemyAttention, this));
 	stateChanges_.emplace(STATE::ENEMY_CAST_SPELL, std::bind(&EncountScene::ChangeStateEnemyCastSpell, this));
 	stateChanges_.emplace(STATE::ENEMY_ATTACK, std::bind(&EncountScene::ChangeStateEnemyAttack, this));
+	stateChanges_.emplace(STATE::LETS_PARRY, std::bind(&EncountScene::ChangeStateLetsParry, this));
 	stateChanges_.emplace(STATE::FINISH, std::bind(&EncountScene::ChangeStateFinish, this));
 
 	intervalTimer_ = 0.0f;
 	isLightUp_ = false;
 	isSlowMotion_ = false;
 	isFinish_ = false;
-	slowMotionFrame_ = 0;
+	isStop_ = false;
 }
 
 EncountScene::~EncountScene(void)
@@ -63,9 +64,6 @@ void EncountScene::Init(void)
 {
 	//サウンド初期化
 	InitSound();
-
-	//スローモーション用フレームカウンター初期化
-	slowMotionFrame_ = 2;
 
 	//初期状態
 	ChangeState(STATE::NONE);
@@ -79,28 +77,6 @@ void EncountScene::Update(void)
 
 void EncountScene::Draw(void)
 {
-	//カメラ開始座標
-	const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
-	const float distance = 160.0f;
-	VECTOR startPos = VAdd(
-		enemy_.GetTransform().pos,
-		VScale(enemyForward, distance));
-	startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
-	DrawSphere3D(startPos, 20.0f, 16, 0x00FF00, 0x00FF00, true);
-
-	//カメラ終了座標
-	const VECTOR& playerBackLeft = VAdd(
-		player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
-	VECTOR endPos = VAdd(
-		player_.GetTransform().pos,
-		VScale(playerBackLeft, 80.0f));
-	endPos.y += player_.GetFramePos(L"mixamorig:Spine").y;
-	DrawSphere3D(endPos, 20.0f, 16, 0xFF0000, 0xFF0000, true);
-
-	//敵とプレイヤーの中間地点
-	VECTOR p2EPos = VScale(
-		VAdd(player_.GetTransform().pos, enemy_.GetTransform().pos), 0.5f);
-	DrawSphere3D(p2EPos, 20.0f, 16, 0xFF00FF, 0xFF00FF, true);
 }
 
 void EncountScene::Start(void)
@@ -315,8 +291,12 @@ void EncountScene::ChangeStateEnemyAttack(void)
 	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Head");
 	mainCamera->SetFixedPointPos(endPos, targetPos);
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
-	player_.ChangeState(Player::STATE::ATTACKED_ENEMY);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttack, this);
+}
+
+void EncountScene::ChangeStateLetsParry(void)
+{
+	stateUpdate_ = std::bind(&EncountScene::UpdateLetsParry, this);
 }
 
 void EncountScene::ChangeStateFinish(void)
@@ -523,30 +503,48 @@ void EncountScene::UpdateEnemyAttack(void)
 	{
 		StartSlowMotion();
 		enemy_.ChangeState(Enemy::STATE::ATTACK_PLAYER);
-		VECTOR playerPos = player_.GetTransform().pos;
-		VECTOR enemyPos = enemy_.GetTransform().pos;
-		VECTOR targetPos = VScale(VAdd(playerPos, enemyPos), 0.5f);
-		////カメラを敵の前からスタート
-		//const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
-		////被写体から距離を取った位置を開始座標とする
-		//const float distance = 160.0f;
-		//VECTOR startPos = VAdd(
-		//	enemy_.GetTransform().pos,
-		//	VScale(enemyForward, distance));
-		//startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
-		////注視点を敵の位置にセット
-		//VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Head");
-		//mainCamera->SetZoomOutDolly(110.0f,
-		//	startPos, endPos, targetPos, CAMERA_PLAYER_HEAD_OFFSET_Y, dollyInTotalTime);
-		//mainCamera->ChangeMode(Camera::MODE::ZOOM_OUT_DOLLY);
-
-		mainCamera->ChangeMode(Camera::MODE::FREE);
-		mainCamera->SetTargetPos(targetPos);
+		player_.ChangeState(Player::STATE::ATTACKED_ENEMY);
+		//カメラを敵の前からスタート
+		const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
+		//被写体から距離を取った位置を開始座標とする
+		const float distance = 160.0f;
+		VECTOR startPos = VAdd(
+			enemy_.GetTransform().pos,
+			VScale(enemyForward, distance));
+		startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
+		const VECTOR& playerBackLeft = VAdd(
+			player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
+		VECTOR endPos = VAdd(
+			player_.GetTransform().pos,
+			VScale(playerBackLeft, 80.0f));
+		endPos.y += 50.0f;
+		//注視点を敵の頭にセット
+		const VECTOR& targetPos = enemy_.GetFramePos(L"mixamorig:Head");
+		//ドリーを行う合計の時間
+		const float dollyTotalTime = 2.0f;
+		//ズームアウトのFOV値
+		const float zoomOutFov = 110.0f;
+		mainCamera->SetZoomOutDolly(
+			zoomOutFov,startPos, endPos, targetPos, dollyTotalTime);
+		mainCamera->ChangeMode(Camera::MODE::ZOOM_OUT_DOLLY);
+		intervalTimer_ = 0.0f;
 	}
 
-	if (!IsSlowMotion())return;
-	//スローモーション時間経過
-	//slowMotionFrame_++;
+	if (mainCamera->IsActionEnd())
+	{
+		ChangeState(STATE::LETS_PARRY);
+		return;
+	}
+}
+
+void EncountScene::UpdateLetsParry(void)
+{
+	InputManager& ins = InputManager::GetInstance();
+	if (ins.IsInputTriggered("Parry"))
+	{
+		ChangeState(STATE::PLAYER_PARRY);
+		return;
+	}
 }
 
 void EncountScene::UpdateFinish(void)

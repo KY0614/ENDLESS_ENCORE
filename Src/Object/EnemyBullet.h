@@ -73,6 +73,12 @@ public:
 	void SetStateReverse(void) { ChangeState(STATE::REVERSE);}
 
 	/// <summary>
+	/// 速度を設定
+	/// </summary>
+	/// <param name="speed">速度</param>
+	void SetSpeed(const float speed) { speed_ = speed; }
+
+	/// <summary>
 	/// 生存状態を設定
 	/// </summary>
 	/// <param name="isAlive">true:生存中　false:生存してない</param>
@@ -131,6 +137,9 @@ private:
 	VECTOR offsetPos_;	//オフセット座標
 	VECTOR targetPos_;	//ターゲット座標
 
+	//速度
+	float speed_;
+
 	//生存時間
 	float lifeTime_;
 
@@ -140,7 +149,7 @@ private:
 	//球体
 	std::unique_ptr<Sphere> sphere_;
 
-	//エフェクト
+	//炎エフェクト
 	int effectFireResId_;	//エフェクトリソースID
 	int effectFirePlayId_;	//エフェクト再生ID
 

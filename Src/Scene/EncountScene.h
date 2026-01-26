@@ -25,6 +25,8 @@ public:
 
 		ENEMY_CAST_SPELL,		//敵が魔法を唱える
 		ENEMY_ATTACK,			//敵が攻撃する
+		LETS_PARRY,				//パリィの合図
+		PLAYER_PARRY,			//パリィ
 
 		FINISH					//終了
 	};
@@ -61,17 +63,21 @@ public:
 	void StartSlowMotion(void) { isSlowMotion_ = true; }
 
 	/// <summary>
+	/// 停止
+	/// </summary>
+	void Stop(void) { isStop_ = true; }
+
+	/// <summary>
 	/// スローモーションするかどうか取得
 	/// </summary>
 	/// <returns>true:スローモーション中、false:スローモーションしない</returns>
 	const bool& IsSlowMotion(void)const { return isSlowMotion_; }
 
 	/// <summary>
-	///　スローモーション用フレーム取得
+	/// 停止中かどうか取得
 	/// </summary>
-	/// <param name=""></param>
-	/// <returns>スローモーション用フレーム</returns>
-	const int& GetSloMotionFrame(void)const { return slowMotionFrame_; }
+	/// <returns>true:停止中、false:停止していない</returns>
+	const bool& IsStop(void)const { return isStop_; }
 
 	/// <summary>
 	/// エンカウント演出が終了したかどうか取得
@@ -105,10 +111,10 @@ private:
 	//ライトアップ用フラグ true:ライトアップ済み false:ライトアップ待ち
 	bool isLightUp_;
 
-	//スロー更新フラグ
+	//スローモーションフラグ true:スローモーション中 false:通常速度
 	bool isSlowMotion_;	
-	//スローモーションフレーム
-	int slowMotionFrame_;
+	//一時停止フラグ true:停止中 false:通常進行
+	bool isStop_;
 
 	//シーン終了フラグ
 	bool isFinish_;				
@@ -167,6 +173,10 @@ private:
 	/// </summary>
 	void ChangeStateEnemyAttack(void);
 	/// <summary>
+	/// 状態遷移：LETS_PARRY
+	/// </summary>
+	void ChangeStateLetsParry(void);
+	/// <summary>
 	/// 状態遷移：FINISH
 	/// </summary>
 	void ChangeStateFinish(void);
@@ -213,6 +223,10 @@ private:
 	/// 更新：ENEMY_ATTACK
 	/// </summary>
 	void UpdateEnemyAttack(void);
+	/// <summary>
+	/// 更新：LETS_PARRY
+	/// </summary>
+	void UpdateLetsParry(void);
 	/// <summary>
 	/// 更新：FINISH
 	/// </summary>
