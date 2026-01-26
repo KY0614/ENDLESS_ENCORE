@@ -490,7 +490,7 @@ void Player::ChangeStateLookAround(void)
 void Player::ChangeStateAttackedEnemy(void)
 {
 	//
-	animationController_->Play((int)ANIM_TYPE::ATTACKED);
+	animationController_->Play((int)ANIM_TYPE::ATTACKED,false,0.0f,20.0f);
 	transform_.pos.z = ATTACKED_POS_Z;
 	stateUpdate_ = std::bind(&Player::UpdateAttackedEnemy, this);
 }

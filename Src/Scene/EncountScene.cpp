@@ -289,6 +289,7 @@ void EncountScene::ChangeStateEnemyAttack(void)
 	endPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
 	//注視点を敵の位置にセット
 	VECTOR targetPos = enemy_.GetFramePos(L"mixamorig:Head");
+	player_.ChangeState(Player::STATE::ATTACKED_ENEMY);
 	mainCamera->SetFixedPointPos(endPos, targetPos);
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateEnemyAttack, this);
@@ -503,7 +504,6 @@ void EncountScene::UpdateEnemyAttack(void)
 	{
 		StartSlowMotion();
 		enemy_.ChangeState(Enemy::STATE::ATTACK_PLAYER);
-		player_.ChangeState(Player::STATE::ATTACKED_ENEMY);
 		//カメラを敵の前からスタート
 		const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
 		//被写体から距離を取った位置を開始座標とする
@@ -521,7 +521,7 @@ void EncountScene::UpdateEnemyAttack(void)
 		//注視点を敵の頭にセット
 		const VECTOR& targetPos = enemy_.GetFramePos(L"mixamorig:Head");
 		//ドリーを行う合計の時間
-		const float dollyTotalTime = 2.0f;
+		const float dollyTotalTime = 4.0f;
 		//ズームアウトのFOV値
 		const float zoomOutFov = 110.0f;
 		mainCamera->SetZoomOutDolly(

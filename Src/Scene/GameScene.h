@@ -82,9 +82,8 @@ private:
 	bool isSkip_;	
 
 	//スローモーション用フレームカウント
-	int slowMotionFrameCount_;
-	int slowMotionFrame_;
-	float slowMotionSpeed_;
+	float slowMotionFrameCount_;
+	float slowMotionFrame_;
 
 	/// <summary>
 	/// サウンド初期化処理

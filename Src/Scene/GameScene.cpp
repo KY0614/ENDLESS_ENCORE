@@ -45,9 +45,8 @@ GameScene::GameScene(void)
 
 	skipTimer_ = 0.0f;
 	isSkip_ = false;
-	slowMotionFrameCount_ = 0;
-	slowMotionFrame_ = 1;
-	slowMotionSpeed_ = 0.0f;
+	slowMotionFrameCount_ = 0.0f;
+	slowMotionFrame_ = 0.1f;
 	//状態管理
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
@@ -266,7 +265,6 @@ void GameScene::ChangeStateEncount(void)
 {
 	skipTimer_ = 0.0f;
 	isSkip_ = false;
-	slowMotionSpeed_ = SLOW_MOTION_SPEED;
 	stateUpdate_ = std::bind(&GameScene::UpdateEncount, this);
 	stateDraw_ = std::bind(&GameScene::DrawEncount, this);
 }
@@ -429,19 +427,16 @@ void GameScene::UpdateEncount(void)
 	//スローモーション中でなければ通常更新
 	if (encountScene_->IsSlowMotion())
 	{
-		//slowMotionFrame_ += 0.1f; // 徐々に遅くする
-		if (slowMotionFrame_ > 60) // 完全停止
+		slowMotionFrame_ *= 1.02f; // 徐々に遅くする
+		if (slowMotionFrame_ > 60.0f) // 完全停止
 		{
 			//終了処理など
 			return;
 		}
 		slowMotionFrameCount_++;
-		if(slowMotionFrameCount_ > 60) 
-		{
-			slowMotionFrameCount_ = 0;
-			slowMotionFrame_++;
-		}
-		if (slowMotionFrameCount_ % slowMotionFrame_ != 0)
+		if (slowMotionFrame_ < 1.0f ||
+			static_cast<int>(slowMotionFrameCount_) % 
+			static_cast<int>(slowMotionFrame_) != 0)
 			return; // このフレームは処理しない
 	}
 	//各オブジェクト更新
@@ -542,7 +537,7 @@ void GameScene::UpdateImGui(void)
 {
 	ImGui::Text("GameScene");
 	ImGui::Text("slowFrameCnt : %d", slowMotionFrameCount_);
-	ImGui::Text("slowMotionFrame : %d", slowMotionFrame_);
+	ImGui::Text("slowMotionFrame : %.2f", slowMotionFrame_);
 
 	if (ImGui::Button("Explore"))
 	{
