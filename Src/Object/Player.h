@@ -301,6 +301,8 @@ private:
 	int victoryImg_;
 	int diedImg_;
 
+	int fontHandle_;
+
 	void LoadData(void);
 
 	/// <summary>

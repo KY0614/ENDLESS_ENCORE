@@ -64,6 +64,7 @@ namespace
 	const float WALK_STAGE_POS_Z = 1150.0f;
 	//攻撃を受けるZ座標
 	const float ATTACKED_POS_Z = 2244.0f;
+	const float POS_Z = -2510.0f;
 	//ステージを歩くスピード
 	const float WALK_SPEED_SLOW = 1.0f;
 }
@@ -120,10 +121,12 @@ Player::Player(void)
 	clothSE_ = false;
 	victoryImg_ = -1;
 	diedImg_ = -1;
+	fontHandle_ = -1;
 }
 
 Player::~Player(void)
 {
+	DeleteFontToHandle(fontHandle_);
 }
 
 void Player::Init(void)
@@ -178,6 +181,8 @@ void Player::Init(void)
 	effectParryResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PARRY_EFKT).handleId_;
 
+	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
+	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", 32 * screenAspect, 3, DX_FONTTYPE_ANTIALIASING);
 	//初期状態
 	ChangeState(STATE::WAKE_UP);
 }
@@ -191,6 +196,8 @@ void Player::Update(void)
 	}
 	//下限設定
 	if (hp_ <= 0.0f)hp_ = 0.0f;
+
+	if (transform_.pos.z <= POS_Z)transform_.pos.z = POS_Z;
 
 	//更新ステップ
 	stateUpdate_();
@@ -1207,8 +1214,12 @@ void Player::DrawParryCD(void)
 		//// ゲージの枠を描画
 		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
 		// テキスト表示 (クールダウン中)
-		DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, cdColor, L"PARRY CD: %.1f", PARRY_TIME - stepParry_);
-	
+		//DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, cdColor, L"PARRY CD: %.1f", PARRY_TIME - stepParry_);
+		DrawFormatStringToHandle(
+			GAUGE_X + GAUGE_W + textOffset, GAUGE_Y,
+			cdColor, fontHandle_,
+			L"PARRY CD: %.1f",
+			PARRY_TIME - stepParry_);
 		parryCDBar_->SetBarSize({ currentGaugeWidth, GAUGE_H });
 		parryCDBar_->SetBarMaxWidth(GAUGE_W);
 		parryCDBar_->DrawParryCD();
@@ -1220,8 +1231,12 @@ void Player::DrawParryCD(void)
 		//// ゲージの枠を描画
 		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
 		// テキスト表示 (パリィ可能)
-		DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, fgColor, L"PARRY READY");
-
+		//DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, fgColor, L"PARRY READY");
+		DrawStringToHandle(
+			GAUGE_X + GAUGE_W + textOffset, GAUGE_Y,
+			L"PARRY READY",
+			fgColor,
+			fontHandle_);
 		parryCDBar_->SetBarSize({ GAUGE_W, GAUGE_H });
 		parryCDBar_->SetBarMaxWidth(GAUGE_W);
 		parryCDBar_->DrawParry();

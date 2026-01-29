@@ -9,6 +9,7 @@ class Enemy;
 class Stage;
 class Tutorial;
 class EncountScene;
+class BarUI;
 
 class GameScene : public SceneBase
 {
@@ -75,6 +76,8 @@ private:
 	std::shared_ptr<Tutorial> tutorial_;
 	//エンカウント演出
 	std::unique_ptr<EncountScene> encountScene_;
+	//UI
+	std::unique_ptr<BarUI> skipBarUI_;
 
 	//演出スキップ用タイマー
 	float skipTimer_;
@@ -84,6 +87,8 @@ private:
 	//スローモーション用フレームカウント
 	float slowMotionFrameCount_;
 	float slowMotionFrame_;
+
+	int fontHandle_;
 
 	/// <summary>
 	/// サウンド初期化処理

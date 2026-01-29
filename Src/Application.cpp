@@ -41,7 +41,12 @@ void Application::Init(void)
 	//ウィンドウサイズ
 	windowSize_ = { SCREEN_SIZE_X ,SCREEN_SIZE_Y };
 	SetGraphMode(windowSize_.width_, windowSize_.height_, 32);
+#ifdef _DEBUG
 	ChangeWindowMode(true);
+#endif // _DEBUG
+#if !_DEBUG
+	ChangeWindowMode(false);
+#endif // _RELEASE
 
 	const int FPS_RATE = 60;	//フレームレート固定
 	fps_ = std::make_unique<FpsController>(FPS_RATE);

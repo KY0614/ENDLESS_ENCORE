@@ -13,6 +13,7 @@
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
+#include "../Object/UI/BarUI.h"
 #include "EncountScene.h"
 #include "GameScene.h"
 
@@ -47,6 +48,7 @@ GameScene::GameScene(void)
 	isSkip_ = false;
 	slowMotionFrameCount_ = 0.0f;
 	slowMotionFrame_ = 0.1f;
+	fontHandle_ = -1;
 	//状態管理
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
@@ -56,7 +58,7 @@ GameScene::GameScene(void)
 
 GameScene::~GameScene(void)
 {
-	
+	DeleteFontToHandle(fontHandle_);
 }
 
 void GameScene::Init(void)
@@ -75,12 +77,12 @@ void GameScene::Init(void)
 	//ステージ
 	stage_ = std::make_shared<Stage>();
 	stage_->Init();
-
+	Vector2 tutorialPos = { 50,Application::SCREEN_SIZE_Y / 2 - 100 };
 	//チュートリアル
 	//移動
 	Tutorial::TutorialStep firstStep = {
 		Tutorial::STATE::MOVE,
-		{50,Application::SCREEN_SIZE_Y / 2},
+		tutorialPos,
 		"WASDで移動",
 		"左スティックで移動",
 		2.0f,
@@ -88,7 +90,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep cameraStep = {
 		Tutorial::STATE::CAMERA,
-		{50,Application::SCREEN_SIZE_Y / 2},
+		tutorialPos,
 		"矢印キーでカメラ操作",
 		"右スティックでカメラ操作",
 		1.5f,
@@ -96,7 +98,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep jumpStep = {
 		Tutorial::STATE::JUMP,
-		{50,Application::SCREEN_SIZE_Y / 2},
+		tutorialPos,
 		"Eキーでジャンプ",
 		"Yボタンでジャンプ",
 		0.0f,
@@ -104,7 +106,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep DodgeStep = {
 		Tutorial::STATE::DODGE,
-		{50,Application::SCREEN_SIZE_Y / 2},
+		tutorialPos,
 		"左Shiftキーで回避",
 		"Aボタンで回避",
 		0.0f,
@@ -112,7 +114,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep ParryStep = {
 		Tutorial::STATE::PARRY,
-		{50,Application::SCREEN_SIZE_Y / 2},
+		tutorialPos,
 		"Spaceキーでパリィ",
 		"Bボタンでパリィ",
 		0.0f,
@@ -120,7 +122,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep StageStep = {
 		Tutorial::STATE::STAGE,
-		{50,Application::SCREEN_SIZE_Y / 2},
+		tutorialPos,
 		"ステージへ行ってみよう",
 		"ステージへ行ってみよう",
 		0.0f,
@@ -139,6 +141,15 @@ void GameScene::Init(void)
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
 	encountScene_->Init();
 
+	//画面座標
+	const int GAUGE_X = Application::SCREEN_SIZE_X - 200;  // ゲージの左上のX座標
+	const int GAUGE_Y = Application::SCREEN_SIZE_Y - 120;  // ゲージの左上のY座標
+	skipBarUI_ = std::make_unique<BarUI>();
+	skipBarUI_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
+	skipBarUI_->Init();
+	skipBarUI_->SetBarPos({ GAUGE_X, GAUGE_Y });
+	skipBarUI_->SetActive(true);
+
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->SetTarget(&enemy_->GetTransform());
@@ -148,6 +159,9 @@ void GameScene::Init(void)
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 
+	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
+	fontHandle_ = CreateFontToHandle(
+		L"しねきゃぷしょん", 32 * screenAspect, 3, DX_FONTTYPE_ANTIALIASING);
 	//初期状態設定
 	ChangeState(STATE::WAKE_UP);
 }
@@ -522,6 +536,7 @@ void GameScene::SkipBarDraw(void)
 	// ゲージの色
 	const int bgColor = 0x333333; // 背景色（灰色）
 	int skipColor = 0x00FFFF; // スキップゲージの色
+	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
 	std::wstring str = L"";
 	if (skipTimer_ >= SKIP_TIME)
 	{
@@ -531,15 +546,28 @@ void GameScene::SkipBarDraw(void)
 	{
 		str = L"スキップ中...";
 	}
+	DrawStringToHandle(
+		GAUGE_X - 98, GAUGE_Y - 28,
+		str.c_str(),
+		0x000000,
+		fontHandle_);
+	DrawStringToHandle(
+		GAUGE_X - 100, GAUGE_Y - 30,
+		str.c_str(),
+		0xFFFFFF,
+		fontHandle_);
+	//DrawFormatString(GAUGE_X + 2, GAUGE_Y - 28, 0x000000, str.c_str());
+	//DrawFormatString(GAUGE_X, GAUGE_Y - 30, 0xFFFFFF, str.c_str());
 
-	DrawFormatString(GAUGE_X + 2, GAUGE_Y - 28, 0x000000, str.c_str());
-	DrawFormatString(GAUGE_X, GAUGE_Y - 30, 0xFFFFFF, str.c_str());
 	// ゲージの背景を描画
-	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, bgColor, true);
-	// 進行中のゲージを描画
-	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + (int)(GAUGE_W * progressRatio), GAUGE_Y + GAUGE_H,
-		skipColor, TRUE);
+	//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, bgColor, true);
+	//// 進行中のゲージを描画
+	//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + (int)(GAUGE_W * progressRatio), GAUGE_Y + GAUGE_H,
+	//	skipColor, TRUE);
 
+	skipBarUI_->SetBarSize({ currentGaugeWidth, GAUGE_H });
+	skipBarUI_->SetBarMaxWidth(GAUGE_W);
+	skipBarUI_->Draw();
 }
 
 void GameScene::UpdateImGui(void)

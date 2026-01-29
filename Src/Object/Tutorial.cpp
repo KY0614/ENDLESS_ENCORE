@@ -32,7 +32,8 @@ void Tutorial::Init(void)
 {
 	viewGuide_ = step_.front().keyGuide_;
 
-	fontHandle_ = CreateFontToHandle(L"‚µ‚Ë‚«‚á‚Õ‚µ‚å‚ñ", 20, 3, DX_FONTTYPE_ANTIALIASING);
+	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
+	fontHandle_ = CreateFontToHandle(L"‚µ‚Ë‚«‚á‚Õ‚µ‚å‚ñ", 32 * screenAspect, 3, DX_FONTTYPE_ANTIALIASING);
 
 	ChangeState(step_.front().state_);
 }
