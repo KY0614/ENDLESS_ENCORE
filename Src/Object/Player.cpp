@@ -118,6 +118,8 @@ Player::Player(void)
 	isActionEnd_ = false;
 	stepBackstab_ = 0.0f;
 	clothSE_ = false;
+	victoryImg_ = -1;
+	diedImg_ = -1;
 }
 
 Player::~Player(void)
@@ -150,6 +152,11 @@ void Player::Init(void)
 	parryCDBar_->Init();
 	parryCDBar_->SetBarPos({50, 50});
 	parryCDBar_->SetActive(true);
+
+	victoryImg_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::VICTORY).handleId_;
+	diedImg_ = ResourceManager::GetInstance().Load(
+		ResourceManager::SRC::YOU_DIED).handleId_;
 
 	//3Dモデルの初期化
 	Init3DModel();
@@ -231,14 +238,16 @@ void Player::DrawDead(void)
 	if (hp_ <= 0.0f && animationController_->IsEnd())
 	{
 		//デバッグ用死亡表記
-		DrawResultString(L"YOU DIED", 0xff0000);
+		//DrawResultString(L"YOU DIED", 0xff0000);
+		DrawResultImage(diedImg_);
 	}
 }
 
 void Player::DrawVictory(void)
 {
 	//デバッグ用勝利表記
-	DrawResultString(L"VICTORY",0xffff00);
+	//DrawResultString(L"VICTORY",0xffff00);
+	DrawResultImage(victoryImg_);
 }
 
 void Player::DrawResultString(const std::wstring& str, int col)
@@ -271,6 +280,48 @@ void Player::DrawResultString(const std::wstring& str, int col)
 	SetFontSize(defaultFontSize);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
+}
+
+void Player::DrawResultImage(const int img)
+{
+	//画面の比率
+	const float& screenAspectRatio =
+		SceneManager::GetInstance().GetScreenAspectRatio();
+
+	static int interval = 0;
+	//透明度の増加値
+	const int alphaSpeed = 5;
+	const int maxAlpha = 255;
+	const int maxInterval = 120;
+	stringAlpha_ = std::clamp(stringAlpha_, 0, maxAlpha);
+	if (stringAlpha_ >= maxAlpha)
+	{
+		if (++interval > maxInterval)
+		{
+			interval = 0;
+			SceneManager::GetInstance().ChangeScene(
+				SceneManager::SCENE_ID::TITLE);
+			return;
+		}
+	}
+	stringAlpha_ += alphaSpeed;	//透明度を増加させる
+	const int fontSize = 64;
+	const int defaultFontSize = 16;
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, stringAlpha_);
+	SetFontSize(fontSize);
+	//int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
+	//DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
+	//	Application::SCREEN_SIZE_Y / 2 - diff / 2,
+	//	str.c_str(), col);
+	DrawRotaGraph(
+		Application::SCREEN_SIZE_X / 2,
+		Application::SCREEN_SIZE_Y / 2,
+		screenAspectRatio,
+		0.0f,
+		img,
+		true);
+	SetFontSize(defaultFontSize);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void Player::ClearCollider(void)

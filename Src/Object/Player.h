@@ -105,6 +105,12 @@ public:
 	void DrawResultString(const std::wstring& str,int col);
 
 	/// <summary>
+	/// 文字列を描画
+	/// </summary>
+	/// <param name="img">描画する画像</param>
+	void DrawResultImage(const int img);
+
+	/// <summary>
 	/// コライダーの削除
 	/// </summary>
 	void ClearCollider(void);
@@ -291,6 +297,9 @@ private:
 
 	//布擦れSE再生フラグ
 	bool clothSE_;
+
+	int victoryImg_;
+	int diedImg_;
 
 	void LoadData(void);
 

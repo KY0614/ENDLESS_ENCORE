@@ -11,6 +11,7 @@ Tutorial::Tutorial(const TutorialStep& firstStep)
 	step_.push_back(firstStep);
 	state_ = STATE::NONE;
 	viewGuide_ = "";
+	fontHandle_ = -1;
 	//ó‘ÔŠÇ—
 	stateChanges_.emplace(STATE::NONE, std::bind(&Tutorial::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Tutorial::ChangeStateMove, this));
@@ -19,15 +20,20 @@ Tutorial::Tutorial(const TutorialStep& firstStep)
 	stateChanges_.emplace(STATE::JUMP, std::bind(&Tutorial::ChangeStateJump, this));
 	stateChanges_.emplace(STATE::DODGE, std::bind(&Tutorial::ChangeStateDodge, this));
 	stateChanges_.emplace(STATE::PARRY, std::bind(&Tutorial::ChangeStateParry, this));
+	stateChanges_.emplace(STATE::STAGE, std::bind(&Tutorial::ChangeStateStage, this));
 }
 
 Tutorial::~Tutorial(void)
 {
+	DeleteFontToHandle(fontHandle_);
 }
 
 void Tutorial::Init(void)
 {
 	viewGuide_ = step_.front().keyGuide_;
+
+	fontHandle_ = CreateFontToHandle(L"‚µ‚Ë‚«‚á‚Õ‚µ‚å‚ñ", 20, 3, DX_FONTTYPE_ANTIALIASING);
+
 	ChangeState(step_.front().state_);
 }
 
@@ -45,11 +51,18 @@ void Tutorial::Draw(void)
 	if (CheckHitKeyAll() > 0)viewGuide_ = step_.front().keyGuide_;
 	else if (GetJoypadInputState(DX_INPUT_PAD1) > 0)viewGuide_ = step_.front().controllerGuide_;
 
-	DrawFormatString(
+	DrawStringToHandle(
 		step_.front().pos_.x,
 		step_.front().pos_.y,
+		StringUtility::StringToWstring(viewGuide_).c_str(),
 		0xFFFFFF,
-		StringUtility::StringToWstring(viewGuide_).c_str());
+		fontHandle_);
+
+	//DrawFormatString(
+	//	step_.front().pos_.x,
+	//	step_.front().pos_.y,
+	//	0xFFFFFF,
+	//	StringUtility::StringToWstring(viewGuide_).c_str());
 }
 
 void Tutorial::AddTutorialStep(const TutorialStep& tutorialStep)
@@ -119,6 +132,11 @@ void Tutorial::ChangeStateDodge(void)
 void Tutorial::ChangeStateParry(void)
 {
 	stateUpdate_ = std::bind(&Tutorial::UpdateParry, this);
+}
+
+void Tutorial::ChangeStateStage(void)
+{
+	stateUpdate_ = std::bind(&Tutorial::UpdateStage, this);
 }
 
 void Tutorial::UpdateNone(void)
@@ -195,9 +213,40 @@ void Tutorial::UpdateParry(void)
 	NextStep();
 }
 
+void Tutorial::UpdateStage(void)
+{
+}
+
 void Tutorial::UpdateImGui(void)
 {
-	ImGui::Text("Step STATE: %d", step_.front().state_);
 	ImGui::Text("Step Time: %.2f", step_.front().requiredTime_);
 	ImGui::Text("Step Num: %d", step_.front().requiredNum_);
+
+	switch (state_)
+	{
+		case STATE::NONE:
+		ImGui::Text("STATE: NONE");
+		break;
+		case STATE::MOVE:
+		ImGui::Text("STATE: MOVE");
+		break;
+		case STATE::CAMERA:
+		ImGui::Text("STATE: CAMERA");
+		break;
+		case STATE::PARRY:
+		ImGui::Text("STATE: PARRY");
+		break;
+		case STATE::STAGE:
+		ImGui::Text("STATE: STAGE");
+		break;
+		case STATE::DODGE:
+		ImGui::Text("STATE: DODGE");
+		break;
+		case STATE::DASH:
+		ImGui::Text("STATE: DASH");
+		break;
+		case STATE::JUMP:
+		ImGui::Text("STATE: JUMP");
+		break;
+	}
 }

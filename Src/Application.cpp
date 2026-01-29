@@ -54,7 +54,7 @@ void Application::Init(void)
 		isInitFail_ = true;
 		return;
 	}
-
+	AddFontResourceExA("Data/Font/cinecaption226.ttf", FR_PRIVATE, NULL);
 	ImGuiWrapper::CreateInstance();
 
 	//Effekseerの初期化
@@ -109,6 +109,8 @@ void Application::Destroy(void)
 
 	//Effekseerを終了する。
 	Effkseer_End();
+	// ウィンドウズに一時的に保持していたフォントデータを削除
+	RemoveFontResourceExA("", FR_PRIVATE, NULL);
 
 	//DxLib終了
 	if (DxLib_End() == -1)
@@ -144,6 +146,9 @@ void Application::InitEffekseer(void)
 	if (Effekseer_Init(8000) == -1)
 	{
 		DxLib_End();
+		// ウィンドウズに一時的に保持していたフォントデータを削除
+		RemoveFontResourceExA("", FR_PRIVATE, NULL);
+
 	}
 
 	SetChangeScreenModeGraphicsSystemResetFlag(FALSE);

@@ -18,6 +18,7 @@ public:
 		JUMP,		//ジャンプ
 		DODGE,		//回避
 		PARRY,		//パリィ
+		STAGE,		//ステージ
 	};
 
 	//チュートリアルステップ構造体
@@ -76,6 +77,8 @@ private:
 
 	std::string viewGuide_;
 
+	int fontHandle_;
+
 	/// <summary>
 	/// 次のステップへ進む
 	/// </summary>
@@ -124,6 +127,11 @@ private:
 	/// </summary>
 	void ChangeStateParry(void);
 
+	/// <summary>
+	/// 状態遷移：STAGE
+	/// </summary>
+	void ChangeStateStage(void);
+
 	//更新ステップ--------------------------------------------------------
 
 	/// <summary>
@@ -161,4 +169,8 @@ private:
 	/// </summary>
 	void UpdateParry(void);
 
+	/// <summary>
+	/// 更新：STAGE
+	/// </summary>
+	void UpdateStage(void);
 };

@@ -80,7 +80,7 @@ void GameScene::Init(void)
 	//移動
 	Tutorial::TutorialStep firstStep = {
 		Tutorial::STATE::MOVE,
-		{0,Application::SCREEN_SIZE_Y / 2},
+		{50,Application::SCREEN_SIZE_Y / 2},
 		"WASDで移動",
 		"左スティックで移動",
 		2.0f,
@@ -88,7 +88,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep cameraStep = {
 		Tutorial::STATE::CAMERA,
-		{0,Application::SCREEN_SIZE_Y / 2},
+		{50,Application::SCREEN_SIZE_Y / 2},
 		"矢印キーでカメラ操作",
 		"右スティックでカメラ操作",
 		1.5f,
@@ -96,7 +96,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep jumpStep = {
 		Tutorial::STATE::JUMP,
-		{0,Application::SCREEN_SIZE_Y / 2},
+		{50,Application::SCREEN_SIZE_Y / 2},
 		"Eキーでジャンプ",
 		"Yボタンでジャンプ",
 		0.0f,
@@ -104,7 +104,7 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep DodgeStep = {
 		Tutorial::STATE::DODGE,
-		{0,Application::SCREEN_SIZE_Y / 2},
+		{50,Application::SCREEN_SIZE_Y / 2},
 		"左Shiftキーで回避",
 		"Aボタンで回避",
 		0.0f,
@@ -112,11 +112,19 @@ void GameScene::Init(void)
 	};
 	Tutorial::TutorialStep ParryStep = {
 		Tutorial::STATE::PARRY,
-		{0,Application::SCREEN_SIZE_Y / 2},
+		{50,Application::SCREEN_SIZE_Y / 2},
 		"Spaceキーでパリィ",
 		"Bボタンでパリィ",
 		0.0f,
 		1
+	};
+	Tutorial::TutorialStep StageStep = {
+		Tutorial::STATE::STAGE,
+		{50,Application::SCREEN_SIZE_Y / 2},
+		"ステージへ行ってみよう",
+		"ステージへ行ってみよう",
+		0.0f,
+		0
 	};
 	//チュートリアル
 	tutorial_ = std::make_shared<Tutorial>(firstStep);
@@ -125,6 +133,7 @@ void GameScene::Init(void)
 	tutorial_->AddTutorialStep(jumpStep);
 	tutorial_->AddTutorialStep(DodgeStep);
 	tutorial_->AddTutorialStep(ParryStep);
+	tutorial_->AddTutorialStep(StageStep);
 
 	//演出シーン
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);

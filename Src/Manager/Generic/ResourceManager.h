@@ -39,7 +39,8 @@ public:
 		ENEMY_BULLET,
 		ENEMY_HP_BAR,
 
-		COIN,
+		VICTORY,
+		YOU_DIED,
 
 		//ステージオブジェクト
 		THEATER,

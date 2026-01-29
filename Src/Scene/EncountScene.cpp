@@ -474,7 +474,8 @@ void EncountScene::UpdateEnemyAttention(void)
 		mainCamera->IsActionEnd())
 	{
 		player_.ChangeState(Player::STATE::WAIT);
-		ChangeState(STATE::ENEMY_CAST_SPELL);
+		ChangeState(STATE::FINISH);
+		//ChangeState(STATE::ENEMY_CAST_SPELL);
 		return;
 	}
 	//Œo‰ßŠÔ‚ªˆê’èŠÔ‚½‚Á‚½‚ç“G‚ÍU‚èŒü‚«ó‘Ô‚Ö‘JˆÚ

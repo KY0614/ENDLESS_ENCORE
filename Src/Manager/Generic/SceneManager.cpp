@@ -79,7 +79,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::GAME);
+	DoChangeScene(SCENE_ID::TITLE);
 }
 
 void SceneManager::Init3D(void)
@@ -144,8 +144,11 @@ void SceneManager::Update(void)
 
 	//カメラ更新
 	camera_->Update();
-
+#ifdef _DEBUG
 	SceneUpdateImGui();
+
+#endif // _DEBUG
+	
 }
 
 void SceneManager::Draw(void)

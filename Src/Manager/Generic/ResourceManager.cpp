@@ -176,9 +176,13 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/EnemyHPBar.png");
 	resourcesMap_.emplace(SRC::ENEMY_HP_BAR, std::move(res));
 
-	//ÉRÉCÉì
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Coin.mv1");
-	resourcesMap_.emplace(SRC::COIN, std::move(res));
+	//èüóò
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "VICTORY.png");
+	resourcesMap_.emplace(SRC::VICTORY, std::move(res));
+
+	//éÄñS
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "YOU DIED.png");
+	resourcesMap_.emplace(SRC::YOU_DIED, std::move(res));
 
 	//ë´âå
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Smoke/Smoke.efkefc");
