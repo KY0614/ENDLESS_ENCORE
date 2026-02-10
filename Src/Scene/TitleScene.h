@@ -36,8 +36,8 @@ public:
 	/// <summary>
 	/// ImGui更新処理
 	/// </summary>
-	/// <param name=""></param>
 	void UpdateImGui(void) override;
+
 private:
 
 	//ステージ
@@ -62,6 +62,7 @@ private:
 	//ノイズテクスチャID（黒いシミっぽい画像)
 	int noiseTextureId_;
 
+	//フィルムスクロール時間
 	float filmScrollTime_;
 
 	//フェードアウト開始するまでのインターバル時間
@@ -83,4 +84,19 @@ private:
 	/// マテリアル初期化処理
 	/// </summary>
 	void InitMaterial(void);
+
+	/// <summary>
+	/// フィルムノイズをランダムに動かす処理
+	/// </summary>
+	void RandomFilmNoise(void);
+
+	/// <summary>
+	/// フィルムスクロール処理
+	/// </summary>
+	void FilmScroll(void);
+
+	/// <summary>
+	/// プッシュスペース画像の点滅処理
+	/// </summary>
+	void PushSpaceImageBlink(void);
 };

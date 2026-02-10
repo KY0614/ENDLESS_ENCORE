@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Object\StateList\Character.cpp" />
-    <ClCompile Include="Src\Scene\ClearScene.cpp" />
     <ClCompile Include="Src\Object\UI\BarUI.cpp" />
     <ClCompile Include="Src\Object\UI\UIBase.cpp" />
     <ClCompile Include="Src\Scene\EncountScene.cpp" />
@@ -71,7 +70,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\StateList\Character.h" />
-    <ClInclude Include="Src\Scene\ClearScene.h" />
     <ClInclude Include="Src\Object\UI\BarUI.h" />
     <ClInclude Include="Src\Object\UI\UIBase.h" />
     <ClInclude Include="Src\Scene\EncountScene.h" />

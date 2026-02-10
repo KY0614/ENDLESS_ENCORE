@@ -8,7 +8,7 @@
 Tutorial::Tutorial(const TutorialStep& firstStep)
 {
 	//最初のチュートリアルを追加
-	step_.push_back(firstStep);
+	tutorialStep_.push_back(firstStep);
 	state_ = STATE::NONE;
 	viewGuide_ = "";
 	fontHandle_ = -1;
@@ -30,12 +30,15 @@ Tutorial::~Tutorial(void)
 
 void Tutorial::Init(void)
 {
-	viewGuide_ = step_.front().keyGuide_;
-
+	//最初の表示ガイドを設定
+	viewGuide_ = tutorialStep_.front().keyGuide_;
+	//フォント作成
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", 32 * screenAspect, 3, DX_FONTTYPE_ANTIALIASING);
-
-	ChangeState(step_.front().state_);
+	const int fontSize = 32 * screenAspect;	//フォントサイズ
+	const int fontThick = 3;				//フォントの太さ
+	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
+	//最初の状態へ変更
+	ChangeState(tutorialStep_.front().state_);
 }
 
 void Tutorial::Update(void)
@@ -47,46 +50,40 @@ void Tutorial::Update(void)
 void Tutorial::Draw(void)
 {
 	//表示するチュートリアルが無ければ終了
-	if (step_.front().state_ == STATE::NONE)return;
+	if (tutorialStep_.front().state_ == STATE::NONE)return;
 
-	if (CheckHitKeyAll() > 0)viewGuide_ = step_.front().keyGuide_;
-	else if (GetJoypadInputState(DX_INPUT_PAD1) > 0)viewGuide_ = step_.front().controllerGuide_;
+	if (CheckHitKeyAll() > 0)viewGuide_ = tutorialStep_.front().keyGuide_;
+	else if (GetJoypadInputState(DX_INPUT_PAD1) > 0)viewGuide_ = tutorialStep_.front().controllerGuide_;
 
 	DrawStringToHandle(
-		step_.front().pos_.x,
-		step_.front().pos_.y,
+		tutorialStep_.front().pos_.x,
+		tutorialStep_.front().pos_.y,
 		StringUtility::StringToWstring(viewGuide_).c_str(),
 		0xFFFFFF,
 		fontHandle_);
-
-	//DrawFormatString(
-	//	step_.front().pos_.x,
-	//	step_.front().pos_.y,
-	//	0xFFFFFF,
-	//	StringUtility::StringToWstring(viewGuide_).c_str());
 }
 
 void Tutorial::AddTutorialStep(const TutorialStep& tutorialStep)
 {
-	step_.push_back(tutorialStep);
+	tutorialStep_.push_back(tutorialStep);
 }
 
 void Tutorial::NextStep(void)
 {
 	//時間と回数が0以下になったらクリア
-	if (step_.front().requiredTime_ <= 0.0f &&
-		step_.front().requiredNum_ <= 0)
+	if (tutorialStep_.front().requiredTime_ <= 0.0f &&
+		tutorialStep_.front().requiredNum_ <= 0)
 	{
-		step_.erase(step_.begin());
-		if(step_.empty())
+		tutorialStep_.erase(tutorialStep_.begin());
+		if(tutorialStep_.empty())
 		{
 			//チュートリアル終了
 			TutorialStep endStep;
 			endStep.state_ = STATE::NONE;
-			step_.push_back(endStep);
+			tutorialStep_.push_back(endStep);
 		}
 		//状態変更
-		ChangeState(step_.front().state_);
+		ChangeState(tutorialStep_.front().state_);
 		return;
 	}
 }
@@ -153,7 +150,7 @@ void Tutorial::UpdateMove(void)
 	   ins.IsInputPressed("Left") ||
 	   ins.IsInputPressed("Right"))
 	{
-		step_.front().requiredTime_ -= SceneManager::GetInstance().GetDeltaTime();
+		tutorialStep_.front().requiredTime_ -= SceneManager::GetInstance().GetDeltaTime();
 	}
 	//次のステップへ
 	NextStep();
@@ -168,7 +165,7 @@ void Tutorial::UpdateCamera(void)
 		ins.IsInputPressed("CameraRight") ||
 		ins.IsInputPressed("CameraLeft"))
 	{
-		step_.front().requiredTime_ -= SceneManager::GetInstance().GetDeltaTime();
+		tutorialStep_.front().requiredTime_ -= SceneManager::GetInstance().GetDeltaTime();
 	}
 	//次のステップへ
 	NextStep();
@@ -184,7 +181,7 @@ void Tutorial::UpdateJump(void)
 
 	if (ins.IsInputTriggered("Jump"))
 	{
-		step_.front().requiredNum_--;
+		tutorialStep_.front().requiredNum_--;
 	}
 	//次のステップへ
 	NextStep();
@@ -196,7 +193,7 @@ void Tutorial::UpdateDodge(void)
 
 	if (ins.IsInputTriggered("Dodge"))
 	{
-		step_.front().requiredNum_--;
+		tutorialStep_.front().requiredNum_--;
 	}
 	//次のステップへ
 	NextStep();
@@ -208,7 +205,7 @@ void Tutorial::UpdateParry(void)
 
 	if (ins.IsInputTriggered("Parry"))
 	{
-		step_.front().requiredNum_--;
+		tutorialStep_.front().requiredNum_--;
 	}
 	//次のステップへ
 	NextStep();
@@ -220,8 +217,8 @@ void Tutorial::UpdateStage(void)
 
 void Tutorial::UpdateImGui(void)
 {
-	ImGui::Text("Step Time: %.2f", step_.front().requiredTime_);
-	ImGui::Text("Step Num: %d", step_.front().requiredNum_);
+	ImGui::Text("Step Time: %.2f", tutorialStep_.front().requiredTime_);
+	ImGui::Text("Step Num: %d", tutorialStep_.front().requiredNum_);
 
 	switch (state_)
 	{

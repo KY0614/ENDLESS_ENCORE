@@ -88,17 +88,18 @@ private:
 	float slowMotionFrameCount_;
 	float slowMotionFrame_;
 
+	///フォントハンドル
 	int fontHandle_;
+
+	/// <summary>
+	/// チュートリアル初期化処理
+	/// </summary>
+	void InitTutorial(void);
 
 	/// <summary>
 	/// サウンド初期化処理
 	/// </summary>
 	void InitSound(void);
-
-	/// <summary>
-	/// バックスタブ処理
-	/// </summary>
-	void Backstab(void);
 
 	/// <summary>
 	/// 探索状態初期化処理
@@ -109,6 +110,11 @@ private:
 	/// 戦闘状態初期化処理
 	/// </summary>
 	void InitStateBattle(void);
+
+	/// <summary>
+	/// バックスタブ処理
+	/// </summary>
+	void Backstab(void);
 
 	//状態遷移--------------------------------------------------------
 

@@ -61,6 +61,10 @@ public:
 	/// <param name="tutorialStep">追加するチュートリアル(２個目以降に表示するもの)</param>
 	void AddTutorialStep(const TutorialStep& tutorialStep);
 
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	/// <param name=""></param>
 	void UpdateImGui(void);
 private:
 	//現在のチュートリアルタイプ
@@ -73,10 +77,12 @@ private:
 	std::function<void(void)> stateUpdate_;
 
 	//チュートリアルステップリスト
-	std::vector<TutorialStep> step_;
+	std::vector<TutorialStep> tutorialStep_;
 
+	//表示するチュートリアル
 	std::string viewGuide_;
 
+	//フォントのハンドル
 	int fontHandle_;
 
 	/// <summary>

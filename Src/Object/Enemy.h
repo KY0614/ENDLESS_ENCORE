@@ -79,9 +79,9 @@ public:
 	void Draw(void) override;
 
 	/// <summary>
-	/// HPバーの描画
+	/// UI描画処理
 	/// </summary>
-	void DrawHPBar(void);
+	void DrawBarUI(void);
 
 	/// <summary>
 	/// 状態変更
@@ -126,7 +126,8 @@ public:
 	void UpdateImGui(void);
 
 private:
-	std::unique_ptr<BarUI> hpBar_;	//HPバー
+	//HPバー
+	std::unique_ptr<BarUI> hpBar_;	
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 
@@ -196,6 +197,15 @@ private:
 	int effectChargeAtkResId_;	//エフェクトリソースID
 	int effectChargeAtkPlayId_;	//エフェクト再生ID
 
+	//状態を遷移させる用の時間管理変数
+	float stateStep_;
+	//方向転換用の時間管理変数
+	float changeDirStep_;
+
+	/// <summary>
+	/// サウンド初期化処理
+	/// </summary>
+	void InitSound(void);
 
 	/// <summary>
 	/// 3Dモデル初期化
@@ -458,6 +468,8 @@ private:
 	/// <returns>true:全て破棄状態　false:未破棄</returns>
 	bool CheckBulletDestroy(void);
 
+	//エフェクト--------------------------------------------------------
+
 	/// <summary>
 	/// チャージエフェクトの再生
 	/// </summary>
@@ -469,15 +481,20 @@ private:
 	/// <param name=""></param>
 	void EffectChargeAtk(void);
 
+	///UI--------------------------------------------------------
+
+	/// <summary>
+	/// HPバーの描画
+	/// </summary>
+	void DrawHPBar(void);
+
+	//--------------------------------------------------------
+
 	/// <summary>
 	/// Jsonデータ取得
 	/// </summary>
 	/// <returns>Jsonデータ</returns>
 	const nlohmann::json GetJsonData(void)const;
 
-	//状態を遷移させる用の時間管理変数
-	float stateStep_;
-	//方向転換用の時間管理変数
-	float changeDirStep_;
 };
 

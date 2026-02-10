@@ -77,65 +77,8 @@ void GameScene::Init(void)
 	//ステージ
 	stage_ = std::make_shared<Stage>();
 	stage_->Init();
-	Vector2 tutorialPos = { 50,Application::SCREEN_SIZE_Y / 2 - 100 };
 	//チュートリアル
-	//移動
-	Tutorial::TutorialStep firstStep = {
-		Tutorial::STATE::MOVE,
-		tutorialPos,
-		"WASDで移動",
-		"左スティックで移動",
-		2.0f,
-		0
-	};
-	Tutorial::TutorialStep cameraStep = {
-		Tutorial::STATE::CAMERA,
-		tutorialPos,
-		"矢印キーでカメラ操作",
-		"右スティックでカメラ操作",
-		1.5f,
-		0
-	};
-	Tutorial::TutorialStep jumpStep = {
-		Tutorial::STATE::JUMP,
-		tutorialPos,
-		"Eキーでジャンプ",
-		"Yボタンでジャンプ",
-		0.0f,
-		1
-	};
-	Tutorial::TutorialStep DodgeStep = {
-		Tutorial::STATE::DODGE,
-		tutorialPos,
-		"左Shiftキーで回避",
-		"Aボタンで回避",
-		0.0f,
-		1
-	};
-	Tutorial::TutorialStep ParryStep = {
-		Tutorial::STATE::PARRY,
-		tutorialPos,
-		"Spaceキーでパリィ",
-		"Bボタンでパリィ",
-		0.0f,
-		1
-	};
-	Tutorial::TutorialStep StageStep = {
-		Tutorial::STATE::STAGE,
-		tutorialPos,
-		"ステージへ行ってみよう",
-		"ステージへ行ってみよう",
-		0.0f,
-		0
-	};
-	//チュートリアル
-	tutorial_ = std::make_shared<Tutorial>(firstStep);
-	tutorial_->Init();
-	tutorial_->AddTutorialStep(cameraStep);
-	tutorial_->AddTutorialStep(jumpStep);
-	tutorial_->AddTutorialStep(DodgeStep);
-	tutorial_->AddTutorialStep(ParryStep);
-	tutorial_->AddTutorialStep(StageStep);
+	InitTutorial();
 
 	//演出シーン
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
@@ -159,9 +102,12 @@ void GameScene::Init(void)
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 
+	//フォント作成
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	fontHandle_ = CreateFontToHandle(
-		L"しねきゃぷしょん", 32 * screenAspect, 3, DX_FONTTYPE_ANTIALIASING);
+	const int fontSize = 32 * screenAspect;	//フォントサイズ
+	const int fontThick = 3;				//フォントの太さ
+	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
+
 	//初期状態設定
 	ChangeState(STATE::WAKE_UP);
 }
@@ -183,6 +129,72 @@ void GameScene::Draw(void)
 	stateDraw_();
 }
 
+void GameScene::InitTutorial(void)
+{
+	//表示位置
+	const Vector2 tutorialPos = { 50,Application::SCREEN_SIZE_Y / 2 - 100 };
+	//移動
+	const float stickInputTime = 1.5f;	//スティック操作の説明を表示する時間
+	Tutorial::TutorialStep firstStep = {
+		Tutorial::STATE::MOVE,
+		tutorialPos,
+		"WASDで移動",
+		"左スティックで移動",
+		stickInputTime,
+		0
+	};
+	Tutorial::TutorialStep cameraStep = {
+		Tutorial::STATE::CAMERA,
+		tutorialPos,
+		"矢印キーでカメラ操作",
+		"右スティックでカメラ操作",
+		stickInputTime,
+		0
+	};
+	//ボタン入力回数
+	const int buttonInputNum = 1;	
+	Tutorial::TutorialStep jumpStep = {
+		Tutorial::STATE::JUMP,
+		tutorialPos,
+		"Eキーでジャンプ",
+		"Yボタンでジャンプ",
+		0.0f,
+		buttonInputNum
+	};
+	Tutorial::TutorialStep DodgeStep = {
+		Tutorial::STATE::DODGE,
+		tutorialPos,
+		"左Shiftキーで回避",
+		"Aボタンで回避",
+		0.0f,
+		buttonInputNum
+	};
+	Tutorial::TutorialStep ParryStep = {
+		Tutorial::STATE::PARRY,
+		tutorialPos,
+		"Spaceキーでパリィ",
+		"Bボタンでパリィ",
+		0.0f,
+		buttonInputNum
+	};
+	Tutorial::TutorialStep StageStep = {
+		Tutorial::STATE::STAGE,
+		tutorialPos,
+		"ステージへ行ってみよう",
+		"ステージへ行ってみよう",
+		0.0f,
+		0
+	};
+	//チュートリアル
+	tutorial_ = std::make_shared<Tutorial>(firstStep);
+	tutorial_->Init();
+	tutorial_->AddTutorialStep(cameraStep);
+	tutorial_->AddTutorialStep(jumpStep);
+	tutorial_->AddTutorialStep(DodgeStep);
+	tutorial_->AddTutorialStep(ParryStep);
+	tutorial_->AddTutorialStep(StageStep);
+}
+
 void GameScene::InitSound(void)
 {
 	//探索BGM
@@ -194,25 +206,6 @@ void GameScene::InitSound(void)
 	sound.Add(SoundManager::TYPE::BGM, SoundManager::SOUND::BATTLE,
 		ResourceManager::GetInstance().Load(ResourceManager::SRC::BATTLE_BGM).handleId_);
 	sound.AdjustVolume(SoundManager::SOUND::BATTLE, BATTLE_BGM_VOLUME);
-}
-
-void GameScene::Backstab(void)
-{
-	VECTOR backDir = enemy_->GetTransform().GetBack();
-	//バックスタブ位置
-	const float distance = 60.0f;	//敵から少し離す
-	VECTOR target = VAdd(enemy_->GetTransform().pos, VScale(backDir, distance));
-	//ダウン中のバックスタブ判定
-	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
-	{
-		if (player_->GetIsParry())
-		{
-			player_->SetPos(target);
-			player_->SetBackstabRotY(enemy_->GetTransform().quaRot);
-			player_->ChangeState(Player::STATE::BACKSTAB);
-			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
-		}
-	}
 }
 
 void GameScene::InitStateExplore(void)
@@ -247,6 +240,25 @@ void GameScene::InitStateBattle(void)
 	player_->AddCollider(stage_->GetMistWallTransform().collider);
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.Play(SoundManager::SOUND::BATTLE);
+}
+
+void GameScene::Backstab(void)
+{
+	VECTOR backDir = enemy_->GetTransform().GetBack();
+	//バックスタブ位置
+	const float distance = 60.0f;	//敵から少し離す
+	VECTOR target = VAdd(enemy_->GetTransform().pos, VScale(backDir, distance));
+	//ダウン中のバックスタブ判定
+	if (enemy_->GetIsDown() && enemy_->CheckBackstab())
+	{
+		if (player_->GetIsParry())
+		{
+			player_->SetPos(target);
+			player_->SetBackstabRotY(enemy_->GetTransform().quaRot);
+			player_->ChangeState(Player::STATE::BACKSTAB);
+			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
+		}
+	}
 }
 
 void GameScene::ChangeState(STATE state)
@@ -387,7 +399,8 @@ void GameScene::DrawExplore(void)
 
 	//チュートリアル描画
 	tutorial_->Draw();
-	player_->DrawHPBar();
+	//UI描画
+	player_->DrawBarUI();
 }
 
 void GameScene::UpdateEncount(void)
@@ -441,12 +454,12 @@ void GameScene::UpdateEncount(void)
 		ChangeState(STATE::BATTLE);
 		return;
 	}
+#ifdef _DEBUG
 
 	//スローモーション処理
 	//if (encountScene_->IsSlowMotion() &&
 	//	slowMotionFrameCount_++ > 60.0f)slowMotionFrameCount_ = 0.0f;
-	//エンカウントシーン更新
-	encountScene_->Update();
+
 	//スローモーション中でなければ通常更新
 	if (encountScene_->IsSlowMotion())
 	{
@@ -458,10 +471,13 @@ void GameScene::UpdateEncount(void)
 		}
 		slowMotionFrameCount_++;
 		if (slowMotionFrame_ < 1.0f ||
-			static_cast<int>(slowMotionFrameCount_) % 
+			static_cast<int>(slowMotionFrameCount_) %
 			static_cast<int>(slowMotionFrame_) != 0)
 			return; // このフレームは処理しない
 	}
+#endif // _DEBUG
+	//エンカウントシーン更新
+	encountScene_->Update();
 	//各オブジェクト更新
 	player_->Update();
 	enemy_->Update();
@@ -515,9 +531,10 @@ void GameScene::DrawBattle(void)
 	}
 
 	player_->DrawDead();
-
-	enemy_->DrawHPBar();
-	player_->DrawHPBar();
+	//UI描画
+	enemy_->DrawBarUI();
+	//UI描画
+	player_->DrawBarUI();
 }
 
 void GameScene::SkipBarDraw(void)
@@ -533,37 +550,27 @@ void GameScene::SkipBarDraw(void)
 	// 現在のクールダウンゲージの幅
 	const int currentGaugeWidth = (int)(GAUGE_W * progressRatio);
 
-	// ゲージの色
-	const int bgColor = 0x333333; // 背景色（灰色）
-	int skipColor = 0x00FFFF; // スキップゲージの色
-	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
 	std::wstring str = L"";
 	if (skipTimer_ >= SKIP_TIME)
 	{
-		skipColor = 0x00FF00; str = L"スキップ完了";
+		str = L"スキップ完了";
 	}
 	else 
 	{
 		str = L"スキップ中...";
 	}
+	//文字描画
 	DrawStringToHandle(
 		GAUGE_X - 98, GAUGE_Y - 28,
 		str.c_str(),
 		0x000000,
 		fontHandle_);
+
 	DrawStringToHandle(
 		GAUGE_X - 100, GAUGE_Y - 30,
 		str.c_str(),
 		0xFFFFFF,
 		fontHandle_);
-	//DrawFormatString(GAUGE_X + 2, GAUGE_Y - 28, 0x000000, str.c_str());
-	//DrawFormatString(GAUGE_X, GAUGE_Y - 30, 0xFFFFFF, str.c_str());
-
-	// ゲージの背景を描画
-	//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, bgColor, true);
-	//// 進行中のゲージを描画
-	//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + (int)(GAUGE_W * progressRatio), GAUGE_Y + GAUGE_H,
-	//	skipColor, TRUE);
 
 	skipBarUI_->SetBarSize({ currentGaugeWidth, GAUGE_H });
 	skipBarUI_->SetBarMaxWidth(GAUGE_W);

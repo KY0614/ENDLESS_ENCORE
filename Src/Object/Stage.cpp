@@ -27,7 +27,7 @@ namespace
 Stage::Stage(void)
 {
 	noiseTextureId_ = -1;
-	mistScrollSpeed_ = 0.0f;
+	mistScrollTime_ = 0.0f;
 	dissolveAlphaLine_ = ALPHA_LINE_MAX;
 	isBattle_ = false;
 }
@@ -48,7 +48,7 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 void Stage::Update(void)
 {
 	//霧のスクロール速度更新
-	mistScrollSpeed_ += SceneManager::GetInstance().GetDeltaTime();
+	mistScrollTime_ += SceneManager::GetInstance().GetDeltaTime();
 	//マテリアルの定数バッファ更新
 	UpdateStageMaterialConstBuf();	//ステージ
 	UpdateMistWallMaterialConstBuf();	//霧の壁
@@ -194,12 +194,12 @@ void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 	//UVスケール
 	const VECTOR uvScale = { 4.0f,4.0f,4.0f };
 	mistWallMaterial_->AddConstBufVS({ uvScale.x,uvScale.y,uvScale.z,uvScale.z });
-	mistWallMaterial_->AddConstBufVS({ mistScrollSpeed_,mistScrollSpeed_,mistScrollSpeed_,mistScrollSpeed_ });
+	mistWallMaterial_->AddConstBufVS({ mistScrollTime_,mistScrollTime_,mistScrollTime_,mistScrollTime_ });
 
 	//ピクセルシェーダーの定数バッファ設定
 	mistWallMaterial_->AddConstBufPS(modelColor);
 	//ライトの方向とスクロール時間
-	mistWallMaterial_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,mistScrollSpeed_ });
+	mistWallMaterial_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,mistScrollTime_ });
 
 	//ディゾルブの閾値と範囲
 	mistWallMaterial_->AddConstBufPS({ dissolveAlphaLine_,ALPHA_RANGE,0.0f,0.0f });
@@ -234,10 +234,14 @@ void Stage::UpdateMistWallMaterialConstBuf(void)
 {
 	//霧の壁の定数バッファ更新
 	//スクロール速度更新
-	mistWallMaterial_->SetConstBufVS(1,
-		{ mistScrollSpeed_,mistScrollSpeed_,mistScrollSpeed_,mistScrollSpeed_ });
+	const int uvScrollSpeedVSSlot = 1;
+	mistWallMaterial_->SetConstBufVS(uvScrollSpeedVSSlot,
+		{ mistScrollTime_,mistScrollTime_,mistScrollTime_,mistScrollTime_ });
 	//ライトの方向とスクロール時間
+	const int uvScrollSpeedPSSlot = 1;
 	VECTOR dir = GetLightDirection();
-	mistWallMaterial_->SetConstBufPS(1, { dir.x,dir.y,dir.z,mistScrollSpeed_ });
-	mistWallMaterial_->SetConstBufPS(2, { dissolveAlphaLine_,ALPHA_RANGE,0.0f,0.0f });
+	mistWallMaterial_->SetConstBufPS(uvScrollSpeedPSSlot, { dir.x,dir.y,dir.z,mistScrollTime_ });
+	//ディゾルブの閾値と範囲
+	const int dissolvePSSlot = 2;
+	mistWallMaterial_->SetConstBufPS(dissolvePSSlot, { dissolveAlphaLine_,ALPHA_RANGE,0.0f,0.0f });
 }

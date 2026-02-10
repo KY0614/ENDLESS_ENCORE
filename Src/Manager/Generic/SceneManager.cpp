@@ -416,9 +416,10 @@ void SceneManager::ShakeScreen(void)
 void SceneManager::SceneUpdateImGui(void)
 {
 	ImGui::Begin("Scenes");
-
+	//タブ
 	if (ImGui::BeginTabBar("Scenes_TabBar"))
 	{
+		//シーンごとのタブ
 		if (ImGui::BeginTabItem(sceneName_.c_str()))
 		{
 			for (auto& scene : scenes_)
@@ -427,6 +428,7 @@ void SceneManager::SceneUpdateImGui(void)
 			}
 			ImGui::EndTabItem();
 		}
+		//カメラのタブ
 		if (ImGui::BeginTabItem("Camera"))
 		{
 			camera_->UpdateImGui();

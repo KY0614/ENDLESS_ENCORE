@@ -12,10 +12,10 @@ public:
 	enum class STATE
 	{
 		NONE,	//初期状態
-		READY,	//準備状態
-		SHOT,	//発射状態
-		REVERSE,//反射状態
-		DESTROY,//破棄状態
+		READY,	//準備
+		SHOT,	//発射
+		REVERSE,//反射
+		DESTROY,//破棄
 	};
 
 	//コンストラクタ

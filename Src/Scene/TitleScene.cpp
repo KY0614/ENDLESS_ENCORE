@@ -91,28 +91,14 @@ void TitleScene::Init(void)
 
 void TitleScene::Update(void)
 {
-	//0.0～1.0の範囲でランダムに決定(uv座標用)
-	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;//0.0～1.0fにおさめるので100.0fで割る
-	//白の強さ（0.0～0.08fにおさめるので81で割った余りを1000.0fで割る）
-	float whitePow = static_cast<float>(rand() % 81) / 1000.0f;
-	std::uniform_real_distribution<float> uv(0.0f, 1.0f);
-	// 乱数生成器の初期化
-	std::random_device rd; //非決定的な乱数生成器
-	std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
-	//画面に出す黒い線のノイズのX座標をランダムに更新
-	retroTheaterMaterial_->SetConstBuf(1, { randomNoiseLineX, uv(engine), uv(engine), whitePow });
-	const float scrollSpeed = 0.5f;
-	filmScrollTime_ += SceneManager::GetInstance().GetDeltaTime() * scrollSpeed;
-	retroTheaterMaterial_->SetConstBuf(2, { VIGNETTE_POWER, filmScrollTime_, 0.0f, 0.0f });
+	//フィルムノイズをランダムに更新
+	RandomFilmNoise();
 
-	//プッシュスペース画像をゆっくり点滅させる
-	pushSpaceImgAlpha_ += alphaChangeSpeed_;
-	//アルファ値が最大値か最小値になったら変化速度の符号を反転させる
-	if (pushSpaceImgAlpha_ >= PUSH_SPACE_IMG_ALPHA_MAX || pushSpaceImgAlpha_ <= 0)
-	{
-		alphaChangeSpeed_ *= -1; //符号を反転
-		pushSpaceImgAlpha_ = std::clamp(pushSpaceImgAlpha_, 0, PUSH_SPACE_IMG_ALPHA_MAX); //範囲外を補正
-	}
+	//フィルムスクロール処理
+	FilmScroll();
+
+	//プッシュスペース画像の点滅処理
+	PushSpaceImageBlink();
 
 	InputManager& ins = InputManager::GetInstance();
 	SoundManager& sound = SoundManager::GetInstance();
@@ -248,4 +234,41 @@ void TitleScene::InitMaterial(void)
 		Vector2(0, 0),
 		Vector2(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y)
 	);
+}
+
+void TitleScene::RandomFilmNoise(void)
+{
+	//0.0～1.0の範囲でランダムに決定(uv座標用)
+	float randomNoiseLineX = static_cast<float>(rand() % 100) / 100.0f;//0.0～1.0fにおさめるので100.0fで割る
+	//白の強さ（0.0～0.08fにおさめるので81で割った余りを1000.0fで割る）
+	float whitePow = static_cast<float>(rand() % 81) / 1000.0f;
+	std::uniform_real_distribution<float> uv(0.0f, 1.0f);
+	// 乱数生成器の初期化
+	std::random_device rd; //非決定的な乱数生成器
+	std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
+	//画面に出す黒い線のノイズのX座標をランダムに更新
+	const int filmNoiseSlot = 1;
+	retroTheaterMaterial_->SetConstBuf(filmNoiseSlot, { randomNoiseLineX, uv(engine), uv(engine), whitePow });
+
+}
+
+void TitleScene::FilmScroll(void)
+{
+	//フィルムスクロール時間を進める
+	const float scrollSpeed = 0.5f;
+	filmScrollTime_ += SceneManager::GetInstance().GetDeltaTime() * scrollSpeed;
+	const int filmScrollSlot = 2;
+	retroTheaterMaterial_->SetConstBuf(filmScrollSlot, { VIGNETTE_POWER, filmScrollTime_, 0.0f, 0.0f });
+}
+
+void TitleScene::PushSpaceImageBlink(void)
+{
+	//プッシュスペース画像をゆっくり点滅させる
+	pushSpaceImgAlpha_ += alphaChangeSpeed_;
+	//アルファ値が最大値か最小値になったら変化速度の符号を反転させる
+	if (pushSpaceImgAlpha_ >= PUSH_SPACE_IMG_ALPHA_MAX || pushSpaceImgAlpha_ <= 0)
+	{
+		alphaChangeSpeed_ *= -1; //符号を反転
+		pushSpaceImgAlpha_ = std::clamp(pushSpaceImgAlpha_, 0, PUSH_SPACE_IMG_ALPHA_MAX); //範囲外を補正
+	}
 }

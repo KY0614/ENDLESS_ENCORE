@@ -23,17 +23,7 @@ public:
 	{
 		NONE,
 		TITLE,
-		DEBUG,
-		ADVERTISE,
-		MOVIE,
-		SELECT,
-		TUTORIAL,
 		GAME,
-		PAUSE,
-		INVENTORY,
-		CHARACTER,
-		OPTION,
-		RESULT,
 	};
 	
 	// インスタンスの生成
@@ -115,11 +105,6 @@ public:
 	/// 画面揺らし開始
 	/// </summary>
 	void StartShakeScreen(void);
-
-	/// <summary>
-	/// ゲームシーンへ遷移
-	/// </summary>
-	void SceneID2Game(void) { sceneId_ = SCENE_ID::GAME; }
 
 	/// <summary>
 	/// メインスクリーン取得
@@ -213,5 +198,8 @@ private:
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
 
+	/// <summary>
+	/// SceneごとのImGui更新処理
+	/// </summary>
 	void SceneUpdateImGui(void);
 };

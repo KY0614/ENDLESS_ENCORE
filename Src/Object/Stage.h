@@ -62,8 +62,8 @@ private:
 	Transform mistWallTransform_;
 	//霧の壁のノイズテクスチャID
 	int noiseTextureId_;
-	//霧の壁のスクロール速度
-	float mistScrollSpeed_;
+	//霧の壁のスクロール時間
+	float mistScrollTime_;
 	//霧の壁の溶解ラインのアルファ値
 	float dissolveAlphaLine_;
 

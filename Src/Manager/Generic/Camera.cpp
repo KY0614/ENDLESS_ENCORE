@@ -354,6 +354,7 @@ void Camera::ProcessRot(void)
 void Camera::ProcessMove(void)
 {
 	InputManager& ins = InputManager::GetInstance();
+	//移動速度
 	const float moveSpeed = 10.0f;
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
 	if (ins.IsInputPressed("CameraMoveUp"))	pos_.z += moveSpeed; targetPos_.z += moveSpeed;
@@ -371,9 +372,11 @@ void Camera::ProcessMouseMove(void)
 	//マウスカーソルを非表示にする
 	SetMouseDispFlag(false);
 	Vector2 mousePos = ins.GetMousePos();
-
-	angles_.y += std::clamp((mousePos.x - Application::SCREEN_SIZE_X / 2), -120, 120) * 0.2f / GetFPS();
-	angles_.x += std::clamp((mousePos.y - Application::SCREEN_SIZE_Y / 2), -120, 120) * 0.2f / GetFPS();
+	//
+	angles_.y += std::clamp(
+		(mousePos.x - Application::SCREEN_SIZE_X / 2), -120, 120) * 0.2f / GetFPS();
+	angles_.x += std::clamp((
+		mousePos.y - Application::SCREEN_SIZE_Y / 2), -120, 120) * 0.2f / GetFPS();
 
 	// マウスの位置を画面中央に戻す
 	SetMousePoint(Application::SCREEN_SIZE_X / 2, Application::SCREEN_SIZE_Y / 2);
@@ -494,6 +497,7 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 
 void Camera::SetBeforeDrawFixedPoint(void)
 {
+	//固定位置に設定
 	pos_ = fixedPointPos_;
 	targetPos_ = fixedPointTargetPos_;
 }
@@ -553,8 +557,15 @@ void Camera::SetBeforeDrawMouse(void)
 
 void Camera::UpdateImGui(void)
 {
+	//デバッグ用ImGui表示
+	//注視座標
 	ImGui::Text("targetPos: %.2f, %.2f, %.2f", targetPos_.x, targetPos_.y, targetPos_.z);
+	//座標
 	ImGui::Text("Pos: %.2f, %.2f, %.2f", pos_.x, pos_.y, pos_.z);
+	//視野角(数値入力)
 	ImGui::InputFloat("Fov", &fov_);
-	ImGui::SliderFloat("Fov_Slider", &fov_, 8.0f, 170.0);
+	//視野角(スライダー)
+	const float fovMin = 8.0f;
+	const float fovMax = 170.0f;
+	ImGui::SliderFloat("Fov_Slider", &fov_, fovMin, fovMax);
 }

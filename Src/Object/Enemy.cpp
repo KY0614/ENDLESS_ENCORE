@@ -29,13 +29,13 @@ namespace
 	static const std::string KEY_WALK = "Walk";		//歩き
 	static const std::string KEY_WALK_RIGHT = "Walk Right";		//右歩き
 	static const std::string KEY_WALK_LEFT = "Walk Left";		//左歩き
-	static const std::string KEY_RUN = "Run";		//走り
+	static const std::string KEY_RUN = "Run";					//走り
 	static const std::string KEY_ATK_NEAR = "Attack_Near";		//近接攻撃
 	static const std::string KEY_ATK_FAR_ONE = "Attack_Far_One";//遠距離攻撃（単発）
 	static const std::string KEY_ATK_FAR_ALL = "Attack_Far_All";//遠距離攻撃（全弾）
 	static const std::string KEY_ATK_CHARGE = "Attack_Charge";	//ため攻撃
-	static const std::string KEY_DAMAGE = "Damage";	//ダメージ
-	static const std::string KEY_DOWN = "Down";		//ダウン
+	static const std::string KEY_DAMAGE = "Damage";				//ダメージ
+	static const std::string KEY_DOWN = "Down";					//ダウン
 	static const std::string KEY_BACKSTAB = "Backstab";			//バックスタブ
 	static const std::string KEY_MAGIC_IDLE = "Magic Idle";		//魔法待機
 	static const std::string KEY_CAST_SPELL = "Cast Spell";		//魔法詠唱
@@ -135,17 +135,9 @@ Enemy::~Enemy(void)
 
 void Enemy::Init(void)
 {
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::BACKSTAB,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::BACKSTAB_SE).handleId_);
+	//サウンドの初期化
+	InitSound();
 
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FLAME,
-	ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLOSION_SE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::FLAME, SE_VOLUME);
-
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
-	sound.AdjustVolume(SoundManager::SOUND::DAMAGE, SE_VOLUME);
 	//3Dモデルの初期化
 	Init3DModel();
 
@@ -219,6 +211,12 @@ void Enemy::Draw(void)
 	DrawShadow();
 }
 
+void Enemy::DrawBarUI(void)
+{
+	//HPバー描画
+	DrawHPBar();
+}
+
 void Enemy::ChangeState(const STATE& state)
 {
 	stateStep_ = 0.0f;
@@ -234,6 +232,21 @@ void Enemy::ChangeState(const STATE& state)
 const bool Enemy::GetIsDead(void) const
 {
 	return state_ == STATE::DEAD && animationController_->IsEnd();
+}
+
+void Enemy::InitSound(void)
+{
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::BACKSTAB,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::BACKSTAB_SE).handleId_);
+
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FLAME,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::EXPLOSION_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::FLAME, SE_VOLUME);
+
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::DAMAGE, SE_VOLUME);
 }
 
 void Enemy::Init3DModel(void)
@@ -580,7 +593,10 @@ void Enemy::UpdateMove(void)
 
 	//移動処理
 	Move();
+	//当たり判定処理
 	Collision();
+
+	//状態時間経過で攻撃状態へ遷移
 	if (stateStep_ > MOVE_TIME)
 	{
 		//HPが最大の半分以下になっていたらチャージ攻撃状態に遷移
@@ -1428,15 +1444,16 @@ void Enemy::EffectChargeAtk(void)
 	effectChargeAtkPlayId_ = PlayEffekseer3DEffect(effectChargeAtkResId_);
 
 	//大きさの設定
-	float EFFEKT_SCALE = 40.0f;		//X,Z方向のスケール
+	float effektScale = 40.0f;		//X,Z方向のスケール
 	SetScalePlayingEffekseer3DEffect(
 		effectChargeAtkPlayId_,
-		EFFEKT_SCALE,
-		EFFEKT_SCALE,
-		EFFEKT_SCALE
+		effektScale,
+		effektScale,
+		effektScale
 	);
 	//再生速度の設定(少し早めに設定）
-	SetSpeedPlayingEffekseer3DEffect(effectChargeAtkPlayId_, 2.0f);
+	const float effektSpeed = 2.0f;
+	SetSpeedPlayingEffekseer3DEffect(effectChargeAtkPlayId_, effektSpeed);
 	//エフェクトの位置を同期
 	SetPosPlayingEffekseer3DEffect(
 		effectChargeAtkPlayId_,
@@ -1466,23 +1483,6 @@ void Enemy::DrawHPBar(void)
 	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
-	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
-	//色の設定
-	const int barBackColor = GetColor(100, 100, 100);	//背景（グレー）
-	const int barColor = GetColor(255, 0, 0);			//現在HP（赤）
-	// 背景（グレー）
-	//DrawBox(posX,
-	//	posY,
-	//	posX + HP_BAR_WIDTH,
-	//	posY + HP_BAR_HEIGHT,
-	//	barBackColor, TRUE);
-	//// 現在HP（赤）
-	//DrawBox(posX,
-	//	posY,
-	//	posX + barWidth,
-	//	posY + HP_BAR_HEIGHT,
-	//	barColor, TRUE);
 
 	hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
 	hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);

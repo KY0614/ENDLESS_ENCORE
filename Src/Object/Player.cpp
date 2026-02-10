@@ -39,6 +39,12 @@ namespace
 	static const std::string KEY_DEATH = "Death";
 	static const std::string KEY_STAGE_POS = "stageWalkPosition";
 
+	//回転完了までの時間
+	const float TIME_ROT = 0.3f;
+
+	//煙エフェクト発生間隔
+	const float TERM_FOOT_SMOKE = 0.3f;
+
 	//ジャンプ力
 	const float JUMP_POW = 9.0f; 
 	//XZ方向のジャンプ力減衰率
@@ -67,6 +73,8 @@ namespace
 	const float POS_Z = -2510.0f;
 	//ステージを歩くスピード
 	const float WALK_SPEED_SLOW = 1.0f;
+	//パリィ音量
+	const int PARRY_SE_VOLUME = 70;	
 }
 
 Player::Player(void)
@@ -131,29 +139,23 @@ Player::~Player(void)
 
 void Player::Init(void)
 {
-	//サウンドの登録
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PARRY,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::PARRY_SE).handleId_);
-	
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::WAKE_UP,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::WAKE_UP_SE).handleId_);
-	
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
+	//サウンドの初期化
+	InitSound();
 
 	colliders_.clear();
 
 	hpBar_ = std::make_unique<BarUI>();
 	hpBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_HP_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
 	hpBar_->Init();
-	hpBar_->SetBarPos({20, 20});
+	const Vector2 hpBarPos = { 20, 20 };
+	hpBar_->SetBarPos(hpBarPos);
 	hpBar_->SetActive(true);
 
 	parryCDBar_ = std::make_unique<BarUI>();
 	parryCDBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
 	parryCDBar_->Init();
-	parryCDBar_->SetBarPos({50, 50});
+	const Vector2 parryCDBarPos = { 50, 50 };
+	parryCDBar_->SetBarPos(parryCDBarPos);
 	parryCDBar_->SetActive(true);
 
 	victoryImg_ = ResourceManager::GetInstance().Load(
@@ -182,7 +184,9 @@ void Player::Init(void)
 		ResourceManager::SRC::PARRY_EFKT).handleId_;
 
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", 32 * screenAspect, 3, DX_FONTTYPE_ANTIALIASING);
+	const int fontSize = 32 * screenAspect;	//フォントサイズ
+	const int fontThick = 3;				//フォントの太さ
+	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
 	//初期状態
 	ChangeState(STATE::WAKE_UP);
 }
@@ -217,26 +221,12 @@ void Player::Draw(void)
 	DrawShadow();
 }
 
-void Player::DebugUpdate(void)
+void Player::DrawBarUI(void)
 {
-	//HP制限(HPが最大HPを超えないようにする)
-	if (hp_ > maxHp_)
-	{
-		hp_ = maxHp_;
-	}
-
-	//デバッグシーン中は移動させない
-	const float debugPosX = 100.0f;
-	transform_.pos.x = debugPosX;
-	transform_.pos.z = 0.0f;
-
-	//更新ステップ
-	stateUpdate_();
-
-	//アニメーション再生
-	animationController_->Update();
-
-	transform_.Update();
+	//HPバーの描画
+	DrawHPBar();
+	//パリィCDバー描画
+	DrawParryCD();
 }
 
 void Player::DrawDead(void)
@@ -245,7 +235,6 @@ void Player::DrawDead(void)
 	if (hp_ <= 0.0f && animationController_->IsEnd())
 	{
 		//デバッグ用死亡表記
-		//DrawResultString(L"YOU DIED", 0xff0000);
 		DrawResultImage(diedImg_);
 	}
 }
@@ -253,7 +242,6 @@ void Player::DrawDead(void)
 void Player::DrawVictory(void)
 {
 	//デバッグ用勝利表記
-	//DrawResultString(L"VICTORY",0xffff00);
 	DrawResultImage(victoryImg_);
 }
 
@@ -316,10 +304,6 @@ void Player::DrawResultImage(const int img)
 	const int defaultFontSize = 16;
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, stringAlpha_);
 	SetFontSize(fontSize);
-	//int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
-	//DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
-	//	Application::SCREEN_SIZE_Y / 2 - diff / 2,
-	//	str.c_str(), col);
 	DrawRotaGraph(
 		Application::SCREEN_SIZE_X / 2,
 		Application::SCREEN_SIZE_Y / 2,
@@ -352,8 +336,18 @@ bool Player::IsPlay(void) const
 	return state_ == STATE::PLAY;
 }
 
-void Player::LoadData(void)
+void Player::InitSound(void)
 {
+	//サウンドの登録
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::PARRY,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::PARRY_SE).handleId_);
+
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::WAKE_UP,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::WAKE_UP_SE).handleId_);
+
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
 }
 
 void Player::Init3DModel(void)
@@ -413,7 +407,6 @@ void Player::InitAnimation(void)
 	//Jsonデータ取得
 	const json playerData = jsonM.GetJsonData(
 		JsonManager::JSON_DATA::PLAYER,KEY_PLAYER);
-	//const json& param = data[KEY_PLAYER];
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!playerData.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
 	const json& animPath = playerData[JsonManager::KEY_ANIMATION];
@@ -508,9 +501,11 @@ void Player::UpdateImGui(void)
 {
 	//座標
 	ImGui::InputFloat3("Pos", &transform_.pos.x);
-	ImGui::SliderFloat("PosX", &transform_.pos.x,-10000.0f,10000.0f);
-	ImGui::SliderFloat("PosY", &transform_.pos.y,-10000.0f,10000.0f);
-	ImGui::SliderFloat("PosZ", &transform_.pos.z,-10000.0f,10000.0f);
+	const float posMin = -10000.0f;
+	const float posMax = 10000.0f;
+	ImGui::SliderFloat("PosX", &transform_.pos.x,posMin,posMax);
+	ImGui::SliderFloat("PosY", &transform_.pos.y,posMin,posMax);
+	ImGui::SliderFloat("PosZ", &transform_.pos.z,posMin,posMax);
 
 	if (ImGui::Button("Damage"))
 	{
@@ -547,8 +542,9 @@ void Player::ChangeStateLookAround(void)
 
 void Player::ChangeStateAttackedEnemy(void)
 {
-	//
-	animationController_->Play((int)ANIM_TYPE::ATTACKED,false,0.0f,20.0f);
+	//攻撃を受けるアニメーションに変更
+	const float animEndStep = 20.0f;
+	animationController_->Play((int)ANIM_TYPE::ATTACKED,false,0.0f, animEndStep);
 	transform_.pos.z = ATTACKED_POS_Z;
 	stateUpdate_ = std::bind(&Player::UpdateAttackedEnemy, this);
 }
@@ -886,7 +882,7 @@ void Player::ProcessParry(void)
 	bool isHit = ins.IsInputTriggered("Parry");
 	if (isHit && !isParry_)
 	{
-		sound.AdjustVolume(SoundManager::SOUND::PARRY,70);
+		sound.AdjustVolume(SoundManager::SOUND::PARRY, PARRY_SE_VOLUME);
 		sound.Play(SoundManager::SOUND::PARRY);
 		isParry_ = true;
 		//パリィエフェクト再生
@@ -1057,7 +1053,7 @@ void Player::CalcGravityPow(void)
 	}
 	else
 	{
-		// 地面にいる場合はジャンプ力をリセット
+		//地面にいる場合はジャンプ力をリセット
 		jumpPow_ = CommonUtility::VECTOR_ZERO;
 
 		//重力方向
@@ -1129,7 +1125,6 @@ void Player::EffectFootSmoke(void)
 		stepFootSmoke_ < 0.0f)
 	{
 
-		//stepFootSmoke_ = speed_ == SPEED_RUN ? 0.5f : TERM_FOOT_SMOKE;
 		stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 		//エフェクト再生
@@ -1187,13 +1182,13 @@ void Player::DrawParryCD(void)
 	//パリィのクールダウン時間
 	const float progressRatio = stepParry_ / PARRY_TIME;
 
-	// 画面座標 (適宜調整してください)
+	//画面座標
 	const int GAUGE_X = 50;  // ゲージの左上のX座標
 	const int GAUGE_Y = 50;  // ゲージの左上のY座標
 	const int GAUGE_W = 200; // ゲージの最大幅
 	const int GAUGE_H = 20;  // ゲージの高さ
 
-	// 現在のクールダウンゲージの幅
+	//現在のクールダウンゲージの幅
 	const int currentGaugeWidth = (int)(GAUGE_W * progressRatio);
 
 	// ゲージの色
@@ -1201,37 +1196,25 @@ void Player::DrawParryCD(void)
 	unsigned int fgColor = 0x00FFFF; // 前景色（水色：パリィ可能）
 	unsigned int cdColor = 0xAA6600; // クールダウン中の色（オレンジ）
 
-	// ゲージの背景を描画
-	DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, bgColor, true);
 	//テキストを少しずらす用の幅
 	const int textOffset = 10;
 	// クールダウン中の場合
 	if (stepParry_ > 0.0f)
 	{
-		// クールダウン中の色で現在の進行度を描画
-		// ゲージは左から右へ満たされていく (回復していく)
-		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + currentGaugeWidth, GAUGE_Y + GAUGE_H, cdColor, TRUE);
-		//// ゲージの枠を描画
-		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
-		// テキスト表示 (クールダウン中)
-		//DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, cdColor, L"PARRY CD: %.1f", PARRY_TIME - stepParry_);
+		//クールダウン中のテキストを描画
 		DrawFormatStringToHandle(
 			GAUGE_X + GAUGE_W + textOffset, GAUGE_Y,
 			cdColor, fontHandle_,
 			L"PARRY CD: %.1f",
 			PARRY_TIME - stepParry_);
+		// クールダウン中の色で現在の進行度を描画
+		// ゲージは左から右へ満たされていく (回復していく)
 		parryCDBar_->SetBarSize({ currentGaugeWidth, GAUGE_H });
 		parryCDBar_->SetBarMaxWidth(GAUGE_W);
 		parryCDBar_->DrawParryCD();
 	}
 	else // クールダウンが完了している場合
 	{
-		// パリィ可能な緑色で全体を描画
-		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, fgColor, TRUE);
-		//// ゲージの枠を描画
-		//DrawBox(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFFFFFF, FALSE);
-		// テキスト表示 (パリィ可能)
-		//DrawFormatString(GAUGE_X + GAUGE_W + textOffset, GAUGE_Y, fgColor, L"PARRY READY");
 		DrawStringToHandle(
 			GAUGE_X + GAUGE_W + textOffset, GAUGE_Y,
 			L"PARRY READY",
@@ -1252,15 +1235,6 @@ void Player::DrawHPBar(void)
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
 	int hpBarWidth = static_cast<int>(480 * hp);
-	////色の設定
-	//const int barBackColor = GetColor(100, 100, 100);	//背景（グレー）
-	//const int barColor = GetColor(0, 255, 0);			//現在HP（緑）
-	////背景
-	//DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + HP_BAR_WIDTH, HP_BAR_Y + HP_BAR_HEIGHT, barBackColor, TRUE);
-	////現在HP
-	//DrawBox(HP_BAR_X, HP_BAR_Y, HP_BAR_X + barWidth, HP_BAR_Y + HP_BAR_HEIGHT, barColor, TRUE);
-	//パリィクールダウン表示
-	DrawParryCD();
 
 	hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
 	hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);

@@ -18,12 +18,6 @@ class Player : public ActorBase
 {
 public:
 
-	//回転完了までの時間
-	static constexpr float TIME_ROT = 0.3f;
-
-	//煙エフェクト発生間隔
-	static constexpr float TERM_FOOT_SMOKE = 0.3f;
-
 	//状態
 	enum class STATE
 	{
@@ -78,14 +72,9 @@ public:
 	void Draw(void) override;
 
 	/// <summary>
-	/// HPバーの描画
+	/// バーUIの描画
 	/// </summary>
-	void DrawHPBar(void);
-
-	/// <summary>
-	/// デバッグシーン用更新処理
-	/// </summary>
-	void DebugUpdate(void);
+	void DrawBarUI(void);
 
 	/// <summary>
 	/// YOU DIEDの描画
@@ -241,9 +230,6 @@ private:
 	Quaternion playerRotY_;		//Y軸回転
 	Quaternion goalQuaRot_;		//目標回転
 	float stepRotTime_;			//回転完了までの時間経過
-	
-	//衝突判定に用いられるコライダ
-	//std::vector<std::weak_ptr<Collider>> colliders_;
 
 	//衝突チェック	
 	VECTOR gravHitPosDown_;	//重力方向の当たり判定位置
@@ -298,12 +284,14 @@ private:
 	//布擦れSE再生フラグ
 	bool clothSE_;
 
-	int victoryImg_;
-	int diedImg_;
+	//結果表示用画像ハンドル
+	int victoryImg_;	//勝利画像
+	int diedImg_;		//敗北画像
 
+	//フォントハンドル
 	int fontHandle_;
 
-	void LoadData(void);
+	void InitSound(void);
 
 	/// <summary>
 	/// 3Dモデル初期化
@@ -506,6 +494,11 @@ private:
 	/// </summary>
 	/// <param name=""></param>
 	void EffectParryPosUpdate(void);
+
+	/// <summary>
+	/// HPバーの描画
+	/// </summary>
+	void DrawHPBar(void);
 
 	/// <summary>
 	/// パリィのクールダウン描画
