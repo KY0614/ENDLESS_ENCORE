@@ -203,7 +203,7 @@ private:
 	float changeDirStep_;
 
 	/// <summary>
-	/// サウンド初期化処理
+	/// サウンド初期化
 	/// </summary>
 	void InitSound(void);
 

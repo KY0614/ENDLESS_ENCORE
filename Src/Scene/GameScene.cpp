@@ -102,7 +102,7 @@ void GameScene::Init(void)
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 
-	//フォント作成
+	//画面比率に応じたフォントサイズ設定
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
 	const int fontSize = 32 * screenAspect;	//フォントサイズ
 	const int fontThick = 3;				//フォントの太さ
@@ -542,8 +542,8 @@ void GameScene::SkipBarDraw(void)
 	const float progressRatio = skipTimer_ / SKIP_TIME;
 
 	//画面座標
-	const int GAUGE_X = Application::SCREEN_SIZE_X - 150;  // ゲージの左上のX座標
-	const int GAUGE_Y = Application::SCREEN_SIZE_Y - 150;  // ゲージの左上のY座標
+	const int GAUGE_X = Application::SCREEN_SIZE_X - 250;  // ゲージの左上のX座標
+	const int GAUGE_Y = Application::SCREEN_SIZE_Y - 180;  // ゲージの左上のY座標
 	const int GAUGE_W = 100; // ゲージの最大幅
 	const int GAUGE_H = 20;  // ゲージの高さ
 
@@ -559,15 +559,16 @@ void GameScene::SkipBarDraw(void)
 	{
 		str = L"スキップ中...";
 	}
-	//文字描画
+	//文字影描画
+	const int strShadowOffset = 2;
 	DrawStringToHandle(
-		GAUGE_X - 98, GAUGE_Y - 28,
+		GAUGE_X + strShadowOffset, GAUGE_Y + strShadowOffset,
 		str.c_str(),
 		0x000000,
 		fontHandle_);
-
+	//文字描画
 	DrawStringToHandle(
-		GAUGE_X - 100, GAUGE_Y - 30,
+		GAUGE_X, GAUGE_Y,
 		str.c_str(),
 		0xFFFFFF,
 		fontHandle_);
@@ -595,9 +596,11 @@ void GameScene::UpdateImGui(void)
 		ChangeState(STATE::ENCOUNT);
 		encountScene_->Start();
 	}
+	//バトル開始位置
+	const VECTOR battlePos = { 10.0, -217.0, 900.0 };
 	if (ImGui::Button("Battle"))
 	{
-		player_->SetPos({ 10.0, -217.0, 900.0 });
+		player_->SetPos(battlePos);
 		InitStateBattle();
 		mainCamera->SetFollow(&player_->GetTransform());
 		mainCamera->ChangeMode(Camera::MODE::FOLLOW);

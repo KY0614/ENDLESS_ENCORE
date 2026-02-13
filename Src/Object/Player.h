@@ -291,6 +291,9 @@ private:
 	//フォントハンドル
 	int fontHandle_;
 
+	/// <summary>
+	/// サウンド初期化
+	/// </summary>
 	void InitSound(void);
 
 	/// <summary>

@@ -60,7 +60,7 @@ namespace
 	const float FOLLOW_DISTANCE = 900.0f;		//’Ç]‹——£
 	//ó‘Ô‚²‚Æ‚ÌŠÔ
 	const float FOLLOW_TIME = 3.0f;			//’Ç]ŠÔ
-	const float MOVE_TIME = 3.0f;			//ˆÚ“®ŠÔ
+	const float MOVE_TIME = 1.0f;			//ˆÚ“®ŠÔ
 	const float ATTACK_TIME = 1.0f;			//UŒ‚Œã‚Ì‘Ò‹@ŠÔ
 	const float ATTACK_FAR_TIME = 15.0f;	//‰“‹——£UŒ‚Œã‚Ì‘Ò‹@ŠÔ
 	const float ATTACK_CHARGE_TIME = 30.0f;	//‚½‚ßUŒ‚Œã‚Ì‘Ò‹@ŠÔ

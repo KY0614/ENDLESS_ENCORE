@@ -154,6 +154,11 @@ private:
 	int effectFirePlayId_;	//エフェクト再生ID
 
 	/// <summary>
+	/// サウンド初期化
+	/// </summary>
+	void InitSound(void);
+
+	/// <summary>
 	/// 生存時間を設定
 	/// </summary>
 	/// <param name="time">生存時間</param>

@@ -144,7 +144,10 @@ void SceneManager::Update(void)
 
 	//カメラ更新
 	camera_->Update();
+
 #ifdef _DEBUG
+
+	//シーンごとのImGui更新処理
 	SceneUpdateImGui();
 
 #endif // _DEBUG

@@ -1,8 +1,10 @@
 #include <DxLib.h>
 #include "../../Application.h"
 #include "JsonManager.h"
+
 // ’·‚¢‚Ì‚Ånamespace‚ÌÈ—ª
 using json = nlohmann::json;
+
 namespace 
 {
 	const std::string JSON_PLAYER = "Player";

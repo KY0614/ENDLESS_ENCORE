@@ -459,6 +459,9 @@ void EncountScene::UpdateEnemySpotlight(void)
 	}
 }
 
+/// <summary>
+/// 実装途中
+/// </summary>
 void EncountScene::UpdateEnemyAttention(void)
 {
 	//一定時間経ったら振り向き開始
@@ -487,6 +490,9 @@ void EncountScene::UpdateEnemyAttention(void)
 	}
 }
 
+/// <summary>
+/// 実装途中
+/// </summary>
 void EncountScene::UpdateEnemyCastSpell(void)
 {
 	if (mainCamera->IsActionEnd())
@@ -496,6 +502,9 @@ void EncountScene::UpdateEnemyCastSpell(void)
 	}
 }
 
+/// <summary>
+/// 実装途中
+/// </summary>
 void EncountScene::UpdateEnemyAttack(void)
 {
 	//一定時間経過
@@ -507,7 +516,7 @@ void EncountScene::UpdateEnemyAttack(void)
 		enemy_.ChangeState(Enemy::STATE::ATTACK_PLAYER);
 		//カメラを敵の前からスタート
 		const VECTOR& enemyForward = enemy_.GetTransform().GetForward();
-		//被写体から距離を取った位置を開始座標とする
+		//開始座標(敵の前方)
 		const float distance = 160.0f;
 		VECTOR startPos = VAdd(
 			enemy_.GetTransform().pos,
@@ -515,9 +524,10 @@ void EncountScene::UpdateEnemyAttack(void)
 		startPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
 		const VECTOR& playerBackLeft = VAdd(
 			player_.GetTransform().GetBack(), player_.GetTransform().GetLeft());
+		//終了座標(プレイヤーの左後ろ)
 		VECTOR endPos = VAdd(
 			player_.GetTransform().pos,
-			VScale(playerBackLeft, 80.0f));
+			VScale(playerBackLeft, distance / 2.0f));
 		endPos.y += 50.0f;
 		//注視点を敵の頭にセット
 		const VECTOR& targetPos = enemy_.GetFramePos(L"mixamorig:Head");

@@ -1,5 +1,5 @@
 #include <DxLib.h>
-#include<EffekseerForDXLib.h>
+#include <EffekseerForDXLib.h>
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/SceneManager.h"
@@ -26,6 +26,7 @@ EnemyBullet::EnemyBullet(Transform& parent)
 	lifeTime_ = 0.0f;
 	isAlive_ = false;
 	state_ = STATE::NONE;
+	speed_ = 0.0f;
 	effectFireResId_ = -1;
 	effectFirePlayId_ = -1;
 
@@ -39,13 +40,14 @@ EnemyBullet::EnemyBullet(Transform& parent)
 
 EnemyBullet::~EnemyBullet(void)
 {
+	//エフェクトの停止
+	StopEffekseer3DEffect(effectFirePlayId_);
 }
 
 void EnemyBullet::Init(void)
 {
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FIRE,
-		ResourceManager::GetInstance().Load(ResourceManager::SRC::FIRE_SE).handleId_);
+	//サウンドの初期化
+	InitSound();
 
 	//モデルの基本設定
 	const float scl = 1.0f;
@@ -58,7 +60,8 @@ void EnemyBullet::Init(void)
 	//当たり判定用の球を生成
     sphere_ = std::make_unique<Sphere>(transform_);
     sphere_->SetLocalPos(CommonUtility::VECTOR_ZERO);
-	sphere_->SetRadius(20.0f);
+	const float sphereRadius = 20.0f;
+	sphere_->SetRadius(sphereRadius);
 
 	//火のエフェクトのリソース読み込み
 	effectFireResId_ = ResourceManager::GetInstance().Load(
@@ -121,6 +124,14 @@ void EnemyBullet::ChangeState(const STATE& state)
 	stateChanges_[state_]();
 }
 
+void EnemyBullet::InitSound(void)
+{
+	//サウンドの登録
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FIRE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::FIRE_SE).handleId_);
+}
+
 void EnemyBullet::ChangeStateNone(void)
 {
 	//生存していない
@@ -130,9 +141,11 @@ void EnemyBullet::ChangeStateNone(void)
 
 void EnemyBullet::ChangeStateReady(void)
 {
+	//SE再生
 	SoundManager& sound = SoundManager::GetInstance();
 	sound.AdjustVolume(SoundManager::SOUND::FIRE, FIRE_SE_VOLUME);
 	sound.Play(SoundManager::SOUND::FIRE);
+	//生存状態へ
 	SetIsAlive(true);
 	EffectFire();
 	stateUpdate_ = std::bind(&EnemyBullet::UpdateReady, this);
@@ -241,6 +254,9 @@ void EnemyBullet::SyncParentRotate(void)
 
 void EnemyBullet::EffectFire(void)
 {
+	//生存していなければ再生しない
+	if (!isAlive_)return;
+
 	//再生Idを取得
 	effectFirePlayId_ = PlayEffekseer3DEffect(effectFireResId_);
 

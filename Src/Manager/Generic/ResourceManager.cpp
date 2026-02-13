@@ -196,7 +196,7 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Explore.mp3");
 	resourcesMap_.emplace(SRC::EXPLORE_BGM, std::move(res));
 	
-	//SE
+	//SE-------------------------------------------------------------------------
 	
 	//ライトアップ
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Light_Up.mp3");
@@ -226,7 +226,7 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/backstab.mp3");
 	resourcesMap_.emplace(SRC::BACKSTAB_SE, std::move(res));
 
-	//エフェクト
+	//エフェクト------------------------------------------------------------------
 
 	//パリィ
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Barrior.efkefc");

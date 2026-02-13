@@ -183,6 +183,7 @@ void Player::Init(void)
 	effectParryResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PARRY_EFKT).handleId_;
 
+	//画面比率に応じたフォントサイズ設定
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
 	const int fontSize = 32 * screenAspect;	//フォントサイズ
 	const int fontThick = 3;				//フォントの太さ
@@ -300,6 +301,9 @@ void Player::DrawResultImage(const int img)
 		}
 	}
 	stringAlpha_ += alphaSpeed;	//透明度を増加させる
+	//透明度の上限設定
+	const int AlphaMax = 255;
+	if (stringAlpha_ > AlphaMax)stringAlpha_ = AlphaMax;
 	const int fontSize = 64;
 	const int defaultFontSize = 16;
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, stringAlpha_);
