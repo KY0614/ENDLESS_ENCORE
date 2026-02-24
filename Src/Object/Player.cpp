@@ -1,5 +1,5 @@
 #include <cassert>
-#include<EffekseerForDXLib.h>
+#include <EffekseerForDXLib.h>
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Libs/nlohmann/json.hpp"
@@ -144,13 +144,14 @@ void Player::Init(void)
 
 	colliders_.clear();
 
+	//HPバーの初期化
 	hpBar_ = std::make_unique<BarUI>();
 	hpBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_HP_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
 	hpBar_->Init();
 	const Vector2 hpBarPos = { 20, 20 };
 	hpBar_->SetBarPos(hpBarPos);
 	hpBar_->SetActive(true);
-
+	//パリィバーの初期化
 	parryCDBar_ = std::make_unique<BarUI>();
 	parryCDBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
 	parryCDBar_->Init();
@@ -185,7 +186,7 @@ void Player::Init(void)
 
 	//画面比率に応じたフォントサイズ設定
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	const int fontSize = 32 * screenAspect;	//フォントサイズ
+	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ
 	const int fontThick = 3;				//フォントの太さ
 	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
 	//初期状態
@@ -244,38 +245,6 @@ void Player::DrawVictory(void)
 {
 	//デバッグ用勝利表記
 	DrawResultImage(victoryImg_);
-}
-
-void Player::DrawResultString(const std::wstring& str, int col)
-{
-	static int interval = 0;
-	//透明度の増加値
-	const int alphaSpeed = 5;
-	const int maxAlpha = 255;
-	const int maxInterval = 120;
-	stringAlpha_ = std::clamp(stringAlpha_, 0, maxAlpha);
-	if (stringAlpha_ >= maxAlpha)
-	{
-		if (++interval > maxInterval)
-		{
-			interval = 0;
-			SceneManager::GetInstance().ChangeScene(
-				SceneManager::SCENE_ID::TITLE);
-			return;
-		}
-	}
-	stringAlpha_ += alphaSpeed;	//透明度を増加させる
-	const int fontSize = 64;
-	const int defaultFontSize = 16;
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, stringAlpha_);
-	SetFontSize(fontSize);
-	int diff = GetDrawStringWidth(str.c_str(), str.size(), NULL);
-	DrawString(Application::SCREEN_SIZE_X / 2 - diff / 2,
-		Application::SCREEN_SIZE_Y / 2 - diff / 2,
-		str.c_str(), col);
-	SetFontSize(defaultFontSize);
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
 }
 
 void Player::DrawResultImage(const int img)
@@ -1234,7 +1203,7 @@ void Player::DrawHPBar(void)
 {
 	const int HP_BAR_X = 20;         // HPバーの左上X座標
 	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
-	const int HP_BAR_WIDTH = static_cast<float>(maxHp_); // HPバーの最大幅
+	const int HP_BAR_WIDTH = static_cast<int>(maxHp_); // HPバーの最大幅
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);

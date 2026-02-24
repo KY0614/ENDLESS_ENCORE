@@ -85,8 +85,10 @@ void GameScene::Init(void)
 	encountScene_->Init();
 
 	//画面座標
-	const int GAUGE_X = Application::SCREEN_SIZE_X - 200;  // ゲージの左上のX座標
-	const int GAUGE_Y = Application::SCREEN_SIZE_Y - 120;  // ゲージの左上のY座標
+	const int GAUGEX_OFFEST_X = 200; //ゲージのX座標オフセット
+	const int GAUGEX_OFFEST_Y = 120; //ゲージのY座標オフセット
+	const int GAUGE_X = Application::SCREEN_SIZE_X - GAUGEX_OFFEST_X;  // ゲージの左上のX座標
+	const int GAUGE_Y = Application::SCREEN_SIZE_Y - GAUGEX_OFFEST_Y;  // ゲージの左上のY座標
 	skipBarUI_ = std::make_unique<BarUI>();
 	skipBarUI_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
 	skipBarUI_->Init();
@@ -104,7 +106,7 @@ void GameScene::Init(void)
 
 	//画面比率に応じたフォントサイズ設定
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	const int fontSize = 32 * screenAspect;	//フォントサイズ
+	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ
 	const int fontThick = 3;				//フォントの太さ
 	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
 
@@ -518,7 +520,7 @@ void GameScene::UpdateBattle(void)
 
 void GameScene::DrawBattle(void)
 {
-	//プレイヤー描画
+	//ステージ描画
 	stage_->Draw();
 	//プレイヤー描画
 	player_->Draw();
@@ -529,8 +531,12 @@ void GameScene::DrawBattle(void)
 	{
 		player_->DrawVictory();
 	}
-
+	//YouDied描画
 	player_->DrawDead();
+
+	//霧の壁描画
+	stage_->DrawTranslucent();
+
 	//UI描画
 	enemy_->DrawBarUI();
 	//UI描画
@@ -542,8 +548,10 @@ void GameScene::SkipBarDraw(void)
 	const float progressRatio = skipTimer_ / SKIP_TIME;
 
 	//画面座標
-	const int GAUGE_X = Application::SCREEN_SIZE_X - 250;  // ゲージの左上のX座標
-	const int GAUGE_Y = Application::SCREEN_SIZE_Y - 180;  // ゲージの左上のY座標
+	const int GAUGEX_OFFEST_X = 250; //ゲージのX座標オフセット
+	const int GAUGEX_OFFEST_Y = 180; //ゲージのY座標オフセット
+	const int GAUGE_X = Application::SCREEN_SIZE_X - GAUGEX_OFFEST_X;  // ゲージの左上のX座標
+	const int GAUGE_Y = Application::SCREEN_SIZE_Y - GAUGEX_OFFEST_Y;  // ゲージの左上のY座標
 	const int GAUGE_W = 100; // ゲージの最大幅
 	const int GAUGE_H = 20;  // ゲージの高さ
 

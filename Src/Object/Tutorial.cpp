@@ -34,7 +34,7 @@ void Tutorial::Init(void)
 	viewGuide_ = tutorialStep_.front().keyGuide_;
 	//フォント作成
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	const int fontSize = 32 * screenAspect;	//フォントサイズ
+	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ
 	const int fontThick = 3;				//フォントの太さ
 	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
 	//最初の状態へ変更

@@ -1,9 +1,11 @@
 #pragma once
 #include <DxLib.h>
 #include "../../Common/Quaternion.h"
+#include "../../Object/ActorBase.h"
+
 class Transform;
 
-class Camera
+class Camera : public ActorBase
 {
 public:
 
@@ -30,6 +32,9 @@ public:
 	static constexpr float LIMIT_X_UP_RAD = 90.0f * (DX_PI_F / 180.0f);
 	static constexpr float LIMIT_X_DW_RAD = 90.0f * (DX_PI_F / 180.0f);
 
+	//衝突時の押し戻し量
+	static constexpr float COLLISION_BACK_DIS = 2.0f;
+
 	//カメラモード
 	enum class MODE
 	{
@@ -48,7 +53,7 @@ public:
 	//コンストラクタ
 	Camera(void);
 	//デストラクタ
-	~Camera(void);
+	~Camera(void)override;
 
 	/// <summary>
 	/// 初期化処理
@@ -58,7 +63,7 @@ public:
 	/// <summary>
 	/// 更新処理
 	/// </summary>
-	void Update(void);
+	void Update(void)override;
 
 	/// <summary>
 	/// 状態ごとの描画前処理
@@ -159,7 +164,11 @@ public:
 	//注視対象の設定
 	void SetTarget(const Transform* target);
 
+	/// <summary>
+	/// ImGuiの更新処理
+	/// </summary>
 	void UpdateImGui(void);
+
 private:
 
 	//カメラが追従対象とするTransform
@@ -170,23 +179,14 @@ private:
 	//カメラモード
 	MODE mode_;
 
-	//カメラの位置
-	VECTOR pos_;
-
 	//カメラ角度(rad)
 	VECTOR angles_;
 
 	//X軸回転が無い角度
 	Quaternion rotOutX_;
 
-	//カメラ角度
-	Quaternion rot_;
-
 	//注視点
 	VECTOR targetPos_;
-
-	//カメラの上方向
-	VECTOR cameraUp_;
 
 	//固定カメラ用座標
 	VECTOR fixedPointPos_;			//カメラ位置
@@ -218,8 +218,8 @@ private:
 	VECTOR zoomOutDollyEndPos_;		//終了位置
 	VECTOR zoomOutDollyTargetPos_;	//被写体の座標
 	float zoomOutFov_;				//最終FOV
-	float zoomOutDollyTotalTime_;		//総移動時間
-	float zoomOutDollyElapsedTime_;		//経過時間
+	float zoomOutDollyTotalTime_;	//総移動時間
+	float zoomOutDollyElapsedTime_;	//経過時間
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
@@ -227,16 +227,22 @@ private:
 	//カメラアクションが終了したかどうか true:終了
 	bool isActionEnd_;
 
+	//視野角
+	float fov_;
+
 	//カメラを初期位置に戻す
 	void SetDefault(void);
 
 	//追従対象との位置同期を取る
 	void SyncFollow(void);
 
+	//衝突処理
+	void Collision(void);
+
 	//カメラ操作
-	void ProcessRot(void);
-	void ProcessMove(void);
-	void ProcessMouseMove(void);
+	void ProcessRot(void);	//回転処理
+	void ProcessMove(void);	//移動処理
+	void ProcessMouseMove(void);	//マウス移動処理
 
 	//モード別更新ステップ
 	void SetBeforeDrawCraneUp(void);
@@ -249,7 +255,5 @@ private:
 	void SetBeforeDrawFree(void);
 	void SetBeforeDrawMouse(void);
 
-	//視野角
-	float fov_;	
 };
 

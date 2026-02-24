@@ -89,13 +89,6 @@ public:
 	/// <summary>
 	/// •¶š—ñ‚ğ•`‰æ
 	/// </summary>
-	/// <param name="str">•`‰æ‚·‚é•¶š—ñ</param>
-	/// <param name="col">•¶š‚ÌF</param>
-	void DrawResultString(const std::wstring& str,int col);
-
-	/// <summary>
-	/// •¶š—ñ‚ğ•`‰æ
-	/// </summary>
 	/// <param name="img">•`‰æ‚·‚é‰æ‘œ</param>
 	void DrawResultImage(const int img);
 

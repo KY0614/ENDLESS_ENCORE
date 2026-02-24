@@ -24,9 +24,9 @@ namespace
 Camera::Camera(void)
 {
 	angles_ = CommonUtility::VECTOR_ZERO;
-	cameraUp_ = CommonUtility::VECTOR_ZERO;
+	transform_.quaRot.GetUp() = CommonUtility::VECTOR_ZERO;
 	mode_ = MODE::NONE;
-	pos_ = CommonUtility::VECTOR_ZERO;
+	transform_.pos = CommonUtility::VECTOR_ZERO;
 	targetPos_ = CommonUtility::VECTOR_ZERO;
 	fixedPointPos_ = CommonUtility::VECTOR_ZERO;
 	fixedPointTargetPos_ = CommonUtility::VECTOR_ZERO;
@@ -119,16 +119,16 @@ void Camera::SetBeforeDraw(void)
 	}
 	//カメラの設定(位置と注視点による制御)
 	SetCameraPositionAndTargetAndUpVec(
-		pos_, 
+		transform_.pos, 
 		targetPos_, 
-		cameraUp_
+		transform_.quaRot.GetUp()
 	);
 
 	//自由視点カメラの場合、角度からカメラを設定し直す
 	if (mode_ == MODE::FREE)
 	{
 		SetCameraPositionAndAngle(
-			pos_,
+			transform_.pos,
 			angles_.x,
 			angles_.y,
 			angles_.z
@@ -158,7 +158,7 @@ void Camera::SetTarget(const Transform* target)
 
 VECTOR Camera::GetPos(void) const
 {
-	return pos_;
+	return transform_.pos;
 }
 
 VECTOR Camera::GetAngles(void) const
@@ -173,7 +173,7 @@ VECTOR Camera::GetTargetPos(void) const
 
 Quaternion Camera::GetQuaRot(void) const
 {
-	return rot_;
+	return transform_.quaRot;
 }
 
 Quaternion Camera::GetQuaRotOutX(void) const
@@ -183,7 +183,7 @@ Quaternion Camera::GetQuaRotOutX(void) const
 
 VECTOR Camera::GetForward(void) const
 {
-	return VNorm(VSub(targetPos_, pos_));
+	return VNorm(VSub(targetPos_, transform_.pos));
 }
 
 void Camera::ChangeMode(MODE mode)
@@ -198,22 +198,22 @@ void Camera::ChangeMode(MODE mode)
 	switch (mode_)
 	{
 	case Camera::MODE::FIXED_POINT:
-		pos_ = fixedPointPos_;
+		transform_.pos = fixedPointPos_;
 		targetPos_ = fixedPointTargetPos_;
 		break;
 	case Camera::MODE::CRANE_UP:
-		pos_ = craneUpStartPos_;
+		transform_.pos = craneUpStartPos_;
 		targetPos_ = craneUpTargetPos_;
 		break;
 	case Camera::MODE::TRACK:
-		pos_ = trackStartPos_;
+		transform_.pos = trackStartPos_;
 		break;
 	case Camera::MODE::DOLLY:
-		pos_ = dollyStartPos_;
+		transform_.pos = dollyStartPos_;
 		targetPos_ = dollyObjectPos_;
 		break;	
 	case Camera::MODE::ZOOM_OUT_DOLLY:
-		pos_ = zoomOutDollyStartPos_;
+		transform_.pos = zoomOutDollyStartPos_;
 		targetPos_ = zoomOutDollyTargetPos_;
 		break;	
 	case Camera::MODE::FREE:
@@ -284,19 +284,19 @@ void Camera::SetZoomOutDolly(
 void Camera::SetDefault(void)
 {
 	//カメラの初期設定
-	pos_ = DEFAULT_CAMERA_POS;
+	transform_.pos = DEFAULT_CAMERA_POS;
 
 	//注視点
 	targetPos_ = CommonUtility::VECTOR_ZERO;
 
 	//カメラの上方向
-	cameraUp_ = CommonUtility::DIR_U;
+	transform_.quaRot.GetUp() = CommonUtility::DIR_U;
 
 	angles_.x = CommonUtility::Deg2RadF(30.0f);
 	angles_.y = 0.0f;
 	angles_.z = 0.0f;
 
-	rot_ = Quaternion();
+	transform_.quaRot = Quaternion();
 	isActionEnd_ = false;
 }
 
@@ -313,19 +313,75 @@ void Camera::SyncFollow(void)
 	targetPos_ = VAdd(pos, localPos);
 
 	//カメラ位置
-	localPos = rot_.PosAxis(LOCAL_F2C_POS);
-	pos_ = VAdd(pos, localPos);
+	localPos = transform_.quaRot.PosAxis(LOCAL_F2C_POS);
+	transform_.pos = VAdd(pos, localPos);
 
 	//正面から設定されたY軸分、回転させる
 	rotOutX_ = followRot.Mult(Quaternion::AngleAxis(angles_.y, CommonUtility::AXIS_Y));
 
 	//正面から設定されたX軸分、回転させる
-	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, CommonUtility::AXIS_X));
+	transform_.quaRot = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, CommonUtility::AXIS_X));
 	const float rotTime = 0.1f;
-	rot_ = Quaternion::Slerp(rot_, rot_, rotTime);
+	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, transform_.quaRot, rotTime);
 
 	//カメラの上方向
-	cameraUp_ = followRot.GetUp();
+	transform_.quaRot.GetUp() = followRot.GetUp();
+}
+
+void Camera::Collision(void)
+{
+	//プレイヤーのルートフレーム
+	VECTOR start = MV1GetFramePosition(followTransform_->modelId, 1);
+	for (const auto& hitCol : colliders_)
+	{
+		//モデル以外は処理を飛ばす
+		//if (hitCol->GetShape() != ColliderBase::SHAPE::MODEL) continue;
+		//派生クラスへキャスト
+		//const ColliderModel* colliderModel =
+		//	dynamic_cast<const ColliderModel*>(hitCol);
+		if (hitCol.lock() == nullptr) continue;
+		//線分で衝突判定
+		auto hits = MV1CollCheck_LineDim(
+			hitCol.lock()->modelId_,
+			-1,
+			transform_.pos,
+			start
+		);
+		//追従対象に一番近い衝突点を探す
+		bool isCollision = false;
+		MV1_COLL_RESULT_POLY hitPoly;
+		double minDist = DBL_MAX;
+		for (int i = 0; i < hits.HitNum; i++)
+		{
+			const auto& hit = hits.Dim[i];
+			//除外フレームは無視する
+			//〇〇〇
+			
+			//衝突判定
+			isCollision = true;
+			//距離判定
+			//〇〇〇
+			//	〇〇〇
+			if (true)
+			{
+				// 追従対象に一番近い衝突点を優先
+				minDist = dist;
+				hitPoly = hit;
+			}
+		}
+		// 検出した地面ポリゴン情報の後始末
+		MV1CollResultPolyDimTerminate(hits);
+		if (!isCollision)
+		{
+			// 衝突していなければ次のコライダへ
+			continue;
+		}
+		// カメラ位置から注視点への方向
+		VECTOR dirToTarget = //〇〇〇
+			// 衝突点の少し手前にカメラを置く
+			transform_.pos =
+			VAdd(hitPoly.HitPosition, VScale(dirToTarget, COLLISION_BACK_DIS));
+	}
 }
 
 void Camera::ProcessRot(void)
@@ -357,13 +413,13 @@ void Camera::ProcessMove(void)
 	//移動速度
 	const float moveSpeed = 10.0f;
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
-	if (ins.IsInputPressed("CameraMoveUp"))	pos_.z += moveSpeed; targetPos_.z += moveSpeed;
-	if (ins.IsInputPressed("CameraMoveDown"))	pos_.z -= moveSpeed; targetPos_.z -= moveSpeed;
-	if (ins.IsInputPressed("CameraMoveRight"))	pos_.x += moveSpeed; targetPos_.x += moveSpeed;
-	if (ins.IsInputPressed("CameraMoveLeft"))	pos_.x -= moveSpeed; targetPos_.x -= moveSpeed;
+	if (ins.IsInputPressed("CameraMoveUp"))	transform_.pos.z += moveSpeed; targetPos_.z += moveSpeed;
+	if (ins.IsInputPressed("CameraMoveDown"))	transform_.pos.z -= moveSpeed; targetPos_.z -= moveSpeed;
+	if (ins.IsInputPressed("CameraMoveRight"))	transform_.pos.x += moveSpeed; targetPos_.x += moveSpeed;
+	if (ins.IsInputPressed("CameraMoveLeft"))	transform_.pos.x -= moveSpeed; targetPos_.x -= moveSpeed;
 
-	if (ins.IsInputPressed("CameraRise"))	pos_.y += moveSpeed;	targetPos_.y += moveSpeed;
-	if (ins.IsInputPressed("CameraDescent"))pos_.y -= moveSpeed;	targetPos_.y -= moveSpeed;
+	if (ins.IsInputPressed("CameraRise"))	transform_.pos.y += moveSpeed;	targetPos_.y += moveSpeed;
+	if (ins.IsInputPressed("CameraDescent"))transform_.pos.y -= moveSpeed;	targetPos_.y -= moveSpeed;
 }
 
 void Camera::ProcessMouseMove(void)
@@ -394,21 +450,21 @@ void Camera::ProcessMouseMove(void)
 void Camera::SetBeforeDrawCraneUp(void)
 {
 	//スタート座標から現在座標までの距離を取得
-	VECTOR endPos = VAdd(craneUpStartPos_, VScale(cameraUp_, craneUpDistance_));
+	VECTOR endPos = VAdd(craneUpStartPos_, VScale(transform_.quaRot.GetUp(), craneUpDistance_));
 	//現在地から目的地までの距離が一定以下になったら終了
-	float pos2StartPos = VSize(VSub(endPos, pos_));
+	float pos2StartPos = VSize(VSub(endPos, transform_.pos));
 	const float distance = 0.5f;
 	isActionEnd_ = pos2StartPos <= distance;
 
 	if (isActionEnd_) return;
 	//カメラを上昇させる
-	pos_ = VAdd(pos_, VScale(cameraUp_, craneUpSpeed_));
+	transform_.pos = VAdd(transform_.pos, VScale(transform_.quaRot.GetUp(), craneUpSpeed_));
 }
 
 void Camera::SetBeforeDrawTrack(void)
 {
 	//終了座標から現在座標までの距離を取得
-	float pos2StartPos = VSize(VSub(trackEndPos_, pos_));
+	float pos2StartPos = VSize(VSub(trackEndPos_, transform_.pos));
 	//一定距離以下になったら行動済みにする
 	const float distance = 1.0f;
 	isActionEnd_ = pos2StartPos <= distance;
@@ -419,17 +475,17 @@ void Camera::SetBeforeDrawTrack(void)
 	//制限時間内に収める
 	trackElapsedTime_ = std::clamp(trackElapsedTime_, 0.0f, trackTotalTime_);
 	// 各軸ごとにQuadOutイージングで補間
-	pos_.x = Easing::QuadOut(
+	transform_.pos.x = Easing::QuadOut(
 		trackElapsedTime_,trackTotalTime_, trackStartPos_.x, trackEndPos_.x);
-	pos_.y = Easing::QuadOut(
+	transform_.pos.y = Easing::QuadOut(
 		trackElapsedTime_, trackTotalTime_, trackStartPos_.y, trackEndPos_.y);
-	pos_.z = Easing::QuadOut(
+	transform_.pos.z = Easing::QuadOut(
 		trackElapsedTime_, trackTotalTime_, trackStartPos_.z, trackEndPos_.z);
 
 	//注視座標はカメラの正面に設置
 	const float lookDistance = 50.0f;
 	//垂直ベクトルを計算して注視点を設定
-	targetPos_ = VAdd(pos_, VScale(
+	targetPos_ = VAdd(transform_.pos, VScale(
 		VGet(-trackDir_.z, trackDir_.y, -trackDir_.x), lookDistance));
 }
 
@@ -442,7 +498,7 @@ void Camera::SetBeforeDrawDolly(void)
 		VScale(VNorm(VSub(dollyObjectPos_, dollyStartPos_)), object2CameraDistance_));
 
 	//終了座標から現在座標までの距離を取得
-	float pos2StartPos = VSize(VSub(dollyEndPos_, pos_));
+	float pos2StartPos = VSize(VSub(dollyEndPos_, transform_.pos));
 	//一定距離以下になったら終了
 	const float distance = 1.0f;
 	isActionEnd_ = pos2StartPos <= distance;
@@ -454,18 +510,18 @@ void Camera::SetBeforeDrawDolly(void)
 	//制限時間内に収める
 	dollyElapsedTime_ = std::clamp(dollyElapsedTime_, 0.0f, dollyTotalTime_);
 	// 各軸ごとにQuadOutイージングで補間
-	pos_.x = Easing::QuadOut(
+	transform_.pos.x = Easing::QuadOut(
 		dollyElapsedTime_, dollyTotalTime_, dollyStartPos_.x, dollyEndPos_.x);
-	pos_.y = Easing::QuadOut(
+	transform_.pos.y = Easing::QuadOut(
 		dollyElapsedTime_, dollyTotalTime_, dollyStartPos_.y, dollyEndPos_.y);
-	pos_.z = Easing::QuadOut(
+	transform_.pos.z = Easing::QuadOut(
 		dollyElapsedTime_, dollyTotalTime_, dollyStartPos_.z, dollyEndPos_.z);
 }
 
 void Camera::SetBeforeDrawZoomOutDolly(void)
 {
 	//終了座標から現在座標までの距離を取得
-	float pos2StartPos = VSize(VSub(zoomOutDollyEndPos_, pos_));
+	float pos2StartPos = VSize(VSub(zoomOutDollyEndPos_, transform_.pos));
 	//一定距離以下になったら終了
 	const float distance = 1.0f;
 	isActionEnd_ = pos2StartPos <= distance;
@@ -484,13 +540,13 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 		fov_, zoomOutFov_);
 
 	//各軸ごとにQuadOutイージングで補間
-	pos_.x = Easing::QuadOut(
+	transform_.pos.x = Easing::QuadOut(
 		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
 		zoomOutDollyStartPos_.x, zoomOutDollyEndPos_.x);
-	pos_.y = Easing::QuadOut(
+	transform_.pos.y = Easing::QuadOut(
 		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
 		zoomOutDollyStartPos_.y, zoomOutDollyEndPos_.y);
-	pos_.z = Easing::QuadOut(
+	transform_.pos.z = Easing::QuadOut(
 		zoomOutDollyElapsedTime_, zoomOutDollyTotalTime_,
 		zoomOutDollyStartPos_.z, zoomOutDollyEndPos_.z);
 }
@@ -498,7 +554,7 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 void Camera::SetBeforeDrawFixedPoint(void)
 {
 	//固定位置に設定
-	pos_ = fixedPointPos_;
+	transform_.pos = fixedPointPos_;
 	targetPos_ = fixedPointTargetPos_;
 }
 
@@ -513,6 +569,9 @@ void Camera::SetBeforeDrawFollow(void)
 
 	//追従対象との相対位置を同期
 	SyncFollow();
+
+	//衝突判定
+	Collision();
 }
 
 void Camera::SetBeforeDrawFree(void)
@@ -544,7 +603,7 @@ void Camera::SetBeforeDrawMouse(void)
 	if (isLockOn_ && targetTransform_ != nullptr)
 	{
 		targetPos_ = targetTransform_->pos;
-		VECTOR lookDir = VSub(targetPos_, pos_);
+		VECTOR lookDir = VSub(targetPos_, transform_.pos);
 		angles_.y = atan2f(lookDir.x, lookDir.z); // Y軸回転 (方位角)
 		angles_.x = -atan2f(lookDir.y, VSize(VGet(lookDir.x, 0, lookDir.z))); // X軸回転 (仰角)
 	}
@@ -561,7 +620,7 @@ void Camera::UpdateImGui(void)
 	//注視座標
 	ImGui::Text("targetPos: %.2f, %.2f, %.2f", targetPos_.x, targetPos_.y, targetPos_.z);
 	//座標
-	ImGui::Text("Pos: %.2f, %.2f, %.2f", pos_.x, pos_.y, pos_.z);
+	ImGui::Text("Pos: %.2f, %.2f, %.2f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
 	//視野角(数値入力)
 	ImGui::InputFloat("Fov", &fov_);
 	//視野角(スライダー)

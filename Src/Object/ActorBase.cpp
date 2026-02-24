@@ -45,7 +45,7 @@ void ActorBase::AddCollider(std::weak_ptr<Collider> collider)
 
 void ActorBase::DrawShadow(void)
 {
-	int i, j;
+	int i = 0;
 	MV1_COLL_RESULT_POLY_DIM HitResDim;
 	MV1_COLL_RESULT_POLY* HitRes;
 	VERTEX3D Vertex[3];
@@ -62,7 +62,7 @@ void ActorBase::DrawShadow(void)
 	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
 
 	//影を落とすモデルの数だけ繰り返し
-	for (auto c : colliders_)
+	for (const auto& c : colliders_)
 	{
 		//チェックするモデルは、jが0の時はステージモデル、1以上の場合はコリジョンモデル
 

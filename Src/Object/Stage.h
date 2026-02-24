@@ -30,6 +30,12 @@ public:
 	void Draw(void);
 
 	/// <summary>
+	/// 半透明描画処理
+	/// </summary>
+	/// <param name=""></param>
+	void DrawTranslucent(void);
+
+	/// <summary>
 	/// ステージのモデル情報を取得する
 	/// </summary>
 	/// <returns>ステージモデル情報</returns>

@@ -81,11 +81,14 @@ void Stage::Update(void)
 
 void Stage::Draw(void)
 {
+	//ƒXƒe[ƒW•`‰æ
 	stageRenderer_->Draw();
+}
 
-	//cube_->Draw();
-
+void Stage::DrawTranslucent(void)
+{
 	if (!isBattle_)return;
+	//–¶‚Ì•Ç•`‰æ
 	mistWallRenderer_->Draw();
 }
 

@@ -28,8 +28,8 @@ public:
 		Vector2 pos_;			//チュートリアル表示位置
 		std::string keyGuide_;	//キーガイドの文字列
 		std::string controllerGuide_; //コントローラーガイドの文字列
-		float requiredTime_;	//クリアに必要な時間
-		int requiredNum_;		//クリアに必要な回数
+		float requiredTime_ = 0.0f;	//クリアに必要な時間
+		int requiredNum_ = 0;		//クリアに必要な回数
 	};
 
 	/// <summary>
