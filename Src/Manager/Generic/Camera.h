@@ -3,6 +3,7 @@
 #include "../../Common/Quaternion.h"
 #include "../../Object/ActorBase.h"
 
+class Sphere;
 class Transform;
 
 class Camera : public ActorBase
@@ -31,9 +32,6 @@ public:
 	//カメラのX回転上限度角
 	static constexpr float LIMIT_X_UP_RAD = 90.0f * (DX_PI_F / 180.0f);
 	static constexpr float LIMIT_X_DW_RAD = 90.0f * (DX_PI_F / 180.0f);
-
-	//衝突時の押し戻し量
-	static constexpr float COLLISION_BACK_DIS = 2.0f;
 
 	//カメラモード
 	enum class MODE
@@ -170,6 +168,8 @@ public:
 	void UpdateImGui(void);
 
 private:
+	//カメラの当たり判定に用いる球
+	std::unique_ptr<Sphere> sphere_;
 
 	//カメラが追従対象とするTransform
 	const Transform* followTransform_;
@@ -229,6 +229,18 @@ private:
 
 	//視野角
 	float fov_;
+
+	// 衝突時の押し戻し試行回数
+	static constexpr int CNT_TRY_COLLISION_CAMERA = 30;
+	// 衝突時の押し戻し量
+	static constexpr float COLLISION_BACK_DIS = 2.0f;
+	// 衝突判定用球体半径
+	static constexpr float COL_CAPSULE_SPHERE = 50.0f;
+
+	/// <summary>
+	/// コライダー初期化
+	/// </summary>
+	void InitCollider(void);
 
 	//カメラを初期位置に戻す
 	void SetDefault(void);

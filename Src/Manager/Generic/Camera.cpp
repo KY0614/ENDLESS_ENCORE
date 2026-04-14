@@ -10,6 +10,7 @@
 #include "../Generic/InputManager.h"
 #include "../Generic/SceneManager.h"
 #include "../../Object/Common/Transform.h"
+#include "../Object/Common/Geometry/Sphere.h"
 #include "Camera.h"
 
 namespace
@@ -281,6 +282,14 @@ void Camera::SetZoomOutDolly(
 	zoomOutDollyElapsedTime_ = 0.0f;
 }
 
+void Camera::InitCollider(void)
+{
+	//球コライダ
+	sphere_ = std::make_unique<Sphere>(transform_);
+	sphere_->SetLocalPos(CommonUtility::VECTOR_ZERO);
+	sphere_->SetRadius(COL_CAPSULE_SPHERE);
+}
+
 void Camera::SetDefault(void)
 {
 	//カメラの初期設定
@@ -356,13 +365,12 @@ void Camera::Collision(void)
 			const auto& hit = hits.Dim[i];
 			//除外フレームは無視する
 			//〇〇〇
-			
+
 			//衝突判定
 			isCollision = true;
 			//距離判定
-			//〇〇〇
-			//	〇〇〇
-			if (true)
+			float dist = VSize(VSub(hit.HitPosition, start));
+			if (dist < minDist)
 			{
 				// 追従対象に一番近い衝突点を優先
 				minDist = dist;
@@ -377,10 +385,25 @@ void Camera::Collision(void)
 			continue;
 		}
 		// カメラ位置から注視点への方向
-		VECTOR dirToTarget = //〇〇〇
-			// 衝突点の少し手前にカメラを置く
-			transform_.pos =
+		VECTOR dirToTarget = VNorm(VSub(start, transform_.pos));
+		// 衝突点の少し手前にカメラを置く
+		transform_.pos =
 			VAdd(hitPoly.HitPosition, VScale(dirToTarget, COLLISION_BACK_DIS));
+
+		// 球体コライダが無ければ処理を抜ける
+		if (sphere_ == nullptr) continue;
+		// 衝突補正処理
+		int sphereCnt = 0;
+		while (sphereCnt < CNT_TRY_COLLISION_CAMERA)
+		{
+			// 球体と三角形の当たり判定
+			int isHitSphere = HitCheck_Sphere_Triangle(
+				transform_.pos, sphere_->GetRadius(),
+				hitPoly.Position[0], hitPoly.Position[1], hitPoly.Position[2]);
+			// 衝突していたら法線方向に押し戻し
+			transform_.pos = VAdd(transform_.pos, VScale(hitPoly.Normal, COLLISION_BACK_DIS));
+			sphereCnt++;
+		}
 	}
 }
 
@@ -391,8 +414,8 @@ void Camera::ProcessRot(void)
 	//回転軸と量を決める
 	float rotPow = 1.5f * DX_PI_F / 180.0f;
 	//回転処理
-	if (ins.IsInputPressed("CameraDown")) { angles_.x += rotPow; }
-	if (ins.IsInputPressed("CameraUp")) { angles_.x -= rotPow; }
+	if (ins.IsInputPressed("CameraUp")) { angles_.x += rotPow; }
+	if (ins.IsInputPressed("CameraDown")) { angles_.x -= rotPow; }
 	if (ins.IsInputPressed("CameraLeft")) { angles_.y -= rotPow; }
 	if (ins.IsInputPressed("CameraRight")) { angles_.y += rotPow; }
 

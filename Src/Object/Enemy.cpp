@@ -200,8 +200,6 @@ void Enemy::Draw(void)
 	//ƒ‚ƒfƒ‹‚Ì•`‰æ
 	MV1DrawModel(transform_.modelId);
 
-	VECTOR pos = ConvWorldPosToScreenPos(transform_.pos);
-
 	for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		bullet->Draw();

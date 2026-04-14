@@ -87,14 +87,6 @@ private:
 		std::unordered_map<AnalogInputType, std::function<bool(const XINPUT_STATE&)>>;
 	AnalogInputTable_t analogInputTable_;
 
-
-	/// <summary>
-	/// 入力テーブルのセーブ
-	/// </summary>
-	void Save();
-
-	void Load();
-
 	/// <summary>
 	/// 入力対応表を初期化する
 	/// </summary>

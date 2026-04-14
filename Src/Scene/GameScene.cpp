@@ -101,12 +101,13 @@ void GameScene::Init(void)
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	//コライダー登録
+	mainCamera->AddCollider(stage_->GetTransform().collider);
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 
 	//画面比率に応じたフォントサイズ設定
 	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ
+	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ(画面比率に合わせる)
 	const int fontThick = 3;				//フォントの太さ
 	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
 
