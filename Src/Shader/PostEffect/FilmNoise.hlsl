@@ -21,7 +21,7 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     float diffNoiseLine = abs(PSInput.uv.x - g_black_uv.x);
     if (diffNoiseLine < 0.001f)
     {
-        dstCol = (0.0f, 0.0f, 0.0f);
+        dstCol.rgb = float3(0.0f, 0.0f, 0.0f);
     }
 
     float noiseScale = 0.1f;

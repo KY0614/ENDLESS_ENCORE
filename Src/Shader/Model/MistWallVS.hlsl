@@ -12,13 +12,15 @@
 // 定数バッファ：スロット4番目(b4と書く)
 cbuffer cbParam : register(b7)
 {
-    float4 g_uv_scale;
-    float g_scroll_time;
+    float2 g_uv_scale; //UVスケール
+    float2 dummy;      //16バイトアライメント用ダミー
+    
+    float g_scroll_time;    //スクロール時間
+    float3 dummy2;          //16バイトアライメント用ダミー
 }
 
 VS_OUTPUT main(VS_INPUT VSInput)
 {
-    
     VS_OUTPUT ret;
     
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 開始 )
@@ -54,13 +56,10 @@ VS_OUTPUT main(VS_INPUT VSInput)
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 終了 )
    
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 開始 )
-    // UV座標
-    //ret.uv.x = VSInput.uv0.x;
-    //ret.uv.y = VSInput.uv0.y;
     
     // UV座標
-    ret.uv.x = VSInput.uv0.x * g_uv_scale;
-    ret.uv.y = VSInput.uv0.y * g_uv_scale;
+    ret.uv.x = VSInput.uv0.x * g_uv_scale.x;
+    ret.uv.y = VSInput.uv0.y * g_uv_scale.y;
     
     // 法線
     ret.normal = normalize(

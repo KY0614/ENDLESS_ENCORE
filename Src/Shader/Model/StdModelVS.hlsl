@@ -51,7 +51,7 @@ VS_OUTPUT main(VS_INPUT VSInput)
     float distance = length(lWorldPosition.xyz - g_camera_pos);
     float fog = (g_fog_end - distance) /(g_fog_end - g_fog_start);
     fog = saturate(fog);
-    ret.fogFactor = float3(fog, fog, fog);
+    ret.fogFactor = fog;
    
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 終了 )
    
@@ -72,7 +72,6 @@ VS_OUTPUT main(VS_INPUT VSInput)
     
     //ライトから見た座標
     ret.lightPow = float(0.0f);
-    
     
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 終了 )
     // 出力パラメータを返す

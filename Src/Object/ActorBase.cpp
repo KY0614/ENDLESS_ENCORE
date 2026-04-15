@@ -33,9 +33,13 @@ const Transform& ActorBase::GetTransform(void) const
 	return transform_;
 }
 
-const VECTOR& ActorBase::GetFramePos(const std::wstring& frameName) const
+const VECTOR ActorBase::GetFramePos(const std::wstring& frameName) const
 {
-	return MV1GetFramePosition(transform_.modelId, MV1SearchFrame(transform_.modelId, frameName.c_str()));
+	VECTOR ret = {};
+	//フレームIDを取得して、フレームの座標を取得する
+	const int frameId = MV1SearchFrame(transform_.modelId, frameName.c_str());
+	ret = MV1GetFramePosition(transform_.modelId, frameId);
+	return ret;
 }
 
 void ActorBase::AddCollider(std::weak_ptr<Collider> collider)
@@ -68,8 +72,11 @@ void ActorBase::DrawShadow(void)
 
 		ModelHandle = c.lock()->modelId_;
 
-		float PLAYER_SHADOW_HEIGHT = 700.0f;
-		float PLAYER_SHADOW_SIZE = 50.0f;
+		//影の高さとサイズを設定
+		const float PLAYER_SHADOW_HEIGHT = 700.0f;
+		const float PLAYER_SHADOW_SIZE = 50.0f;
+
+		const int maxAlpha = 128;	//影の最大不透明度
 
 		//プレイヤーの直下に存在する地面のポリゴンを取得
 		HitResDim = MV1CollCheck_Capsule(ModelHandle, -1, transform_.pos, VAdd(transform_.pos, VGet(0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f)), PLAYER_SHADOW_SIZE);
@@ -102,21 +109,25 @@ void ActorBase::DrawShadow(void)
 			Vertex[1].dif.a = 0;
 			Vertex[2].dif.a = 0;
 			if (HitRes->Position[0].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[0].dif.a = 128 * (1.0f - fabs(HitRes->Position[0].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT);
+				Vertex[0].dif.a = static_cast<BYTE>(
+					maxAlpha * (1.0f - fabs(HitRes->Position[0].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
 
 			if (HitRes->Position[1].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[1].dif.a = 128 * (1.0f - fabs(HitRes->Position[1].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT);
+				Vertex[1].dif.a = static_cast<BYTE>(
+					maxAlpha * (1.0f - fabs(HitRes->Position[1].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
 
 			if (HitRes->Position[2].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[2].dif.a = 128 * (1.0f - fabs(HitRes->Position[2].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT);
+				Vertex[2].dif.a = static_cast<BYTE>(
+					maxAlpha * (1.0f - fabs(HitRes->Position[2].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT));
 
 			//ＵＶ値は地面ポリゴンとプレイヤーの相対座標から割り出す
-			Vertex[0].u = (HitRes->Position[0].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[0].v = (HitRes->Position[0].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].u = (HitRes->Position[1].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].v = (HitRes->Position[1].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].u = (HitRes->Position[2].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].v = (HitRes->Position[2].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			const float uvOffset = 0.5f;	//UV値の中心をプレイヤーの位置にするためのオフセット
+			Vertex[0].u = (HitRes->Position[0].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + uvOffset;
+			Vertex[0].v = (HitRes->Position[0].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + uvOffset;
+			Vertex[1].u = (HitRes->Position[1].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + uvOffset;
+			Vertex[1].v = (HitRes->Position[1].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + uvOffset;
+			Vertex[2].u = (HitRes->Position[2].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + uvOffset;
+			Vertex[2].v = (HitRes->Position[2].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + uvOffset;
 
 			//影ポリゴンを描画
 			DrawPolygon3D(Vertex, 1, imgShadow_, TRUE);

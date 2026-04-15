@@ -24,6 +24,7 @@ public:
 
 #endif // _RELEASE
 
+	//スクリーン最大サイズ
 	static constexpr int SCREEN_MAX_SIZE_X = 1920;
 	static constexpr int SCREEN_MAX_SIZE_Y = 1080;
 

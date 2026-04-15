@@ -40,7 +40,10 @@ void Application::Init(void)
 
 	//ウィンドウサイズ
 	windowSize_ = { SCREEN_SIZE_X ,SCREEN_SIZE_Y };
-	SetGraphMode(windowSize_.width_, windowSize_.height_, 32);
+	const int colorBitDepth = 32;	//色深度
+	SetGraphMode(windowSize_.width_, windowSize_.height_, colorBitDepth);
+
+	//Debugビルドのときはウィンドウモード、Releaseビルドのときはフルスクリーンにする
 #ifdef _DEBUG
 	ChangeWindowMode(true);
 #endif // _DEBUG
@@ -74,12 +77,10 @@ void Application::Init(void)
 
 	//シーン管理初期化
 	SceneManager::CreateInstance();
-
 }
 
 void Application::Run(void)
 {
-
 	auto& inputManager = InputManager::GetInstance();
 	auto& sceneManager = SceneManager::GetInstance();
 	auto& imGuiWrapper = ImGuiWrapper::GetInstance();

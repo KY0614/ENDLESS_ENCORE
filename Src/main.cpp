@@ -5,7 +5,6 @@
 #include "Application.h"
 
 #ifdef _DEBUG
-#define malloc(X) _malloc_dbg(X,_NORMAL_BLOCK,__FILE__,__LINE__)
 #define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
 

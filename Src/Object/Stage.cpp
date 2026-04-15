@@ -195,8 +195,8 @@ void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 	);
 	mistWallMaterial_->SetTextureAddress(ModelMaterial::TEXADDRESS::WRAP);
 	//UVスケール
-	const VECTOR uvScale = { 4.0f,4.0f,4.0f };
-	mistWallMaterial_->AddConstBufVS({ uvScale.x,uvScale.y,uvScale.z,uvScale.z });
+	const float uvScale = 4.0f;
+	mistWallMaterial_->AddConstBufVS({ uvScale,uvScale,0.0f,0.0f });
 	mistWallMaterial_->AddConstBufVS({ mistScrollTime_,mistScrollTime_,mistScrollTime_,mistScrollTime_ });
 
 	//ピクセルシェーダーの定数バッファ設定

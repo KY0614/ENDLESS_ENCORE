@@ -30,7 +30,7 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     float diffNoiseLine = abs(PSInput.uv.x - g_line_uv_x);
     if (diffNoiseLine < 0.001f)
     {
-        dstCol = (0.0f, 0.0f, 0.0f);
+        dstCol.rgb = float3(0.0f, 0.0f, 0.0f);
     }
     
     //シミノイズ-----------------------------------------------------------
@@ -55,7 +55,7 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     sepia.g = dot(dstCol.rgb, float3(0.349f, 0.686f, 0.168f));
     sepia.b = dot(dstCol.rgb, float3(0.272f, 0.534f, 0.131f));
     //白の強さ加算
-    sepia.rgb += (g_sepia_white_pow, g_sepia_white_pow, g_sepia_white_pow);
+    sepia.rgb += float3(g_sepia_white_pow, g_sepia_white_pow, g_sepia_white_pow);
     dstCol.rgb = lerp(dstCol.rgb, sepia, 1.0f);
     
     //フィルムのパーフォレーション（送り穴、画面端の白黒のやつ）----------

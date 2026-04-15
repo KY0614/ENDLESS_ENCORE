@@ -1,9 +1,8 @@
 #include <DxLib.h>
-#include<EffekseerForDXLib.h>
+#include <EffekseerForDXLib.h>
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Common/Fader.h"
-#include "../Common/Easing.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/Camera.h"
@@ -432,31 +431,32 @@ void GameScene::UpdateEncount(void)
 		skipTimer_ = 0.0f;
 	}
 
-	//エンカウントシーンが終了し、
-	// フェードアウトが完了したらバトル状態へ遷移
+	//エンカウントシーンが終了もしくはスキップ時間を満たしていて、
+	//かつフェード処理が完了している場合の処理
 	if ((encountScene_->IsFinished() || skipTimer_ >= SKIP_TIME) &&
-		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
-		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_OUT)
+		SceneManager::GetInstance().GetFader().lock()->IsEnd())
 	{
-		enemy_->ChangeState(Enemy::STATE::WAIT);
-		player_->ChangeState(Player::STATE::WAIT);
-		//カメラ
-		mainCamera->SetFollow(&player_->GetTransform());
-		mainCamera->SetTarget(&enemy_->GetTransform());
-		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
-		SceneManager::GetInstance().ResetFog();
-		SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
+		//フェードアウトが完了したらバトル状態へ遷移
+		if(SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_OUT)
+		{
+			//プレイヤーと敵を待機状態にする
+			enemy_->ChangeState(Enemy::STATE::WAIT);
+			player_->ChangeState(Player::STATE::WAIT);
+			//カメラをプレイヤーに追従させる
+			mainCamera->SetFollow(&player_->GetTransform());
+			mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+			//フェードイン開始
+			SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
+		}
+		//エンカウントシーンが終了したらバトル状態へ遷移
+		//(フェードインが終わった後に遷移)	
+		if(SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_IN)
+		{
+			ChangeState(STATE::BATTLE);
+			return;
+		}
 	}
 
-	//エンカウントシーンが終了したらバトル状態へ遷移
-	//(フェードインが終わった後に遷移)
-	if ((encountScene_->IsFinished() || skipTimer_ >= SKIP_TIME) &&
-		SceneManager::GetInstance().GetFader().lock()->IsEnd() &&
-		SceneManager::GetInstance().GetFader().lock()->GetState() == Fader::STATE::FADE_IN)
-	{
-		ChangeState(STATE::BATTLE);
-		return;
-	}
 #ifdef _DEBUG
 
 	//スローモーション処理
@@ -464,21 +464,22 @@ void GameScene::UpdateEncount(void)
 	//	slowMotionFrameCount_++ > 60.0f)slowMotionFrameCount_ = 0.0f;
 
 	//スローモーション中でなければ通常更新
-	if (encountScene_->IsSlowMotion())
-	{
-		slowMotionFrame_ *= 1.02f; // 徐々に遅くする
-		if (slowMotionFrame_ > 60.0f) // 完全停止
-		{
-			//終了処理など
-			return;
-		}
-		slowMotionFrameCount_++;
-		if (slowMotionFrame_ < 1.0f ||
-			static_cast<int>(slowMotionFrameCount_) %
-			static_cast<int>(slowMotionFrame_) != 0)
-			return; // このフレームは処理しない
-	}
+	//if (encountScene_->IsSlowMotion())
+	//{
+	//	slowMotionFrame_ *= 1.02f; // 徐々に遅くする
+	//	if (slowMotionFrame_ > 60.0f) // 完全停止
+	//	{
+	//		//終了処理など
+	//		return;
+	//	}
+	//	slowMotionFrameCount_++;
+	//	if (slowMotionFrame_ < 1.0f ||
+	//		static_cast<int>(slowMotionFrameCount_) %
+	//		static_cast<int>(slowMotionFrame_) != 0)
+	//		return; // このフレームは処理しない
+	//}
 #endif // _DEBUG
+
 	//エンカウントシーン更新
 	encountScene_->Update();
 	//各オブジェクト更新
@@ -489,13 +490,14 @@ void GameScene::UpdateEncount(void)
 
 void GameScene::DrawEncount(void)
 {
+	//ステージ描画
 	stage_->Draw();
-
+	//プレイヤー描画
 	player_->Draw();
+	//敵描画
 	enemy_->Draw();
 
-	encountScene_->Draw();
-
+	//スキップUI描画
 	if (!isSkip_)return;
 	SkipBarDraw();
 }
@@ -511,9 +513,9 @@ void GameScene::UpdateBattle(void)
 	}
 
 	//各オブジェクト更新
-	player_->Update();
-	enemy_->Update();
-	stage_->Update();
+	player_->Update();	//プレイヤー
+	enemy_->Update();	//敵
+	stage_->Update();	//ステージ
 
 	//バックスタブ判定
 	Backstab();
@@ -528,10 +530,13 @@ void GameScene::DrawBattle(void)
 	//敵描画
 	enemy_->Draw();
 
+
+	//敵が死んでいたらVictory描画
 	if(enemy_->GetIsDead())
 	{
 		player_->DrawVictory();
 	}
+
 	//YouDied描画
 	player_->DrawDead();
 
@@ -546,6 +551,7 @@ void GameScene::DrawBattle(void)
 
 void GameScene::SkipBarDraw(void)
 {
+	//スキップの進行度を0.0f～1.0fで表す
 	const float progressRatio = skipTimer_ / SKIP_TIME;
 
 	//画面座標
@@ -582,6 +588,7 @@ void GameScene::SkipBarDraw(void)
 		0xFFFFFF,
 		fontHandle_);
 
+	//ゲージ描画
 	skipBarUI_->SetBarSize({ currentGaugeWidth, GAUGE_H });
 	skipBarUI_->SetBarMaxWidth(GAUGE_W);
 	skipBarUI_->Draw();
@@ -592,12 +599,14 @@ void GameScene::UpdateImGui(void)
 	ImGui::Text("GameScene");
 	ImGui::Text("slowFrameCnt : %d", slowMotionFrameCount_);
 	ImGui::Text("slowMotionFrame : %.2f", slowMotionFrame_);
-
+	//状態遷移ボタン
+	//探索
 	if (ImGui::Button("Explore"))
 	{
 		InitStateExplore();
 		ChangeState(STATE::EXPLORE);
 	}
+	//エンカウント演出
 	if (ImGui::Button("Encount"))
 	{
 		enemy_->ChangeState(Enemy::STATE::NONE);

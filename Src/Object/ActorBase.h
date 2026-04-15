@@ -28,7 +28,7 @@ public:
 	/// </summary>
 	/// <param name="frameName">フレームの名前</param>
 	/// <returns>フレームの座標</returns>
-	const VECTOR& GetFramePos(const std::wstring& frameName) const;
+	const VECTOR GetFramePos(const std::wstring& frameName) const;
 
 	/// <summary>
 	/// 衝突判定に用いられるコライダーを追加する

@@ -150,6 +150,15 @@ bool InputManager::IsTrgMouseRight(void) const
 
 InputManager::InputManager(void)
 {
+	infoEmpty_ = {};
+	joyXInState_ = {};
+	mouseInfoEmpty_ = {};
+	padInfos_[0] = {};
+	padInfos_[1] = {};
+	padInfos_[2] = {};
+	padInfos_[3] = {};
+	padInfos_[4] = {};
+	joyDInState_ = {};
 	mouseInput_ = -1;
 }
 

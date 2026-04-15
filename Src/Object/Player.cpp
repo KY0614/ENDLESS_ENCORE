@@ -233,10 +233,10 @@ void Player::DrawBarUI(void)
 
 void Player::DrawDead(void)
 {
-	//デバッグ用死亡表記
+	//HPが0以下でアニメーションが終了している場合、死亡表記を描画
 	if (hp_ <= 0.0f && animationController_->IsEnd())
 	{
-		//デバッグ用死亡表記
+		//YOU DIEDの画像を描画
 		DrawResultImage(diedImg_);
 	}
 }

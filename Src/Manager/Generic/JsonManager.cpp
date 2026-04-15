@@ -74,7 +74,6 @@ const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const s
 	if (!jsonData.contains(key) || !jsonData[key].is_array() || jsonData[key].size() < arraySize)
 	{
 		//存在しなかったりしたらデフォルト値を返す
-		assert(L"%s のフォーマットが不正です。\n", key.c_str());
 		return VGet(0.0f, 0.0f, 0.0f);
 	}
 	//配列の取得

@@ -39,8 +39,8 @@ public:
 
 protected:
     //UI画像のリソースID
-	ResourceManager::SRC uiSrc_; 
-	ResourceManager::SRC uiBackSrc_; 
+	ResourceManager::SRC uiSrc_;        //メイン画像
+	ResourceManager::SRC uiBackSrc_;    //背景画像
 
     //UI画像ハンドル
 	int uiImg_;     //メイン画像

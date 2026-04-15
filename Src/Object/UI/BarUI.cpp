@@ -1,8 +1,15 @@
 #include "BarUI.h"
 
-BarUI::BarUI(void) :
-	barUiInfo_()
+BarUI::BarUI(void)
 {
+	barUiInfo_ = {};
+	barMaxWidth_ = 0;
+
+	//バーUI背景画像のリソースID
+	barUIFrameImg_ = -1;
+
+	parryBarImg_ = -1;
+	parryCDBarImg_ = -1;
 }
 
 BarUI::~BarUI(void)
@@ -11,9 +18,13 @@ BarUI::~BarUI(void)
 
 void BarUI::Init(void)
 {
+	//UI画像のハンドル取得
 	uiImg_ = ResourceManager::GetInstance().Load(uiSrc_).handleId_;
+	//UI背景画像のハンドル取得
 	uiBackImg_ = ResourceManager::GetInstance().Load(uiBackSrc_).handleId_;
+	//UIフレーム画像のハンドル取得
 	barUIFrameImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PLAYER_HP_BAR_FRAME).handleId_;
+	
 	parryBarImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PLAYER_PARYY_BAR).handleId_;
 	parryCDBarImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PLAYER_PARYY_CD_BAR).handleId_;
 }
@@ -45,6 +56,7 @@ void BarUI::Draw(void)
 		uiBackImg_,
 		true
 	);
+
 	//バーの描画
 	DrawExtendGraph(
 		barUiInfo_.pos_.x, barUiInfo_.pos_.y,
@@ -53,7 +65,6 @@ void BarUI::Draw(void)
 		uiImg_,
 		true
 	);
-
 }
 
 void BarUI::DrawParry(void)

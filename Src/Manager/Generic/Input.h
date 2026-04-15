@@ -9,7 +9,8 @@
 /// <summary>
 /// 周辺機器種別
 /// </summary>
-enum class PeripheralType {
+enum class PeripheralType 
+{
 	KEYBOARD,	//キーボード
 	GAMEPAD,	//ゲームパッド
 	MOUSE,		//マウス
@@ -20,7 +21,8 @@ enum class PeripheralType {
 /// <summary>
 /// アナログ入力種別
 /// </summary>
-enum class AnalogInputType {
+enum class AnalogInputType 
+{
 	NONE,		//押してない
 	L_UP,		//左スティックの上
 	L_DOWN,		//左スティックの下
@@ -67,9 +69,10 @@ public:
 
 private:
 	/// <summary>
-		///	入力状態
-		/// </summary>
-	struct InputState {
+	///	入力状態
+	/// </summary>
+	struct InputState 
+	{
 		PeripheralType type;	//周辺機器種別
 		uint32_t code;			//入力コード(汎用)
 	};
