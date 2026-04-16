@@ -9,7 +9,7 @@ class Enemy;
 class Stage;
 class Tutorial;
 class EncountScene;
-class BarUI;
+class SkipBar;
 
 class GameScene : public SceneBase
 {
@@ -76,8 +76,8 @@ private:
 	std::shared_ptr<Tutorial> tutorial_;
 	//エンカウント演出
 	std::unique_ptr<EncountScene> encountScene_;
-	//UI
-	std::unique_ptr<BarUI> skipBarUI_;
+	//スキップバーUI
+	std::unique_ptr<SkipBar> skipBarUI_;
 
 	//演出スキップ用タイマー
 	float skipTimer_;

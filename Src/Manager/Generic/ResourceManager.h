@@ -19,26 +19,28 @@ public:
 		PUSH_SPACE,
 		FILM_NOISE,
 
+		//プレイヤー関連
 		PLAYER,
 		PLAYER_SHADOW,
 		PLAYER_HP_BAR,
-		HP_BACK_BAR,
-		PLAYER_HP_BAR_FRAME,
+		BAR_BACK,
+		BAR_FRAME,
 		PLAYER_PARYY_BAR,
 		PLAYER_PARYY_CD_BAR,
 		FOOT_SMOKE,
 		PARRY_EFKT,
 
+		//敵関連
 		FIRE_EFFECT,
 		CHARGE_EFFECT,
 		EXPLOSIVE_EFFECT,
 		COSMIC_EFFECT,
 		BLOOD_EFFECT,
-
 		ENEMY,
 		ENEMY_BULLET,
 		ENEMY_HP_BAR,
 
+		//演出関連
 		VICTORY,
 		YOU_DIED,
 
@@ -61,6 +63,9 @@ public:
 		FIRE_SE,		//火炎SE（火を噴く音）		
 		EXPLOSION_SE,	//爆発SE（ため攻撃用の音）
 		BACKSTAB_SE,	//致命攻撃SE(ぐさって音)
+
+		//フォント
+		TUTORIAL_FONT,
 	};
 
 	// 明示的にインステンスを生成する

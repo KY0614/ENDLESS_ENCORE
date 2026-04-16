@@ -60,13 +60,9 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     //ライトの色に影響力をかける
     pointLightCol.rgb = (pointLightCol.rgb * saturate(pointLightAtten));
     
-    //スポットライト---------------------------------------------------------
-
     float fogFactor = PSInput.fogFactor;
     float3 fogCol = g_fog_color.rgb;
     float3 rgb = (color.rgb * g_color.rgb * lihgt) + g_ambient_color.rgb + pointLightCol.rgb;
     float3 finalColor = lerp(fogCol, rgb, fogFactor);
     return float4(finalColor, color.a);
-    
-    
 }

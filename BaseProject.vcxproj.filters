@@ -192,13 +192,16 @@
     <ClCompile Include="Src\Object\UI\UIBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\UI\BarUI.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Object\Tutorial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\UI\HPBar.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\UI\ParryBar.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\UI\SkipBar.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -479,13 +482,16 @@
     <ClInclude Include="Src\Object\UI\UIBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\UI\BarUI.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Object\Tutorial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\UI\HPBar.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\UI\ParryBar.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\UI\SkipBar.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -507,5 +513,7 @@
     <FxCompile Include="Src\Shader\PostEffect\Vignette.hlsl" />
     <FxCompile Include="Src\Shader\PostEffect\FilmNoise.hlsl" />
     <FxCompile Include="Src\Shader\PostEffect\RetroTheater.hlsl" />
+    <FxCompile Include="Src\Shader\Model\EnemyRimLightVS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\EnemyRimLightPS.hlsl" />
   </ItemGroup>
 </Project>

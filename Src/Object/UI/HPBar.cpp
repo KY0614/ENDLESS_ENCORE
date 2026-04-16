@@ -4,8 +4,8 @@ HPBar::HPBar(const HPBarInfo hpBarInfo, const float& hp):
 	hpBarInfo_(hpBarInfo),
 	hp_(hp)
 {
-	barUIFrameImg_ = -1;	
-	uiBackImg_ = -1;
+	barFrameImg_ = -1;
+	barBackImg_ = -1;
 }
 
 HPBar::~HPBar(void)
@@ -35,7 +35,7 @@ void HPBar::Draw(void)
 		hpBarInfo_.pos_.x - frameOffset, hpBarInfo_.pos_.y - frameOffset,
 		hpBarInfo_.pos_.x + hpBarInfo_.size_.x + frameOffset,
 		hpBarInfo_.pos_.y + hpBarInfo_.size_.y + frameOffset,
-		barUIFrameImg_,
+		barFrameImg_,
 		true
 	);
 
@@ -44,7 +44,7 @@ void HPBar::Draw(void)
 		hpBarInfo_.pos_.x, hpBarInfo_.pos_.y,
 		hpBarInfo_.pos_.x + hpBarInfo_.size_.x,
 		hpBarInfo_.pos_.y + hpBarInfo_.size_.y,
-		uiBackImg_,
+		barBackImg_,
 		true
 	);
 	//HPの割合を計算
@@ -62,12 +62,10 @@ void HPBar::Draw(void)
 
 void HPBar::InitImage(void)
 {
-	//UI画像のハンドル取得
-	uiImg_ = ResourceManager::GetInstance().Load(uiSrc_).handleId_;
 	//UI背景画像のハンドル取得
-	uiBackImg_ = ResourceManager::GetInstance().Load(uiBackSrc_).handleId_;
+	barBackImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::BAR_BACK).handleId_;
 	//UIフレーム画像のハンドル取得
-	barUIFrameImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::PLAYER_HP_BAR_FRAME).handleId_;
+	barFrameImg_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::BAR_FRAME).handleId_;
 
 	//種類に応じた画像のハンドル取得
 	if(hpBarInfo_.type_ == TYPE::PLAYER)

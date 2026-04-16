@@ -17,8 +17,8 @@
 #include "Common/Geometry/Capsule.h"
 #include "Common/Geometry/Sphere.h"
 #include "Common/Collider.h"
-#include "UI/BarUI.h"
 #include "UI/HPBar.h"
+#include "UI/ParryBar.h"
 #include "Player.h"
 
 // 長いのでnamespaceの省略
@@ -76,6 +76,13 @@ namespace
 	const float WALK_SPEED_SLOW = 1.0f;
 	//パリィ音量
 	const int PARRY_SE_VOLUME = 70;	
+
+	//UIの座標
+	const Vector2 HP_BAR_POS = { 20, 20 };		//HPバーの位置
+	const Vector2 PARRY_BAR_POS = { 50, 50 };	//パリィバーの位置
+
+	//UIのサイズ
+	const Vector2 PARRY_BAR_SIZE = { 200, 20 };	//パリィバーのサイズ
 }
 
 Player::Player(void)
@@ -124,18 +131,16 @@ Player::Player(void)
 	stepDodge_ = 0.0f;
 	isParry_ = false;
 	stepWalk_ = 0.0f;
-	stringAlpha_ = 0;
+	resultImgAlpha_ = 0;
 	isActionEnd_ = false;
 	stepBackstab_ = 0.0f;
 	clothSE_ = false;
 	victoryImg_ = -1;
 	diedImg_ = -1;
-	fontHandle_ = -1;
 }
 
 Player::~Player(void)
 {
-	DeleteFontToHandle(fontHandle_);
 }
 
 void Player::Init(void)
@@ -145,13 +150,6 @@ void Player::Init(void)
 
 	//コライダーの初期化
 	colliders_.clear();
-
-	//パリィバーの初期化
-	parryCDBar_ = std::make_unique<BarUI>();
-	parryCDBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::HP_BACK_BAR);
-	parryCDBar_->Init();
-	const Vector2 parryCDBarPos = { 50, 50 };
-	parryCDBar_->SetBarPos(parryCDBarPos);
 
 	victoryImg_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::VICTORY).handleId_;
@@ -181,11 +179,6 @@ void Player::Init(void)
 	effectParryResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PARRY_EFKT).handleId_;
 
-	//画面比率に応じたフォントサイズ設定
-	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ
-	const int fontThick = 3;				//フォントの太さ
-	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
 	//初期状態
 	ChangeState(STATE::WAKE_UP);
 }
@@ -224,8 +217,8 @@ void Player::DrawBarUI(void)
 {
 	//HPバーの描画
 	hpBar_->Draw();
-	//パリィCDバー描画
-	DrawParryCD();
+	//パリィバー描画
+	parryBar_->Draw();
 }
 
 void Player::DrawDead(void)
@@ -255,8 +248,8 @@ void Player::DrawResultImage(const int img)
 	const int alphaSpeed = 5;
 	const int maxAlpha = 255;
 	const int maxInterval = 120;
-	stringAlpha_ = std::clamp(stringAlpha_, 0, maxAlpha);
-	if (stringAlpha_ >= maxAlpha)
+	resultImgAlpha_ = std::clamp(resultImgAlpha_, 0, maxAlpha);
+	if (resultImgAlpha_ >= maxAlpha)
 	{
 		if (++interval > maxInterval)
 		{
@@ -266,13 +259,13 @@ void Player::DrawResultImage(const int img)
 			return;
 		}
 	}
-	stringAlpha_ += alphaSpeed;	//透明度を増加させる
+	resultImgAlpha_ += alphaSpeed;	//透明度を増加させる
 	//透明度の上限設定
 	const int AlphaMax = 255;
-	if (stringAlpha_ > AlphaMax)stringAlpha_ = AlphaMax;
+	if (resultImgAlpha_ > AlphaMax)resultImgAlpha_ = AlphaMax;
 	const int fontSize = 64;
 	const int defaultFontSize = 16;
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, stringAlpha_);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, resultImgAlpha_);
 	SetFontSize(fontSize);
 	DrawRotaGraph(
 		Application::SCREEN_SIZE_X / 2,
@@ -425,16 +418,24 @@ void Player::InitAnimation(void)
 
 void Player::InitUI(void)
 {
+	//バーの大きさ（高さ）
+	const int barHeight = 20;
 	//HPバーの初期化
-	const Vector2 hpBarPos = { 20, 20 };
-	const int hpBarHeight = 20;
 	hpBar_ = std::make_unique<HPBar>(
 		HPBar::HPBarInfo{
 			HPBar::TYPE::PLAYER,
-			hpBarPos,
-			Vector2(static_cast<int>(maxHp_), hpBarHeight)
+			HP_BAR_POS,
+			Vector2(static_cast<int>(maxHp_), barHeight)
 		}, hp_);
 	hpBar_->Init();
+
+	//パリィバーの初期化
+	parryBar_ = std::make_unique<ParryBar>(
+		ParryBar::ParryBarInfo{
+			PARRY_BAR_POS,
+			PARRY_BAR_SIZE
+		}, stepParry_, PARRY_TIME);
+	parryBar_->Init();
 }
 
 void Player::StageWalkReady(void)
@@ -876,7 +877,7 @@ void Player::ProcessParry(void)
 	if (!isParry_)return;
 	//パリィ時間経過判定
 	stepParry_ += SceneManager::GetInstance().GetDeltaTime();
-	//パリィ時間を超えたらパリィ終了
+	//パリィクールタイム終了
 	if(stepParry_ > PARRY_TIME)
 	{
 		isParry_ = false;
@@ -1159,68 +1160,4 @@ void Player::EffectParryPosUpdate(void)
 		transform_.pos.x,
 		transform_.pos.y,
 		transform_.pos.z);
-}
-
-void Player::DrawParryCD(void)
-{
-	//パリィのクールダウン時間
-	const float progressRatio = stepParry_ / PARRY_TIME;
-
-	//画面座標
-	const int GAUGE_X = 50;  // ゲージの左上のX座標
-	const int GAUGE_Y = 50;  // ゲージの左上のY座標
-	const int GAUGE_W = 200; // ゲージの最大幅
-	const int GAUGE_H = 20;  // ゲージの高さ
-
-	//現在のクールダウンゲージの幅
-	const int currentGaugeWidth = (int)(GAUGE_W * progressRatio);
-
-	// ゲージの色
-	unsigned int bgColor = 0x333333; // 背景色（灰色）
-	unsigned int fgColor = 0x00FFFF; // 前景色（水色：パリィ可能）
-	unsigned int cdColor = 0xAA6600; // クールダウン中の色（オレンジ）
-
-	//テキストを少しずらす用の幅
-	const int textOffset = 10;
-	// クールダウン中の場合
-	if (stepParry_ > 0.0f)
-	{
-		//クールダウン中のテキストを描画
-		DrawFormatStringToHandle(
-			GAUGE_X + GAUGE_W + textOffset, GAUGE_Y,
-			cdColor, fontHandle_,
-			L"PARRY CD: %.1f",
-			PARRY_TIME - stepParry_);
-		// クールダウン中の色で現在の進行度を描画
-		// ゲージは左から右へ満たされていく (回復していく)
-		parryCDBar_->SetBarSize({ currentGaugeWidth, GAUGE_H });
-		parryCDBar_->SetBarMaxWidth(GAUGE_W);
-		parryCDBar_->DrawParryCD();
-	}
-	else // クールダウンが完了している場合
-	{
-		DrawStringToHandle(
-			GAUGE_X + GAUGE_W + textOffset, GAUGE_Y,
-			L"PARRY READY",
-			fgColor,
-			fontHandle_);
-		parryCDBar_->SetBarSize({ GAUGE_W, GAUGE_H });
-		parryCDBar_->SetBarMaxWidth(GAUGE_W);
-		parryCDBar_->DrawParry();
-	}
-}
-
-void Player::DrawHPBar(void)
-{
-	const int HP_BAR_X = 20;         // HPバーの左上X座標
-	const int HP_BAR_Y = 20;         // HPバーの左上Y座標
-	const int HP_BAR_WIDTH = static_cast<int>(maxHp_); // HPバーの最大幅
-	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
-	float hp = hp_ / maxHp_;
-	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-
-	//hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
-	//hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);
-	//hpBar_->Draw();
-
 }

@@ -6,8 +6,8 @@
 #include <DxLib.h>
 #include "ActorBase.h"
 
+class ParryBar;
 class HPBar;
-class BarUI;
 class AnimationController;
 class Collider;
 class Capsule;
@@ -188,7 +188,7 @@ public:
 private:
 	//UI
 	std::unique_ptr<HPBar> hpBar_;	//HPバー
-	std::unique_ptr<BarUI> parryCDBar_;	//パリィCDバー
+	std::unique_ptr<ParryBar> parryBar_;//パリィバー
 
 	//マテリアル・レンダラー
 	std::unique_ptr<ModelMaterial> material_;
@@ -275,7 +275,7 @@ private:
 	float stepParry_;
 
 	//結果表示用文字列のアルファ値
-	int stringAlpha_;
+	int resultImgAlpha_;
 
 	bool isActionEnd_;
 
@@ -285,9 +285,6 @@ private:
 	//結果表示用画像ハンドル
 	int victoryImg_;	//勝利画像
 	int diedImg_;		//敗北画像
-
-	//フォントハンドル
-	int fontHandle_;
 
 	/// <summary>
 	/// サウンド初期化
@@ -501,16 +498,4 @@ private:
 	/// </summary>
 	/// <param name=""></param>
 	void EffectParryPosUpdate(void);
-
-	/// <summary>
-	/// HPバーの描画
-	/// </summary>
-	void DrawHPBar(void);
-
-	/// <summary>
-	/// パリィのクールダウン描画
-	/// </summary>
-	/// <param name=""></param>
-	void DrawParryCD(void);
-
 };

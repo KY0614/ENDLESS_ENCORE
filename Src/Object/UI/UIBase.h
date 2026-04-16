@@ -32,12 +32,9 @@ public:
     void SetActive(const bool isActive) { isActive_ = isActive; }
 
 protected:
-    //UI画像のリソースID
-	ResourceManager::SRC uiSrc_;        //メイン画像
-	ResourceManager::SRC uiBackSrc_;    //背景画像
 
     //UI画像ハンドル
-	int uiImg_;     //メイン画像
+	int uiImg_;
 
 	//表示、非表示用のフラグ
     bool isActive_;

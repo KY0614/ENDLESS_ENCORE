@@ -37,6 +37,7 @@ public:
 	static const std::string PATH_SOUND;
 	static const std::string PATH_SCORE;
 	static const std::string PATH_JSON;
+	static const std::string PATH_FONT;
 	//-------------------------------------------
 
 	struct Size

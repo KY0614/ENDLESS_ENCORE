@@ -12,14 +12,14 @@
 #include "../Object/Enemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
-#include "../Object/UI/BarUI.h"
+#include "../Object/UI/SkipBar.h"
 #include "EncountScene.h"
 #include "GameScene.h"
 
 namespace
 {
 	//スキップ判定時間
-	const float SKIP_TIME = 2.0f; 
+	const float SKIP_TIME = 1.5f; 
 	//バトル中のZ位置制限
 	const float BATTLE_STAGE_Z = 938.0f;
 	//BGM音量
@@ -33,6 +33,12 @@ namespace
 	//スローモーション関連
 	const float SLOW_MOTION_SPEED = 0.1f; //スローモーションの速度
 	const float SLOW_MOTION_SPEED_ACCEL = 1.2f; //スローモーションの加速度
+
+	//UIの座標
+	const Vector2 SKIP_BAR_POS = { Application::SCREEN_SIZE_X - 200, Application::SCREEN_SIZE_Y - 120 };
+
+	//UIの大きさ
+	const Vector2 SKIP_BAR_SIZE = { 100, 20 };
 }
 
 GameScene::GameScene(void)
@@ -83,20 +89,16 @@ void GameScene::Init(void)
 	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
 	encountScene_->Init();
 
-	//画面座標
-	const int GAUGEX_OFFEST_X = 200; //ゲージのX座標オフセット
-	const int GAUGEX_OFFEST_Y = 120; //ゲージのY座標オフセット
-	const int GAUGE_X = Application::SCREEN_SIZE_X - GAUGEX_OFFEST_X;  // ゲージの左上のX座標
-	const int GAUGE_Y = Application::SCREEN_SIZE_Y - GAUGEX_OFFEST_Y;  // ゲージの左上のY座標
-	skipBarUI_ = std::make_unique<BarUI>();
-	skipBarUI_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::HP_BACK_BAR);
+	//スキップUI
+	skipBarUI_ = std::make_unique<SkipBar>(
+		SkipBar::SkipBarUIInfo{
+			SKIP_BAR_POS,	//位置
+			SKIP_BAR_SIZE,	//サイズ
+		},skipTimer_,SKIP_TIME );
 	skipBarUI_->Init();
-	skipBarUI_->SetBarPos({ GAUGE_X, GAUGE_Y });
-	skipBarUI_->SetActive(true);
 
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
-	mainCamera->SetTarget(&enemy_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	//コライダー登録
@@ -104,11 +106,8 @@ void GameScene::Init(void)
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 
-	//画面比率に応じたフォントサイズ設定
-	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ(画面比率に合わせる)
-	const int fontThick = 3;				//フォントの太さ
-	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
+	//フォントハンドルの取得
+	fontHandle_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::TUTORIAL_FONT).handleId_;
 
 	//初期状態設定
 	ChangeState(STATE::WAKE_UP);
@@ -589,8 +588,6 @@ void GameScene::SkipBarDraw(void)
 		fontHandle_);
 
 	//ゲージ描画
-	skipBarUI_->SetBarSize({ currentGaugeWidth, GAUGE_H });
-	skipBarUI_->SetBarMaxWidth(GAUGE_W);
 	skipBarUI_->Draw();
 }
 

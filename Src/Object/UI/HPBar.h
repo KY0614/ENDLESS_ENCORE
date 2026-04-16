@@ -47,12 +47,12 @@ private:
 	//HPバーの情報
 	HPBarInfo hpBarInfo_;
 
-	//HP
+	//HP(プレイヤーもしくは敵のHPを参照)
 	const float& hp_;
 
-	//バーUI背景画像
-	int barUIFrameImg_;	//HPバーのフレーム画像
-	int uiBackImg_;		//背景画像
+	//バー本体以外のUI画像
+	int barFrameImg_;		//バーのフレーム画像
+	int barBackImg_;		//バーの背景画像
 
 	/// <summary>
 	/// HPバーの画像の初期化

@@ -9,6 +9,8 @@ class AnimationController;
 class Sphere;
 class Player;
 class EnemyBullet;
+class ModelRenderer;
+class ModelMaterial;
 
 class Enemy : public ActorBase
 {
@@ -126,6 +128,10 @@ public:
 	void UpdateImGui(void);
 
 private:
+	//マテリアルとレンダー
+	std::unique_ptr<ModelMaterial> material_;
+	std::unique_ptr<ModelRenderer> renderer_;
+
 	//HPバー
 	std::unique_ptr<HPBar> hpBar_;
 
@@ -145,6 +151,7 @@ private:
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
 
+	//弾
 	std::vector<std::unique_ptr<EnemyBullet>> bullets_;
 
 	//近接攻撃用の当たり判定球
@@ -222,6 +229,11 @@ private:
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);
+
+	/// <summary>
+	/// マテリアルの初期化
+	/// </summary>
+	void InitMaterial(void);
 
 	/// <summary>
 	/// UI初期化

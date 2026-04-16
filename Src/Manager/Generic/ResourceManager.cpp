@@ -158,11 +158,11 @@ void ResourceManager::InitGame(void)
 
 	//プレイヤーHPバー背景
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarBack.png");
-	resourcesMap_.emplace(SRC::HP_BACK_BAR, std::move(res));
+	resourcesMap_.emplace(SRC::BAR_BACK, std::move(res));
 
 	//プレイヤーHPバーの額縁
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarFrame.png");
-	resourcesMap_.emplace(SRC::PLAYER_HP_BAR_FRAME, std::move(res));
+	resourcesMap_.emplace(SRC::BAR_FRAME, std::move(res));
 
 	//プレイヤーパリィバー
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/ParryBar.png");
@@ -251,6 +251,10 @@ void ResourceManager::InitGame(void)
 	//敵のチャージ
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "LossOfBlood.efkefc");
 	resourcesMap_.emplace(SRC::BLOOD_EFFECT, std::move(res));
+
+	//フォント-------------------------------------------------------------------------
+	res = std::make_unique<RES>(RES_T::FONT, "しねきゃぷしょん");
+	resourcesMap_.emplace(SRC::TUTORIAL_FONT, std::move(res));
 }
 
 void ResourceManager::InitPause(void)

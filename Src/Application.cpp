@@ -16,6 +16,7 @@ const std::string Application::PATH_SHADER = "Data/Shader/";
 const std::string Application::PATH_SOUND = "Data/Sound/";
 const std::string Application::PATH_SCORE = "Data/Score/";
 const std::string Application::PATH_JSON = "Data/Json/";
+const std::string Application::PATH_FONT = "Data/Font/";
 
 void Application::CreateInstance(void)
 {
@@ -62,6 +63,7 @@ void Application::Init(void)
 		isInitFail_ = true;
 		return;
 	}
+	//ƒtƒHƒ“ƒg‚Ì’Ç‰Á
 	AddFontResourceExA("Data/Font/cinecaption226.ttf", FR_PRIVATE, NULL);
 	ImGuiWrapper::CreateInstance();
 

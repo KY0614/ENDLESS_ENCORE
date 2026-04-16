@@ -3,7 +3,10 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Utility/CommonUtility.h"
+#include "../Renderer/ModelRenderer.h"
+#include "../Renderer/ModelMaterial.h"
 #include "../Manager/GameSystem/SoundManager.h"
+#include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
@@ -147,6 +150,9 @@ void Enemy::Init(void)
 	//アニメーションの初期化
 	InitAnimation();
 
+	//マテリアルの初期化
+	InitMaterial();
+
 	//UIの初期化
 	InitUI();
 
@@ -178,6 +184,21 @@ void Enemy::Update(void)
 		ChangeState(STATE::DEAD);
 	}
 
+	//マテリアルの定数バッファ更新
+	//カメラ座標更新
+	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->SetConstBufVS(0, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+	//フォグ座標更新
+	float fogStart, fogEnd = 0.0f;
+	GetFogStartEnd(&fogStart, &fogEnd);
+	material_->SetConstBufVS(1, { fogStart,fogEnd,0.0f,0.0f });
+	//フォグの色
+	int fogColorR, fogColorG, fogColorB;
+	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
+	material_->SetConstBufPS(3, { 0.0f,0.0f,0.0f,0.0f });
+	//カメラの位置
+	material_->SetConstBufPS(4, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -191,7 +212,8 @@ void Enemy::Draw(void)
 	if (!isEncount_)return;
 
 	//モデルの描画
-	MV1DrawModel(transform_.modelId);
+	//MV1DrawModel(transform_.modelId);
+	renderer_->Draw();
 
 	for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
@@ -267,6 +289,7 @@ void Enemy::Init3DModel(void)
 	const json& paramData = data[JsonManager::KEY_PARAMETER];
 	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
 	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
+
 }
 
 void Enemy::InitCollider(void)
@@ -339,6 +362,48 @@ void Enemy::InitAnimation(void)
 		animSpeed);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
+}
+
+void Enemy::InitMaterial(void)
+{
+	//シェーダー毎の定数バッファ数
+	const int VS_CONST_BUF_NUM = 2;
+	const int PS_CONST_BUF_NUM = 5;
+	//モデル描画用
+	material_ = std::make_unique<ModelMaterial>(
+		"EnemyRimLightVS.cso", VS_CONST_BUF_NUM,
+		"EnemyRimLightPS.cso", PS_CONST_BUF_NUM
+	);
+	//頂点シェーダーの定数バッファ設定
+	//カメラ座標
+	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->AddConstBufVS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+
+	//フォグの開始距離と終了距離
+	float fogStart, fogEnd = 0.0f;
+	GetFogStartEnd(&fogStart, &fogEnd);
+	material_->AddConstBufVS({ fogStart,fogEnd,0.0f,0.0f });
+
+	//ピクセルシェーダーの定数バッファ設定
+	//モデルカラー
+	const FLOAT4 modelColor = { 1.0f,1.0f,1.0f,1.0f };
+	material_->AddConstBufPS(modelColor);
+	//ライトの方向
+	VECTOR lightDir = GetLightDirection();
+	material_->AddConstBufPS({ lightDir.x,lightDir.y,lightDir.z,0.0f });
+
+	//環境光
+	float ambient = 0.0f;
+	material_->AddConstBufPS({ ambient,ambient,ambient,ambient });
+
+	//フォグの色
+	const FLOAT4 fogColor = { 0.1f,0.1f,0.1f,1.0f };
+	material_->AddConstBufPS(fogColor);
+
+	//カメラの位置
+	material_->AddConstBufPS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+
+	renderer_ = std::make_unique<ModelRenderer>(transform_.modelId, *material_);
 }
 
 void Enemy::InitUI(void)

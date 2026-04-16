@@ -3,6 +3,7 @@
 #include "../Utility/StringUtility.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/SceneManager.h"
+#include "../Manager/Generic/ResourceManager.h"
 #include "Tutorial.h"
 
 Tutorial::Tutorial(const TutorialStep& firstStep)
@@ -32,11 +33,8 @@ void Tutorial::Init(void)
 {
 	//最初の表示ガイドを設定
 	viewGuide_ = tutorialStep_.front().keyGuide_;
-	//フォント作成
-	float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
-	const int fontSize = 32 * static_cast<int>(screenAspect);	//フォントサイズ
-	const int fontThick = 3;				//フォントの太さ
-	fontHandle_ = CreateFontToHandle(L"しねきゃぷしょん", fontSize, fontThick, DX_FONTTYPE_ANTIALIASING);
+	//フォントハンドルの取得
+	fontHandle_ = ResourceManager::GetInstance().Load(ResourceManager::SRC::TUTORIAL_FONT).handleId_;
 	//最初の状態へ変更
 	ChangeState(tutorialStep_.front().state_);
 }

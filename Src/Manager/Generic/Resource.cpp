@@ -1,6 +1,7 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "../../Utility/StringUtility.h"
+#include "SceneManager.h"
 #include "Resource.h"
 
 Resource::Resource(void)
@@ -82,6 +83,14 @@ void Resource::Load(void)
 	case Resource::TYPE::SOUND:
 		//サウンド
 		handleId_ = LoadSoundMem(StringUtility::StringToWstring(path_).c_str());
+		break;
+
+	case Resource::TYPE::FONT:
+		//フォントは画面の比率に合わせてサイズを変える
+		const float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
+		const int fontSize = FONT_SIZE * static_cast<int>(screenAspect);
+		//フォント
+		handleId_ = CreateFontToHandle(StringUtility::StringToWstring(path_).c_str(), fontSize, FONT_THICK, DX_FONTTYPE_ANTIALIASING);
 		break;
 	}
 	
