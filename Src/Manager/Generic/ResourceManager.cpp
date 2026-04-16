@@ -129,7 +129,7 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::THEATER, std::move(res));
 
 	//霧の壁
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Mist/MistWall.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/MistWall/MistWall.mv1");
 	resourcesMap_.emplace(SRC::MIST_WALL, std::move(res));
 
 	//ノイズ用画像
@@ -158,7 +158,7 @@ void ResourceManager::InitGame(void)
 
 	//プレイヤーHPバー背景
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarBack.png");
-	resourcesMap_.emplace(SRC::PLAYER_HP_BACK_BAR, std::move(res));
+	resourcesMap_.emplace(SRC::HP_BACK_BAR, std::move(res));
 
 	//プレイヤーHPバーの額縁
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarFrame.png");

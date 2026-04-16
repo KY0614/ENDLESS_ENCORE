@@ -4,7 +4,7 @@
 #include "../Libs/nlohmann/json.hpp"
 #include "ActorBase.h"
 
-class BarUI;
+class HPBar;
 class AnimationController;
 class Sphere;
 class Player;
@@ -127,7 +127,8 @@ public:
 
 private:
 	//HPバー
-	std::unique_ptr<BarUI> hpBar_;	
+	std::unique_ptr<HPBar> hpBar_;
+
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 
@@ -221,6 +222,12 @@ private:
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);
+
+	/// <summary>
+	/// UI初期化
+	/// </summary>
+	/// <param name=""></param>
+	void InitUI(void);
 
 	/// <summary>
 	/// HPを設定
@@ -480,13 +487,6 @@ private:
 	/// </summary>
 	/// <param name=""></param>
 	void EffectChargeAtk(void);
-
-	///UI--------------------------------------------------------
-
-	/// <summary>
-	/// HPバーの描画
-	/// </summary>
-	void DrawHPBar(void);
 
 	//--------------------------------------------------------
 

@@ -5,6 +5,14 @@
 class BarUI : public UIBase
 {
 public:
+	//バーUIの種類
+	enum class TYPE
+	{
+		HP,			//HP
+		PARRY,		//パリィ
+		PARRY_CD	//パリィクールダウン
+	};
+
 	//バーUI情報構造体
 	struct BarUIInfo
 	{
@@ -12,11 +20,7 @@ public:
 		Vector2 size_;	//サイズ	
 	};
 
-	/// <summary>
-	/// コンストラクタ
-	/// </summary>
-	/// <param name="uiSrc">ui画像のリソースID</param>
-	/// <param name="uiBackSrc">バック画像のリソースID</param>
+	//コンストラクタ
 	BarUI(void);
 	//デストラクタ
 	~BarUI(void);
@@ -68,6 +72,7 @@ private:
 
 	//バーUI背景画像のリソースID
 	int barUIFrameImg_;
+	int uiBackImg_; //背景画像
 
 	int parryBarImg_;
 	int parryCDBarImg_;

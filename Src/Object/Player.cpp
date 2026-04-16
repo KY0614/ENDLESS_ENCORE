@@ -18,6 +18,7 @@
 #include "Common/Geometry/Sphere.h"
 #include "Common/Collider.h"
 #include "UI/BarUI.h"
+#include "UI/HPBar.h"
 #include "Player.h"
 
 // 長いのでnamespaceの省略
@@ -142,22 +143,15 @@ void Player::Init(void)
 	//サウンドの初期化
 	InitSound();
 
+	//コライダーの初期化
 	colliders_.clear();
 
-	//HPバーの初期化
-	hpBar_ = std::make_unique<BarUI>();
-	hpBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_HP_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
-	hpBar_->Init();
-	const Vector2 hpBarPos = { 20, 20 };
-	hpBar_->SetBarPos(hpBarPos);
-	hpBar_->SetActive(true);
 	//パリィバーの初期化
 	parryCDBar_ = std::make_unique<BarUI>();
-	parryCDBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
+	parryCDBar_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::HP_BACK_BAR);
 	parryCDBar_->Init();
 	const Vector2 parryCDBarPos = { 50, 50 };
 	parryCDBar_->SetBarPos(parryCDBarPos);
-	parryCDBar_->SetActive(true);
 
 	victoryImg_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::VICTORY).handleId_;
@@ -172,6 +166,9 @@ void Player::Init(void)
 
 	//アニメーションの設定
 	InitAnimation();
+
+	//UIの初期化
+	InitUI();
 
 	//足煙エフェクト
 	effectSmokeResId_ = ResourceManager::GetInstance().Load(
@@ -226,7 +223,7 @@ void Player::Draw(void)
 void Player::DrawBarUI(void)
 {
 	//HPバーの描画
-	DrawHPBar();
+	hpBar_->Draw();
 	//パリィCDバー描画
 	DrawParryCD();
 }
@@ -424,6 +421,20 @@ void Player::InitAnimation(void)
 	//死亡
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
 		animSpeed);
+}
+
+void Player::InitUI(void)
+{
+	//HPバーの初期化
+	const Vector2 hpBarPos = { 20, 20 };
+	const int hpBarHeight = 20;
+	hpBar_ = std::make_unique<HPBar>(
+		HPBar::HPBarInfo{
+			HPBar::TYPE::PLAYER,
+			hpBarPos,
+			Vector2(static_cast<int>(maxHp_), hpBarHeight)
+		}, hp_);
+	hpBar_->Init();
 }
 
 void Player::StageWalkReady(void)
@@ -1207,9 +1218,9 @@ void Player::DrawHPBar(void)
 	const int HP_BAR_HEIGHT = 20;    // HPバーの高さ
 	float hp = hp_ / maxHp_;
 	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	int hpBarWidth = static_cast<int>(480 * hp);
 
-	hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
-	hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);
-	hpBar_->Draw();
+	//hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
+	//hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);
+	//hpBar_->Draw();
+
 }

@@ -11,7 +11,7 @@
 #include "Common/AnimationController.h"
 #include "Common/Geometry/Capsule.h"
 #include "Common/Geometry/Sphere.h"
-#include "UI/BarUI.h"
+#include "UI/HPBar.h"
 #include "Player.h"
 #include "EnemyBullet.h"
 #include "Enemy.h"
@@ -147,6 +147,9 @@ void Enemy::Init(void)
 	//アニメーションの初期化
 	InitAnimation();
 
+	//UIの初期化
+	InitUI();
+
 	//火のエフェクトのリソース読み込み
 	effectChargeResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::CHARGE_EFFECT).handleId_;
@@ -154,17 +157,7 @@ void Enemy::Init(void)
 	effectChargeAtkResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::EXPLOSIVE_EFFECT).handleId_;
 
-	hpBar_ = std::make_unique<BarUI>();
-	hpBar_->SetBarUISrc(ResourceManager::SRC::ENEMY_HP_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
-	hpBar_->Init();
-	const int HP_BAR_WIDTH = static_cast<int>(maxHp_);    // HPバーの最大幅
-	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
-	float hp = hp_ / maxHp_;
-	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-	const int posX = Application::SCREEN_SIZE_X / 2 - HP_BAR_WIDTH / 2;
-	const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
-	hpBar_->SetBarPos({ posX, posY });
-	hpBar_->SetActive(true);
+
 
 	//初期の状態を設定
 	ChangeState(STATE::NONE);
@@ -212,7 +205,7 @@ void Enemy::Draw(void)
 void Enemy::DrawBarUI(void)
 {
 	//HPバー描画
-	DrawHPBar();
+	hpBar_->Draw();
 }
 
 void Enemy::ChangeState(const STATE& state)
@@ -346,6 +339,24 @@ void Enemy::InitAnimation(void)
 		animSpeed);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
+}
+
+void Enemy::InitUI(void)
+{
+	//HPバーの高さ
+	const int HP_BAR_HEIGHT = 30;		
+	const int posX = Application::SCREEN_SIZE_X / 2 - static_cast<int>(maxHp_) / 2;
+	//const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
+	//画面を10分割したうちの9/10の位置
+	const float heightRatio = 0.9f;
+	const int posY = static_cast<int>(Application::SCREEN_SIZE_Y * heightRatio);
+	hpBar_ = std::make_unique<HPBar>(
+		HPBar::HPBarInfo{
+			HPBar::TYPE::ENEMY,
+			{posX,posY},
+			Vector2(static_cast<int>(maxHp_), HP_BAR_HEIGHT)
+		}, hp_);
+	hpBar_->Init();
 }
 
 void Enemy::ChangeStateNone(void)
@@ -1473,16 +1484,4 @@ const json Enemy::GetJsonData(void)const
 void Enemy::UpdateImGui(void)
 {
 	ImGui::Text("isDown_: %d", isDown_);
-}
-
-void Enemy::DrawHPBar(void)
-{
-	const int HP_BAR_WIDTH = static_cast<int>(maxHp_);    // HPバーの最大幅
-	const int HP_BAR_HEIGHT = 30;		// HPバーの高さ
-	float hp = hp_ / maxHp_;
-	int barWidth = static_cast<int>(HP_BAR_WIDTH * hp);
-
-	hpBar_->SetBarSize({ barWidth, HP_BAR_HEIGHT });
-	hpBar_->SetBarMaxWidth(HP_BAR_WIDTH);
-	hpBar_->Draw();
 }

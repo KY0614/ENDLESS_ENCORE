@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\UI\HPBar.cpp" />
     <ClCompile Include="Src\Object\UI\BarUI.cpp" />
     <ClCompile Include="Src\Object\UI\UIBase.cpp" />
     <ClCompile Include="Src\Scene\EncountScene.cpp" />
@@ -68,6 +69,7 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\UI\HPBar.h" />
     <ClInclude Include="Src\Object\UI\BarUI.h" />
     <ClInclude Include="Src\Object\UI\UIBase.h" />
     <ClInclude Include="Src\Scene\EncountScene.h" />

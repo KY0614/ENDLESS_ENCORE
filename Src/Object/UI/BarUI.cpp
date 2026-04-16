@@ -4,10 +4,7 @@ BarUI::BarUI(void)
 {
 	barUiInfo_ = {};
 	barMaxWidth_ = 0;
-
-	//バーUI背景画像のリソースID
 	barUIFrameImg_ = -1;
-
 	parryBarImg_ = -1;
 	parryCDBarImg_ = -1;
 }
@@ -18,6 +15,8 @@ BarUI::~BarUI(void)
 
 void BarUI::Init(void)
 {
+	//初期状態は表示
+	isActive_ = true;
 	//UI画像のハンドル取得
 	uiImg_ = ResourceManager::GetInstance().Load(uiSrc_).handleId_;
 	//UI背景画像のハンドル取得

@@ -159,7 +159,8 @@ void TitleScene::Draw(void)
 	//ロゴ画像の大きさ
 	float logoScale = 1.5f;
 	//ロゴのY座標(画面を10分割したうちの4/10の位置)
-	int logoPosY = (Application::SCREEN_SIZE_Y / 10) * 4;
+	float heightRatio = 0.4f;
+	int logoPosY = static_cast<int>(Application::SCREEN_SIZE_Y * heightRatio);
 	//タイトルロゴ描画
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
 		logoPosY,
@@ -169,7 +170,8 @@ void TitleScene::Draw(void)
 	//点滅させるためのアルファ値設定
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, pushSpaceImgAlpha_);
 	//ロゴのY座標(画面を10分割したうちの7/10の位置)
-	logoPosY = (Application::SCREEN_SIZE_Y / 10) * 7;
+	heightRatio = 0.7f;
+	logoPosY = static_cast<int>(Application::SCREEN_SIZE_Y * heightRatio);
 	//プッシュスペース描画
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2,
 		logoPosY,

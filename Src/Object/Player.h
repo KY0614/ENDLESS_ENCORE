@@ -6,6 +6,7 @@
 #include <DxLib.h>
 #include "ActorBase.h"
 
+class HPBar;
 class BarUI;
 class AnimationController;
 class Collider;
@@ -183,12 +184,16 @@ public:
 	/// </summary>
 	/// <param name=""></param>
 	void UpdateImGui(void);
+
 private:
-	std::unique_ptr<BarUI> hpBar_;	//HPバー
-	std::unique_ptr<BarUI> parryCDBar_;	//HPバー
+	//UI
+	std::unique_ptr<HPBar> hpBar_;	//HPバー
+	std::unique_ptr<BarUI> parryCDBar_;	//パリィCDバー
+
 	//マテリアル・レンダラー
 	std::unique_ptr<ModelMaterial> material_;
 	std::unique_ptr<ModelRenderer> renderer_;
+
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 
@@ -303,6 +308,12 @@ private:
 	/// アニメーション初期化
 	/// </summary>
 	void InitAnimation(void);
+
+	/// <summary>
+	/// UI初期化
+	/// </summary>
+	/// <param name=""></param>
+	void InitUI(void);
 
 	/// <summary>
 	/// 最大HPを設定

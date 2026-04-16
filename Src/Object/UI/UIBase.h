@@ -25,12 +25,6 @@ public:
     /// </summary>  
     virtual void Draw(void) = 0;
 
-	/// <summary>
-	/// アルファ値を設定する
-	/// </summary>
-	/// <param name="alpha">アルファ値（0.0f～1.0f)</param>
-	void SetAlpha(const float alpha) { alpha_ = alpha; }
-
     /// <summary>
 	/// 表示、非表示を設定する
     /// </summary>
@@ -44,10 +38,6 @@ protected:
 
     //UI画像ハンドル
 	int uiImg_;     //メイン画像
-	int uiBackImg_; //背景画像
-
-    //UI画像の透明度
-    float alpha_;
 
 	//表示、非表示用のフラグ
     bool isActive_;

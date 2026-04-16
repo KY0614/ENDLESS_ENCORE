@@ -89,7 +89,7 @@ void GameScene::Init(void)
 	const int GAUGE_X = Application::SCREEN_SIZE_X - GAUGEX_OFFEST_X;  // ゲージの左上のX座標
 	const int GAUGE_Y = Application::SCREEN_SIZE_Y - GAUGEX_OFFEST_Y;  // ゲージの左上のY座標
 	skipBarUI_ = std::make_unique<BarUI>();
-	skipBarUI_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::PLAYER_HP_BACK_BAR);
+	skipBarUI_->SetBarUISrc(ResourceManager::SRC::PLAYER_PARYY_BAR, ResourceManager::SRC::HP_BACK_BAR);
 	skipBarUI_->Init();
 	skipBarUI_->SetBarPos({ GAUGE_X, GAUGE_Y });
 	skipBarUI_->SetActive(true);
