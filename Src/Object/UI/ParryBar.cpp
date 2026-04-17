@@ -50,8 +50,8 @@ void ParryBar::Draw(void)
 	//バーの背景描画
 	const int frameOffset = 2;
 	DrawExtendGraph(
-		parryBarInfo_.pos_.x - frameOffset, parryBarInfo_.pos_.y - frameOffset,
-		parryBarInfo_.pos_.x + parryBarInfo_.size_.x + frameOffset,
+		parryBarInfo_.pos_.x - frameOffset, parryBarInfo_.pos_.y - frameOffset,//左上座標
+		parryBarInfo_.pos_.x + parryBarInfo_.size_.x + frameOffset,			   //右下座標	
 		parryBarInfo_.pos_.y + parryBarInfo_.size_.y + frameOffset,
 		barFrameImg_,
 		true
@@ -59,8 +59,8 @@ void ParryBar::Draw(void)
 
 	//バーの背景描画
 	DrawExtendGraph(
-		parryBarInfo_.pos_.x, parryBarInfo_.pos_.y,
-		parryBarInfo_.pos_.x + parryBarInfo_.size_.x,
+		parryBarInfo_.pos_.x, parryBarInfo_.pos_.y,		//左上座標
+		parryBarInfo_.pos_.x + parryBarInfo_.size_.x,	//右下座標	
 		parryBarInfo_.pos_.y + parryBarInfo_.size_.y,
 		barBackImg_,
 		true

@@ -72,7 +72,6 @@ VS_OUTPUT main(VS_INPUT VSInput)
     // ローカル座標をワールド座標に変換
     // ローカル座標をワールド座標に変換(剛体)
     lWorldPosition.w = 1.0f;
-    //lWorldPosition.xyz = mul(lLocalPosition, g_base.localWorldMatrix);
     lWorldPosition.x = dot(lLocalPosition, lL_W_Mat[0]);
     lWorldPosition.y = dot(lLocalPosition, lL_W_Mat[1]);
     lWorldPosition.z = dot(lLocalPosition, lL_W_Mat[2]);
