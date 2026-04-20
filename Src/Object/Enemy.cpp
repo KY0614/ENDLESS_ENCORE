@@ -192,12 +192,15 @@ void Enemy::Update(void)
 	float fogStart, fogEnd = 0.0f;
 	GetFogStartEnd(&fogStart, &fogEnd);
 	material_->SetConstBufVS(1, { fogStart,fogEnd,0.0f,0.0f });
+	//ピクセルシェーダー
 	//フォグの色
 	int fogColorR, fogColorG, fogColorB;
 	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
 	material_->SetConstBufPS(3, { 0.0f,0.0f,0.0f,0.0f });
 	//カメラの位置
-	material_->SetConstBufPS(4, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+	material_->SetConstBufPS(4, 
+		{ cameraPos.x,cameraPos.y,cameraPos.z,
+		SceneManager::GetInstance().GetTotalTime() });
 
 	//更新ステップ
 	stateUpdate_();

@@ -63,6 +63,7 @@ void SceneManager::Init(void)
 
 	//デルタタイム
 	preTime_ = std::chrono::system_clock::now();
+	totalTime_ = 0.0f;
 
 	//フォグ
 	fogStart_ = FOG_START;
@@ -79,7 +80,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::GAME);
+	DoChangeScene(SCENE_ID::TITLE);
 }
 
 void SceneManager::Init3D(void)
@@ -131,6 +132,8 @@ void SceneManager::Update(void)
 	deltaTime_ = static_cast<float>(
 		std::chrono::duration_cast<std::chrono::nanoseconds>(nowTime - preTime_).count() / 1000000000.0);
 	preTime_ = nowTime;
+
+	totalTime_ += deltaTime_;
 
 	fader_->Update();
 	if (isSceneChanging_)
@@ -232,6 +235,11 @@ float SceneManager::GetDeltaTime(void) const
 	return deltaTime_;
 }
 
+float SceneManager::GetTotalTime(void) const
+{
+	return totalTime_;
+}
+
 std::weak_ptr<Camera> SceneManager::GetCamera(void) const
 {
 	return camera_;
@@ -318,6 +326,8 @@ SceneManager::SceneManager(void)
 
 	//デルタタイム
 	deltaTime_ = 1.0f / 60.0f;
+
+	totalTime_ = 0.0f;
 
 	camera_ = nullptr;
 	lightDir_ = CommonUtility::VECTOR_ZERO;

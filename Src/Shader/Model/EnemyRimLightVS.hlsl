@@ -3,7 +3,8 @@
 
 // IN
 #include "../Common/Vertex/VertexInputType.hlsli"
-#define VERTEX_INPUT DX_MV1_VERTEX_TYPE_NMAP_8FRAME
+//#define VERTEX_INPUT DX_MV1_VERTEX_TYPE_NMAP_8FRAME
+#define VERTEX_INPUT DX_MV1_VERTEX_TYPE_8FRAME
 
 // OUT
 #define VS_OUTPUT VertexToPixelLit
@@ -27,37 +28,70 @@ VS_OUTPUT main(VS_INPUT VSInput)
 // スキンメッシュ用のローカル⇒ワールド変換行列を作成+++( 開始 )
     int4 lBoneIdx;
     float4 lL_W_Mat[3];
-    float4 lWeight;
+    //float4 lWeight;
 // BONE4
     lBoneIdx = VSInput.blendIndices0;
-    lWeight = VSInput.blendWeight0;
-    lL_W_Mat[0] = L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
-    lL_W_Mat[1] = L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
-    lL_W_Mat[2] = L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
+    //lWeight = VSInput.blendWeight0;
+    //lL_W_Mat[0] = L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
+    //lL_W_Mat[1] = L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
+    //lL_W_Mat[2] = L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
+    //lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
+    //lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
+    //lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
+    //lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
+    //lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
+    //lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
+    //lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
+    //lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
+    //lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
+
+    lL_W_Mat[0] = L_W_MAT[lBoneIdx.x + 0] * VSInput.blendWeight0.xxxx;
+    lL_W_Mat[1] = L_W_MAT[lBoneIdx.x + 1] * VSInput.blendWeight0.xxxx;
+    lL_W_Mat[2] = L_W_MAT[lBoneIdx.x + 2] * VSInput.blendWeight0.xxxx;
+
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * VSInput.blendWeight0.yyyy;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * VSInput.blendWeight0.yyyy;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * VSInput.blendWeight0.yyyy;
+
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * VSInput.blendWeight0.zzzz;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * VSInput.blendWeight0.zzzz;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * VSInput.blendWeight0.zzzz;
+
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * VSInput.blendWeight0.wwww;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * VSInput.blendWeight0.wwww;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * VSInput.blendWeight0.wwww;
+    
 // BONE8
     lBoneIdx = VSInput.blendIndices1;
-    lWeight = VSInput.blendWeight1;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.x + 0] * VSInput.blendWeight1.xxxx;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.x + 1] * VSInput.blendWeight1.xxxx;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.x + 2] * VSInput.blendWeight1.xxxx;
+
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * VSInput.blendWeight1.yyyy;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * VSInput.blendWeight1.yyyy;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * VSInput.blendWeight1.yyyy;
+
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * VSInput.blendWeight1.zzzz;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * VSInput.blendWeight1.zzzz;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * VSInput.blendWeight1.zzzz;
+
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * VSInput.blendWeight1.wwww;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * VSInput.blendWeight1.wwww;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * VSInput.blendWeight1.wwww;
+
+    //lWeight = VSInput.blendWeight1;
+    //lL_W_Mat[0] += L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
+    //lL_W_Mat[1] += L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
+    //lL_W_Mat[2] += L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
+    //lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
+    //lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
+    //lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
+    //lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
+    //lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
+    //lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
+    //lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
+    //lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
+    //lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
 
 // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 開始 )
     VS_OUTPUT ret;
@@ -102,7 +136,8 @@ VS_OUTPUT main(VS_INPUT VSInput)
     ret.normal.x = dot(VSInput.norm, lL_W_Mat[0]);
     ret.normal.y = dot(VSInput.norm, lL_W_Mat[1]);
     ret.normal.z = dot(VSInput.norm, lL_W_Mat[2]);
-
+    ret.normal = normalize(ret.normal);
+    
     // ディフューズカラー
     ret.diffuse = VSInput.diffuse;
     

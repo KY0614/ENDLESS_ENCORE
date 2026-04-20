@@ -68,6 +68,9 @@ public:
 	// デルタタイムの取得
 	float GetDeltaTime(void) const;
 
+	// 総時間の取得
+	float GetTotalTime(void) const;
+
 	// カメラの取得
 	std::weak_ptr<Camera> GetCamera(void) const;
 
@@ -155,6 +158,9 @@ private:
 	// デルタタイム
 	std::chrono::system_clock::time_point preTime_;
 	float deltaTime_;
+
+	// 総時間
+	float totalTime_;
 
 	//フォグ
 	float fogStart_;	//開始位置

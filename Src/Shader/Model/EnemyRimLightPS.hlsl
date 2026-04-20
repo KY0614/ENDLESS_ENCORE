@@ -20,7 +20,7 @@ cbuffer cbParam : register(b4)
     float4 g_fog_color;     //霧の色
     
     float3 g_camera_pos;    //カメラの位置
-    float dummy2;          //ダミー
+    float g_time;           //時間
 }
 
 float4 main(PS_INPUT PSInput) : SV_TARGET
@@ -39,14 +39,27 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     float3 fogCol = g_fog_color.rgb;
     
     //リムライト
-    float3 toCamera = normalize(g_camera_pos - PSInput.worldPos);
-    float cDot = abs(dot(PSInput.normal, toCamera));
-    cDot = 1.0f - cDot;
-    float rimLightPow = 3.0f; //リムライトの強さを調整するためのパワー値
-    float rimDot = pow(cDot, rimLightPow); //強めのリムライトを設定
-    float4 rimColor = float4(1.0f, 0.0f, 0.0f, 1.0f) * rimDot; // 赤リムライト
+    //視線方向（カメラ→ピクセル）
+    float3 viewDir = normalize(g_camera_pos - PSInput.worldPos);
+    //基本リム値
+    float rim = 1.0 - saturate(dot(viewDir, normal));
+    //鋭くする（数値を大きくすると細くなる）
+    rim = pow(rim, 6.0);
+    //時間で揺らぐ（sinで脈動）
+    float pulse = 0.7 + 0.3 * sin(g_time * 5.0);
+    //ノイズ風のゆらぎ（UVベース）
+    float noise = frac(sin(dot(PSInput.uv * g_time, float2(12.9898, 78.233))) * 43758.5453);
+    rim *= lerp(0.8, 1.5, noise);
+    //赤い発光色
+    float3 rimColor = float3(1.0, 0.0, 0.0);
     
-    float3 rgb = (color.rgb * g_color.rgb) + rimColor.rgb;
+    //色の合成
+    float3 rgb = (color.rgb * g_color.rgb * lihgt) + +g_ambient_color.rgb;
+    //霧の合成
     float3 finalColor = lerp(fogCol, rgb, fogFactor);
-    return float4(rgb, color.a);
+    //リムの合成
+    finalColor.rgb += rim * rimColor * pulse * 2.0;
+    finalColor.r += 0.1;
+    
+    return float4(finalColor, color.a);
 }
