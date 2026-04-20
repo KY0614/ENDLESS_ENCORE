@@ -1,6 +1,7 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
+#include "../Object/EncountEnemy.h"
 #include "../Common/Fader.h"
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/InputManager.h"
@@ -30,9 +31,11 @@ namespace
 
 EncountScene::EncountScene(
 	Player& player,
-	Enemy& enemy) : 
+	Enemy& enemy,
+	EncountEnemy& encountEnemy) : 
 	player_(player),
-	enemy_(enemy)
+	enemy_(enemy),
+	encountEnemy_(encountEnemy)
 {
 	state_ = STATE::NONE;
 	//状態管理
@@ -81,6 +84,8 @@ void EncountScene::Draw(void)
 
 void EncountScene::Start(void)
 {
+	//エンカウント演出開始のために
+	//フェードアウトから開始
 	ChangeStateFade();
 }
 
@@ -152,6 +157,7 @@ void EncountScene::ChangeStateNone(void)
 
 void EncountScene::ChangeStateFade(void)
 {
+	//フェードアウト開始
 	std::weak_ptr<Fader> fader = SceneManager::GetInstance().GetFader();
 	fader.lock()->SetFade(Fader::STATE::FADE_OUT);
 	stateUpdate_ = std::bind(&EncountScene::UpdateFade, this);
@@ -202,8 +208,8 @@ void EncountScene::ChangeStateLookAround(void)
 
 void EncountScene::ChangeStateEnemySpotlight(void)
 {
-	//敵をエンカウント状態へ遷移
-	enemy_.ChangeState(Enemy::STATE::ENCOUNT);
+	//敵のエンカウント演出開始
+	encountEnemy_.EncountStart();
 	//カメラをプレイヤーの後方に固定
 	float cameraOffsetY = 70.0f;//カメラの高さ調整
 	VECTOR pPos = VAdd(
@@ -214,7 +220,7 @@ void EncountScene::ChangeStateEnemySpotlight(void)
 	pPos.x += cameraOffsetX;
 	pPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;
 	//注視点を敵の位置にセット
-	VECTOR targetPos = enemy_.GetTransform().pos;
+	VECTOR targetPos = encountEnemy_.GetTransform().pos;
 	targetPos.y += CAMERA_PLAYER_HEAD_OFFSET_Y;//カメラの高さ調整
 	mainCamera->SetFixedPointPos(pPos, targetPos);
 	mainCamera->ChangeMode(Camera::MODE::FIXED_POINT);
@@ -459,9 +465,6 @@ void EncountScene::UpdateEnemySpotlight(void)
 	}
 }
 
-/// <summary>
-/// 実装途中
-/// </summary>
 void EncountScene::UpdateEnemyAttention(void)
 {
 	//一定時間経ったら振り向き開始
@@ -483,10 +486,11 @@ void EncountScene::UpdateEnemyAttention(void)
 	}
 	//経過時間が一定時間たったら敵は振り向き状態へ遷移
 	if (intervalTimer_ >= intervalLightUp	&&
-		enemy_.GetState() == Enemy::STATE::ENCOUNT)
+		encountEnemy_.GetState() == EncountEnemy::STATE::ENCOUNT)
 	{
 		intervalTimer_ = 0.0f;
-		enemy_.ChangeState(Enemy::STATE::TURN);
+		//敵振り向き開始
+		encountEnemy_.Turn();
 	}
 }
 

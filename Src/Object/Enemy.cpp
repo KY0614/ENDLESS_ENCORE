@@ -114,11 +114,8 @@ Enemy::Enemy(Player& player):
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
-	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&Enemy::ChangeStateEncount, this));
-	stateChanges_.emplace(STATE::TURN, std::bind(&Enemy::ChangeStateTurn, this));
 	stateChanges_.emplace(STATE::CAST_SPELL, std::bind(&Enemy::ChangeStateCastSpell, this));
 	stateChanges_.emplace(STATE::ATTACK_PLAYER, std::bind(&Enemy::ChangeStateAttackPlayer, this));
-	stateChanges_.emplace(STATE::ENCOUNT_FINISH, std::bind(&Enemy::ChangeStateEncountFinish, this));
 	stateChanges_.emplace(STATE::WAIT, std::bind(&Enemy::ChangeStateWait, this));
 	stateChanges_.emplace(STATE::FOLLOW, std::bind(&Enemy::ChangeStateFollow, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Enemy::ChangeStateMove, this));
@@ -162,8 +159,6 @@ void Enemy::Init(void)
 
 	effectChargeAtkResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::EXPLOSIVE_EFFECT).handleId_;
-
-
 
 	//初期の状態を設定
 	ChangeState(STATE::NONE);
@@ -329,8 +324,6 @@ void Enemy::InitAnimation(void)
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
-	animationController_->Add((int)ANIM_TYPE::TURN, path + animPath.value(KEY_TURN, KEY_EMPTY),
-		animSpeedSlow);
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::WALK_RIGHT, path + animPath.value(KEY_WALK_RIGHT, KEY_EMPTY),
@@ -432,18 +425,6 @@ void Enemy::ChangeStateNone(void)
 	stateUpdate_ = std::bind(&Enemy::UpdateNone, this);
 }
 
-void Enemy::ChangeStateEncount(void)
-{
-	isEncount_ = true;
-	stateUpdate_ = std::bind(&Enemy::UpdateEncount, this);
-}
-
-void Enemy::ChangeStateTurn(void)
-{
-	animationController_->Play((int)ANIM_TYPE::TURN, false);
-	stateUpdate_ = std::bind(&Enemy::UpdateTurn, this);
-}
-
 void Enemy::ChangeStateCastSpell(void)
 {
 	//弾の生成
@@ -469,15 +450,6 @@ void Enemy::ChangeStateAttackPlayer(void)
 {
 	animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
 	stateUpdate_ = std::bind(&Enemy::UpdateAttackPlayer, this);
-}
-
-void Enemy::ChangeStateEncountFinish(void)
-{
-	//敵の向きを戦闘開始時の向きに設定
-	const float battleRotY = 180.0f;
-	transform_.quaRot =
-		Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(-battleRotY), 0.0f });
-	stateUpdate_ = std::bind(&Enemy::UpdateEncountFinish, this);
 }
 
 void Enemy::ChangeStateWait(void)
@@ -575,20 +547,6 @@ void Enemy::UpdateNone(void)
 {//何もしない
 }
 
-void Enemy::UpdateEncount(void)
-{
-}
-
-void Enemy::UpdateTurn(void)
-{
-	if (animationController_->IsEnd())
-	{
-		animationController_->Play((int)ANIM_TYPE::IDLE);
-		ChangeState(STATE::ENCOUNT_FINISH);
-		return;
-	}
-}
-
 void Enemy::UpdateCastSpell(void)
 {
 	//詠唱アニメーションが終わったら魔法待機へ
@@ -628,10 +586,6 @@ void Enemy::UpdateAttackPlayer(void)
 		targetPos.y = player_.GetFramePos(L"mixamorig:Spine").y;
 		bullets_.front()->SetTargetPos(player_.GetTransform().pos);
 	}
-}
-
-void Enemy::UpdateEncountFinish(void)
-{
 }
 
 void Enemy::UpdateWait(void)

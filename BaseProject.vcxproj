@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\EncountEnemy.cpp" />
     <ClCompile Include="Src\Object\UI\SkipBar.cpp" />
     <ClCompile Include="Src\Object\UI\ParryBar.cpp" />
     <ClCompile Include="Src\Object\UI\HPBar.cpp" />
@@ -70,6 +71,7 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\EncountEnemy.h" />
     <ClInclude Include="Src\Object\UI\SkipBar.h" />
     <ClInclude Include="Src\Object\UI\ParryBar.h" />
     <ClInclude Include="Src\Object\UI\HPBar.h" />

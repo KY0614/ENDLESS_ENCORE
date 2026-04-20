@@ -6,6 +6,7 @@
 class Fader;
 class Player;
 class Enemy;
+class EncountEnemy;
 class Stage;
 
 class EncountScene :  public SceneBase
@@ -32,7 +33,7 @@ public:
 	};
 
 	//コンストラクタ
-	EncountScene(Player& player,Enemy& enemy);
+	EncountScene(Player& player,Enemy& enemy,EncountEnemy& encountEnemy);
 
 	//デストラクタ
 	~EncountScene(void);
@@ -103,6 +104,7 @@ private:
 	//参照
 	Player& player_;			//プレイヤー参照
 	Enemy& enemy_;				//敵参照
+	EncountEnemy& encountEnemy_;				//エンカウント演出用の敵参照
 
 	//インターバルタイマー
 	float intervalTimer_;	

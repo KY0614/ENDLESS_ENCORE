@@ -20,11 +20,9 @@ public:
 	enum class STATE
 	{
 		NONE,
-		ENCOUNT,		//エンカウント(登場）
-		TURN,			//振り向く
 		CAST_SPELL,		//魔法詠唱
 		ATTACK_PLAYER,	//プレイヤーへ攻撃
-		ENCOUNT_FINISH,	//エンカウント演出終了
+
 		FOLLOW,			//追跡
 		WAIT,			//待機
 		MOVE,			//移動(左右に)
@@ -42,7 +40,6 @@ public:
 	enum class ANIM_TYPE
 	{
 		IDLE,			//待機
-		TURN,			//振り向き
 		WALK,			//歩行
 		WALK_RIGHT,		//右歩行
 		WALK_LEFT,		//左歩行
@@ -81,7 +78,7 @@ public:
 	void Draw(void) override;
 
 	/// <summary>
-	/// UI描画処理
+	/// バーUI描画処理
 	/// </summary>
 	void DrawBarUI(void);
 
@@ -260,14 +257,6 @@ private:
 	/// </summary>
 	void ChangeStateNone(void);
 	/// <summary>
-	/// 状態遷移：ENCOUNT
-	/// </summary>
-	void ChangeStateEncount(void);
-	/// <summary>
-	/// 状態遷移：TURN
-	/// </summary>
-	void ChangeStateTurn(void);
-	/// <summary>
 	/// 状態遷移：CAST_SPELL
 	/// </summary>
 	void ChangeStateCastSpell(void);
@@ -275,10 +264,6 @@ private:
 	/// 状態遷移：ATTACK_PLAYER
 	/// </summary>
 	void ChangeStateAttackPlayer(void);
-	/// <summary>
-	/// 状態遷移：ENCOUNT_FINISH
-	/// </summary>
-	void ChangeStateEncountFinish(void);
 	/// <summary>
 	/// 状態遷移：WAIT
 	/// </summary>
@@ -330,14 +315,6 @@ private:
 	/// </summary>
 	void UpdateNone(void);
 	/// <summary>
-	/// 更新：ENCOUNT
-	/// </summary>
-	void UpdateEncount(void);
-	/// <summary>
-	/// 更新：TURN
-	/// </summary>
-	void UpdateTurn(void);
-	/// <summary>
 	/// 更新：CAST_SPELL
 	/// </summary>
 	void UpdateCastSpell(void);
@@ -345,10 +322,6 @@ private:
 	/// 更新：ATTACK_PLAYER
 	/// </summary>
 	void UpdateAttackPlayer(void);
-	/// <summary>
-	/// 更新：WAIT
-	/// </summary>
-	void UpdateEncountFinish(void);
 	/// <summary>
 	/// 更新：WAIT
 	/// </summary>

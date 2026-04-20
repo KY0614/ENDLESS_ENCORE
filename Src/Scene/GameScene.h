@@ -6,6 +6,7 @@
 
 class Player;
 class Enemy;
+class EncountEnemy;
 class Stage;
 class Tutorial;
 class EncountScene;
@@ -70,6 +71,8 @@ private:
 	std::shared_ptr<Player> player_;
 	//敵
 	std::shared_ptr<Enemy> enemy_;
+	//エンカウント演出用の敵
+	std::shared_ptr<EncountEnemy> encountEnemy_;
 	//ステージ
 	std::shared_ptr<Stage> stage_;
 	//チュートリアル

@@ -10,6 +10,7 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Object/Player.h"
 #include "../Object/Enemy.h"
+#include "../Object/EncountEnemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
 #include "../Object/UI/SkipBar.h"
@@ -45,6 +46,7 @@ GameScene::GameScene(void)
 {
 	player_ = nullptr;
 	enemy_ = nullptr;
+	encountEnemy_ = nullptr;
 	stage_ = nullptr;
 	isFaseChange_ = false;
 	state_ = STATE::NONE;
@@ -79,6 +81,10 @@ void GameScene::Init(void)
 	enemy_ = std::make_shared<Enemy>(*player_);
 	enemy_->Init();
 
+	//エンカウント演出用の敵
+	encountEnemy_ = std::make_shared<EncountEnemy>();
+	encountEnemy_->Init();
+
 	//ステージ
 	stage_ = std::make_shared<Stage>();
 	stage_->Init();
@@ -86,7 +92,7 @@ void GameScene::Init(void)
 	InitTutorial();
 
 	//演出シーン
-	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_);
+	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_, *encountEnemy_);
 	encountScene_->Init();
 
 	//スキップUI
@@ -484,6 +490,7 @@ void GameScene::UpdateEncount(void)
 	//各オブジェクト更新
 	player_->Update();
 	enemy_->Update();
+	encountEnemy_->Update();
 	stage_->Update();
 }
 
@@ -495,6 +502,7 @@ void GameScene::DrawEncount(void)
 	player_->Draw();
 	//敵描画
 	enemy_->Draw();
+	encountEnemy_->Draw();
 
 	//スキップUI描画
 	if (!isSkip_)return;
