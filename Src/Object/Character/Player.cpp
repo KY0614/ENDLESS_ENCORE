@@ -1,4 +1,3 @@
-#include <cassert>
 #include <EffekseerForDXLib.h>
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
@@ -13,12 +12,12 @@
 #include "../Manager/Generic/Camera.h"
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
-#include "Common/AnimationController.h"
-#include "Common/Geometry/Capsule.h"
-#include "Common/Geometry/Sphere.h"
-#include "Common/Collider.h"
-#include "UI/HPBar.h"
-#include "UI/ParryBar.h"
+#include "../Common/AnimationController.h"
+#include "../Common/Geometry/Capsule.h"
+#include "../Common/Geometry/Sphere.h"
+#include "../Common/Collider.h"
+#include "../UI/HPBar.h"
+#include "../UI/ParryBar.h"
 #include "Player.h"
 
 // 長いのでnamespaceの省略
@@ -94,9 +93,6 @@ Player::Player(void)
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&Player::ChangeStateWakeUp, this));
-	stateChanges_.emplace(STATE::STAGE_WALK, std::bind(&Player::ChangeStateStageWalk, this));
-	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&Player::ChangeStateLookAround, this));
-	stateChanges_.emplace(STATE::ATTACKED_ENEMY, std::bind(&Player::ChangeStateAttackedEnemy, this));
 	stateChanges_.emplace(STATE::WAIT, std::bind(&Player::ChangeStateWait, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
@@ -387,15 +383,6 @@ void Player::InitAnimation(void)
 	//待機状態
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
-	//ゆっくり歩く
-	animationController_->Add((int)ANIM_TYPE::WALK_SLOW, path + animPath.value(KEY_WALK, KEY_EMPTY),
-		animSpeedSlow);
-	//周りを見渡す
-	animationController_->Add((int)ANIM_TYPE::LOOK_AROUND, path + animPath.value(KEY_LOOK_AROUND, KEY_EMPTY),
-		animSpeed);
-	//攻撃をされる
-	animationController_->Add((int)ANIM_TYPE::ATTACKED, path + animPath.value(KEY_ATTACKED, KEY_EMPTY),
-		animSpeedSlow);
 	//歩く
 	animationController_->Add((int)ANIM_TYPE::WALK, path + animPath.value(KEY_WALK, KEY_EMPTY),
 		animSpeed);
@@ -438,33 +425,6 @@ void Player::InitUI(void)
 	parryBar_->Init();
 }
 
-void Player::StageWalkReady(void)
-{
-	//ジャンプ中に遷移したらジャンプ力を無効にする
-	jumpPow_ = CommonUtility::VECTOR_ZERO;
-	//Jsonデータ取得
-	JsonManager& jsonM = JsonManager::GetInstance();
-	const json playerData = jsonM.GetJsonData(
-		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
-	//パラメータを取得
-	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
-	//座標をステージ上の端(手前側)に設定
-	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
-	//正面を向かせる(Z軸方向)
-	transform_.quaRot = Quaternion();
-}
-
-void Player::ChangeState(const STATE& state)
-{
-	//行動終了判定をリセット
-	isActionEnd_ = false;
-	//状態変更
-	state_ = state;
-
-	//各状態遷移の初期処理
-	stateChanges_[state_]();
-}
-
 void Player::Damage(float subHp)
 {
 	if (hp_ <= 0.0f)return;
@@ -482,6 +442,24 @@ void Player::SetBackstabRotY(const Quaternion& rotY)
 	goalQuaRot_ = rotY;
 }
 
+void Player::Play(void)
+{
+	//状態をPLAYに変更
+	ChangeState(STATE::PLAY);
+}
+
+void Player::Wait(void)
+{
+	//状態をWAITに変更
+	ChangeState(STATE::WAIT);
+}
+
+void Player::Backstab(void)
+{
+	//状態をBACKSTABに変更
+	ChangeState(STATE::BACKSTAB);
+}
+
 void Player::UpdateImGui(void)
 {
 	//座標
@@ -492,11 +470,30 @@ void Player::UpdateImGui(void)
 	ImGui::SliderFloat("PosY", &transform_.pos.y,posMin,posMax);
 	ImGui::SliderFloat("PosZ", &transform_.pos.z,posMin,posMax);
 
+	ImGui::SliderFloat("MovePosX", &movedPos_.x,posMin,posMax);
+	ImGui::SliderFloat("MovePosY", &movedPos_.y,posMin,posMax);
+	ImGui::SliderFloat("MovePosZ", &movedPos_.z,posMin,posMax);
+
+	ImGui::SliderFloat("MovePowX", &movePow_.x,-1.0f,50.0f);
+	ImGui::SliderFloat("MovePowY", &movePow_.y,-1.0f,50.0f);
+	ImGui::SliderFloat("MovePowZ", &movePow_.z,-1.0f,50.0f);
+
 	if (ImGui::Button("Damage"))
 	{
 		const float damage = 10.0f;
 		Damage(damage);
 	}
+}
+
+void Player::ChangeState(const STATE& state)
+{
+	//行動終了判定をリセット
+	isActionEnd_ = false;
+	//状態変更
+	state_ = state;
+
+	//各状態遷移の初期処理
+	stateChanges_[state_]();
 }
 
 void Player::ChangeStateNone(void)
@@ -512,31 +509,10 @@ void Player::ChangeStateWakeUp(void)
 	stateUpdate_ = std::bind(&Player::UpdateWakeUp, this);
 }
 
-void Player::ChangeStateStageWalk(void)
-{
-	StageWalkReady();
-	stateUpdate_ = std::bind(&Player::UpdateStageWalk, this);
-}
-
-void Player::ChangeStateLookAround(void)
-{
-	//周りを見渡すアニメーションに変更
-	animationController_->Play((int)ANIM_TYPE::LOOK_AROUND,false);
-	stateUpdate_ = std::bind(&Player::UpdateLookAround, this);
-}
-
-void Player::ChangeStateAttackedEnemy(void)
-{
-	//攻撃を受けるアニメーションに変更
-	const float animEndStep = 20.0f;
-	animationController_->Play((int)ANIM_TYPE::ATTACKED,false,0.0f, animEndStep);
-	transform_.pos.z = ATTACKED_POS_Z;
-	stateUpdate_ = std::bind(&Player::UpdateAttackedEnemy, this);
-}
-
 void Player::ChangeStateWait(void)
 {
-	animationController_->Play((int)ANIM_TYPE::IDLE,true,0.0f,-1.0f,false,true);
+	//animationController_->Play((int)ANIM_TYPE::IDLE, true, 0.0f, -1.0f, false, true);
+	animationController_->Play((int)ANIM_TYPE::IDLE);
 	stateUpdate_ = std::bind(&Player::UpdateWait, this);
 }
 
@@ -585,39 +561,9 @@ void Player::UpdateWakeUp(void)
 	}
 }
 
-void Player::UpdateStageWalk(void)
-{
-	if (transform_.pos.z <= WALK_STAGE_POS_Z)
-	{
-		//ゆっくり歩くアニメーション
-		animationController_->Play((int)ANIM_TYPE::WALK_SLOW);
-		//ゆっくり歩く処理
-		movePow_ = VScale(transform_.GetForward(), WALK_SPEED_SLOW);
-		movedPos_ = VAdd(transform_.pos, movePow_);
-	}
-	else
-	{
-		//移動終了
-		movePow_ = CommonUtility::VECTOR_ZERO;
-		//待機アニメーション
-		animationController_->Play((int)ANIM_TYPE::IDLE);
-		isActionEnd_ = true;
-	}
-
-	//衝突判定
-	Collision();
-}
-
-void Player::UpdateLookAround(void)
-{
-}
-
-void Player::UpdateAttackedEnemy(void)
-{
-}
-
 void Player::UpdateWait(void)
 {
+	//待機状態のままなので特に処理はない
 }
 
 void Player::UpdatePlay(void)

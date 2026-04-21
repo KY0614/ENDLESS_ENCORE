@@ -6,8 +6,10 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
-#include "Common/AnimationController.h"
+#include "../Common/AnimationController.h"
+#include "../EnemyBullet.h"
 #include "EncountEnemy.h"
+
 // 長いのでnamespaceの省略
 using json = nlohmann::json;
 
@@ -24,6 +26,7 @@ namespace
 EncountEnemy::EncountEnemy(void)
 {
 	isEncount_ = false;
+	stateStep_ = 0.0f;
 	state_ = STATE::NONE;
 
 	//状態管理
@@ -185,16 +188,6 @@ void EncountEnemy::InitMaterial(void)
 	renderer_ = std::make_unique<ModelRenderer>(transform_.modelId, *material_);
 }
 
-const json EncountEnemy::GetJsonData(void)const
-{
-	JsonManager& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(
-		JsonManager::JSON_DATA::ENEMY, KEY_ENEMY);
-
-	return data;
-}
-
 void EncountEnemy::ChangeStateNone(void)
 {
 	stateUpdate_ = std::bind(&EncountEnemy::UpdateNone, this);
@@ -210,6 +203,34 @@ void EncountEnemy::ChangeStateTurn(void)
 	animationController_->Play((int)ANIM_TYPE::TURN, false);
 	stateUpdate_ = std::bind(&EncountEnemy::UpdateTurn, this);
 }
+
+
+void EncountEnemy::ChangeStateCastSpell(void)
+{
+	//弾の生成
+	const int bulletNum = 1;
+	bullet_ = std::make_unique<EnemyBullet>(transform_);
+	bullet_->Init();
+	const VECTOR headPos = GetFramePos(L"mixamorig:Head");
+	//弾のオフセット座標
+	const VECTOR offsetPos = VSub(headPos, transform_.pos);
+	//弾のローカル座標
+	const VECTOR localPos = VGet(70.0f, 40.0f, 0.0f);
+	//弾の相対座標にセットする
+	bullet_->SetOffsetPos(offsetPos);
+	bullet_->SetLocalPos(localPos);
+	bullet_->SetPos(headPos);
+
+	animationController_->Play((int)ANIM_TYPE::CAST_SPELL, false);
+	stateUpdate_ = std::bind(&EncountEnemy::UpdateCastSpell, this);
+}
+
+void EncountEnemy::ChangeStateAttackPlayer(void)
+{
+	animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
+	stateUpdate_ = std::bind(&EncountEnemy::UpdateAttackPlayer, this);
+}
+
 
 void EncountEnemy::ChangeStateEncountFinish(void)
 {
@@ -239,6 +260,85 @@ void EncountEnemy::UpdateTurn(void)
 	}
 }
 
+void EncountEnemy::UpdateCastSpell(void)
+{
+	//詠唱アニメーションが終わったら魔法待機へ
+	if (IsCastSpell())
+	{
+		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
+	}
+	//弾の状態更新
+	bullet_->Update();
+	//
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+
+	//弾を準備状態にする
+	const float bulletInterval = 0.7f;
+	if (bullet_->GetState() != EnemyBullet::STATE::NONE)return;
+	if (stateStep_ > bulletInterval)
+	{
+		bullet_->SetStateReady();
+		stateStep_ = 0.0f;
+	}
+}
+
+void EncountEnemy::UpdateAttackPlayer(void)
+{
+	if (IsSpellAttack())
+	{
+		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
+	}
+	//弾の状態更新
+	bullet_->Update();
+	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
+	const float bulletInterval = 0.5f;
+	if (stateStep_ > bulletInterval)
+	{
+		bullet_->SetStateShot();
+		//VECTOR targetPos = player_.GetTransform().pos;
+		//targetPos.y = player_.GetFramePos(L"mixamorig:Spine").y;
+		//bullets_.front()->SetTargetPos(player_.GetTransform().pos);
+	}
+}
+
 void EncountEnemy::UpdateEncountFinish(void)
 {
+}
+
+const json EncountEnemy::GetJsonData(void)const
+{
+	JsonManager& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json data = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::ENEMY, KEY_ENEMY);
+
+	return data;
+}
+
+bool EncountEnemy::IsCastSpell(void)
+{
+	bool ret = true;
+
+	//アニメーションが終了しているか
+	if (animationController_->IsEnd() &&
+		animationController_->GetPlayType() == (int)ANIM_TYPE::CAST_SPELL)
+	{
+		return ret;	//終了している
+	}
+
+	return false;
+}
+
+bool EncountEnemy::IsSpellAttack(void)
+{
+	bool ret = true;
+
+	//アニメーションが終了しているか
+	if (animationController_->IsEnd() &&
+		animationController_->GetPlayType() == (int)ANIM_TYPE::ATTACK_FAR_ONE)
+	{
+		return ret;	//終了している
+	}
+
+	return false;
 }

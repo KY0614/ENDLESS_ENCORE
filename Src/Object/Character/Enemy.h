@@ -20,8 +20,6 @@ public:
 	enum class STATE
 	{
 		NONE,
-		CAST_SPELL,		//魔法詠唱
-		ATTACK_PLAYER,	//プレイヤーへ攻撃
 
 		FOLLOW,			//追跡
 		WAIT,			//待機
@@ -202,7 +200,7 @@ private:
 	int effectChargeAtkResId_;	//エフェクトリソースID
 	int effectChargeAtkPlayId_;	//エフェクト再生ID
 
-	//状態を遷移させる用の時間管理変数
+	//状態を遷移させる用の時間
 	float stateStep_;
 	//方向転換用の時間管理変数
 	float changeDirStep_;
@@ -257,14 +255,6 @@ private:
 	/// </summary>
 	void ChangeStateNone(void);
 	/// <summary>
-	/// 状態遷移：CAST_SPELL
-	/// </summary>
-	void ChangeStateCastSpell(void);
-	/// <summary>
-	/// 状態遷移：ATTACK_PLAYER
-	/// </summary>
-	void ChangeStateAttackPlayer(void);
-	/// <summary>
 	/// 状態遷移：WAIT
 	/// </summary>
 	void ChangeStateWait(void);
@@ -314,14 +304,6 @@ private:
 	/// 更新：NONE
 	/// </summary>
 	void UpdateNone(void);
-	/// <summary>
-	/// 更新：CAST_SPELL
-	/// </summary>
-	void UpdateCastSpell(void);
-	/// <summary>
-	/// 更新：ATTACK_PLAYER
-	/// </summary>
-	void UpdateAttackPlayer(void);
 	/// <summary>
 	/// 更新：WAIT
 	/// </summary>
@@ -387,7 +369,16 @@ private:
 	/// <returns>プレイヤーと敵の距離</returns>
 	float CheckPlayerDistance(void);
 
+	/// <summary>
+	/// 魔法詠唱アニメーションが終了したかどうかをチェックする
+	/// </summary>
+	/// <returns>true:終了　false:未終了</returns>
 	bool IsCastSpell(void);
+
+	/// <summary>
+	/// 魔法攻撃アニメーションが終了したかどうかをチェックする
+	/// </summary>
+	/// <returns>true:終了　false:未終了</returns>
 	bool IsSpellAttack(void);
 
 	/// <summary>

@@ -11,12 +11,12 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/JsonManager.h"
-#include "Common/AnimationController.h"
-#include "Common/Geometry/Capsule.h"
-#include "Common/Geometry/Sphere.h"
-#include "UI/HPBar.h"
+#include "../Common/AnimationController.h"
+#include "../Common/Geometry/Capsule.h"
+#include "../Common/Geometry/Sphere.h"
+#include "../UI/HPBar.h"
+#include "../EnemyBullet.h"
 #include "Player.h"
-#include "EnemyBullet.h"
 #include "Enemy.h"
 
 // 長いのでnamespaceの省略
@@ -114,8 +114,6 @@ Enemy::Enemy(Player& player):
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Enemy::ChangeStateNone, this));
-	stateChanges_.emplace(STATE::CAST_SPELL, std::bind(&Enemy::ChangeStateCastSpell, this));
-	stateChanges_.emplace(STATE::ATTACK_PLAYER, std::bind(&Enemy::ChangeStateAttackPlayer, this));
 	stateChanges_.emplace(STATE::WAIT, std::bind(&Enemy::ChangeStateWait, this));
 	stateChanges_.emplace(STATE::FOLLOW, std::bind(&Enemy::ChangeStateFollow, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&Enemy::ChangeStateMove, this));
@@ -425,33 +423,6 @@ void Enemy::ChangeStateNone(void)
 	stateUpdate_ = std::bind(&Enemy::UpdateNone, this);
 }
 
-void Enemy::ChangeStateCastSpell(void)
-{
-	//弾の生成
-	const int bulletNum = 1;
-	bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
-	bullets_.back()->Init();
-	bullets_.resize(bulletNum);
-	const VECTOR headPos = GetFramePos(L"mixamorig:Head");
-	//弾のオフセット座標
-	const VECTOR offsetPos = VSub(headPos, transform_.pos);
-	//弾のローカル座標
-	const VECTOR localPos = VGet(70.0f, 40.0f, 0.0f);
-	//弾の相対座標にセットする
-	bullets_.front()->SetOffsetPos(offsetPos);
-	bullets_.front()->SetLocalPos(localPos);
-	bullets_.front()->SetPos(headPos);
-
-	animationController_->Play((int)ANIM_TYPE::CAST_SPELL, false);
-	stateUpdate_ = std::bind(&Enemy::UpdateCastSpell, this);
-}
-
-void Enemy::ChangeStateAttackPlayer(void)
-{
-	animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
-	stateUpdate_ = std::bind(&Enemy::UpdateAttackPlayer, this);
-}
-
 void Enemy::ChangeStateWait(void)
 {
 	animationController_->Play((int)ANIM_TYPE::IDLE);
@@ -545,47 +516,6 @@ void Enemy::ChangeStateDead(void)
 
 void Enemy::UpdateNone(void)
 {//何もしない
-}
-
-void Enemy::UpdateCastSpell(void)
-{
-	//詠唱アニメーションが終わったら魔法待機へ
-	if (IsCastSpell())
-	{
-		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
-	}
-	//弾の状態更新
-	bullets_.front()->Update();
-	//
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-
-	//弾を準備状態にする
-	const float bulletInterval = 0.7f;
-	if (bullets_.front()->GetState() != EnemyBullet::STATE::NONE)return;
-	if (stateStep_ > bulletInterval)
-	{
-		bullets_.front()->SetStateReady();
-		stateStep_ = 0.0f;
-	}
-}
-
-void Enemy::UpdateAttackPlayer(void)
-{
-	if (IsSpellAttack())
-	{
-		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
-	}
-	//弾の状態更新
-	bullets_.front()->Update();
-	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
-	const float bulletInterval = 0.5f;
-	if (stateStep_ > bulletInterval)
-	{
-		bullets_.front()->SetStateShot();
-		VECTOR targetPos = player_.GetTransform().pos;
-		targetPos.y = player_.GetFramePos(L"mixamorig:Spine").y;
-		bullets_.front()->SetTargetPos(player_.GetTransform().pos);
-	}
 }
 
 void Enemy::UpdateWait(void)
@@ -719,6 +649,7 @@ void Enemy::UpdateAttackNear(void)
 
 void Enemy::UpdateShotOne(void)
 {
+	//アニメーションが終わったら詠唱待機状態へ
 	if (IsCastSpell() || IsSpellAttack())
 	{
 		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);
@@ -769,6 +700,7 @@ void Enemy::UpdateShotOne(void)
 
 void Enemy::UpdateShotAll(void)
 {
+	//アニメーションが終わったら詠唱待機状態へ
 	if (IsCastSpell())
 	{
 		animationController_->Play((int)ANIM_TYPE::MAGIC_ILDE);

@@ -78,7 +78,7 @@
     <ClCompile Include="Src\Manager\Generic\SceneManager.cpp">
       <Filter>ソース ファイル\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Player.cpp">
+    <ClCompile Include="Src\Object\Character\Player.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\GameScene.cpp">
@@ -114,7 +114,7 @@
     <ClCompile Include="Src\Common\Vector2.cpp">
       <Filter>ソース ファイル\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\ActorBase.cpp">
+    <ClCompile Include="Src\Object\Character\ActorBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_dx11.cpp">
@@ -171,7 +171,7 @@
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Enemy.cpp">
+    <ClCompile Include="Src\Object\Character\Enemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp">
@@ -204,7 +204,10 @@
     <ClCompile Include="Src\Object\UI\SkipBar.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\EncountEnemy.cpp">
+    <ClCompile Include="Src\Object\Character\EncountEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Character\EncountPlayer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -224,7 +227,7 @@
     <ClInclude Include="Src\Manager\Generic\SceneManager.h">
       <Filter>ヘッダー ファイル\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Player.h">
+    <ClInclude Include="Src\Object\Character\Player.h">
       <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\GameScene.h">
@@ -266,7 +269,7 @@
     <ClInclude Include="Src\main.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\ActorBase.h">
+    <ClInclude Include="Src\Object\Character\ActorBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Libs\ImGui\backends\imgui_impl_dx11.h">
@@ -464,7 +467,7 @@
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Enemy.h">
+    <ClInclude Include="Src\Object\Character\Enemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Manager\Generic\JsonManager.h">
@@ -497,7 +500,10 @@
     <ClInclude Include="Src\Object\UI\SkipBar.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\EncountEnemy.h">
+    <ClInclude Include="Src\Object\Character\EncountEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Character\EncountPlayer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

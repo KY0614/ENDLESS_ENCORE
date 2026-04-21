@@ -3,6 +3,7 @@
 #include <map>
 #include "ActorBase.h"
 
+class EnemyBullet;
 class AnimationController;
 class ModelRenderer;
 class ModelMaterial;
@@ -19,6 +20,7 @@ public:
 		TURN,			//振り向く
 		CAST_SPELL,		//魔法詠唱
 		ATTACK_PLAYER,	//プレイヤーへ攻撃
+
 		ENCOUNT_FINISH,	//エンカウント演出終了
 	};
 
@@ -28,6 +30,9 @@ public:
 		IDLE,			//待機
 		TURN,			//振り向き
 		WALK,			//歩行
+		MAGIC_ILDE,		//魔法待機
+		CAST_SPELL,		//魔法詠唱
+		ATTACK_FAR_ONE,	//遠距離攻撃(１つずつ発射）
 	};
 
 	//コンストラクタ
@@ -90,6 +95,12 @@ private:
 	//状態管理(更新ステップ)
 	std::function<void(void)> stateUpdate_;
 
+	//弾
+	std::unique_ptr<EnemyBullet> bullet_;
+
+	//状態を遷移させる用の時間管理変数
+	float stateStep_;
+
 	//エンカウントしているかどうか
 	bool isEncount_;		
 
@@ -107,12 +118,6 @@ private:
 	/// マテリアルの初期化
 	/// </summary>
 	void InitMaterial(void);
-
-	/// <summary>
-	/// Jsonデータ取得
-	/// </summary>
-	/// <returns>Jsonデータ</returns>
-	const nlohmann::json GetJsonData(void)const;
 
 	//状態遷移--------------------------------------------------------
 
@@ -155,8 +160,37 @@ private:
 	/// </summary>
 	void UpdateTurn(void);
 	/// <summary>
+	/// 更新：CAST_SPELL
+	/// </summary>
+	void UpdateCastSpell(void);
+	/// <summary>
+	/// 更新：ATTACK_PLAYER
+	/// </summary>
+	void UpdateAttackPlayer(void);
+	/// <summary>
 	/// 更新：ENCOUNT_FINISH
 	/// </summary>
 	void UpdateEncountFinish(void);
+
+	//--------------------------------------------------------
+
+	/// <summary>
+	/// Jsonデータ取得
+	/// </summary>
+	/// <returns>Jsonデータ</returns>
+	const nlohmann::json GetJsonData(void)const;
+
+	/// <summary>
+	/// 魔法詠唱アニメーションが終了したかどうかをチェックする
+	/// </summary>
+	/// <returns>true:終了　false:未終了</returns>
+	bool IsCastSpell(void);
+
+	/// <summary>
+	/// 魔法攻撃アニメーションが終了したかどうかをチェックする
+	/// </summary>
+	/// <returns>true:終了　false:未終了</returns>
+	bool IsSpellAttack(void);
+
 };
 

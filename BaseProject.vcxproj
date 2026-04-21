@@ -19,7 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Object\EncountEnemy.cpp" />
+    <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
+    <ClCompile Include="Src\Object\Character\EncountEnemy.cpp" />
     <ClCompile Include="Src\Object\UI\SkipBar.cpp" />
     <ClCompile Include="Src\Object\UI\ParryBar.cpp" />
     <ClCompile Include="Src\Object\UI\HPBar.cpp" />
@@ -28,7 +29,7 @@
     <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
     <ClCompile Include="Src\Object\EnemyBullet.cpp" />
-    <ClCompile Include="Src\Object\Enemy.cpp" />
+    <ClCompile Include="Src\Object\Character\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
     <ClCompile Include="Src\Manager\Generic\Input.cpp" />
@@ -46,7 +47,7 @@
     <ClCompile Include="Src\Renderer\ModelRenderer.cpp" />
     <ClCompile Include="Src\Renderer\PixelMaterial.cpp" />
     <ClCompile Include="Src\Renderer\PixelRenderer.cpp" />
-    <ClCompile Include="Src\Object\ActorBase.cpp" />
+    <ClCompile Include="Src\Object\Character\ActorBase.cpp" />
     <ClCompile Include="Src\Application.cpp" />
     <ClCompile Include="Src\Common\Fader.cpp" />
     <ClCompile Include="Src\Common\Quaternion.cpp" />
@@ -61,7 +62,7 @@
     <ClCompile Include="Src\Object\Common\Geometry\Capsule.cpp" />
     <ClCompile Include="Src\Object\Common\Collider.cpp" />
     <ClCompile Include="Src\Object\Common\Transform.cpp" />
-    <ClCompile Include="Src\Object\Player.cpp" />
+    <ClCompile Include="Src\Object\Character\Player.cpp" />
     <ClCompile Include="Src\Scene\GameScene.cpp" />
     <ClCompile Include="Src\Scene\SceneBase.cpp" />
     <ClCompile Include="Src\Scene\TitleScene.cpp" />
@@ -71,7 +72,8 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Object\EncountEnemy.h" />
+    <ClInclude Include="Src\Object\Character\EncountPlayer.h" />
+    <ClInclude Include="Src\Object\Character\EncountEnemy.h" />
     <ClInclude Include="Src\Object\UI\SkipBar.h" />
     <ClInclude Include="Src\Object\UI\ParryBar.h" />
     <ClInclude Include="Src\Object\UI\HPBar.h" />
@@ -80,7 +82,7 @@
     <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
     <ClInclude Include="Src\Object\EnemyBullet.h" />
-    <ClInclude Include="Src\Object\Enemy.h" />
+    <ClInclude Include="Src\Object\Character\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
     <ClInclude Include="Src\Common\Easing.h" />
     <ClInclude Include="Src\Manager\Generic\Input.h" />
@@ -145,7 +147,7 @@
     <ClInclude Include="Src\Renderer\ModelRenderer.h" />
     <ClInclude Include="Src\Renderer\PixelMaterial.h" />
     <ClInclude Include="Src\Renderer\PixelRenderer.h" />
-    <ClInclude Include="Src\Object\ActorBase.h" />
+    <ClInclude Include="Src\Object\Character\ActorBase.h" />
     <ClInclude Include="Src\Application.h" />
     <ClInclude Include="Src\Common\Fader.h" />
     <ClInclude Include="Src\Common\Quaternion.h" />
@@ -160,7 +162,7 @@
     <ClInclude Include="Src\Object\Common\Geometry\Capsule.h" />
     <ClInclude Include="Src\Object\Common\Collider.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
-    <ClInclude Include="Src\Object\Player.h" />
+    <ClInclude Include="Src\Object\Character\Player.h" />
     <ClInclude Include="Src\Scene\GameScene.h" />
     <ClInclude Include="Src\Scene\SceneBase.h" />
     <ClInclude Include="Src\Scene\TitleScene.h" />

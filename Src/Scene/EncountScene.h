@@ -6,6 +6,7 @@
 class Fader;
 class Player;
 class Enemy;
+class EncountPlayer;
 class EncountEnemy;
 class Stage;
 
@@ -32,8 +33,12 @@ public:
 		FINISH					//終了
 	};
 
-	//コンストラクタ
-	EncountScene(Player& player,Enemy& enemy,EncountEnemy& encountEnemy);
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="encountEnemy">エンカウント演出用の敵参照</param>
+	/// <param name="encountPlayer">エンカウント演出用のプレイヤー参照</param>
+	EncountScene(EncountEnemy& encountEnemy, EncountPlayer& encountPlayer);
 
 	//デストラクタ
 	~EncountScene(void);
@@ -102,9 +107,8 @@ private:
 	std::function<void(void)> stateUpdate_;
 
 	//参照
-	Player& player_;			//プレイヤー参照
-	Enemy& enemy_;				//敵参照
-	EncountEnemy& encountEnemy_;				//エンカウント演出用の敵参照
+	EncountEnemy& encountEnemy_;		//エンカウント演出用の敵参照
+	EncountPlayer& encountPlayer_;		//エンカウント演出用のプレイヤー参照
 
 	//インターバルタイマー
 	float intervalTimer_;	

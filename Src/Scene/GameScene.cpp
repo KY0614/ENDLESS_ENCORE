@@ -8,9 +8,10 @@
 #include "../Manager/Generic/Camera.h"
 #include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/ResourceManager.h"
-#include "../Object/Player.h"
-#include "../Object/Enemy.h"
-#include "../Object/EncountEnemy.h"
+#include "../Object/Character/Player.h"
+#include "../Object/Character/EncountPlayer.h"
+#include "../Object/Character/Enemy.h"
+#include "../Object/Character/EncountEnemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
 #include "../Object/UI/SkipBar.h"
@@ -45,6 +46,7 @@ namespace
 GameScene::GameScene(void)
 {
 	player_ = nullptr;
+	encountPlayer_ = nullptr;
 	enemy_ = nullptr;
 	encountEnemy_ = nullptr;
 	stage_ = nullptr;
@@ -77,6 +79,10 @@ void GameScene::Init(void)
 	player_ = std::make_shared<Player>();
 	player_->Init();
 
+	//エンカウント演出用のプレイヤー
+	encountPlayer_ = std::make_shared<EncountPlayer>();
+	encountPlayer_->Init();
+
 	//敵
 	enemy_ = std::make_shared<Enemy>(*player_);
 	enemy_->Init();
@@ -92,7 +98,7 @@ void GameScene::Init(void)
 	InitTutorial();
 
 	//演出シーン
-	encountScene_ = std::make_unique<EncountScene>(*player_,*enemy_, *encountEnemy_);
+	encountScene_ = std::make_unique<EncountScene>(*encountEnemy_,*encountPlayer_);
 	encountScene_->Init();
 
 	//スキップUI
@@ -219,7 +225,7 @@ void GameScene::InitStateExplore(void)
 {
 	//敵とプレイヤーの状態設定
 	enemy_->ChangeState(Enemy::STATE::NONE);
-	player_->ChangeState(Player::STATE::PLAY);
+	player_->Play();
 	player_->Update(); //状態変更後すぐに更新しておく
 
 	//フェードイン開始
@@ -242,7 +248,7 @@ void GameScene::InitStateBattle(void)
 	enemy_->SetIsEncount(true);
 	enemy_->Update(); //状態変更後すぐに更新しておく
 	enemy_->AddCollider(stage_->GetMistWallTransform().collider);
-	player_->ChangeState(Player::STATE::PLAY);
+	player_->Play();
 	player_->Update(); //状態変更後すぐに更新しておく
 	player_->AddCollider(stage_->GetMistWallTransform().collider);
 	SoundManager& sound = SoundManager::GetInstance();
@@ -262,7 +268,7 @@ void GameScene::Backstab(void)
 		{
 			player_->SetPos(target);
 			player_->SetBackstabRotY(enemy_->GetTransform().quaRot);
-			player_->ChangeState(Player::STATE::BACKSTAB);
+			player_->Backstab();
 			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
 		}
 	}
@@ -446,7 +452,7 @@ void GameScene::UpdateEncount(void)
 		{
 			//プレイヤーと敵を待機状態にする
 			enemy_->ChangeState(Enemy::STATE::WAIT);
-			player_->ChangeState(Player::STATE::WAIT);
+			player_->Wait();
 			//カメラをプレイヤーに追従させる
 			mainCamera->SetFollow(&player_->GetTransform());
 			mainCamera->ChangeMode(Camera::MODE::FOLLOW);
@@ -489,6 +495,7 @@ void GameScene::UpdateEncount(void)
 	encountScene_->Update();
 	//各オブジェクト更新
 	player_->Update();
+	encountPlayer_->Update();
 	enemy_->Update();
 	encountEnemy_->Update();
 	stage_->Update();
@@ -499,9 +506,12 @@ void GameScene::DrawEncount(void)
 	//ステージ描画
 	stage_->Draw();
 	//プレイヤー描画
-	player_->Draw();
+	//player_->Draw();
+	//エンカウント演出用のプレイヤー描画
+	encountPlayer_->Draw();
 	//敵描画
-	enemy_->Draw();
+	//enemy_->Draw();
+	//エンカウント演出用の敵描画
 	encountEnemy_->Draw();
 
 	//スキップUI描画
@@ -615,7 +625,9 @@ void GameScene::UpdateImGui(void)
 	if (ImGui::Button("Encount"))
 	{
 		enemy_->ChangeState(Enemy::STATE::NONE);
-		player_->ChangeState(Player::STATE::NONE);
+		//player_->ChangeState(Player::STATE::NONE);
+		encountPlayer_->Init();
+		encountEnemy_->Init();
 		ChangeState(STATE::ENCOUNT);
 		encountScene_->Start();
 	}
@@ -641,6 +653,12 @@ void GameScene::ObjectUpdateImGui(void)
 		if (ImGui::BeginTabItem("Player"))
 		{
 			player_->UpdateImGui();
+			ImGui::EndTabItem();
+		}
+		//プレイヤーのImGui
+		if (ImGui::BeginTabItem("EncountPlayer"))
+		{
+			encountPlayer_->UpdateImGui();
 			ImGui::EndTabItem();
 		}
 		//敵のImGui

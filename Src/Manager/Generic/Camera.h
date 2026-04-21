@@ -1,7 +1,7 @@
 #pragma once
 #include <DxLib.h>
 #include "../../Common/Quaternion.h"
-#include "../../Object/ActorBase.h"
+#include "../../Object/Character/ActorBase.h"
 
 class Sphere;
 class Transform;

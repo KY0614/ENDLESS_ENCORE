@@ -22,12 +22,9 @@ public:
 	//状態
 	enum class STATE
 	{
-		NONE,		//初期化前
+		NONE,
 		WAKE_UP,	//起き上がる
-		STAGE_WALK,	//ステージ上を歩く
-		LOOK_AROUND,//周りを見渡す
-		ATTACKED_ENEMY,	//敵に攻撃される
-		WAIT,		//戦闘開始前の待機
+		WAIT,		//待機
 		PLAY,		//操作可能
 		BACKSTAB,	//バックスタブ
 		DEAD,		//死亡
@@ -36,11 +33,8 @@ public:
 	//アニメーション種別
 	enum class ANIM_TYPE
 	{
+		IDLE,		//待機
 		WAKE_UP,	//起き上がる
-		IDLE,		//通常
-		WALK_SLOW,	//ゆっくり歩く
-		LOOK_AROUND,//周りを見渡す
-		ATTACKED,	//攻撃をされる
 		WALK,		//歩く
 		RUN,		//走り
 		JUMP,		//ジャンプ
@@ -53,7 +47,6 @@ public:
 
 	//コンストラクタ
 	Player(void);
-
 	//デストラクタ
 	~Player(void);
 
@@ -132,12 +125,6 @@ public:
 	const STATE& GetState(void) const { return state_; }
 
 	/// <summary>
-	/// 状態を変更する
-	/// </summary>
-	/// <param name="state">変更する状態</param>
-	void ChangeState(const STATE& state);
-
-	/// <summary>
 	/// ダメージを与える
 	/// </summary>
 	/// <param name="subHp">ダメージ量</param>
@@ -178,6 +165,21 @@ public:
 	/// </summary>
 	/// <param name="rotY">設定するY軸回転値</param>
 	void SetBackstabRotY(const Quaternion& rotY);
+
+	/// <summary>
+	/// 操作可能な状態へ
+	/// </summary>
+	void Play(void);
+
+	/// <summary>
+	/// 待機状態へ
+	/// </summary>
+	void Wait(void);
+
+	/// <summary>
+	/// 致命攻撃状態へ
+	/// </summary>
+	void Backstab(void);
 
 	/// <summary>
 	/// ImGui更新処理
@@ -235,6 +237,7 @@ private:
 
 	//カプセル
 	std::unique_ptr<Capsule> capsule_;
+	//球体
 	std::unique_ptr<Sphere> sphere_;
 
 	//足煙エフェクト
@@ -277,6 +280,7 @@ private:
 	//結果表示用文字列のアルファ値
 	int resultImgAlpha_;
 
+	//行動終了判定
 	bool isActionEnd_;
 
 	//布擦れSE再生フラグ
@@ -318,13 +322,13 @@ private:
 	/// <param name="maxHp">最大HP</param>
 	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
-	/// <summary>
-	/// エンカウント演出：ステージ上を歩く準備
-	/// </summary>
-	/// <param name=""></param>
-	void StageWalkReady(void);
-
 	//状態遷移処理--------------------------------------------------------
+
+	/// <summary>
+	/// 状態を変更する
+	/// </summary>
+	/// <param name="state">変更する状態</param>
+	void ChangeState(const STATE& state);
 
 	/// <summary>
 	/// 状態遷移：NONE
@@ -334,18 +338,6 @@ private:
 	/// 状態遷移：WAKE_UP
 	/// </summary>
 	void ChangeStateWakeUp(void);
-	/// <summary>
-	/// 状態遷移：STAGE_WALK
-	/// </summary>
-	void ChangeStateStageWalk(void);
-	/// <summary>
-	/// 状態遷移：LOOK_AROUND
-	/// </summary>
-	void ChangeStateLookAround(void);
-	/// <summary>
-	/// 状態遷移：ATTACKED_ENEMY
-	/// </summary>
-	void ChangeStateAttackedEnemy(void);
 	/// <summary>
 	/// 状態遷移：WAIT
 	/// </summary>
@@ -374,19 +366,7 @@ private:
 	/// </summary>
 	void UpdateWakeUp(void);
 	/// <summary>
-	/// 更新：STAGE_WALK
-	/// </summary>
-	void UpdateStageWalk(void);
-	/// <summary>
-	/// 更新：LOOK_AROUND
-	/// </summary>
-	void UpdateLookAround(void);
-	/// <summary>
-	/// 更新：ATTACKED_ENEMY
-	/// </summary>
-	void UpdateAttackedEnemy(void);
-	/// <summary>
-	/// 更新：WAIT
+	/// 状態更新：WAIT
 	/// </summary>
 	void UpdateWait(void);
 	/// <summary>
