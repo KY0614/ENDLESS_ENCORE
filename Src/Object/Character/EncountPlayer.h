@@ -33,7 +33,7 @@ public:
 	EncountPlayer(void);
 
 	//デストラクタ
-	~EncountPlayer(void);
+	~EncountPlayer(void)override;
 
 	/// <summary>
 	///	初期化
@@ -53,7 +53,13 @@ public:
 	/// <summary>
 	/// エンカウント演出開始
 	/// </summary>
-	void EncountStart(void);
+	/// <param name=""></param>
+	void IsEncountStart(void) { isEncountStart_ = true; }
+
+	/// <summary>
+	/// ステージを歩く状態へ
+	/// </summary>
+	void StageWalk(void);
 
 	/// <summary>
 	/// 周りを見渡す状態へ
@@ -104,6 +110,9 @@ private:
 
 	//行動終了判定
 	bool isActionEnd_;
+
+	//エンカウント演出を開始したかどうかの判定
+	bool isEncountStart_;	
 
 	/// <summary>
 	/// 3Dモデル初期化

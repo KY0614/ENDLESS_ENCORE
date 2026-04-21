@@ -19,11 +19,11 @@ public:
 	/// <param name="parryBarInfo">パリィのCDバーの情報（位置、サイズ）</param>
 	/// <param name="parryCD">パリィのCD</param>
 	/// <param name="parryCDMax">パリィの最大CD</param>
-	ParryBar(const ParryBarInfo parryBarInfo,
+	ParryBar(const ParryBarInfo& parryBarInfo,
 		const float& parryCD,
 		const float& parryCDMax);
 	//デストラクタ
-	~ParryBar(void);
+	~ParryBar(void)override;
 
 	/// <summary>
 	///	初期化

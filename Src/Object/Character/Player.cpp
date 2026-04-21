@@ -425,6 +425,22 @@ void Player::InitUI(void)
 	parryBar_->Init();
 }
 
+void Player::InitBattle(void)
+{
+	//移動中だった場合は移動量を０にする
+	movePow_ = CommonUtility::VECTOR_ZERO;
+	//Jsonデータ取得
+	JsonManager& jsonM = JsonManager::GetInstance();
+	const json playerData = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
+	//パラメータを取得
+	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
+	//座標をステージ上の端(手前側)に設定
+	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
+	//正面を向かせる(Z軸方向)
+	transform_.quaRot = Quaternion();
+}
+
 void Player::Damage(float subHp)
 {
 	if (hp_ <= 0.0f)return;
@@ -450,6 +466,8 @@ void Player::Play(void)
 
 void Player::Wait(void)
 {
+	//戦闘開始前の状態にする
+	InitBattle();
 	//状態をWAITに変更
 	ChangeState(STATE::WAIT);
 }
@@ -470,18 +488,33 @@ void Player::UpdateImGui(void)
 	ImGui::SliderFloat("PosY", &transform_.pos.y,posMin,posMax);
 	ImGui::SliderFloat("PosZ", &transform_.pos.z,posMin,posMax);
 
-	ImGui::SliderFloat("MovePosX", &movedPos_.x,posMin,posMax);
-	ImGui::SliderFloat("MovePosY", &movedPos_.y,posMin,posMax);
-	ImGui::SliderFloat("MovePosZ", &movedPos_.z,posMin,posMax);
-
-	ImGui::SliderFloat("MovePowX", &movePow_.x,-1.0f,50.0f);
-	ImGui::SliderFloat("MovePowY", &movePow_.y,-1.0f,50.0f);
-	ImGui::SliderFloat("MovePowZ", &movePow_.z,-1.0f,50.0f);
-
+	//ダメージを受けるボタン(10ダメージ)
 	if (ImGui::Button("Damage"))
 	{
 		const float damage = 10.0f;
 		Damage(damage);
+	}
+
+	//状態表示
+	switch (state_)
+	{
+	case Player::STATE::NONE:
+		ImGui::Text("NONE");
+		break;
+	case Player::STATE::WAIT:
+		ImGui::Text("WAIT");
+		break;
+	case Player::STATE::PLAY:
+		ImGui::Text("PLAY");
+		break;
+	case Player::STATE::DEAD:
+		ImGui::Text("DEAD");
+		break;
+	case Player::STATE::WAKE_UP:
+		ImGui::Text("WAKE_UP");
+		break;
+	default:
+		break;
 	}
 }
 
@@ -503,6 +536,7 @@ void Player::ChangeStateNone(void)
 
 void Player::ChangeStateWakeUp(void)
 {
+	//起き上がりアニメーションの終了時間
 	const float wakeUpEnd = 320.0f;
 	//起き上がりアニメーションに変更
 	animationController_->Play((int)ANIM_TYPE::WAKE_UP, false, 0.0f,wakeUpEnd);
@@ -511,8 +545,6 @@ void Player::ChangeStateWakeUp(void)
 
 void Player::ChangeStateWait(void)
 {
-	//animationController_->Play((int)ANIM_TYPE::IDLE, true, 0.0f, -1.0f, false, true);
-	animationController_->Play((int)ANIM_TYPE::IDLE);
 	stateUpdate_ = std::bind(&Player::UpdateWait, this);
 }
 
@@ -563,7 +595,17 @@ void Player::UpdateWakeUp(void)
 
 void Player::UpdateWait(void)
 {
-	//待機状態のままなので特に処理はない
+	//重力による移動量
+	CalcGravityPow();
+
+	//衝突判定
+	Collision();
+
+	if(animationController_->IsEnd())
+	{
+		//アニメーションが終了したら待機アニメーションに移行
+		animationController_->Play((int)ANIM_TYPE::IDLE);
+	}
 }
 
 void Player::UpdatePlay(void)

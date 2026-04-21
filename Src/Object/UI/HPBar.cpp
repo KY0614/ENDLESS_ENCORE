@@ -8,10 +8,6 @@ HPBar::HPBar(const HPBarInfo hpBarInfo, const float& hp):
 	barBackImg_ = -1;
 }
 
-HPBar::~HPBar(void)
-{
-}
-
 void HPBar::Init(void)
 {
 	//‰Šúó‘Ô‚Í•\¦

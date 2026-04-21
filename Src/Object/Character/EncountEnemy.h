@@ -38,7 +38,7 @@ public:
 	//コンストラクタ
 	EncountEnemy(void);
 	//デストラクタ
-	~EncountEnemy(void);
+	~EncountEnemy(void)override;
 
 	/// <summary>
 	///	初期化

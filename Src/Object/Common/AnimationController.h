@@ -23,7 +23,10 @@ public :
 	//デフォルトのアニメーションブレンド時間
 	static constexpr float DEFAULT_BLEND_ANIM_TIME = 1.0f;
 
-	//コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="modelId">DモデルID</param>
 	AnimationController(int modelId);
 	//デストラクタ
 	~AnimationController(void);

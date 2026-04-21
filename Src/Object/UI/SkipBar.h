@@ -21,11 +21,11 @@ public:
 	};
 
 	//コンストラクタ
-	SkipBar(const SkipBarUIInfo skipBarInfo,
+	SkipBar(const SkipBarUIInfo& skipBarInfo,
 		const float& skipTime,
 		const float& skipTimeMax);
 	//デストラクタ
-	~SkipBar(void);
+	~SkipBar(void) override = default;
 
 	/// <summary>
 	///	初期化

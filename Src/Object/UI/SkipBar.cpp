@@ -1,6 +1,6 @@
 #include "SkipBar.h"
 
-SkipBar::SkipBar(const SkipBarUIInfo skipBarInfo,
+SkipBar::SkipBar(const SkipBarUIInfo& skipBarInfo,
 	const float& skipTime,
 	const float& skipTimeMax):
 	skipBarInfo_(skipBarInfo),
@@ -9,10 +9,6 @@ SkipBar::SkipBar(const SkipBarUIInfo skipBarInfo,
 {
 	barUIFrameImg_ = -1;
 	uiBackImg_ = -1;
-}
-
-SkipBar::~SkipBar(void)
-{
 }
 
 void SkipBar::Init(void)

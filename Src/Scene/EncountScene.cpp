@@ -85,7 +85,7 @@ void EncountScene::Start(void)
 {
 	//エンカウント演出開始のために
 	//フェードアウトから開始
-	ChangeStateFade();
+	ChangeState(STATE::FADE);
 }
 
 void EncountScene::UpdateImGui(void)
@@ -165,7 +165,8 @@ void EncountScene::ChangeStateFade(void)
 void EncountScene::ChangeStatePlayerWalk(void)
 {
 	//プレイヤーのエンカウント演出開始
-	encountPlayer_.EncountStart();
+	encountPlayer_.IsEncountStart();
+	encountPlayer_.StageWalk();//プレイヤーを歩かせる
 	//カメラをトラック移動させる(ステージからプレイヤーに向かって)
 	//足元を映すように
 	mainCamera->SetTrackQuadOut(

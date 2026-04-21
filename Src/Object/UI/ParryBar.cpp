@@ -8,7 +8,7 @@ namespace
 	const int FONT_SIZE = 32;
 }
 
-ParryBar::ParryBar(const ParryBarInfo parryBarInfo,
+ParryBar::ParryBar(const ParryBarInfo& parryBarInfo,
 	const float& parryCD,
 	const float& parryCDMax):
 	parryBarInfo_(parryBarInfo),

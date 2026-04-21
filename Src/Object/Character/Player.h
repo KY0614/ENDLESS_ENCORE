@@ -317,6 +317,12 @@ private:
 	void InitUI(void);
 
 	/// <summary>
+	/// í“¬ŠJn‚Ì‰Šú‰»
+	/// </summary>
+	/// <param name=""></param>
+	void InitBattle(void);
+
+	/// <summary>
 	/// Å‘åHP‚ğİ’è
 	/// </summary>
 	/// <param name="maxHp">Å‘åHP</param>

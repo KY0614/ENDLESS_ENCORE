@@ -18,10 +18,13 @@ public:
 		DESTROY,//破棄
 	};
 
-	//コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="parent">親のTransform</param>
 	EnemyBullet(Transform& parent);
 	//デストラクタ
-	~EnemyBullet(void);
+	~EnemyBullet(void)override;
 
 	/// <summary>
 	///	初期化

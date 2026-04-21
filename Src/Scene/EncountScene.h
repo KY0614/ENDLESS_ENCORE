@@ -92,6 +92,13 @@ public:
 	const bool& IsFinished(void) const { return isFinish_; }
 
 	/// <summary>
+	/// ó‘Ô‚ğæ“¾
+	/// </summary>
+	/// <param name=""></param>
+	/// <returns></returns>
+	const STATE& GetState(void)const { return state_; }
+
+	/// <summary>
 	/// ImGuiXVˆ—
 	/// </summary>
 	void UpdateImGui(void) override;

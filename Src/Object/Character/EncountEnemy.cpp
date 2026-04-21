@@ -317,13 +317,11 @@ const json EncountEnemy::GetJsonData(void)const
 
 bool EncountEnemy::IsCastSpell(void)
 {
-	bool ret = true;
-
 	//アニメーションが終了しているか
 	if (animationController_->IsEnd() &&
 		animationController_->GetPlayType() == (int)ANIM_TYPE::CAST_SPELL)
 	{
-		return ret;	//終了している
+		return true;	//終了している
 	}
 
 	return false;
@@ -331,13 +329,11 @@ bool EncountEnemy::IsCastSpell(void)
 
 bool EncountEnemy::IsSpellAttack(void)
 {
-	bool ret = true;
-
 	//アニメーションが終了しているか
 	if (animationController_->IsEnd() &&
 		animationController_->GetPlayType() == (int)ANIM_TYPE::ATTACK_FAR_ONE)
 	{
-		return ret;	//終了している
+		return true;	//終了している
 	}
 
 	return false;

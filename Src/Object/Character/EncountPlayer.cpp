@@ -64,11 +64,11 @@ namespace
 EncountPlayer::EncountPlayer(void)
 {
 	state_ = STATE::NONE;
-	animationController_ = nullptr;
 	movedPos_ = CommonUtility::VECTOR_ZERO;
 	movePow_ = CommonUtility::VECTOR_ZERO;
 	jumpPow_ = CommonUtility::VECTOR_ZERO;
 	isActionEnd_ = false;
+	isEncountStart_ = false;
 	stateChanges_.emplace(STATE::NONE, std::bind(&EncountPlayer::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::STAGE_WALK, std::bind(&EncountPlayer::ChangeStateStageWalk, this));
 	stateChanges_.emplace(STATE::STAGE_WAIT, std::bind(&EncountPlayer::ChangeStateStageWait, this));
@@ -108,6 +108,8 @@ void EncountPlayer::Update(void)
 
 void EncountPlayer::Draw(void)
 {
+	if (!isEncountStart_)return;
+
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 
@@ -115,7 +117,7 @@ void EncountPlayer::Draw(void)
 	DrawShadow();
 }
 
-void EncountPlayer::EncountStart(void)
+void EncountPlayer::StageWalk(void)
 {
 	//ステージ上を歩く状態に遷移
 	ChangeState(STATE::STAGE_WALK);
@@ -222,22 +224,6 @@ void EncountPlayer::InitAnimation(void)
 	//攻撃をされる
 	animationController_->Add((int)ANIM_TYPE::ATTACKED, path + animPath.value(KEY_ATTACKED, KEY_EMPTY),
 		animSpeedSlow);
-}
-
-void EncountPlayer::StageWalkReady(void)
-{
-	//ジャンプ中に遷移したらジャンプ力を無効にする
-	jumpPow_ = CommonUtility::VECTOR_ZERO;
-	//Jsonデータ取得
-	JsonManager& jsonM = JsonManager::GetInstance();
-	const json playerData = jsonM.GetJsonData(
-		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
-	//パラメータを取得
-	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
-	//座標をステージ上の端(手前側)に設定
-	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
-	//正面を向かせる(Z軸方向)
-	transform_.quaRot = Quaternion();
 }
 
 void EncountPlayer::ChangeState(const STATE& state)

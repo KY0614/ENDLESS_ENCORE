@@ -313,6 +313,7 @@ void GameScene::ChangeStateEncount(void)
 {
 	skipTimer_ = 0.0f;
 	isSkip_ = false;
+	player_->Wait();
 	stateUpdate_ = std::bind(&GameScene::UpdateEncount, this);
 	stateDraw_ = std::bind(&GameScene::DrawEncount, this);
 }
@@ -505,12 +506,16 @@ void GameScene::DrawEncount(void)
 {
 	//ステージ描画
 	stage_->Draw();
-	//プレイヤー描画
-	//player_->Draw();
+	//エンカウントシーンのフェード中は通常のプレイヤー描画を行う
+	if (encountScene_->GetState() == EncountScene::STATE::FADE)
+	{
+		//プレイヤー描画
+		player_->Draw();
+	}
 	//エンカウント演出用のプレイヤー描画
 	encountPlayer_->Draw();
 	//敵描画
-	//enemy_->Draw();
+	enemy_->Draw();
 	//エンカウント演出用の敵描画
 	encountEnemy_->Draw();
 
@@ -625,7 +630,6 @@ void GameScene::UpdateImGui(void)
 	if (ImGui::Button("Encount"))
 	{
 		enemy_->ChangeState(Enemy::STATE::NONE);
-		//player_->ChangeState(Player::STATE::NONE);
 		encountPlayer_->Init();
 		encountEnemy_->Init();
 		ChangeState(STATE::ENCOUNT);
