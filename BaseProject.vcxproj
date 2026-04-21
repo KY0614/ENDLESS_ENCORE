@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
     <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
     <ClCompile Include="Src\Object\Character\EncountEnemy.cpp" />
     <ClCompile Include="Src\Object\UI\SkipBar.cpp" />
@@ -34,7 +35,6 @@
     <ClCompile Include="Src\Common\Easing.cpp" />
     <ClCompile Include="Src\Manager\Generic\Input.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Sphere.cpp" />
-    <ClCompile Include="Src\Common\DebugDrawFormat.cpp" />
     <ClCompile Include="Src\Libs\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_win32.cpp" />
@@ -72,6 +72,7 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
     <ClInclude Include="Src\Object\Character\EncountPlayer.h" />
     <ClInclude Include="Src\Object\Character\EncountEnemy.h" />
     <ClInclude Include="Src\Object\UI\SkipBar.h" />
@@ -133,7 +134,6 @@
     <ClInclude Include="Src\Libs\nlohmann\ordered_map.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\thirdparty\hedley\hedley.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
-    <ClInclude Include="Src\Common\DebugDrawFormat.h" />
     <ClInclude Include="Src\Libs\ImGuiWrapper.h" />
     <ClInclude Include="Src\Libs\ImGui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="Src\Libs\ImGui\backends\imgui_impl_win32.h" />
