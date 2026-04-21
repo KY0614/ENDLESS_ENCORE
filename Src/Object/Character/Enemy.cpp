@@ -569,30 +569,9 @@ void Enemy::UpdateMove(void)
 			ChangeState(STATE::CHARGE);
 			return;
 		}
-		//プレイヤーとの距離を測り、一定以上離れていたら遠距離攻撃
-		//それ以外は近距離攻撃
-		std::discrete_distribution<int> dist({ 60, 40 });
-		if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
-		{
-			ChangeState(STATE::ATTACK_NEAR);
-		}
-		else
-		{
-		}
-			animationController_->Play((int)ANIM_TYPE::CAST_SPELL, false);
-			std::vector<STATE> attackState = { STATE::SHOT_ONE, STATE::SHOT_ALL,STATE::ATTACK_NEAR };
-			// 乱数生成器の初期化
-			std::random_device rd;		//非決定的な乱数生成器
-			std::mt19937 engine(rd());	//メルセンヌ・ツイスタ法による乱数生成器
-			std::shuffle(attackState.begin(), attackState.end(), engine);
 
-			//遠距離攻撃
-			const int bulletNum = 5;
-			CreateBullets(bulletNum);
-
-			//攻撃状態へ遷移
-			ChangeState(attackState[0]);
-			return;
+		//ランダムに攻撃方法を決める
+		RandomAttack();
 		
 	}
 
@@ -919,6 +898,51 @@ void Enemy::UpdateDown(void)
 
 void Enemy::UpdateDead(void)
 {//何もしない
+}
+
+void Enemy::RandomAttack(void)
+{
+	//ランダムで遠距離攻撃を選択
+	std::vector<STATE> attackFarState = { STATE::SHOT_ONE, STATE::SHOT_ALL };
+	// 乱数生成器の初期化
+	std::random_device rd;		//非決定的な乱数生成器
+	std::mt19937 engine(rd());	//メルセンヌ・ツイスタ法による乱数生成器
+	std::shuffle(attackFarState.begin(), attackFarState.end(), engine);
+
+	// プレイヤーとの距離に応じて攻撃の確率を設定 (0: 近距離, 1: 遠距離)
+	int attackType = 0;
+	if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
+	{
+		// 距離が近い場合: 近距離攻撃 80% / 遠距離攻撃 20%
+		std::discrete_distribution<int> dist({ 80, 20 });
+		attackType = dist(engine);
+	}
+	else
+	{
+		// 距離が遠い場合: 近距離攻撃 20% / 遠距離攻撃 80%
+		std::discrete_distribution<int> dist({ 20, 80 });
+		attackType = dist(engine);
+	}
+
+	//プレイヤーとの距離を測り、一定以上離れていたら遠距離攻撃
+	//それ以外は近距離攻撃
+	if (attackType == 0)
+	{
+		ChangeState(STATE::ATTACK_NEAR);
+		return;
+	}
+	else
+	{
+		animationController_->Play((int)ANIM_TYPE::CAST_SPELL, false);
+
+		//遠距離攻撃
+		const int bulletNum = 5;
+		CreateBullets(bulletNum);
+
+		//攻撃状態へ遷移
+		ChangeState(attackFarState[0]);
+		return;
+	}
 }
 
 void Enemy::Damage(const float damage)

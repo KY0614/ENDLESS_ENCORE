@@ -352,6 +352,12 @@ private:
 	//--------------------------------------------------------
 
 	/// <summary>
+	/// ランダムに攻撃方法を選択する
+	/// </summary>
+	/// <param name="">メルセンヌ・ツイスタ法による乱数生成</param>
+	void RandomAttack(void);
+
+	/// <summary>
 	/// ダメージを与える
 	/// </summary>
 	/// <param name="damage">ダメージ量</param>
