@@ -1,5 +1,5 @@
 #include <DxLib.h>
-#include "../Manager/Generic/InputManager.h"
+#include "../Manager/GameSystem/InputManager.h"
 #include "ImGui/backends/imgui_impl_dx11.h"
 #include "ImGui/backends/imgui_impl_win32.h"
 #include "ImGuiWrapper.h"
@@ -114,27 +114,14 @@ void ImGuiWrapper::UpdateInputMouse(void)
 	io.AddMousePosEvent(mousePos.x, mousePos.y);
 	io.AddMouseButtonEvent(ImGuiMouseButton_Left, input.IsClickMouseLeft());
 	io.AddMouseButtonEvent(ImGuiMouseButton_Right, input.IsClickMouseRight());
-
-	// マウス情報をImGuiに渡す(InputManager未使用、DxLib使用)
-	//ImGuiIO& io = ImGui::GetIO();
-	//auto mouseInput = DxLib::GetMouseInput();
-	//int mousePosX = 0;
-	//int mousePosY = 0;
-	//DxLib::GetMousePoint(&mousePosX, &mousePosY);
-	//io.AddMousePosEvent(mousePosX, mousePosY);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Left, mouseInput & MOUSE_INPUT_LEFT);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Right, mouseInput & MOUSE_INPUT_RIGHT);
-
 }
 
 void ImGuiWrapper::UpdateNewFrame(void)
 {
-
 	// ImGui操作前準備
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
 }
 
 ImGuiWrapper::ImGuiWrapper(void)

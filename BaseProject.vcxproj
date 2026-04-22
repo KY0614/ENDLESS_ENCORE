@@ -33,7 +33,7 @@
     <ClCompile Include="Src\Object\Character\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
-    <ClCompile Include="Src\Manager\Generic\Input.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\Input.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Sphere.cpp" />
     <ClCompile Include="Src\Libs\ImGuiWrapper.cpp" />
     <ClCompile Include="Src\Libs\ImGui\backends\imgui_impl_dx11.cpp" />
@@ -53,8 +53,8 @@
     <ClCompile Include="Src\Common\Quaternion.cpp" />
     <ClCompile Include="Src\Common\Vector2.cpp" />
     <ClCompile Include="Src\main.cpp" />
-    <ClCompile Include="Src\Manager\Generic\Camera.cpp" />
-    <ClCompile Include="Src\Manager\Generic\InputManager.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\Camera.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\InputManager.cpp" />
     <ClCompile Include="Src\Manager\Generic\Resource.cpp" />
     <ClCompile Include="Src\Manager\Generic\ResourceManager.cpp" />
     <ClCompile Include="Src\Manager\Generic\SceneManager.cpp" />
@@ -86,7 +86,7 @@
     <ClInclude Include="Src\Object\Character\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
     <ClInclude Include="Src\Common\Easing.h" />
-    <ClInclude Include="Src\Manager\Generic\Input.h" />
+    <ClInclude Include="Src\Manager\GameSystem\Input.h" />
     <ClInclude Include="Src\Object\Common\Geometry\Sphere.h" />
     <ClInclude Include="Src\Libs\nlohmann\adl_serializer.hpp" />
     <ClInclude Include="Src\Libs\nlohmann\byte_container_with_subtype.hpp" />
@@ -153,8 +153,8 @@
     <ClInclude Include="Src\Common\Quaternion.h" />
     <ClInclude Include="Src\Common\Vector2.h" />
     <ClInclude Include="Src\main.h" />
-    <ClInclude Include="Src\Manager\Generic\Camera.h" />
-    <ClInclude Include="Src\Manager\Generic\InputManager.h" />
+    <ClInclude Include="Src\Manager\GameSystem\Camera.h" />
+    <ClInclude Include="Src\Manager\GameSystem\InputManager.h" />
     <ClInclude Include="Src\Manager\Generic\Resource.h" />
     <ClInclude Include="Src\Manager\Generic\ResourceManager.h" />
     <ClInclude Include="Src\Manager\Generic\SceneManager.h" />

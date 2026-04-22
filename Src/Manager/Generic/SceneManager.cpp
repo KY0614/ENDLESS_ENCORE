@@ -10,7 +10,7 @@
 #include "../../Scene/GameScene.h"
 #include "../GameSystem/SoundManager.h"
 #include "JsonManager.h"
-#include "Camera.h"
+#include "../GameSystem/Camera.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 

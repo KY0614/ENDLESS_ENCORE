@@ -93,7 +93,7 @@
     <ClCompile Include="Src\Utility\CommonUtility.cpp">
       <Filter>ソース ファイル\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\Camera.cpp">
+    <ClCompile Include="Src\Manager\GameSystem\Camera.cpp">
       <Filter>ソース ファイル\Manager</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\Common\AnimationController.cpp">
@@ -108,7 +108,7 @@
     <ClCompile Include="Src\Object\Common\Transform.cpp">
       <Filter>ソース ファイル\Object\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\InputManager.cpp">
+    <ClCompile Include="Src\Manager\GameSystem\InputManager.cpp">
       <Filter>ソース ファイル\Manager</Filter>
     </ClCompile>
     <ClCompile Include="Src\Common\Vector2.cpp">
@@ -147,7 +147,7 @@
     <ClCompile Include="Src\Object\Common\Geometry\Sphere.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Manager\Generic\Input.cpp">
+    <ClCompile Include="Src\Manager\GameSystem\Input.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Src\Common\Easing.cpp">
@@ -242,7 +242,7 @@
     <ClInclude Include="Src\Utility\CommonUtility.h">
       <Filter>ヘッダー ファイル\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\Camera.h">
+    <ClInclude Include="Src\Manager\GameSystem\Camera.h">
       <Filter>ヘッダー ファイル\Manager</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Common\AnimationController.h">
@@ -257,7 +257,7 @@
     <ClInclude Include="Src\Object\Common\Transform.h">
       <Filter>ヘッダー ファイル\Object\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\InputManager.h">
+    <ClInclude Include="Src\Manager\GameSystem\InputManager.h">
       <Filter>ヘッダー ファイル\Manager</Filter>
     </ClInclude>
     <ClInclude Include="Src\Common\Vector2.h">
@@ -443,7 +443,7 @@
     <ClInclude Include="Src\Object\Common\Geometry\Sphere.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Manager\Generic\Input.h">
+    <ClInclude Include="Src\Manager\GameSystem\Input.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Common\Easing.h">

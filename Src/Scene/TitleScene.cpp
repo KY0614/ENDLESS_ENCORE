@@ -7,8 +7,8 @@
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
-#include "../Manager/Generic/InputManager.h"
-#include "../Manager/Generic/Camera.h"
+#include "../Manager/GameSystem/InputManager.h"
+#include "../Manager/GameSystem/Camera.h"
 #include "../Object/Stage.h"
 #include "TitleScene.h"
 

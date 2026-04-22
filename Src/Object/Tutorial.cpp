@@ -1,7 +1,7 @@
 #include <DxLib.h>
 #include "../Libs/ImGui/imgui.h"
 #include "../Utility/StringUtility.h"
-#include "../Manager/Generic/InputManager.h"
+#include "../Manager/GameSystem/InputManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "Tutorial.h"

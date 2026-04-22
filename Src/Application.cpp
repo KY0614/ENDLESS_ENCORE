@@ -1,7 +1,7 @@
 #include <DxLib.h>
 #include "Libs/ImGuiWrapper.h"
 #include <EffekseerForDXLib.h>
-#include "Manager/Generic/InputManager.h"
+#include "Manager/GameSystem/InputManager.h"
 #include "Manager/Generic/ResourceManager.h"
 #include "Manager/Generic/SceneManager.h"
 #include "Common/FpsController.h"

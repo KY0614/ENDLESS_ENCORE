@@ -2,7 +2,7 @@
 #include "../Application.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Utility/CommonUtility.h"
-#include "../Manager/Generic/Camera.h"
+#include "../Manager/GameSystem/Camera.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"

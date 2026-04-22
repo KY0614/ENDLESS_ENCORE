@@ -2,7 +2,7 @@
 #include "../Utility/CommonUtility.h"
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
-#include "../Manager/Generic/Camera.h"
+#include "../Manager/GameSystem/Camera.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
