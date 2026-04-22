@@ -2,10 +2,10 @@
 #include "../Utility/CommonUtility.h"
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
-#include "../Manager/Generic/Camera.h"
+#include "../Manager/GameSystem/Camera.h"
+#include "../Manager/GameSystem/InputManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
-#include "../Manager/Generic/InputManager.h"
 #include "../Manager/Generic/JsonManager.h"
 #include "Stage.h"
 
@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 namespace
 {
-	//JSONキー名を定義
+	//JSONのデータのオブジェクト指定キー
 	static const std::string KEY_STAGE = "Stage";
 	static const std::string KEY_THEATER = "Theater";
 	static const std::string KEY_MIST_WALL = "MistWall";

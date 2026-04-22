@@ -7,7 +7,7 @@
 #include "../../Common/Vector2.h"
 #include "../../Common/Easing.h"
 #include "../../Utility/CommonUtility.h"
-#include "../Generic/InputManager.h"
+#include "../GameSystem/InputManager.h"
 #include "../Generic/SceneManager.h"
 #include "../../Object/Common/Transform.h"
 #include "../Object/Common/Geometry/Sphere.h"

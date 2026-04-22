@@ -185,7 +185,9 @@ public:
 	/// ImGuiXVˆ—
 	/// </summary>
 	/// <param name=""></param>
-	void UpdateImGui(void);
+	void UpdateImGui(void)override;
+
+	void SaveParameter(void) override;
 
 private:
 	//UI

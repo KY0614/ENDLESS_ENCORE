@@ -65,8 +65,9 @@ void Application::Init(void)
 	}
 	//ƒtƒHƒ“ƒg‚Ì’Ç‰Á
 	AddFontResourceExA("Data/Font/cinecaption226.ttf", FR_PRIVATE, NULL);
-	ImGuiWrapper::CreateInstance();
 
+	ImGuiWrapper::CreateInstance();
+	
 	//Effekseer‚Ì‰Šú‰»
 	InitEffekseer();
 

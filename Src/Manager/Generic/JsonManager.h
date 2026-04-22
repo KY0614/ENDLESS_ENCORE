@@ -62,7 +62,20 @@ public:
 	/// </summary>
 	/// <param name="objName">データを読み込む対象のオブジェクト名</param>
 	/// <returns>オブジェクト名と対応するパラメータ</returns>
-	nlohmann::json LoadJsonData(const std::string& fileName, const std::string& dataName);
+	nlohmann::json LoadJsonData(const std::string& fileName,
+		const std::string& dataName);
+
+	/// <summary>
+	/// 既存のJsonデータを上書きして保存する
+	/// </summary>
+	/// <param name="fileName">保存するファイル名</param>
+	/// <param name="jsonObjectName">指定するJsonオブジェクト名</param>
+	/// <param name="jsonData">指定するJsonデータ</param>
+	void OverWriteJsonData(const std::string& fileName,
+		const std::string& jsonObjectName,
+		const std::string& jsonData);
+
+	void WriteJsonDataTest(void);
 
 	/// <summary>
 	/// JSONデータからVECTOR型へ変換して取得

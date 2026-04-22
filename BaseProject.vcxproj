@@ -72,6 +72,8 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_dx11.h" />
+    <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_win32.h" />
     <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
     <ClInclude Include="Src\Object\Character\EncountPlayer.h" />
     <ClInclude Include="Src\Object\Character\EncountEnemy.h" />

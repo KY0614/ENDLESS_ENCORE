@@ -7,7 +7,7 @@ PixelMaterial::PixelMaterial(std::string shaderFileName, int constBufFloat4Size)
 
 	// ピクセルシェーダのロード
 	shader_ = LoadPixelShader(
-		StringUtility::StringToWstring((Application::PATH_SHADER + shaderFileName)).c_str());
+		StringUtility::String2Wstring((Application::PATH_SHADER + shaderFileName)).c_str());
 
 	// 定数バッファの確保サイズ(FLOAT4をいくつ作るか)
 	constBufFloat4Size_ = constBufFloat4Size;

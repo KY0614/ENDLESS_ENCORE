@@ -9,6 +9,14 @@ ImGuiWrapper* ImGuiWrapper::instance_ = nullptr;
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+namespace
+{
+	//ImGuiのフォントサイズ
+	const float IMGUI_FONT_SIZE = 13.0f;	
+	//ImGuiのフォントファイルパス
+	const char* IMGUI_FONT_PATH = "C:\\Windows\\Fonts\\msgothic.ttc";	//ゴシック体
+}
+
 void ImGuiWrapper::CreateInstance(void)
 {
 	if (instance_ == nullptr)
@@ -33,12 +41,20 @@ void ImGuiWrapper::Init(void)
 	// ImGuiの初期化
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	
+
 	ImGui_ImplWin32_Init(DxLib::GetMainWindowHandle());
 	ImGui_ImplDX11_Init(
 		(ID3D11Device*)DxLib::GetUseDirect3D11Device(),
 		(ID3D11DeviceContext*)DxLib::GetUseDirect3D11DeviceContext());
 
+	ImGuiIO& io = ImGui::GetIO();
+	//Windowsのフォントフォルダから直接読み込むか、プロジェクト内のパスを指定
+	// 日本語の範囲を指定して読み込み
+	io.Fonts->AddFontFromFileTTF(IMGUI_FONT_PATH, IMGUI_FONT_SIZE,
+		NULL, io.Fonts->GetGlyphRangesJapanese());
+
+	//ドッキング機能を有効化
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
 void ImGuiWrapper::Update(void)

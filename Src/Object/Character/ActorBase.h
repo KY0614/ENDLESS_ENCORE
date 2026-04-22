@@ -36,6 +36,18 @@ public:
 	/// <param name="collider">コライダー情報</param>
 	void AddCollider(std::weak_ptr<Collider> collider);
 
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	/// <param name=""></param>
+	virtual void UpdateImGui(void) {}
+
+	/// <summary>
+	/// Jsonデータのパラメータを保存する
+	/// </summary>
+	/// <param name=""></param>
+	virtual void SaveParameter(void) {}
+
 protected:
 	//モデル制御の基本情報
 	Transform transform_;

@@ -56,14 +56,14 @@ void Resource::Load(void)
 	{
 	case Resource::TYPE::IMG:
 		//画像
-		handleId_ = LoadGraph(StringUtility::StringToWstring(path_).c_str());
+		handleId_ = LoadGraph(StringUtility::String2Wstring(path_).c_str());
 		break;
 
 	case Resource::TYPE::IMGS:
 		//複数画像
 		handleIds_ = new int[numX_ * numY_];
 		LoadDivGraph(
-			StringUtility::StringToWstring(path_).c_str(),
+			StringUtility::String2Wstring(path_).c_str(),
 			numX_ * numY_,
 			numX_, numY_,
 			sizeX_, sizeY_,
@@ -72,17 +72,17 @@ void Resource::Load(void)
 
 	case Resource::TYPE::MODEL:
 		//モデル
-		handleId_ = MV1LoadModel(StringUtility::StringToWstring(path_).c_str());
+		handleId_ = MV1LoadModel(StringUtility::String2Wstring(path_).c_str());
 		break;
 
 	case Resource::TYPE::EFFEKSEER:
 		///エフェクト
-		handleId_ = LoadEffekseerEffect(StringUtility::StringToWstring(path_).c_str());
+		handleId_ = LoadEffekseerEffect(StringUtility::String2Wstring(path_).c_str());
 		break;
 
 	case Resource::TYPE::SOUND:
 		//サウンド
-		handleId_ = LoadSoundMem(StringUtility::StringToWstring(path_).c_str());
+		handleId_ = LoadSoundMem(StringUtility::String2Wstring(path_).c_str());
 		break;
 
 	case Resource::TYPE::FONT:
@@ -90,7 +90,7 @@ void Resource::Load(void)
 		const float screenAspect = SceneManager::GetInstance().GetScreenAspectRatio();
 		const int fontSize = FONT_SIZE * static_cast<int>(screenAspect);
 		//フォント
-		handleId_ = CreateFontToHandle(StringUtility::StringToWstring(path_).c_str(), fontSize, FONT_THICK, DX_FONTTYPE_ANTIALIASING);
+		handleId_ = CreateFontToHandle(StringUtility::String2Wstring(path_).c_str(), fontSize, FONT_THICK, DX_FONTTYPE_ANTIALIASING);
 		break;
 	}
 	

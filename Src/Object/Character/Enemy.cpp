@@ -24,7 +24,7 @@ using json = nlohmann::json;
 
 namespace
 {
-	//JSONキー名を定義
+	//JSONのデータのオブジェクト指定キー
 	static const std::string KEY_ENEMY = "Enemy";
 	//アニメーションキー名
 	static const std::string KEY_IDLE = "Idle";		//待機
@@ -643,7 +643,7 @@ void Enemy::UpdateShotOne(void)
 	//回転処理
 	RotateToPlayer();
 
-	//
+	//状態時間更新
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 
 	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
@@ -651,7 +651,7 @@ void Enemy::UpdateShotOne(void)
 		bullet->Update();
 	}
 
-	//弾を順々に準備状態にする
+	//弾を0.7f間隔で順々に準備状態にする
 	const float bulletInterval = 0.7f;
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
@@ -1324,6 +1324,7 @@ void Enemy::ShootBulletOne(const float shotInterval)
 	//弾が全部準備できたらプレイヤーに向けて１つずつ発射する
 	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
+		//弾の状態を確認し、全部消滅していたら処理しない
 		if (CheckBulletDestroy())break;
 		if (CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
 		if (stateStep_ > shotInterval && bullet->GetState() == EnemyBullet::STATE::READY)

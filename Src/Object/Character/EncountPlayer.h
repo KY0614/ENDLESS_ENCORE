@@ -81,7 +81,7 @@ public:
 	/// ImGui更新処理
 	/// </summary>
 	/// <param name=""></param>
-	void UpdateImGui(void);
+	void UpdateImGui(void)override;
 private:
 
 	//アニメーション

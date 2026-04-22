@@ -34,7 +34,7 @@ void AnimationController::Add(int type, const std::string& path, float speed)
 {
 
 	Animation anim;
-	anim.model = MV1LoadModel(StringUtility::StringToWstring(path).c_str());
+	anim.model = MV1LoadModel(StringUtility::String2Wstring(path).c_str());
 	anim.animIndex = type;
 	anim.speed = speed;
 

@@ -56,7 +56,7 @@ void Tutorial::Draw(void)
 	DrawStringToHandle(
 		tutorialStep_.front().pos_.x,
 		tutorialStep_.front().pos_.y,
-		StringUtility::StringToWstring(viewGuide_).c_str(),
+		StringUtility::String2Wstring(viewGuide_).c_str(),
 		0xFFFFFF,
 		fontHandle_);
 }

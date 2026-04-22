@@ -1,3 +1,4 @@
+#include <cassert>
 #include <DxLib.h>
 #include "../../Application.h"
 #include "JsonManager.h"
@@ -10,6 +11,8 @@ namespace
 	const std::string JSON_PLAYER = "Player";
 	const std::string JSON_ENEMY = "Enemy";
 	const std::string JSON_STAGE = "Stage";
+
+	const int JSON_INDENT_NUM = 4;	//JSONのインデントスペース数
 }
 
 JsonManager* JsonManager::instance_ = nullptr;
@@ -30,6 +33,8 @@ JsonManager& JsonManager::GetInstance(void)
 
 void JsonManager::Init(void)
 {
+	//JSONデータの書き込み
+	WriteJsonDataTest();
 }
 
 void JsonManager::Release(void)
@@ -64,6 +69,41 @@ nlohmann::json JsonManager::LoadJsonData(
 	nlohmann::json data = nlohmann::json::parse(ifs);
 	if (!data.contains(dataName))return{};
 	return data;
+}
+
+void JsonManager::OverWriteJsonData(const std::string& fileName,
+	const std::string& jsonObjectName,
+	const std::string& jsonData)
+{
+	std::ifstream ifs(fileName);
+	if (!ifs)
+	{
+		assert(0 && "ファイルが見つかりませんでした");
+		return;
+	}
+
+	//ファイルストリームからjsonオブジェクトに変換
+	nlohmann::json data = nlohmann::json::parse(ifs);
+}
+
+void JsonManager::WriteJsonDataTest(void)
+{
+	json data = {
+		{"param",{
+		{"name", "Aiueo"},
+		{"age", 20},
+		{"speed", 2.5f},
+		{"isHungry", true}
+			}}
+	};
+
+	std::string fileName = "Data/Json/Test.json";
+	//名前だけ上書き
+	//data["param"]["name"] = "Kakikukeo";
+
+	std::ofstream writing_file;
+	writing_file.open(fileName,std::ios::out);
+	writing_file << data.dump(JSON_INDENT_NUM) << std::endl;
 }
 
 const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const std::string& key)
