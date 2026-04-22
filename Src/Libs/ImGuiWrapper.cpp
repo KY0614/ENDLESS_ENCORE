@@ -12,7 +12,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace
 {
 	//ImGuiのフォントサイズ
-	const float IMGUI_FONT_SIZE = 13.0f;	
+	const float IMGUI_FONT_SIZE = 16.0f;	
 	//ImGuiのフォントファイルパス
 	const char* IMGUI_FONT_PATH = "C:\\Windows\\Fonts\\msgothic.ttc";	//ゴシック体
 }
@@ -48,13 +48,16 @@ void ImGuiWrapper::Init(void)
 		(ID3D11DeviceContext*)DxLib::GetUseDirect3D11DeviceContext());
 
 	ImGuiIO& io = ImGui::GetIO();
-	//Windowsのフォントフォルダから直接読み込むか、プロジェクト内のパスを指定
-	// 日本語の範囲を指定して読み込み
+	//Windowsのフォントフォルダから直接読み込む
+	//日本語の範囲を指定して読み込み
 	io.Fonts->AddFontFromFileTTF(IMGUI_FONT_PATH, IMGUI_FONT_SIZE,
 		NULL, io.Fonts->GetGlyphRangesJapanese());
 
-	//ドッキング機能を有効化
+	//ドッキング機能を有効化（ウィンドウをドラッグしてくっつけれる）
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+	ImGui::GetStyle().Colors[ImGuiCol_Tab] = ImColor(0,13,30,255);	//ウィンドウの背景を半透明にする
+	ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImColor(120,51,51,255);	//ウィンドウの背景を半透明にする
 }
 
 void ImGuiWrapper::Update(void)

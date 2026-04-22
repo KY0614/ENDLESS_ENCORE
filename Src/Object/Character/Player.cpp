@@ -493,18 +493,25 @@ void Player::UpdateImGui(void)
 	//Transformデータ取得
 	const json& transformData = playerData.at(JsonManager::KEY_TRANSFORM);
 
+	ImGui::Text(StringUtility::Wstring2UTF8(
+		L"Ctrlキーを押しながらスライダーをクリックすると、\n入力ボックスに変換されます").c_str());
 	//座標
-	ImGui::InputFloat3(StringUtility::Wstring2UTF8(L"初期座標").c_str(), &transform_.pos.x);
 	const float posMin = -10000.0f;
 	const float posMax = 10000.0f;
 	ImGui::SliderFloat("PosX", &transform_.pos.x,posMin,posMax);
-	std::string utf8(reinterpret_cast<const char*>(u8"テスト"));
 	//保存ボタン(スライドの横に配置)
 	ImGui::SameLine();
 	if (ImGui::Button(StringUtility::Wstring2UTF8(L"保存").c_str())) 
 	{
 		ImGui::OpenPopup("Save Confirmation");
 	}
+	//元に戻すボタン(保存ボタンの横に配置)
+	ImGui::SameLine();
+	if (ImGui::Button(StringUtility::Wstring2UTF8(L"元に戻す").c_str())) 
+	{
+		transform_.pos.x = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION).x;
+	}
+
 	//ポップアップの処理
 	if (ImGui::BeginPopupModal(
 		"Save Confirmation",
@@ -541,7 +548,6 @@ void Player::UpdateImGui(void)
 	if (ImGui::Button("Save to Json"))
 	{
 	}
-	
 
 	//ダメージを受けるボタン(10ダメージ)
 	if (ImGui::Button("Damage"))
