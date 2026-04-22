@@ -57,6 +57,10 @@ Camera::Camera(void)
 	zoomOutFov_ = 0.0f;
 	zoomOutDollyTotalTime_ = 0.0f;
 	zoomOutDollyElapsedTime_ = 0.0f;
+	backstabStartPos_ = CommonUtility::VECTOR_ZERO;
+	backstabEndPos_ = CommonUtility::VECTOR_ZERO;
+	backstabTargetPos_ = CommonUtility::VECTOR_ZERO;
+	stepBackstab_ = 0.5f;
 }
 
 Camera::~Camera(void)
@@ -153,7 +157,8 @@ void Camera::Draw(void)
 
 void Camera::SetBackstabCamera(const VECTOR& pos, const VECTOR& targetPos)
 {
-	backstabPos_ = pos;
+	backstabStartPos_ = transform_.pos;
+	backstabEndPos_ = pos;
 	backstabTargetPos_ = targetPos;
 }
 
@@ -228,7 +233,7 @@ void Camera::ChangeMode(MODE mode)
 		targetPos_ = zoomOutDollyTargetPos_;
 		break;	
 	case Camera::MODE::BACKSTAB:
-		transform_.pos = backstabPos_;
+		transform_.pos = backstabStartPos_;
 		targetPos_ = backstabTargetPos_;
 		break;	
 	case Camera::MODE::FREE:
@@ -590,6 +595,10 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 
 void Camera::SetBeforeDrawBackstab(void)
 {
+	stepBackstab_ -= SceneManager::GetInstance().GetDeltaTime();
+	float t = std::clamp(1.0f - (stepBackstab_ / 0.5f), 0.0f, 1.0f);
+	transform_.pos = CommonUtility::Lerp(
+		backstabStartPos_, backstabEndPos_, t);
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)

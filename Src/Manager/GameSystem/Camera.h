@@ -235,8 +235,10 @@ private:
 	float zoomOutDollyElapsedTime_;	//経過時間
 
 	//バックスタブ用
-	VECTOR backstabPos_;		//カメラ位置
+	VECTOR backstabStartPos_;	//開始位置
+	VECTOR backstabEndPos_;		//終了位置
 	VECTOR backstabTargetPos_;	//注視点
+	float stepBackstab_;		//カメラ移動の進行度合い
 
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
