@@ -42,10 +42,10 @@ public:
 		DOLLY,		//被写体に対してカメラを前後移動させる
 		ZOOM_OUT_DOLLY,	//ズームアウトしながらドリー移動
 		FIXED_POINT,//固定カメラ
+		BACKSTAB,	//バックスタブ時のカメラ
 		FOLLOW,		//追従
 		FREE,		//自由
 		MOUSE,		//マウスで操作
-		PAUSE,		//一時停止
 	};
 
 	//コンストラクタ
@@ -142,7 +142,7 @@ public:
 		const float& totalMoveTime = 1.0f);
 
 	/// <summary>
-	/// 
+	/// ズームアウトしながらドリー移動するカメラの設定
 	/// </summary>
 	/// <param name="endFov">最終的な視野角(60より大きい)</param>
 	/// <param name="startPos"></param>
@@ -156,7 +156,20 @@ public:
 		const VECTOR& targetPos,
 		const float& totalMoveTime = 1.0f);
 
-	//追従対象の設定
+	/// <summary>
+	/// バックスタブ時のカメラの設定
+	/// </summary>
+	/// <param name="startPos"></param>
+	/// <param name="endPos"></param>
+	/// <param name="targetPos"></param>
+	void SetBackstabCamera(
+		const VECTOR& pos,
+		const VECTOR& targetPos);
+
+	/// <summary>
+	/// 追従対象の設定
+	/// </summary>
+	/// <param name="follow">追従対象のTransform</param>
 	void SetFollow(const Transform* follow);
 
 	//注視対象の設定
@@ -221,6 +234,10 @@ private:
 	float zoomOutDollyTotalTime_;	//総移動時間
 	float zoomOutDollyElapsedTime_;	//経過時間
 
+	//バックスタブ用
+	VECTOR backstabPos_;		//カメラ位置
+	VECTOR backstabTargetPos_;	//注視点
+
 	//ロックオンしているかどうか true:ロックオン中
 	bool isLockOn_;
 
@@ -257,14 +274,23 @@ private:
 	void ProcessMouseMove(void);	//マウス移動処理
 
 	//モード別更新ステップ
+	//クレーンアップ
 	void SetBeforeDrawCraneUp(void);
+	//トラック
 	void SetBeforeDrawTrack(void);
+	//ドリー
 	void SetBeforeDrawDolly(void);
+	//ズームアウトドリー
 	void SetBeforeDrawZoomOutDolly(void);
+	//バックスタブ
+	void SetBeforeDrawBackstab(void);
+	//固定
 	void SetBeforeDrawFixedPoint(void);
-	void SetBeforeDrawTopFixed(void);
+	//追従
 	void SetBeforeDrawFollow(void);
+	//自由
 	void SetBeforeDrawFree(void);
+	//マウス操作
 	void SetBeforeDrawMouse(void);
 
 };

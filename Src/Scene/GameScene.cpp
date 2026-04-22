@@ -270,6 +270,16 @@ void GameScene::Backstab(void)
 			player_->SetBackstabRotY(enemy_->GetTransform().quaRot);
 			player_->Backstab();
 			enemy_->ChangeState(Enemy::STATE::BACKSTAB);
+			VECTOR right = player_->GetTransform().GetRight();
+			VECTOR back = player_->GetTransform().GetBack();
+			VECTOR rightBack = VAdd(right, back);
+			VECTOR pos = VAdd(player_->GetTransform().pos, VScale(rightBack, 50.0f));
+			pos.x += 20.0f;
+			pos.y += 50.0f;
+			VECTOR targetpos = enemy_->GetTransform().pos;
+			targetpos.y += 65.0f;
+			mainCamera->SetBackstabCamera(pos, targetpos);
+			mainCamera->ChangeMode(Camera::MODE::BACKSTAB);
 		}
 	}
 }

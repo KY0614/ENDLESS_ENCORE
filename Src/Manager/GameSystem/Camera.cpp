@@ -103,6 +103,10 @@ void Camera::SetBeforeDraw(void)
 		SetBeforeDrawZoomOutDolly();
 		break;
 
+	case Camera::MODE::BACKSTAB:
+		SetBeforeDrawBackstab();
+		break;
+
 	case Camera::MODE::FOLLOW:
 		SetBeforeDrawFollow();
 		break;
@@ -145,6 +149,12 @@ void Camera::SetBeforeDraw(void)
 
 void Camera::Draw(void)
 {
+}
+
+void Camera::SetBackstabCamera(const VECTOR& pos, const VECTOR& targetPos)
+{
+	backstabPos_ = pos;
+	backstabTargetPos_ = targetPos;
 }
 
 void Camera::SetFollow(const Transform* follow)
@@ -216,6 +226,10 @@ void Camera::ChangeMode(MODE mode)
 	case Camera::MODE::ZOOM_OUT_DOLLY:
 		transform_.pos = zoomOutDollyStartPos_;
 		targetPos_ = zoomOutDollyTargetPos_;
+		break;	
+	case Camera::MODE::BACKSTAB:
+		transform_.pos = backstabPos_;
+		targetPos_ = backstabTargetPos_;
 		break;	
 	case Camera::MODE::FREE:
 		break;
@@ -574,15 +588,15 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 		zoomOutDollyStartPos_.z, zoomOutDollyEndPos_.z);
 }
 
+void Camera::SetBeforeDrawBackstab(void)
+{
+}
+
 void Camera::SetBeforeDrawFixedPoint(void)
 {
 	//å≈íËà íuÇ…ê›íË
 	transform_.pos = fixedPointPos_;
 	targetPos_ = fixedPointTargetPos_;
-}
-
-void Camera::SetBeforeDrawTopFixed(void)
-{
 }
 
 void Camera::SetBeforeDrawFollow(void)
