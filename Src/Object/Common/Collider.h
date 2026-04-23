@@ -12,6 +12,7 @@ public :
 		STAGE,
 		PLAYER,
 		ENEMY,
+		CAMERA,
 	};
 
 	//コンストラクタ

@@ -12,6 +12,7 @@
 #include "../../Object/Common/Transform.h"
 #include "../Object/Common/Geometry/Sphere.h"
 #include "Camera.h"
+#include "ColliderBase.h"
 
 namespace
 {
@@ -166,6 +167,14 @@ void Camera::SetBackstabCamera(const VECTOR& pos, const VECTOR& targetPos)
 	backstabStartPos_ = transform_.pos;
 	backstabEndPos_ = pos;
 	backstabTargetPos_ = targetPos;
+}
+
+ColliderBase::ColliderBase(SHAPE shape, TAG tag, const Transform* follow)
+{
+}
+
+ColliderBase::~ColliderBase(void)
+{
 }
 
 void Camera::SetFollow(const Transform* follow)
@@ -445,8 +454,8 @@ void Camera::ProcessRot(void)
 	//‰ñ“]ˆ—
 	if (ins.IsInputPressed("CameraUp")) { angles_.x += rotPow; }
 	if (ins.IsInputPressed("CameraDown")) { angles_.x -= rotPow; }
-	if (ins.IsInputPressed("CameraLeft")) { angles_.y -= rotPow; }
-	if (ins.IsInputPressed("CameraRight")) { angles_.y += rotPow; }
+	if (ins.IsInputPressed("CameraRight")) { angles_.y -= rotPow; }
+	if (ins.IsInputPressed("CameraLeft")) { angles_.y += rotPow; }
 
 	//xŽ²‰ñ“]‚Ì§ŒÀiã‚Í‚S‚O“xA‰º‚Í‚P‚T“xj
 	if (angles_.x > LIMIT_X_UP_RAD)
