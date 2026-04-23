@@ -20,6 +20,8 @@ namespace
 	const float FPS_LIMIT_X_DW_RAD = 70.0f * (DX_PI_F / 180.0f);	//下限
 	//視野角
 	const float DEFAULT_CAMERA_FOV = 60.0f;
+
+	const float BACKSTAB_MOVE_TIME = 0.3f;	//バックスタブカメラの移動時間	
 }
 
 Camera::Camera(void)
@@ -60,7 +62,7 @@ Camera::Camera(void)
 	backstabStartPos_ = CommonUtility::VECTOR_ZERO;
 	backstabEndPos_ = CommonUtility::VECTOR_ZERO;
 	backstabTargetPos_ = CommonUtility::VECTOR_ZERO;
-	stepBackstab_ = 0.5f;
+	stepBackstab_ = 0.0f;
 }
 
 Camera::~Camera(void)
@@ -113,6 +115,10 @@ void Camera::SetBeforeDraw(void)
 
 	case Camera::MODE::FOLLOW:
 		SetBeforeDrawFollow();
+		break;
+
+	case Camera::MODE::BACKSTAB_2_FOLLOW:
+		SetBeforeDrawBackstab2Follow();
 		break;
 
 	case Camera::MODE::FREE:
@@ -235,6 +241,10 @@ void Camera::ChangeMode(MODE mode)
 	case Camera::MODE::BACKSTAB:
 		transform_.pos = backstabStartPos_;
 		targetPos_ = backstabTargetPos_;
+		stepBackstab_ = 0.0f;
+		break;	
+	case Camera::MODE::BACKSTAB_2_FOLLOW:
+		stepBackstab_ = 0.0f;
 		break;	
 	case Camera::MODE::FREE:
 		break;
@@ -595,10 +605,15 @@ void Camera::SetBeforeDrawZoomOutDolly(void)
 
 void Camera::SetBeforeDrawBackstab(void)
 {
-	stepBackstab_ -= SceneManager::GetInstance().GetDeltaTime();
-	float t = std::clamp(1.0f - (stepBackstab_ / 0.5f), 0.0f, 1.0f);
-	transform_.pos = CommonUtility::Lerp(
-		backstabStartPos_, backstabEndPos_, t);
+	//終了座標から現在座標まで
+	stepBackstab_ += SceneManager::GetInstance().GetDeltaTime();
+
+	transform_.pos.x = Easing::ExpOut(
+		stepBackstab_, 1.0f, backstabStartPos_.x, backstabEndPos_.x);
+	transform_.pos.y = Easing::ExpOut(
+		stepBackstab_, 1.0f, backstabStartPos_.y, backstabEndPos_.y);
+	transform_.pos.z = Easing::ExpOut(
+		stepBackstab_, 1.0f, backstabStartPos_.z, backstabEndPos_.z);
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)
@@ -618,6 +633,50 @@ void Camera::SetBeforeDrawFollow(void)
 
 	//衝突判定
 	Collision();
+}
+
+void Camera::SetBeforeDrawBackstab2Follow(void)
+{
+	//追従先の位置
+	VECTOR pos = followTransform_->pos;
+
+	//追従先の向き
+	Quaternion followRot = Quaternion::Quaternion();
+
+	//注視点(通常重力でいうところのY値を追従対象と同じにする)
+	VECTOR localPos = rotOutX_.PosAxis(LOCAL_F2T_POS);
+	targetPos_ = VAdd(pos, localPos);
+
+	//カメラをもとに戻す位置
+	VECTOR endPos = {};
+	localPos = transform_.quaRot.PosAxis(LOCAL_F2C_POS);
+	endPos = VAdd(pos, localPos);
+
+	//正面から設定されたY軸分、回転させる
+	rotOutX_ = followRot.Mult(Quaternion::AngleAxis(angles_.y, CommonUtility::AXIS_Y));
+
+	//正面から設定されたX軸分、回転させる
+	transform_.quaRot = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, CommonUtility::AXIS_X));
+	const float rotTime = 0.1f;
+	transform_.quaRot = Quaternion::Slerp(transform_.quaRot, transform_.quaRot, rotTime);
+
+	//カメラの上方向
+	transform_.quaRot.GetUp() = followRot.GetUp();
+
+	if (stepBackstab_ >= 1.0f)
+	{
+		//ChangeMode関数を使うとSetDefault関数が呼ばれ、
+		//角度や位置がリセットされてしまうため、直接モードを変更する
+		mode_ = MODE::FOLLOW;
+		return;
+	}
+	stepBackstab_ += SceneManager::GetInstance().GetDeltaTime();
+	transform_.pos.x = Easing::ExpOut(
+		stepBackstab_, 1.0f, backstabEndPos_.x, endPos.x);
+	transform_.pos.y = Easing::ExpOut(
+		stepBackstab_, 1.0f, backstabEndPos_.y, endPos.y);
+	transform_.pos.z = Easing::ExpOut(
+		stepBackstab_, 1.0f, backstabEndPos_.z, endPos.z);
 }
 
 void Camera::SetBeforeDrawFree(void)
@@ -667,6 +726,8 @@ void Camera::UpdateImGui(void)
 	ImGui::Text("targetPos: %.2f, %.2f, %.2f", targetPos_.x, targetPos_.y, targetPos_.z);
 	//座標
 	ImGui::Text("Pos: %.2f, %.2f, %.2f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
+	//角度
+	ImGui::Text("AngleX : %.2f", angles_.x);
 	//視野角(数値入力)
 	ImGui::InputFloat("Fov", &fov_);
 	//視野角(スライダー)

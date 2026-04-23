@@ -203,11 +203,10 @@ void Player::Update(void)
 
 void Player::Draw(void)
 {
-	VECTOR right = transform_.GetRight();
-	VECTOR back = transform_.GetBack();
-	VECTOR rightBack = VAdd(right, back);
-	VECTOR pos = VAdd(transform_.pos,VScale(rightBack, 50.0f));
-	pos.x += 20.0f;
+	VECTOR right = GetTransform().GetRight();
+	VECTOR back = GetTransform().GetBack();
+	VECTOR rightBackDir = VNorm(VAdd(back, right));
+	VECTOR pos = VAdd(GetTransform().pos, VScale(VNorm(rightBackDir), 50.0f));
 	pos.y += 50.0f;
 	DrawSphere3D(pos, 20.0f, 16, 0x00ff00, 0x00ff00, false);
 
@@ -784,8 +783,6 @@ void Player::UpdateBackstab(void)
 		
 		stepBackstab_ = 0.0f;
 		ChangeState(STATE::PLAY);
-		mainCamera->SetFollow(&transform_);
-		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 		return;
 	}
 }

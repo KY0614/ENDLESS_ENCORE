@@ -55,9 +55,12 @@ void ImGuiWrapper::Init(void)
 
 	//ドッキング機能を有効化（ウィンドウをドラッグしてくっつけれる）
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-	ImGui::GetStyle().Colors[ImGuiCol_Tab] = ImColor(0,13,30,255);	//ウィンドウの背景を半透明にする
-	ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImColor(120,51,51,255);	//ウィンドウの背景を半透明にする
+	//タブの色を濃い目の青
+	const ImColor darkBlue(0, 13, 30, 255);
+	ImGui::GetStyle().Colors[ImGuiCol_Tab] = darkBlue;	
+	//アクティブなタブの色を赤っぽく
+	const ImColor red(120, 51, 51, 255);
+	ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = red;	//アクティブなタブの色を赤っぽく
 }
 
 void ImGuiWrapper::Update(void)

@@ -870,6 +870,8 @@ void Enemy::UpdateBackstab(void)
 	//アニメーションが最後まで再生されたら移動状態へ遷移
 	if (isBackstab_ && animationController_->IsEnd())
 	{
+		mainCamera->SetFollow(&player_.GetTransform());
+		mainCamera->ChangeMode(Camera::MODE::BACKSTAB_2_FOLLOW);
 		isBackstab_ = false;
 		ChangeState(STATE::MOVE);
 		return;

@@ -20,18 +20,18 @@ public:
 	static constexpr float CAMERA_FAR = 30000.0f;
 
 	//追従位置からカメラ位置までの相対座標
-	static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 90.0f, -340.0f };
+	static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 110.0f, -340.0f };
 
 	//追従位置から注視点までの相対座標
-	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, -60.0f, 575.0f };
+	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, 50.0f, 0.0f };
 
 	//カメラ座標関連の定数---------------------------------------------------------------------
 
 	static constexpr VECTOR DEFAULT_CAMERA_POS = { 0.0f, 500.0f, -800.0f };			//カメラの初期座標
 
 	//カメラのX回転上限度角
-	static constexpr float LIMIT_X_UP_RAD = 90.0f * (DX_PI_F / 180.0f);
-	static constexpr float LIMIT_X_DW_RAD = 90.0f * (DX_PI_F / 180.0f);
+	static constexpr float LIMIT_X_UP_RAD = 70.0f * (DX_PI_F / 180.0f);
+	static constexpr float LIMIT_X_DW_RAD = 20.0f * (DX_PI_F / 180.0f);
 
 	//カメラモード
 	enum class MODE
@@ -44,6 +44,7 @@ public:
 		FIXED_POINT,//固定カメラ
 		BACKSTAB,	//バックスタブ時のカメラ
 		FOLLOW,		//追従
+		BACKSTAB_2_FOLLOW,	//バックスタブから追従に移行するカメラ
 		FREE,		//自由
 		MOUSE,		//マウスで操作
 	};
@@ -92,9 +93,16 @@ public:
 	/// <returns>true:終了,false:まだ終了していない</returns>
 	const bool& IsActionEnd() const { return isActionEnd_; }
 
-	//カメラモードの変更
+	/// <summary>
+	/// カメラモードの変更
+	/// </summary>
+	/// <param name="mode">変更するカメラモード</param>
 	void ChangeMode(MODE mode);
 
+	/// <summary>
+	/// 注視点を設定
+	/// </summary>
+	/// <param name="targetPos">注視点</param>
 	void SetTargetPos(const VECTOR& targetPos) { targetPos_ = targetPos; }
 
 	/// <summary>
@@ -290,6 +298,8 @@ private:
 	void SetBeforeDrawFixedPoint(void);
 	//追従
 	void SetBeforeDrawFollow(void);
+	//バックスタブから追従に移行
+	void SetBeforeDrawBackstab2Follow(void);
 	//自由
 	void SetBeforeDrawFree(void);
 	//マウス操作
