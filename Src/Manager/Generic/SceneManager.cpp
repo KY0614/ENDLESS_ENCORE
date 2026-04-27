@@ -8,9 +8,10 @@
 #include "../../Common/Fader.h"
 #include "../../Scene/TitleScene.h"
 #include "../../Scene/GameScene.h"
+#include "../../Scene/DebugScene.h"
 #include "../GameSystem/SoundManager.h"
-#include "JsonManager.h"
 #include "../GameSystem/Camera.h"
+#include "JsonManager.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
@@ -80,7 +81,7 @@ void SceneManager::Init(void)
 	Init3D();
 
 	//初期シーンの設定
-	DoChangeScene(SCENE_ID::GAME);
+	DoChangeScene(SCENE_ID::DEBUG);
 }
 
 void SceneManager::Init3D(void)
@@ -152,7 +153,7 @@ void SceneManager::Update(void)
 
 	//シーンごとのImGui更新処理
 	SceneUpdateImGui();
-
+	UpdateImGui();
 #endif // _DEBUG
 	
 }
@@ -480,8 +481,37 @@ std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
 		sceneName_ = "Game Scene";
 		break;
 
+	case SceneManager::SCENE_ID::DEBUG:
+		scene = std::make_unique<DebugScene>();
+		resM.InitGame();
+		jsonM.InitGame();
+		sceneName_ = "Debug	 Scene";
+		break;
+
 	default:
 		break;
 	}
 	return scene;
+}
+
+void SceneManager::UpdateImGui(void)
+{
+	ImGui::Begin("SceneManager");
+
+	if (ImGui::Button("TITLE"))
+	{
+		ChangeScene(SCENE_ID::TITLE);
+	}
+
+	if (ImGui::Button("GAME"))
+	{
+		ChangeScene(SCENE_ID::GAME);
+	}
+
+	if (ImGui::Button("DEBUG"))
+	{
+		ChangeScene(SCENE_ID::DEBUG);
+	}
+
+	ImGui::End();
 }

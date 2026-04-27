@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\DebugScene.cpp" />
+    <ClCompile Include="Src\Object\Character\PlayerTest.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\ColliderLine.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\ColliderModel.cpp" />
     <ClCompile Include="Src\Object\Character\CharactorBase.cpp" />
@@ -77,6 +79,8 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\DebugScene.h" />
+    <ClInclude Include="Src\Object\Character\PlayerTest.h" />
     <ClInclude Include="Src\Object\Common\Geometry\ColliderLine.h" />
     <ClInclude Include="Src\Object\Common\Geometry\ColliderModel.h" />
     <ClInclude Include="Src\Object\Character\CharactorBase.h" />

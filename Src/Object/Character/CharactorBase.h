@@ -1,5 +1,7 @@
 #pragma once
-#include "ActorBase.h"
+#include "../Common/ActorBase.h"
+
+class AnimationController;
 
 class CharactorBase : public ActorBase
 {
@@ -9,6 +11,7 @@ public:
 	enum class COLLIDER_TYPE
 	{
 		SPHERE,	//球体
+		LINE,	//線分
 		MAX,
 	};
 
@@ -25,7 +28,7 @@ public:
 	/// <summary>
 	/// 更新処理
 	/// </summary>
-	void Update(void) override;
+	virtual void Update(void) override;
 
 	/// <summary>
 	/// 描画処理
@@ -33,19 +36,45 @@ public:
 	void Draw(void) override;
 
 protected:
-	//モデル制御の基本情報
-	Transform transform_;
+	//アニメーション
+	std::unique_ptr<AnimationController> animationController_;
+
+	//移動方向
+	VECTOR moveDir_;
+
+	//移動量
+	VECTOR movePow_;
+
+	//移動後の座標
+	VECTOR movedPos_;
+
+	// 移動前の座標
+	VECTOR prevPos_;
 
 	//ジャンプの力
 	VECTOR jumpPow_;
 
+	//ジャンプ判定
+	bool isJump_;
+
 	//丸影
 	int imgShadow_;
+
+	// 更新系
+	virtual void UpdateProcess(void) = 0;
+	virtual void UpdateProcessPost(void) = 0;
+
+	// 移動方向に応じた遅延回転
+	void DelayRotate(void);
 
 	/// <summary>
 	/// 重力計算処理
 	/// </summary>
 	void CalcGravityPower(void);
+
+	void Collision(void);
+
+	void CollisionGravity(void);
 
 	/// <summary>
 	/// 影の描画処理

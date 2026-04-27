@@ -2,8 +2,8 @@
 #include "../Object/Common/AnimationController.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/SceneManager.h"
+#include "Geometry/ColliderBase.h"
 #include "ActorBase.h"
-#include "CharactorBase.h"
 
 ActorBase::ActorBase(void)
 {
@@ -11,11 +11,6 @@ ActorBase::ActorBase(void)
 
 ActorBase::~ActorBase(void)
 {
-	//自身のコライダ解放
-	for (auto& own : ownColliders_)
-	{
-		delete own.second;
-	}
 }
 
 void ActorBase::Init(void)
@@ -30,7 +25,7 @@ void ActorBase::Update(void)
 void ActorBase::Draw(void)
 {
 #ifdef _DEBUG
-	// 所有しているコライダの描画
+	//所有しているコライダの描画
 	for (const auto& own : ownColliders_)
 	{
 		own.second->Draw();
@@ -57,16 +52,32 @@ void ActorBase::AddCollider(std::weak_ptr<Collider> collider)
 	colliders_.emplace_back(collider);
 }
 
-const ColliderBase* ActorBase::GetOwnCollider(int key) const
+void ActorBase::AddHitCollider(const std::weak_ptr<ColliderBase> hitCollider)
 {
-	//指定されたキーに対応する自身の衝突情報を取得する
-	const auto& it = ownColliders_.find(key);
-	//見つかった場合は対応する衝突情報を返す
-	if (it != ownColliders_.end())
+	for (const auto& c : hitColliders_)
 	{
-		return it->second;
+		if (c.lock() == hitCollider.lock())
+		{
+			return;
+		}
 	}
-	return nullptr;	//見つからなかった場合はnullptrを返す
+	hitColliders_.emplace_back(hitCollider);
+}
+
+void ActorBase::ClearHitCollider(void)
+{
+	hitColliders_.clear();
+}
+
+const std::weak_ptr<ColliderBase> ActorBase::GetOwnCollider(int key) const
+{
+	//指定されたキーに対応する自身の衝突情報が存在しない場合は空を返す
+	if (ownColliders_.count(key) == 0)
+	{
+		static std::weak_ptr<ColliderBase> nullPtr;
+		return nullPtr;
+	}
+	return ownColliders_.find(key)->second;
 }
 
 //void ActorBase::DrawShadow(void)
