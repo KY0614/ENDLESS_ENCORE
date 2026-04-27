@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ColliderShpere.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderLine.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\ColliderBase.cpp" />
     <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\CollisionManager.cpp" />
@@ -82,6 +84,8 @@
     <ClCompile Include="Src\Manager\Transition\WipeTransitor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ColliderShpere.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderLine.h" />
     <ClInclude Include="Src\Object\Common\Geometry\ColliderBase.h" />
     <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\CollisionManager.h" />

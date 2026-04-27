@@ -7,6 +7,7 @@
 #include "../Generic/SceneManager.h"
 #include "../../Object/Common/Transform.h"
 #include "Camera.h"
+#include "ColliderBase.h"
 
 Camera::Camera(void)
 {
