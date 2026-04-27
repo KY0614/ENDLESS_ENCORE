@@ -41,9 +41,6 @@ public:
 	//‚‚³
 	float GetHeight(void) const { return localPos_.y; }
 
-	//‹…‘Ì‚Ì’†SÀ•W
-	//VECTOR GetCenter(void) const;
-
 private:
 
 	//‹…‘Ì‚ğ‚­‚Á‚Â‚¯‚é‘Šè

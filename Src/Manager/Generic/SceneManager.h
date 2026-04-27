@@ -24,6 +24,7 @@ public:
 		NONE,
 		TITLE,
 		GAME,
+		DEBUG,
 	};
 	
 	// インスタンスの生成
@@ -203,6 +204,8 @@ private:
 	//SCENE_IDからシーンを生成する
 	template<typename T = SceneBase>
 	std::unique_ptr<T> CreateScene(SCENE_ID sceneId);
+
+	void UpdateImGui(void);
 
 	/// <summary>
 	/// SceneごとのImGui更新処理

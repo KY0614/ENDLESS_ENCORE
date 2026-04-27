@@ -1,12 +1,21 @@
 #pragma once
 #include "Common/Transform.h"
+#include "Common/ActorBase.h"
 
 class ModelRenderer;
 class ModelMaterial;
 
-class Stage
+class Stage : public ActorBase
 {
 public:
+
+	enum class COLLIDER_TYPE
+	{
+		STAGE,		//ステージ
+		MIST_WALL,	//霧の壁
+		MAX,
+	};
+
 	//コンストラクタ
 	Stage(void);
 	//デストラクタ
@@ -80,6 +89,11 @@ private:
 	/// 3Dモデル初期化
 	/// </summary>
 	void Init3DModel(void);
+
+	/// <summary>
+	/// コライダー初期化
+	/// </summary>
+	void InitCollider(void);
 
 	/// <summary>
 	/// マテリアル初期化

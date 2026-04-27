@@ -4,7 +4,7 @@
 #include <map>
 #include <functional>
 #include <DxLib.h>
-#include "../Common/ActorBase.h"
+#include "CharactorBase.h"
 
 class ParryBar;
 class HPBar;
@@ -15,7 +15,7 @@ class Sphere;
 class ModelRenderer;
 class ModelMaterial;
 
-class Player : public ActorBase
+class PlayerTest : public CharactorBase
 {
 public:
 
@@ -46,24 +46,24 @@ public:
 	};
 
 	//コンストラクタ
-	Player(void);
+	PlayerTest(void);
 	//デストラクタ
-	~Player(void);
+	~PlayerTest(void);
 
 	/// <summary>
 	///	初期化
 	/// </summary>
-	void Init(void) override;
+	void Init(void);
 
 	/// <summary>
 	///	更新処理
 	/// </summary>
-	void Update(void) override;
+	void UpdateState(void);
 
 	/// <summary>
 	/// 描画処理
 	/// </summary>
-	void Draw(void) override;
+	void Draw(void);
 
 	/// <summary>
 	/// バーUIの描画
@@ -134,13 +134,13 @@ public:
 	/// 回避中かどうかを取得する
 	/// </summary>
 	/// <returns>true:回避中　false:回避してない</returns>
-	const bool& GetIsDodge(void)const  { return isDodge_; }
+	const bool& GetIsDodge(void)const { return isDodge_; }
 
 	/// <summary>
 	/// パリィ中かどうかを取得する
 	/// </summary>
 	/// <returns>true:パリィ中　false:パリィしてない</returns>
-	const bool& GetIsParry(void)const  { return isParry_; }
+	const bool& GetIsParry(void)const { return isParry_; }
 
 	/// <summary>
 	/// 座標の設定
@@ -187,9 +187,23 @@ public:
 	/// <param name=""></param>
 	void UpdateImGui(void)override;
 
-	void SaveParameter(void) override;
+protected:
+
+	virtual void UpdateProcess(void) override;
+	virtual void UpdateProcessPost(void) override;
 
 private:
+	// 衝突判定用線分開始(ジャンプ時)
+	static constexpr VECTOR COL_LINE_JUMP_START_LOCAL_POS =
+	{ 0.0f, 130.0f, 0.0f };
+	// 衝突判定用線分終了(ジャンプ時)
+	static constexpr VECTOR COL_LINE_JUMP_END_LOCAL_POS =
+	{ 0.0f, 50.0f, 0.0f };
+	// 衝突判定用線分開始
+	static constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 80.0f, 0.0f };
+	// 衝突判定用線分終了
+	static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, -10.0f, 0.0f };
+
 	//UI
 	std::unique_ptr<HPBar> hpBar_;	//HPバー
 	std::unique_ptr<ParryBar> parryBar_;//パリィバー
@@ -197,9 +211,6 @@ private:
 	//マテリアル・レンダラー
 	std::unique_ptr<ModelMaterial> material_;
 	std::unique_ptr<ModelRenderer> renderer_;
-
-	//アニメーション
-	std::unique_ptr<AnimationController> animationController_;
 
 	//状態管理
 	STATE state_;
@@ -216,15 +227,7 @@ private:
 
 	//移動スピード
 	float speed_;
-	
-	//移動方向
-	VECTOR moveDir_;
-	
-	//移動量
-	VECTOR movePow_;
-	
-	//移動後の座標
-	VECTOR movedPos_;
+
 
 	float stepWalk_;	//歩きモーション完了までの時間経過
 
@@ -257,19 +260,12 @@ private:
 	//フレームごとの移動値
 	VECTOR moveDiff_;
 
-	//ジャンプ用
-	//ジャンプ量
-	VECTOR jumpPow_;
-
-	//ジャンプ判定
-	bool isJump_;
-
 	//無限ジャンプ
 	bool isJumpUnlimited_;
 
 	//ジャンプの入力受付時間
 	float stepJump_;
-	
+
 	//回避判定
 	bool isDodge_;
 	float stepDodge_;

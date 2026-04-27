@@ -19,9 +19,11 @@ public:
 		PUSH_SPACE,
 		FILM_NOISE,
 
+		//キャラクター関連
+		CHARACTOR_SHADOW,	//キャラクターの影
+
 		//プレイヤー関連
 		PLAYER,
-		PLAYER_SHADOW,
 		PLAYER_HP_BAR,
 		BAR_BACK,
 		BAR_FRAME,

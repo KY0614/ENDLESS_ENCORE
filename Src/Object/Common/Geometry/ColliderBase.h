@@ -11,7 +11,7 @@ public:
 	{
 		NONE,	//無効
 		LINE,	//線分
-		SPHERE,	//球
+		SPHERE,	//球体
 		CAPSULE,//カプセル
 		MODEL,	//モデル
 	};
@@ -21,13 +21,18 @@ public:
 	{
 		STAGE,	//ステージ
 		PLAYER,	//プレイヤー
-		PLAYER_ATK,		//プレイヤーの攻撃
-		PLAYER_PARRY,	//プレイヤーのパリィ		
+		PLAYER_ATTACK,	//プレイヤーの攻撃
+		PLAYER_PARRY,	//プレイヤーのパリィ
 		ENEMY,			//敵
 		ENEMY_BULLET,	//敵の弾
 	};
 
-	//コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="shape">形状</param>
+	/// <param name="tag">衝突種別</param>
+	/// <param name="follow">追従先のTransform</param>
 	ColliderBase(SHAPE shape, TAG tag, const Transform* follow);
 	//デストラクタ
 	virtual ~ColliderBase(void);
@@ -40,23 +45,23 @@ public:
 	/// <summary>
 	/// 追従先の取得
 	/// </summary>
-	/// <returns>追従先のTransformポインタ</returns>
-	const Transform* GetFollow(void) const { return follow_; };
+	/// <returns>追従先のTransform</returns>
+	const Transform * GetFollow(void) const { return follow_; };
 
 	/// <summary>
 	/// 追従先の設定
 	/// </summary>
-	/// <param name="follow">追従先のTransformポインタ</param>
+	/// <param name="follow">追従先のTransform</param>
 	void SetFollow(Transform* follow);
 
 	/// <summary>
-	/// 形状を取得
+	/// 形状の取得
 	/// </summary>
 	/// <returns>形状</returns>
 	SHAPE GetShape(void) const { return shape_; }
 
 	/// <summary>
-	/// 衝突種別を取得
+	/// 衝突種別の取得
 	/// </summary>
 	/// <returns>衝突種別</returns>
 	TAG GetTag(void) const { return tag_; }
@@ -79,9 +84,9 @@ protected:
 	//有効フラグ
 	bool isValid_;
 
-	// ローカル座標をワールド座標に変換
+	//ローカル座標をワールド座標に変換
 	VECTOR GetRotPos(const VECTOR& localPos) const;
 
-	// デバッグ用描画
+	//デバッグ用描画
 	virtual void DrawDebug(int color) = 0;
 };

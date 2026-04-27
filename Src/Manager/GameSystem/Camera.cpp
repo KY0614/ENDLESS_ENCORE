@@ -467,8 +467,8 @@ void Camera::ProcessMove(void)
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
 	if (ins.IsInputPressed("CameraMoveUp"))	transform_.pos.z += moveSpeed; targetPos_.z += moveSpeed;
 	if (ins.IsInputPressed("CameraMoveDown"))	transform_.pos.z -= moveSpeed; targetPos_.z -= moveSpeed;
-	if (ins.IsInputPressed("CameraMoveRight"))	transform_.pos.x += moveSpeed; targetPos_.x += moveSpeed;
-	if (ins.IsInputPressed("CameraMoveLeft"))	transform_.pos.x -= moveSpeed; targetPos_.x -= moveSpeed;
+	if (ins.IsInputPressed("CameraMoveLeft"))	transform_.pos.x += moveSpeed; targetPos_.x += moveSpeed;
+	if (ins.IsInputPressed("CameraMoveRight"))	transform_.pos.x -= moveSpeed; targetPos_.x -= moveSpeed;
 
 	if (ins.IsInputPressed("CameraRise"))	transform_.pos.y += moveSpeed;	targetPos_.y += moveSpeed;
 	if (ins.IsInputPressed("CameraDescent"))transform_.pos.y -= moveSpeed;	targetPos_.y -= moveSpeed;

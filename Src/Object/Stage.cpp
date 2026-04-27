@@ -7,6 +7,7 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
+#include "Common/Geometry/ColliderModel.h"
 #include "Stage.h"
 
 // 長いのでnamespaceの省略
@@ -40,6 +41,8 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 {
 	//3Dモデル初期化
 	Init3DModel();
+
+	InitCollider();
 
 	//マテリアル初期化
 	InitMaterial(pos, sPos);
@@ -135,6 +138,16 @@ void Stage::Init3DModel(void)
 	noiseTextureId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::NOISE_TEXTURE).handleId_;
 }
+
+void Stage::InitCollider(void)
+{
+	//DxLib側の衝突情報セットアップ
+	MV1SetupCollInfo(transform_.modelId);
+	//モデルのコライダ
+	ColliderModel* colModel =
+		new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
+	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::STAGE), colModel);
+}	
 
 void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 {

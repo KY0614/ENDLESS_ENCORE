@@ -13,22 +13,53 @@ public:
 		const VECTOR& localStartPos,
 		const VECTOR& localEndPos);
 
-	//デストラクタ
-	~ColliderLine(void);
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="tag">形状</param>
+	/// <param name="follow">追従先</param>
+	/// <param name="localPosStart">ローカル座標での開始位置</param>
+	/// <param name="localPosEnd">ローカル座標での終了位置</param>
+	ColliderLine(
+		TAG tag, const Transform* follow,
+		const VECTOR& localPosStart, const VECTOR& localPosEnd);
+	// デストラクタ
+	~ColliderLine(void) override;
 
-	// ローカル座標での設定
+	/// <summary>
+	/// ローカル開始座標の設定
+	/// </summary>
+	/// <param name="pos">ローカル開始座標</param>
 	void SetLocalPosStart(const VECTOR& pos);
 
+	/// <summary>
+	/// ローカル終了座標の設定
+	/// </summary>
+	/// <param name="pos">ローカル終了座標</param>
 	void SetLocalPosEnd(const VECTOR& pos);
 
-	// ローカル座標の取得
+	/// <summary>
+	/// ローカル開始座標の取得
+	/// </summary>
+	/// <returns>ローカル開始座標</returns>
 	const VECTOR& GetLocalPosStart(void) const;
 
+	/// <summary>
+	/// ローカル終了座標の取得
+	/// </summary>
+	/// <returns>ローカル終了座標</returns>
 	const VECTOR& GetLocalPosEnd(void) const;
 
-	// ワールド座標の取得
+	/// <summary>
+	/// ワールド開始座標の取得
+	/// </summary>
+	/// <returns>ワールド開始座標</returns>
 	VECTOR GetPosStart(void) const;
 
+	/// <summary>
+	/// ワールド終了座標の取得
+	/// </summary>
+	/// <returns>ワールド終了座標</returns>
 	VECTOR GetPosEnd(void) const;
 
 protected:

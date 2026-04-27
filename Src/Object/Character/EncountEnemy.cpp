@@ -74,7 +74,7 @@ void EncountEnemy::Draw(void)
 	//renderer_->Draw();
 
 	//ŠÛ‰e•`‰æ
-	DrawShadow();
+	//DrawShadow();
 }
 
 void EncountEnemy::EncountStart(void)
