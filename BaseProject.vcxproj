@@ -36,8 +36,6 @@
     <ClCompile Include="Src\Scene\EncountScene.cpp" />
     <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\ColliderBase.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\ColliderLine.cpp" />
     <ClCompile Include="Src\Object\EnemyBullet.cpp" />
     <ClCompile Include="Src\Object\Character\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
@@ -100,8 +98,6 @@
     <ClInclude Include="Src\Scene\EncountScene.h" />
     <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\ColliderBase.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\ColliderLine.h" />
     <ClInclude Include="Src\Object\EnemyBullet.h" />
     <ClInclude Include="Src\Object\Character\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />

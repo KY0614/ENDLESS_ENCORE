@@ -7,12 +7,6 @@ class Transform;
 class ColliderLine : public ColliderBase
 {
 public:
-	//コンストラクタ
-	ColliderLine(TAG tag,
-		const Transform* follow,
-		const VECTOR& localStartPos,
-		const VECTOR& localEndPos);
-
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
