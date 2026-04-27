@@ -19,7 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Object\Common\ColliderBase.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderLine.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderModel.cpp" />
+    <ClCompile Include="Src\Object\Character\CharactorBase.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderSphere.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderBase.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
     <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
     <ClCompile Include="Src\Object\Character\EncountEnemy.cpp" />
@@ -48,7 +52,7 @@
     <ClCompile Include="Src\Renderer\ModelRenderer.cpp" />
     <ClCompile Include="Src\Renderer\PixelMaterial.cpp" />
     <ClCompile Include="Src\Renderer\PixelRenderer.cpp" />
-    <ClCompile Include="Src\Object\Character\ActorBase.cpp" />
+    <ClCompile Include="Src\Object\Common\ActorBase.cpp" />
     <ClCompile Include="Src\Application.cpp" />
     <ClCompile Include="Src\Common\Fader.cpp" />
     <ClCompile Include="Src\Common\Quaternion.cpp" />
@@ -73,7 +77,11 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Object\Common\ColliderBase.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderLine.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderModel.h" />
+    <ClInclude Include="Src\Object\Character\CharactorBase.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderSphere.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderBase.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_dx11.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_win32.h" />
     <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
@@ -151,7 +159,7 @@
     <ClInclude Include="Src\Renderer\ModelRenderer.h" />
     <ClInclude Include="Src\Renderer\PixelMaterial.h" />
     <ClInclude Include="Src\Renderer\PixelRenderer.h" />
-    <ClInclude Include="Src\Object\Character\ActorBase.h" />
+    <ClInclude Include="Src\Object\Common\ActorBase.h" />
     <ClInclude Include="Src\Application.h" />
     <ClInclude Include="Src\Common\Fader.h" />
     <ClInclude Include="Src\Common\Quaternion.h" />

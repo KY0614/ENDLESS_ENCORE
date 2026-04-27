@@ -4,7 +4,7 @@
 #include <map>
 #include <functional>
 #include <DxLib.h>
-#include "ActorBase.h"
+#include "../Common/ActorBase.h"
 
 class ParryBar;
 class HPBar;

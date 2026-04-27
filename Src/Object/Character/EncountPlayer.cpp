@@ -114,7 +114,7 @@ void EncountPlayer::Draw(void)
 	MV1DrawModel(transform_.modelId);
 
 	//ŠÛ‰e•`‰æ
-	DrawShadow();
+	//DrawShadow();
 }
 
 void EncountPlayer::StageWalk(void)

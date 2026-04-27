@@ -12,7 +12,6 @@
 #include "../../Object/Common/Transform.h"
 #include "../Object/Common/Geometry/Sphere.h"
 #include "Camera.h"
-#include "ColliderBase.h"
 
 namespace
 {
@@ -167,14 +166,6 @@ void Camera::SetBackstabCamera(const VECTOR& pos, const VECTOR& targetPos)
 	backstabStartPos_ = transform_.pos;
 	backstabEndPos_ = pos;
 	backstabTargetPos_ = targetPos;
-}
-
-ColliderBase::ColliderBase(SHAPE shape, TAG tag, const Transform* follow)
-{
-}
-
-ColliderBase::~ColliderBase(void)
-{
 }
 
 void Camera::SetFollow(const Transform* follow)

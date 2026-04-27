@@ -150,7 +150,7 @@ void ResourceManager::InitGame(void)
 
 	//プレイヤー影
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
-	resourcesMap_.emplace(SRC::PLAYER_SHADOW, std::move(res));
+	resourcesMap_.emplace(SRC::CHARACTOR_SHADOW, std::move(res));
 
 	//プレイヤーHPバー
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBar.png");

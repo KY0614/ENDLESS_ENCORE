@@ -1,53 +1,49 @@
-#include "../Application.h"
-#include "../Object/Common/AnimationController.h"
-#include "../Manager/Generic/ResourceManager.h"
+#include "../Utility/CommonUtility.h"
 #include "../Manager/Generic/SceneManager.h"
-#include "ActorBase.h"
+#include "../Manager/Generic/ResourceManager.h"
+#include "CharactorBase.h"
 
-ActorBase::ActorBase(void)
+CharactorBase::CharactorBase(void):
+	ActorBase()
 {
+	jumpPow_ = CommonUtility::VECTOR_ZERO;
 	//丸影画像
 	imgShadow_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::PLAYER_SHADOW).handleId_;
+		ResourceManager::SRC::CHARACTOR_SHADOW).handleId_;
 }
 
-ActorBase::~ActorBase(void)
+CharactorBase::~CharactorBase(void)
 {
 }
 
-void ActorBase::Init(void)
-{
-
-}
-
-void ActorBase::Update(void)
+void CharactorBase::Init(void)
 {
 }
 
-void ActorBase::Draw(void)
+void CharactorBase::Update(void)
+{
+	//重力計算
+	CalcGravityPower();
+}
+
+void CharactorBase::Draw(void)
 {
 }
 
-const Transform& ActorBase::GetTransform(void) const
+void CharactorBase::CalcGravityPower(void)
 {
-	return transform_;
+	// 重力方向
+	VECTOR dirGravity = CommonUtility::DIR_D;
+	// 重力の強さ
+	float gravityPow = 0.01f * SceneManager::GetInstance().GetDeltaTime();
+	// 重力
+	VECTOR gravity = VScale(dirGravity, gravityPow);
+	jumpPow_ = VAdd(jumpPow_, gravity);
+	// ジャンプ量を加算
+	transform_.pos = VAdd(transform_.pos, jumpPow_);
 }
 
-const VECTOR ActorBase::GetFramePos(const std::wstring& frameName) const
-{
-	VECTOR ret = {};
-	//フレームIDを取得して、フレームの座標を取得する
-	const int frameId = MV1SearchFrame(transform_.modelId, frameName.c_str());
-	ret = MV1GetFramePosition(transform_.modelId, frameId);
-	return ret;
-}
-
-void ActorBase::AddCollider(std::weak_ptr<Collider> collider)
-{
-	colliders_.emplace_back(collider);
-}
-
-void ActorBase::DrawShadow(void)
+void CharactorBase::DrawShadow(void)
 {
 	int i = 0;
 	MV1_COLL_RESULT_POLY_DIM HitResDim;

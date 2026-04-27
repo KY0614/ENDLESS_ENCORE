@@ -2,7 +2,7 @@
 #include <functional>
 #include <map>
 #include "../Libs/nlohmann/json.hpp"
-#include "ActorBase.h"
+#include "../Common/ActorBase.h"
 
 class HPBar;
 class AnimationController;

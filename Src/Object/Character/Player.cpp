@@ -214,7 +214,7 @@ void Player::Draw(void)
 	MV1DrawModel(transform_.modelId);
 
 	//丸影描画
-	DrawShadow();
+	//DrawShadow();
 }
 
 void Player::DrawBarUI(void)
@@ -1071,16 +1071,16 @@ void Player::CollisionCapsule(void)
 
 void Player::CollisionGravity(void)
 {
-	// ジャンプ量を加算
+	//ジャンプ量を加算
 	movedPos_ = VAdd(movedPos_, jumpPow_);
 
-	// 重力方向
+	//重力方向
 	VECTOR dirGravity = CommonUtility::DIR_D;
 
-	// 重力方向の反対
+	//重力方向の反対
 	VECTOR dirUpGravity = CommonUtility::DIR_U;
 
-	// 重力の強さ
+	//重力の強さ
 	float gravityPow = GRAVITY_POW;
 	//重力落下チェック用の長さ
 	float checkPow = 10.0f;
@@ -1089,7 +1089,7 @@ void Player::CollisionGravity(void)
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 	for (const std::weak_ptr<Collider> c : colliders_)
 	{
-		// 地面との衝突
+		//地面との衝突
 		auto hit = MV1CollCheck_Line(
 			c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
 
@@ -1099,15 +1099,13 @@ void Player::CollisionGravity(void)
 			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
 
 			// ジャンプリセット
-			jumpPow_ = CommonUtility::VECTOR_ZERO;
-			//jumpVelocity_ = CommonUtility::VECTOR_ZERO;
-			//stepJump_ = 0.0f;
+			jumpPow_ = CommonUtility::VECTOR_ZERO;\
 			if (isJump_)
 			{
 				//ジャンプアニメーションを途中から再生
 				const float animStartStep = 29.0f;
 				const float animEndStep = 45.0f;
-				// 着地モーション
+				//着地モーション
 				animationController_->Play(
 					(int)ANIM_TYPE::JUMP, false, animStartStep, animEndStep, false, true);
 			}
