@@ -19,23 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
-    <ClCompile Include="ColliderShpere.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\ColliderLine.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\ColliderBase.cpp" />
-=======
-    <ClCompile Include="Src\Object\Common\ColliderBase.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
-    <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
-    <ClCompile Include="Src\Object\Character\EncountEnemy.cpp" />
-    <ClCompile Include="Src\Object\UI\SkipBar.cpp" />
-    <ClCompile Include="Src\Object\UI\ParryBar.cpp" />
-    <ClCompile Include="Src\Object\UI\HPBar.cpp" />
-    <ClCompile Include="Src\Object\UI\UIBase.cpp" />
-    <ClCompile Include="Src\Scene\EncountScene.cpp" />
->>>>>>> Collider
     <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderBase.cpp" />
+    <ClCompile Include="Src\Object\Common\Geometry\ColliderLine.cpp" />
     <ClCompile Include="Src\Object\EnemyBullet.cpp" />
     <ClCompile Include="Src\Object\Character\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
@@ -79,25 +66,10 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
-    <ClInclude Include="ColliderShpere.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\ColliderLine.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\ColliderBase.h" />
-=======
-    <ClInclude Include="Src\Object\Common\ColliderBase.h" />
-    <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_dx11.h" />
-    <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_win32.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
-    <ClInclude Include="Src\Object\Character\EncountPlayer.h" />
-    <ClInclude Include="Src\Object\Character\EncountEnemy.h" />
-    <ClInclude Include="Src\Object\UI\SkipBar.h" />
-    <ClInclude Include="Src\Object\UI\ParryBar.h" />
-    <ClInclude Include="Src\Object\UI\HPBar.h" />
-    <ClInclude Include="Src\Object\UI\UIBase.h" />
-    <ClInclude Include="Src\Scene\EncountScene.h" />
->>>>>>> Collider
     <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderBase.h" />
+    <ClInclude Include="Src\Object\Common\Geometry\ColliderLine.h" />
     <ClInclude Include="Src\Object\EnemyBullet.h" />
     <ClInclude Include="Src\Object\Character\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
