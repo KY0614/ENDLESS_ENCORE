@@ -82,6 +82,9 @@ public:
 	//X軸回転
 	static VECTOR RotYZPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad);
 
+	//Z軸回転
+	static VECTOR RotXYPos(const VECTOR& centerPos, const VECTOR& radiusPos, float rad);
+
 	//ベクトルの長さ
 	static double Magnitude(const Vector2& v);
 	static double Magnitude(const VECTOR& v);
@@ -109,6 +112,15 @@ public:
 		const VECTOR& sphPos, float sphRadius, 
 		const VECTOR& capPos1, const VECTOR& capPos2, float capRadius);
 
+	//カプセルと立方体の衝突判定
+	static bool IsHitCapsuleBox(
+		const VECTOR& capPos1, const VECTOR& capPos2, float capRadius,
+		const VECTOR& boxMaxPos, const VECTOR& boxMinPos, const VECTOR& boxParentPos,
+		const VECTOR& axis, const VECTOR& axisY, const VECTOR& axisZ);
+
+	static float ClosestSegmentAABB(const VECTOR& segA,
+		const VECTOR& segB, const VECTOR& aabbMin,const VECTOR& aabbMax);
+
 	//比較
 	static bool Equals(const VECTOR& v1, const VECTOR& v2);
 	static bool EqualsVZero(const VECTOR& v1);
@@ -124,6 +136,9 @@ public:
 	static void DrawLineDir(const VECTOR& pos, const VECTOR& dir, int color, float len = 50.0f);
 	static void DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len = 50.0f);
 	static void DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len = 50.0f);
+
+	//待機時間
+	static bool TimeOver(float& totalTime, const float& waitTime);
 
 };
 

@@ -22,14 +22,14 @@ Capsule::~Capsule(void)
 
 void Capsule::Draw(void)
 {
-
+	const int divNum = 5;
 	//è„ÇÃãÖëÃ
 	VECTOR pos1 = GetPosTop();
-	DrawSphere3D(pos1, radius_, 5, COLOR, COLOR, false);
+	DrawSphere3D(pos1, radius_, divNum, COLOR, COLOR, false);
 
 	//â∫ÇÃãÖëÃ
 	VECTOR pos2 = GetPosDown();
-	DrawSphere3D(pos2, radius_, 5, COLOR, COLOR, false);
+	DrawSphere3D(pos2, radius_, divNum, COLOR, COLOR, false);
 
 	VECTOR dir;
 	VECTOR s;

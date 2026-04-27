@@ -1,0 +1,26 @@
+{
+  "Stage": {
+    "Theater": {
+      "Transform": {
+        "position": [ 0.0, 0.0, -1000.0 ],
+        "scale": [ 1.5,1.5,1.5 ]
+      },
+      "Parameter": {
+        "hp": 500.0,
+        "maxHp": 500.0,
+        "stageWalkPosition": [ 10.0, -217.0, 900.0 ]
+      }
+    },
+    "MistWall": {
+      "Transform": {
+        "position": [ 10.0, 600.0, 900.0 ],
+        "scale": [ 11.0, 7.5, 0.5 ]
+      },
+      "Parameter": {
+        "hp": 500.0,
+        "maxHp": 500.0,
+        "stageWalkPosition": [ 10.0, -217.0, 900.0 ]
+      }
+    }
+  }
+}

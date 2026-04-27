@@ -24,6 +24,7 @@ public:
 
 #endif // _RELEASE
 
+	//スクリーン最大サイズ
 	static constexpr int SCREEN_MAX_SIZE_X = 1920;
 	static constexpr int SCREEN_MAX_SIZE_Y = 1080;
 
@@ -36,6 +37,7 @@ public:
 	static const std::string PATH_SOUND;
 	static const std::string PATH_SCORE;
 	static const std::string PATH_JSON;
+	static const std::string PATH_FONT;
 	//-------------------------------------------
 
 	struct Size

@@ -2,13 +2,16 @@
 #include "../Transform.h"
 #include "Sphere.h"
 
-Sphere::Sphere(const Transform& parent) : transformParent_(parent)
+Sphere::Sphere(const Transform& parent) : 
+	transformParent_(parent)
 {
 	radius_ = 0.0f;
 	localPos_ = { 0.0f, 0.0f, 0.0f };
 }
 
-Sphere::Sphere(const VECTOR& parentPos,const Transform& parent) : parentPos_(parentPos), transformParent_(parent)
+Sphere::Sphere(const VECTOR& parentPos,const Transform& parent) : 
+	parentPos_(parentPos),
+	transformParent_(parent)
 {
 	radius_ = 0.0f;
 	localPos_ = { 0.0f, 0.0f, 0.0f };
@@ -31,10 +34,10 @@ void Sphere::Draw(void)
 	DrawSphere3D(pos, radius_, 5, COLOR, COLOR, false);
 }
 
-void Sphere::Draw(int col)
+void Sphere::Draw(int col,bool fill)
 {
 	VECTOR pos = GetPos();
-	DrawSphere3D(pos, radius_, 5, col, col, false);
+	DrawSphere3D(pos, radius_, 5, col, col, fill);
 }
 
 VECTOR Sphere::GetRotPos(const VECTOR& localPos) const

@@ -1,11 +1,18 @@
+#include <cassert>
 #include <DxLib.h>
 #include "../../Application.h"
 #include "JsonManager.h"
+
+// 長いのでnamespaceの省略
+using json = nlohmann::json;
 
 namespace 
 {
 	const std::string JSON_PLAYER = "Player";
 	const std::string JSON_ENEMY = "Enemy";
+	const std::string JSON_STAGE = "Stage";
+
+	const int JSON_INDENT_NUM = 4;	//JSONのインデントスペース数
 }
 
 JsonManager* JsonManager::instance_ = nullptr;
@@ -26,6 +33,8 @@ JsonManager& JsonManager::GetInstance(void)
 
 void JsonManager::Init(void)
 {
+	//JSONデータの書き込み
+	WriteJsonDataTest();
 }
 
 void JsonManager::Release(void)
@@ -38,16 +47,20 @@ void JsonManager::Destroy(void)
 {
 	//インスタンスの解放
 	Release();
+	jsonDataMap_.clear();
 	delete instance_;
 }
 
-nlohmann::json JsonManager::GetJsonData(JSON_DATA data)
+const nlohmann::json& JsonManager::GetJsonData(
+	const JSON_DATA dataType,
+	const std::string data)const
 {
-	nlohmann::json jsonData = jsonDataMap_[data];
-	return jsonData;
+	return jsonDataMap_.at(dataType).at(data);
 }
 
-nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::string& dataName)
+nlohmann::json JsonManager::LoadJsonData(
+	const std::string& fileName,
+	const std::string& dataName)
 {
 	std::ifstream ifs(fileName);
 	if (!ifs)return nlohmann::json();
@@ -58,6 +71,41 @@ nlohmann::json JsonManager::LoadData(const std::string& fileName, const std::str
 	return data;
 }
 
+void JsonManager::OverWriteJsonData(const std::string& fileName,
+	const std::string& jsonObjectName,
+	const std::string& jsonData)
+{
+	std::ifstream ifs(fileName);
+	if (!ifs)
+	{
+		assert(0 && "ファイルが見つかりませんでした");
+		return;
+	}
+
+	//ファイルストリームからjsonオブジェクトに変換
+	nlohmann::json data = nlohmann::json::parse(ifs);
+}
+
+void JsonManager::WriteJsonDataTest(void)
+{
+	json data = {
+		{"param",{
+		{"name", "Aiueo"},
+		{"age", 20},
+		{"speed", 2.5f},
+		{"isHungry", true}
+			}}
+	};
+
+	std::string fileName = "Data/Json/Test.json";
+	//名前だけ上書き
+	//data["param"]["name"] = "Kakikukeo";
+
+	std::ofstream writing_file;
+	writing_file.open(fileName,std::ios::out);
+	writing_file << data.dump(JSON_INDENT_NUM) << std::endl;
+}
+
 const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const std::string& key)
 {
 	//配列のサイズ
@@ -66,11 +114,10 @@ const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const s
 	if (!jsonData.contains(key) || !jsonData[key].is_array() || jsonData[key].size() < arraySize)
 	{
 		//存在しなかったりしたらデフォルト値を返す
-		assert(L"%s のフォーマットが不正です。\n", key.c_str());
 		return VGet(0.0f, 0.0f, 0.0f);
 	}
 	//配列の取得
-	const auto& arr = jsonData[key];
+	const json& arr = jsonData[key];
 	return VGet(
 		arr[0].get<float>(),//X座標
 		arr[1].get<float>(),//Y座標
@@ -78,13 +125,30 @@ const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const s
 	);
 }
 
-void JsonManager::InitGame(void)
+void JsonManager::InitTitle(void)
 {
 	static std::string PATH_JSON = Application::PATH_JSON;
 
-	//プレイヤーデータの読み込み
+	//ステージのデータ読み込み
+	const std::string stagePath = "Stage.json";
+	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(PATH_JSON + stagePath, JSON_STAGE));
+}
+
+void JsonManager::InitGame(void)
+{
+	//JSONデータが入っているフォルダのパス
+	static std::string PATH_JSON = Application::PATH_JSON;
+
+	//プレイヤーのデータ読み込み
 	const std::string playerPath = "Player.json";
-	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadData(PATH_JSON + playerPath, JSON_PLAYER));
+	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadJsonData(
+		PATH_JSON + playerPath, JSON_PLAYER));
+	//敵のデータ読み込み
 	const std::string enemyPath = "Enemy.json";
-	jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadData(PATH_JSON + enemyPath, JSON_ENEMY));
+	jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadJsonData(
+		PATH_JSON + enemyPath, JSON_ENEMY));
+	//ステージのデータ読み込み
+	const std::string stagePath = "Stage.json";
+	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(
+		PATH_JSON + stagePath, JSON_STAGE));
 }

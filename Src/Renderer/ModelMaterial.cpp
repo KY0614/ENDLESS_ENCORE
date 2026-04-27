@@ -9,7 +9,7 @@ ModelMaterial::ModelMaterial(
 
 	// 頂点シェーダのロード
 	shaderVS_ = LoadVertexShader(
-		StringUtility::StringToWstring((Application::PATH_SHADER + shaderFileNameVS)).c_str());
+		StringUtility::String2Wstring((Application::PATH_SHADER + shaderFileNameVS)).c_str());
 
 	// 頂点定数バッファの確保サイズ(FLOAT4をいくつ作るか)
 	constBufFloat4SizeVS_ = constBufFloat4SizeVS;
@@ -21,7 +21,7 @@ ModelMaterial::ModelMaterial(
 
 	// ピクセルシェーダのロード
 	shaderPS_ = LoadPixelShader(
-		StringUtility::StringToWstring((Application::PATH_SHADER + shaderFileNamePS)).c_str());
+		StringUtility::String2Wstring((Application::PATH_SHADER + shaderFileNamePS)).c_str());
 
 	// ピクセル定数バッファの確保サイズ(FLOAT4をいくつ作るか)
 	constBufFloat4SizePS_ = constBufFloat4SizePS;

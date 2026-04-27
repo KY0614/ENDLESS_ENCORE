@@ -6,6 +6,8 @@ class Resource
 {
 
 public:
+	static constexpr int FONT_SIZE = 32;	//フォントのデフォルトサイズ
+	static constexpr int FONT_THICK = 3;	//フォントのデフォルトの太さ
 	
 	// リソースタイプ
 	enum class TYPE
@@ -16,7 +18,7 @@ public:
 		MODEL,
 		EFFEKSEER,
 		SOUND,
-		JSON,
+		FONT,
 	};
 
 	// コンストラクタ

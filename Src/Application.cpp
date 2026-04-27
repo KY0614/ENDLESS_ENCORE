@@ -1,7 +1,7 @@
 #include <DxLib.h>
 #include "Libs/ImGuiWrapper.h"
 #include <EffekseerForDXLib.h>
-#include "Manager/Generic/InputManager.h"
+#include "Manager/GameSystem/InputManager.h"
 #include "Manager/Generic/ResourceManager.h"
 #include "Manager/Generic/SceneManager.h"
 #include "Common/FpsController.h"
@@ -16,6 +16,7 @@ const std::string Application::PATH_SHADER = "Data/Shader/";
 const std::string Application::PATH_SOUND = "Data/Sound/";
 const std::string Application::PATH_SCORE = "Data/Score/";
 const std::string Application::PATH_JSON = "Data/Json/";
+const std::string Application::PATH_FONT = "Data/Font/";
 
 void Application::CreateInstance(void)
 {
@@ -36,12 +37,20 @@ void Application::Init(void)
 	isEnd_ = false;
 
 	//アプリケーションの初期設定
-	SetWindowText(L"2025_AGS_Winter");
+	SetWindowText(L"ENDLESS ENCORE");
 
 	//ウィンドウサイズ
 	windowSize_ = { SCREEN_SIZE_X ,SCREEN_SIZE_Y };
-	SetGraphMode(windowSize_.width_, windowSize_.height_, 32);
+	const int colorBitDepth = 32;	//色深度
+	SetGraphMode(windowSize_.width_, windowSize_.height_, colorBitDepth);
+
+	//Debugビルドのときはウィンドウモード、Releaseビルドのときはフルスクリーンにする
+#ifdef _DEBUG
 	ChangeWindowMode(true);
+#endif // _DEBUG
+#if !_DEBUG
+	ChangeWindowMode(false);
+#endif // _RELEASE
 
 	const int FPS_RATE = 60;	//フレームレート固定
 	fps_ = std::make_unique<FpsController>(FPS_RATE);
@@ -54,9 +63,11 @@ void Application::Init(void)
 		isInitFail_ = true;
 		return;
 	}
+	//フォントの追加
+	AddFontResourceExA("Data/Font/cinecaption226.ttf", FR_PRIVATE, NULL);
 
 	ImGuiWrapper::CreateInstance();
-
+	
 	//Effekseerの初期化
 	InitEffekseer();
 
@@ -69,20 +80,17 @@ void Application::Init(void)
 
 	//シーン管理初期化
 	SceneManager::CreateInstance();
-
 }
 
 void Application::Run(void)
 {
-
 	auto& inputManager = InputManager::GetInstance();
 	auto& sceneManager = SceneManager::GetInstance();
 	auto& imGuiWrapper = ImGuiWrapper::GetInstance();
 
 	//ゲームループ
-	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0 && !isEnd_)
+	while (ProcessMessage() == 0 && !isEnd_ )
 	{
-
 		inputManager.Update();
 		imGuiWrapper.Update();
 		sceneManager.Update();
@@ -92,8 +100,6 @@ void Application::Run(void)
 		RenderVertex();
 
 		imGuiWrapper.Draw();
-
-		fps_->Draw();
 
 		ScreenFlip();
 
@@ -112,6 +118,8 @@ void Application::Destroy(void)
 
 	//Effekseerを終了する。
 	Effkseer_End();
+	// ウィンドウズに一時的に保持していたフォントデータを削除
+	RemoveFontResourceExA("", FR_PRIVATE, NULL);
 
 	//DxLib終了
 	if (DxLib_End() == -1)
@@ -147,6 +155,9 @@ void Application::InitEffekseer(void)
 	if (Effekseer_Init(8000) == -1)
 	{
 		DxLib_End();
+		// ウィンドウズに一時的に保持していたフォントデータを削除
+		RemoveFontResourceExA("", FR_PRIVATE, NULL);
+
 	}
 
 	SetChangeScreenModeGraphicsSystemResetFlag(FALSE);

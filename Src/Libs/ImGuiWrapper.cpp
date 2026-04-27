@@ -1,5 +1,5 @@
 #include <DxLib.h>
-#include "../Manager/Generic/InputManager.h"
+#include "../Manager/GameSystem/InputManager.h"
 #include "ImGui/backends/imgui_impl_dx11.h"
 #include "ImGui/backends/imgui_impl_win32.h"
 #include "ImGuiWrapper.h"
@@ -8,6 +8,14 @@ ImGuiWrapper* ImGuiWrapper::instance_ = nullptr;
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+namespace
+{
+	//ImGuiのフォントサイズ
+	const float IMGUI_FONT_SIZE = 16.0f;	
+	//ImGuiのフォントファイルパス
+	const char* IMGUI_FONT_PATH = "C:\\Windows\\Fonts\\msgothic.ttc";	//ゴシック体
+}
 
 void ImGuiWrapper::CreateInstance(void)
 {
@@ -33,12 +41,26 @@ void ImGuiWrapper::Init(void)
 	// ImGuiの初期化
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	
+
 	ImGui_ImplWin32_Init(DxLib::GetMainWindowHandle());
 	ImGui_ImplDX11_Init(
 		(ID3D11Device*)DxLib::GetUseDirect3D11Device(),
 		(ID3D11DeviceContext*)DxLib::GetUseDirect3D11DeviceContext());
 
+	ImGuiIO& io = ImGui::GetIO();
+	//Windowsのフォントフォルダから直接読み込む
+	//日本語の範囲を指定して読み込み
+	io.Fonts->AddFontFromFileTTF(IMGUI_FONT_PATH, IMGUI_FONT_SIZE,
+		NULL, io.Fonts->GetGlyphRangesJapanese());
+
+	//ドッキング機能を有効化（ウィンドウをドラッグしてくっつけれる）
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	//タブの色を濃い目の青
+	const ImColor darkBlue(0, 13, 30, 255);
+	ImGui::GetStyle().Colors[ImGuiCol_Tab] = darkBlue;	
+	//アクティブなタブの色を赤っぽく
+	const ImColor red(120, 51, 51, 255);
+	ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = red;	//アクティブなタブの色を赤っぽく
 }
 
 void ImGuiWrapper::Update(void)
@@ -114,27 +136,14 @@ void ImGuiWrapper::UpdateInputMouse(void)
 	io.AddMousePosEvent(mousePos.x, mousePos.y);
 	io.AddMouseButtonEvent(ImGuiMouseButton_Left, input.IsClickMouseLeft());
 	io.AddMouseButtonEvent(ImGuiMouseButton_Right, input.IsClickMouseRight());
-
-	// マウス情報をImGuiに渡す(InputManager未使用、DxLib使用)
-	//ImGuiIO& io = ImGui::GetIO();
-	//auto mouseInput = DxLib::GetMouseInput();
-	//int mousePosX = 0;
-	//int mousePosY = 0;
-	//DxLib::GetMousePoint(&mousePosX, &mousePosY);
-	//io.AddMousePosEvent(mousePosX, mousePosY);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Left, mouseInput & MOUSE_INPUT_LEFT);
-	//io.AddMouseButtonEvent(ImGuiMouseButton_Right, mouseInput & MOUSE_INPUT_RIGHT);
-
 }
 
 void ImGuiWrapper::UpdateNewFrame(void)
 {
-
 	// ImGui操作前準備
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
 }
 
 ImGuiWrapper::ImGuiWrapper(void)

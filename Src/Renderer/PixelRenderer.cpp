@@ -171,7 +171,6 @@ void PixelRenderer::Draw(void)
 	// オリジナルシェーダ設定(OFF)
 	MV1SetUseOrigShader(false);
 	//-----------------------------------------
-
 }
 
 void PixelRenderer::Draw(int x, int y)

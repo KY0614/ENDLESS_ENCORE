@@ -68,40 +68,6 @@ int ResourceManager::LoadModelDuplicate(SRC src)
 	return duId;
 }
 
-ResourceManager::SRC ResourceManager::StringToSRC(const std::string& name)
-{
-	static const std::unordered_map<std::string, SRC> map = 
-	{
-		//{ "Counter", SRC::COUNTER },
-		//{ "Table",   SRC::TABLE },
-		//{ "Sweets_Choco_Rack",  SRC::CHOCO_RACK },
-		//{ "Sweets_Choco",		SRC::SWEETS_CHOCO },
-		//{ "Sweets_Strawberry_Rack",   SRC::BERRY_RACK },
-		//{ "Sweets_Strawberry",  SRC::SWEETS_BERRY },
-		//{ "Coffee_Machine",   SRC::COFFEE_MACHINE },
-		//{ "Hot_Cup",		SRC::HOTCUP },
-		//{ "Cup_Hot_Rack",   SRC::HOTCUP_RACK },
-		//{ "Hot_Coffee",		SRC::HOTCOFFEE },
-		//{ "Ice_Dispenser",			SRC::ICEDISPENSER },
-		//{ "Ice",			SRC::ICE },
-		//{ "Ice_Cup",		SRC::ICECUP },
-		//{ "Cup_Ice_Rack",	SRC::ICECUP_RACK },
-		//{ "Ice_Coffee",		SRC::ICECOFFEE },
-		//{ "Cup_Lid_Rack",	SRC::CUPLID_RACK },
-		//{ "Hot_Cup_Lid",		SRC::HOTCUP_LID },
-		//{ "Ice_Cup_Lid",		SRC::ICECUP_LID },
-		//{ "Dust_Box",		SRC::DUSTBOX },
-		// 新しい要素はここに追加
-	};
-
-	auto it = map.find(name);
-	if (it != map.end()) {
-		return it->second;
-	}
-
-	return SRC::NONE; // 不正な名前が来たときのデフォルト対応
-}
-
 void ResourceManager::InitTitle(void)
 {
 	//推奨しませんが、どうしても使いたい方は
@@ -115,32 +81,20 @@ void ResourceManager::InitTitle(void)
 	std::unique_ptr<Resource> res;
 
 	//PushSpace画像
-	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "PleaseKey.png");
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Push_Space.png");
 	resourcesMap_.emplace(SRC::PUSH_SPACE, std::move(res));
 
 	//タイトルロゴ
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Title.png");
 	resourcesMap_.emplace(SRC::TITLE_LOGO, std::move(res));
 
-	//プレイヤー
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
-	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
+	//ステージ
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Theater/large_theater.mv1");
+	resourcesMap_.emplace(SRC::THEATER, std::move(res));
 
-	//スカイドーム
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "SkyDome/SkyDome.mv1");
-	resourcesMap_.emplace(SRC::SKY_DOME, std::move(res));
-
-	//お店
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/cafe.mv1");
-	resourcesMap_.emplace(SRC::CAFE, std::move(res));
-
-	//家具：床
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/floor.mv1");
-	resourcesMap_.emplace(SRC::FLOOR, std::move(res));
-
-	//地面テクスチャ
-	res = std::make_unique<RES>(RES_T::IMG, PATH_MDL + "Stage/Tex/ground.png");
-	resourcesMap_.emplace(SRC::GROUND, std::move(res));
+	//ノイズ用画像
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "FilmNoise.png");
+	resourcesMap_.emplace(SRC::FILM_NOISE, std::move(res));
 
 	//音------------------------------------------------------------------------
 
@@ -148,32 +102,15 @@ void ResourceManager::InitTitle(void)
 	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Title.mp3");
 	resourcesMap_.emplace(SRC::TITLE_BGM, std::move(res));
 
-	//SE
-	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/press_key.mp3");
+	//上映開始のSE
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Push_Space.mp3");
 	resourcesMap_.emplace(SRC::PUSH_SPACE_SE, std::move(res));
 
+	//フィルムがまわるSE
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/FilmScroll.mp3");
+	resourcesMap_.emplace(SRC::FILM_SCROLL_SE, std::move(res));
+
 	//--------------------------------------------------------------------------
-}
-
-void ResourceManager::InitMovie(void)
-{
-}
-
-void ResourceManager::InitSelect(void)
-{
-}
-
-void ResourceManager::InitTutorial(void)
-{
-	using RES = Resource;
-	using RES_T = RES::TYPE;
-	static std::string PATH_IMG = Application::PATH_IMAGE;
-	static std::string PATH_MDL = Application::PATH_MODEL;
-	static std::string PATH_EFF = Application::PATH_EFFECT;
-	static std::string PATH_SND = Application::PATH_SOUND;
-
-	std::unique_ptr<Resource> res;
-
 }
 
 void ResourceManager::InitGame(void)
@@ -187,8 +124,20 @@ void ResourceManager::InitGame(void)
 
 	std::unique_ptr<Resource> res;
 
+	//ステージ
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/Theater/large_theater.mv1");
+	resourcesMap_.emplace(SRC::THEATER, std::move(res));
+
+	//霧の壁
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Stage/MistWall/MistWall.mv1");
+	resourcesMap_.emplace(SRC::MIST_WALL, std::move(res));
+
+	//ノイズ用画像
+	res = std::make_unique<RES>(RES_T::IMG, PATH_MDL + "Stage/Mist/Noise.png");
+	resourcesMap_.emplace(SRC::NOISE_TEXTURE, std::move(res));
+
 	//敵
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician_.mv1");
 	resourcesMap_.emplace(SRC::ENEMY, std::move(res));
 
 	//敵の弾
@@ -196,23 +145,116 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::ENEMY_BULLET, std::move(res));
 
 	//プレイヤー
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Model.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
 	resourcesMap_.emplace(SRC::PLAYER, std::move(res));
 
 	//プレイヤー影
 	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "Shadow.png");
 	resourcesMap_.emplace(SRC::PLAYER_SHADOW, std::move(res));
 
-	//床
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Floor/floor.mv1");
-	resourcesMap_.emplace(SRC::FLOOR, std::move(res));
+	//プレイヤーHPバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBar.png");
+	resourcesMap_.emplace(SRC::PLAYER_HP_BAR, std::move(res));
+
+	//プレイヤーHPバー背景
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarBack.png");
+	resourcesMap_.emplace(SRC::BAR_BACK, std::move(res));
+
+	//プレイヤーHPバーの額縁
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/HPBarFrame.png");
+	resourcesMap_.emplace(SRC::BAR_FRAME, std::move(res));
+
+	//プレイヤーパリィバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/ParryBar.png");
+	resourcesMap_.emplace(SRC::PLAYER_PARYY_BAR, std::move(res));
+
+	//プレイヤーパリィバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/ParryCDBar.png");
+	resourcesMap_.emplace(SRC::PLAYER_PARYY_CD_BAR, std::move(res));
+
+	//プレイヤーパリィバー
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "UI/EnemyHPBar.png");
+	resourcesMap_.emplace(SRC::ENEMY_HP_BAR, std::move(res));
+
+	//勝利
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "VICTORY.png");
+	resourcesMap_.emplace(SRC::VICTORY, std::move(res));
+
+	//死亡
+	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "YOU DIED.png");
+	resourcesMap_.emplace(SRC::YOU_DIED, std::move(res));
 
 	//足煙
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Smoke/Smoke.efkefc");
 	resourcesMap_.emplace(SRC::FOOT_SMOKE, std::move(res));
 
 	//音------------------------------------------------------------------------
+	//BGM
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Battle.mp3");
+	resourcesMap_.emplace(SRC::BATTLE_BGM, std::move(res));
+	//BGM
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "BGM/Explore.mp3");
+	resourcesMap_.emplace(SRC::EXPLORE_BGM, std::move(res));
 	
+	//SE-------------------------------------------------------------------------
+	
+	//ライトアップ
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Light_Up.mp3");
+	resourcesMap_.emplace(SRC::LIGHT_UP_SE, std::move(res));
+	
+	//パリィ
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Barrior.mp3");
+	resourcesMap_.emplace(SRC::PARRY_SE, std::move(res));
+	
+	//パリィ
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/damage.mp3");
+	resourcesMap_.emplace(SRC::DAMAGE_SE, std::move(res));
+	
+	//起き上がるときの音
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/Wake_Up.mp3");
+	resourcesMap_.emplace(SRC::WAKE_UP_SE, std::move(res));
+	
+	//炎の音
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/fire_.mp3");
+	resourcesMap_.emplace(SRC::FIRE_SE, std::move(res));
+		
+	//爆発
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/flame.mp3");
+	resourcesMap_.emplace(SRC::EXPLOSION_SE, std::move(res));
+	
+	//炎の音
+	res = std::make_unique<RES>(RES_T::SOUND, PATH_SND + "SE/backstab.mp3");
+	resourcesMap_.emplace(SRC::BACKSTAB_SE, std::move(res));
+
+	//エフェクト------------------------------------------------------------------
+
+	//パリィ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Barrior.efkefc");
+	resourcesMap_.emplace(SRC::PARRY_EFKT, std::move(res));
+
+	//敵の弾
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire_test.efkefc");
+	resourcesMap_.emplace(SRC::FIRE_EFFECT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge.efkefc");
+	resourcesMap_.emplace(SRC::CHARGE_EFFECT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "CosmicMist.efkefc");
+	resourcesMap_.emplace(SRC::COSMIC_EFFECT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge_atk.efkefc");
+	resourcesMap_.emplace(SRC::EXPLOSIVE_EFFECT, std::move(res));
+
+	//敵のチャージ
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "LossOfBlood.efkefc");
+	resourcesMap_.emplace(SRC::BLOOD_EFFECT, std::move(res));
+
+	//フォント-------------------------------------------------------------------------
+	res = std::make_unique<RES>(RES_T::FONT, "しねきゃぷしょん");
+	resourcesMap_.emplace(SRC::TUTORIAL_FONT, std::move(res));
 }
 
 void ResourceManager::InitPause(void)
@@ -225,24 +267,6 @@ void ResourceManager::InitPause(void)
 	static std::string PATH_SND = Application::PATH_SOUND;
 
 	std::unique_ptr<Resource> res;
-}
-
-void ResourceManager::InitResult(void)
-{
-	using RES = Resource;
-	using RES_T = RES::TYPE;
-	static std::string PATH_IMG = Application::PATH_IMAGE;
-	static std::string PATH_MDL = Application::PATH_MODEL;
-	static std::string PATH_EFF = Application::PATH_EFFECT;
-	static std::string PATH_SND = Application::PATH_SOUND;
-
-	std::unique_ptr<Resource> res;
-
-	//PushSpace画像
-	res = std::make_unique<RES>(RES_T::IMG, PATH_IMG + "PleaseKey.png");
-	resourcesMap_.emplace(SRC::PUSH_SPACE, std::move(res));
-
-	//音------------------------------------------------------------------------
 }
 
 ResourceManager::ResourceManager(void)

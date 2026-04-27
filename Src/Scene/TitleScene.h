@@ -3,26 +3,14 @@
 #include "SceneBase.h"
 #include "../Object/Common/Transform.h"
 
-class SceneManager;
-class AnimationController;
-class ModelRenderer;
-class ModelMaterial;
-
+class PixelMaterial;
+class PixelRenderer;
+class Stage;
 
 class TitleScene : public SceneBase
 {
 
 public:
-	static constexpr float HIGH_LIGHT_INTERVAL = 1.2f;
-
-	//UVスケール
-	static constexpr float TILLING_SIZE = 35.0f;
-
-	static constexpr float AMBIENT_COLOR = 0.2f;
-
-	static constexpr int LOGO_OFFSET_Y = 80;
-	static constexpr int LOGO_HEIGHT = 1024;
-	static constexpr int PUSHIMG_OFFSET_Y = 100;
 
 	//コンストラクタ
 	TitleScene(void);
@@ -30,29 +18,85 @@ public:
 	//デストラクタ
 	~TitleScene(void);
 
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
 	void Init(void) override;
-	void Update(void) override;
-	void Draw(void) override;
-
-private:
-	//マテリアル
-	std::unique_ptr<ModelMaterial> material_;
-	//レンダラ
-	std::unique_ptr<ModelRenderer> renderer_;
-
-	//地面用
-	Transform graoundTran_;
-
-	//アニメーション
-	std::unique_ptr<AnimationController> animationController_;
-
-	int toAdvertiseLoopTimer_;
 
 	/// <summary>
-	/// マテリアル情報初期化
+	/// 更新処理
 	/// </summary>
-	/// <param name="">マテリアルの定数バッファ設定</param>
+	void Update(void) override;
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
+	void Draw(void) override;
+
+	/// <summary>
+	/// ImGui更新処理
+	/// </summary>
+	void UpdateImGui(void) override;
+
+private:
+
+	//ステージ
+	std::shared_ptr<Stage> stage_;
+
+	//ポストエフェクト用スクリーン
+	int postEffectScreen_;
+
+	//ポストエフェクト用(映写機風)マテリアルとレンダラー
+	std::unique_ptr<PixelMaterial> retroTheaterMaterial_;
+	std::unique_ptr<PixelRenderer> retroTheaterRenderer_;
+
+	//タイトルロゴ画像ハンドル
+	int logoImg_;
+	//プッシュスペース画像ハンドル
+	int pushSpaceImg_;
+	//プッシュスペース画像アルファ値
+	int pushSpaceImgAlpha_;
+	//プッシュスペース画像アルファ値
+	int alphaChangeSpeed_;
+
+	//ノイズテクスチャID（黒いシミっぽい画像)
+	int noiseTextureId_;
+
+	//フィルムスクロール時間
+	float filmScrollTime_;
+
+	//フェードアウト開始するまでのインターバル時間
+	float intervalTimer_;
+
+	//スペースキーを押したかどうか
+	bool isPushSpace_;
+
+	//スペースキーを押したときの効果音のボリューム
+	int pushSpaceSEVolume_;
+	int seVolumeDecreaseFrame_;
+
+	/// <summary>
+	/// サウンド初期化処理
+	/// </summary>
+	void InitSound(void);
+
+	/// <summary>
+	/// マテリアル初期化処理
+	/// </summary>
 	void InitMaterial(void);
 
-	void UpdateDebugImGui(void);
+	/// <summary>
+	/// フィルムノイズをランダムに動かす処理
+	/// </summary>
+	void RandomFilmNoise(void);
+
+	/// <summary>
+	/// フィルムスクロール処理
+	/// </summary>
+	void FilmScroll(void);
+
+	/// <summary>
+	/// プッシュスペース画像の点滅処理
+	/// </summary>
+	void PushSpaceImageBlink(void);
 };

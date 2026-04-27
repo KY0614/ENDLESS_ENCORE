@@ -1,10 +1,12 @@
 struct PS_INPUT
 {
     float4 svPos    : SV_POSITION;
-    float4 diffuse  : COLOR0;    //拡散反射の色
-    float2 uv       : TEXCOORD0;      //UV値
-    float2 suv      : TEXCOORD1;     //サブテクスチャのUV値
+    float4 diffuse  : COLOR0;           //拡散反射の色
+    float2 uv       : TEXCOORD0;        //UV値
+    float2 suv      : TEXCOORD1;        //サブテクスチャのUV値
+    float2 TexCoords0 : TEXCOORD2;      //テクスチャ座標
 };
 
-Texture2D tex : register(t0);               //テクスチャ
-SamplerState texSampler : register(s0);     //サンプラー
+SamplerState texSampler         :       register(s0); //サンプラー
+Texture2D tex                   :       register(t0); //テクスチャ
+Texture2D noiseTexture          :       register(t1); // ディフューズマップテクスチャ

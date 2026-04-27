@@ -10,9 +10,16 @@ public :
 	//デバッグ時の簡易カプセル表示の色
 	static constexpr int COLOR = 0xffffff;
 
-	//コンストラクタ
-	//カプセルをつけるオブジェクトを指定する
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="parent">カプセルをつけるオブジェクトのTransform</param>
 	Capsule(const Transform& parent);
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="base">コピー元のカプセル</param>
+	/// <param name="parent">カプセルをつけるオブジェクトのTransform</param>
 	Capsule(const Capsule& base, const Transform& parent);
 
 	//デストラクタ

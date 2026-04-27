@@ -1,5 +1,6 @@
 #pragma once
 #include<string>
+#include<vector>
 
 class StringUtility
 {
@@ -10,16 +11,16 @@ public:
 	/// </summary>
 	/// <param name="str">string‚Ì•¶Žš—ñ</param>
 	/// <returns>wstringŒ^‚Ì•¶Žš—ñ</returns>
-	static std::wstring StringToWstring(const std::string& str);
+	static std::wstring String2Wstring(const std::string& str);
 
 	/// <summary>
 	/// wstring‚ðstring‚É•ÏŠ·
 	/// </summary>
 	/// <param name="wstr">wstring‚Ì•¶Žš—ñ</param>
 	/// <returns>string‚Ì•¶Žš—ñ</returns>
-	static std::string WstringToString(const std::wstring& wstr);
+	static std::string Wstring2String(const std::wstring& wstr);
 
-	static std::wstring GetWStringFromString(const std::string& str);
+	static std::string Wstring2UTF8(const std::wstring& wstr);
 
 private:
 

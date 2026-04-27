@@ -1,27 +1,30 @@
+#include <ranges>
 #include <chrono>
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
+#include "../../Libs//ImGui//imgui.h"
 #include "../../Application.h"
-#include "../../Libs/ImGui/imgui.h"
 #include "../../Utility/CommonUtility.h"
 #include "../../Common/Fader.h"
 #include "../../Scene/TitleScene.h"
-#include "../../Scene/AdvertiseScene.h"
-#include "../../Scene/MovieScene.h"
-#include "../../Scene/SelectScene.h"
-#include "../../Scene/PauseScene.h"
-#include "../../Scene/TutorialScene.h"
 #include "../../Scene/GameScene.h"
-#include "../../Scene/ResultScene.h"
 #include "../GameSystem/SoundManager.h"
 #include "JsonManager.h"
-#include "Camera.h"
+#include "../GameSystem/Camera.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
 
 namespace
 {
+	//画面揺らしのフレーム数
 	const int SHAKE_FRAME = 60;
+
+	//フォグの開始・終了距離
+	const float FOG_START = 10000.0f;	//フォグ開始距離
+	const float FOG_END = 20000.0f;		//フォグ終了距離
+
+	//画面揺れの減衰率
+	const float SHAKE_DECEL_RATE = 0.95f;
 }
 
 SceneManager* SceneManager::instance_ = nullptr;
@@ -44,12 +47,12 @@ void SceneManager::Init(void)
 {
 	SoundManager::CreateInstance();
 	JsonManager::CreateInstance();
-	//UIManager::CreateInstance();
+	JsonManager::CreateInstance();
 
 	sceneId_ = SCENE_ID::NONE;
 	waitSceneId_ = SCENE_ID::NONE;
 
-	fader_ = std::make_unique<Fader>();
+	fader_ = std::make_shared<Fader>();
 	fader_->Init();
 
 	//カメラ
@@ -60,27 +63,33 @@ void SceneManager::Init(void)
 
 	//デルタタイム
 	preTime_ = std::chrono::system_clock::now();
+	totalTime_ = 0.0f;
+
+	//フォグ
+	fogStart_ = FOG_START;
+	fogEnd_ = FOG_END;
 
 	//ライトの向き
 	lightDir_ = LIGHT_DIR;
 
-	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+	mainScreen_ = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y,true);
 	shakeFrame_ = 0;
 	shakeRate_ = 0.0f;
-	screenPos_ = { 0,0 };
 
 	//3D用の設定
 	Init3D();
 
 	//初期シーンの設定
 	DoChangeScene(SCENE_ID::GAME);
-
 }
 
 void SceneManager::Init3D(void)
 {
 	//背景色設定
-	SetBackgroundColor(64, 64, 128);
+	const int bgColorRed = 64;
+	const int bgColorGreen = 64;
+	const int bgColorBlue = 128;
+	SetBackgroundColor(bgColorRed, bgColorGreen, bgColorBlue);
 
 	//Zバッファを有効にする
 	SetUseZBuffer3D(true);
@@ -96,18 +105,22 @@ void SceneManager::Init3D(void)
 	SetUseLighting(true);
 	
 	//ライトの設定
-	//ChangeLightTypeDir({ 0.3f, -0.7f, 0.8f });
 	ChangeLightTypeDir(lightDir_);
 
 	//フォグ設定
-	SetFogEnable(true);
-	SetFogColor(5, 5, 5);
-	SetFogStartEnd(10000.0f, 20000.0f);
+	ResetFog();
 }
 
 void SceneManager::Update(void)
 {
+	// 非同期読み込み中の処理数がゼロになるまで処理しない
+	if (GetASyncLoadNum() != 0)
+	{
+		return;
+	}
+	//画面揺らし
 	ShakeScreen();
+
 	ChangeLightTypeDir(lightDir_);
 	if (scenes_.empty())
 	{
@@ -120,6 +133,8 @@ void SceneManager::Update(void)
 		std::chrono::duration_cast<std::chrono::nanoseconds>(nowTime - preTime_).count() / 1000000000.0);
 	preTime_ = nowTime;
 
+	totalTime_ += deltaTime_;
+
 	fader_->Update();
 	if (isSceneChanging_)
 	{
@@ -127,21 +142,25 @@ void SceneManager::Update(void)
 	}
 	else
 	{
-		//scene_->Update();
 		scenes_.back()->Update();
 	}
 
 	//カメラ更新
 	camera_->Update();
-	UpdateDebugImGui();
+
+#ifdef _DEBUG
+
+	//シーンごとのImGui更新処理
+	SceneUpdateImGui();
+
+#endif // _DEBUG
+	
 }
 
 void SceneManager::Draw(void)
 {
-	
 	//描画先グラフィック領域の指定
 	//(３Ｄ描画で使用するカメラの設定などがリセットされる)
-	//SetDrawScreen(DX_SCREEN_BACK);
 	SetDrawScreen(mainScreen_);
 	//画面を初期化
 	ClearDrawScreen();
@@ -153,8 +172,7 @@ void SceneManager::Draw(void)
 	UpdateEffekseer3D();
 
 	//描画
-	//scene_->Draw();
-	for (auto& scene : scenes_) 
+	for (auto& scene : scenes_)
 	{
 		scene->Draw();
 	}
@@ -168,22 +186,20 @@ void SceneManager::Draw(void)
 	//暗転・明転
 	fader_->Draw();
 
-	//int call = GetDrawCallCount();
-	//DrawFormatString(0,400,0Xffffff,L"call : %d", call);
-
 	SetDrawScreen(DX_SCREEN_BACK);
-	//ClearDrawScreen();
 
 	if (shakeFrame_ == 0)
 	{
+		ClearDrawScreen();
 		DrawGraph(0, 0, mainScreen_, false);
 	}
 	if (shakeFrame_ > 0)
 	{
 		Vector2 pos;
-		int lineH = 3;
-		const int shakePadding = 10;
-		pos.x = (int)(((shakeFrame_ % 3) * shakePadding) * shakeRate_);
+		//画面を揺らす
+		const int shakeFrameRate = 3;
+		const int shakePadding = 5;
+		pos.x = (int)(((shakeFrame_ % shakeFrameRate) * shakePadding) * shakeRate_);
 		pos.y = 0;
 		DrawGraph(pos.x, 0, mainScreen_, false);
 	}
@@ -193,7 +209,7 @@ void SceneManager::Destroy(void)
 {
 	SoundManager::GetInstance().Destroy();
 	JsonManager::GetInstance().Destroy();
-	//UIManager::GetInstance().Destroy();
+	DeleteGraph(mainScreen_);
 	delete instance_;
 }
 
@@ -208,21 +224,9 @@ void SceneManager::ChangeScene(SCENE_ID nextId)
 	isSceneChanging_ = true;
 }
 
-void SceneManager::ChangeScene(std::unique_ptr<SceneBase> _scene)
-{
-	if (scenes_.empty()) {
-		//空だったら新しく入れる
-		scenes_.push_back(std::move(_scene));
-	}
-	else {
-		//末尾のものを新しい物に入れ替える
-		scenes_.back() = std::move(_scene);
-	}
-}
-
 SceneManager::SCENE_ID SceneManager::GetSceneID(void)
 {
-	return sceneId_;
+	 return sceneId_;
 }
 
 float SceneManager::GetDeltaTime(void) const
@@ -231,15 +235,26 @@ float SceneManager::GetDeltaTime(void) const
 	return deltaTime_;
 }
 
+float SceneManager::GetTotalTime(void) const
+{
+	return totalTime_;
+}
+
 std::weak_ptr<Camera> SceneManager::GetCamera(void) const
 {
 	return camera_;
 }
 
-void SceneManager::PushScene(std::unique_ptr<SceneBase> _scene)
+std::weak_ptr<Fader> SceneManager::GetFader(void) const
 {
+	return fader_;
+}
+
+void SceneManager::PushScene(SCENE_ID _scene)
+{
+	sceneId_ = _scene;
 	//新しく積むのでもともと入っている奴はまだ削除されない
-	scenes_.push_back(std::move(_scene));
+	scenes_.push_back(std::move(CreateScene(_scene)));
 	scenes_.back()->Init();
 }
 
@@ -258,18 +273,48 @@ void SceneManager::JumpScene(std::unique_ptr<SceneBase> scene)
 	scenes_.push_back(std::move(scene));
 }
 
-void SceneManager::SetShakeScreen(bool isShake)
+void SceneManager::SetFog(const float fogStart, const float fogEnd)
 {
-	if (isShake)
-	{
-		shakeFrame_ = SHAKE_FRAME;
-		shakeRate_ = 1.0f;
-	}
+	SetFogStartEnd(fogStart, fogEnd);
+}
+
+void SceneManager::ResetFog(void)
+{
+	//フォグ設定
+	SetFogEnable(true);
+	SetFogColor(5, 5, 5);
+	SetFogStartEnd(fogStart_, fogEnd_);
+}
+
+void SceneManager::StartShakeScreen(void)
+{
+	//画面揺らしのフレームとレートを設定
+	shakeFrame_ = SHAKE_FRAME;
+	shakeRate_ = 1.0f;
+}
+
+bool SceneManager::IsFadeOutEnd(void)
+{
+	//true:フェードアウト終了 false:まだ終了していない
+	return fader_->GetState() == Fader::STATE::FADE_OUT &&
+		fader_->IsEnd();
+}
+
+bool SceneManager::IsFadeInEnd(void)
+{
+	//true:フェードイン終了 false:まだ終了していない
+	return fader_->GetState() == Fader::STATE::FADE_IN &&
+		fader_->IsEnd();
+}
+
+const float SceneManager::GetScreenAspectRatio(void) const
+{
+	return static_cast<float>(Application::SCREEN_SIZE_Y) /
+		static_cast<float>(Application::SCREEN_MAX_SIZE_Y);
 }
 
 SceneManager::SceneManager(void)
 {
-
 	sceneId_ = SCENE_ID::NONE;
 	waitSceneId_ = SCENE_ID::NONE;
 
@@ -282,8 +327,19 @@ SceneManager::SceneManager(void)
 	//デルタタイム
 	deltaTime_ = 1.0f / 60.0f;
 
+	totalTime_ = 0.0f;
+
 	camera_ = nullptr;
 	lightDir_ = CommonUtility::VECTOR_ZERO;
+
+	shakeRate_ = 0.0f;
+	shakeFrame_ = 0;
+
+	mainScreen_ = -1;
+	fogStart_ = FOG_START;
+	fogEnd_ = FOG_END;
+
+	sceneName_ = std::string();
 }
 
 void SceneManager::ResetDeltaTime(void)
@@ -300,7 +356,6 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	resM.Release();
 	jsonM.Release();
 	SoundManager::GetInstance().Release();
-	//UIManager::GetInstance().Release();
 
 	//シーンを変更する
 	sceneId_ = sceneId;
@@ -310,11 +365,19 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 	{
 		scene_.reset();
 	}
-	
-	MakeScene(sceneId);
+
+	if (scenes_.empty())
+	{
+		//空だったら新しく入れる
+		scenes_.push_back(std::move(CreateScene(sceneId)));
+	}
+	else
+	{
+		//末尾のものを新しい物に入れ替える
+		scenes_.back() = std::move(CreateScene(sceneId));
+	}
 
 	scenes_.back()->Init();
-	//scene_->Init();
 
 	ResetDeltaTime();
 
@@ -324,7 +387,6 @@ void SceneManager::DoChangeScene(SCENE_ID sceneId)
 
 void SceneManager::Fade(void)
 {
-
 	Fader::STATE fState = fader_->GetState();
 	switch (fState)
 	{
@@ -348,96 +410,78 @@ void SceneManager::Fade(void)
 		}
 		break;
 	}
-
 }
 
-void SceneManager::MakeScene(SCENE_ID sceneId)
+void SceneManager::ShakeScreen(void)
 {
+	//画面揺らし
+	if (shakeFrame_ > 0)
+	{
+		shakeFrame_--;
+		shakeRate_ *= SHAKE_DECEL_RATE;
+	}
+	else 
+	{
+		shakeRate_ = 0.0f;
+	}
+}
+
+void SceneManager::SceneUpdateImGui(void)
+{
+	ImGui::Begin("Scenes");
+	//タブ
+	if (ImGui::BeginTabBar("Scenes_TabBar"))
+	{
+		//シーンごとのタブ
+		if (ImGui::BeginTabItem(sceneName_.c_str()))
+		{
+			for (auto& scene : scenes_)
+			{
+				scene->UpdateImGui();
+			}
+			ImGui::EndTabItem();
+		}
+		//カメラのタブ
+		if (ImGui::BeginTabItem("Camera"))
+		{
+			camera_->UpdateImGui();
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+
+	ImGui::End();
+}
+
+template<typename T>
+std::unique_ptr<T> SceneManager::CreateScene(SCENE_ID sceneId)
+{
+
 	auto& resM = ResourceManager::GetInstance();
 	auto& jsonM = JsonManager::GetInstance();
+
 	std::unique_ptr<SceneBase> scene;
 	switch (sceneId)
 	{
 	case SceneManager::SCENE_ID::NONE:
 		break;
-	
+
 	case SceneManager::SCENE_ID::TITLE:
 		scene = std::make_unique<TitleScene>();
 		resM.InitTitle();
+		jsonM.InitTitle();
+		sceneName_ = "Title Scene";
 		break;
-	
-	case SceneManager::SCENE_ID::ADVERTISE:
-		scene = std::make_unique<AdvertiseScene>();
-		break;
-	
-	
-	case SceneManager::SCENE_ID::MOVIE:
-		scene = std::make_unique<MovieScene>();
-		break;
-	
-	case SceneManager::SCENE_ID::SELECT:
-		scene = std::make_unique<SelectScene>();
-		break;
-	
-	case SceneManager::SCENE_ID::TUTORIAL:
-		scene = std::make_unique<TutorialScene>();
-		resM.InitTutorial();
-		break;
-	
+
 	case SceneManager::SCENE_ID::GAME:
 		scene = std::make_unique<GameScene>();
 		resM.InitGame();
 		jsonM.InitGame();
-		break;
-	
-	case SceneManager::SCENE_ID::PAUSE:
-		scene = std::make_unique<PauseScene>();
+		sceneName_ = "Game Scene";
 		break;
 
-	case SceneManager::SCENE_ID::RESULT:
-		scene = std::make_unique<ResultScene>();
-		resM.InitResult();
-		break;
-	
 	default:
 		break;
 	}
-
-	if (scenes_.empty())
-	{
-		//空だったら新しく入れる
-		scenes_.push_back(std::move(scene));
-	}
-	else
-	{
-		//末尾のものを新しい物に入れ替える
-		scenes_.back() = std::move(scene);
-	}
-}
-
-void SceneManager::ShakeScreen(void)
-{
-	if (shakeFrame_ > 0)
-	{
-		shakeFrame_--;
-		shakeRate_ *= 0.95f;
-	}
-	else {
-		shakeRate_ = 0.0f;
-	}
-}
-
-void SceneManager::UpdateDebugImGui(void)
-{
-	//ウィンドウタイトル&開始処理
-	ImGui::Begin("SceneM");
-
-	//位置
-	ImGui::Text("screenPosXOffset");
-	//構造体の先頭ポインタを渡し、xyzと連続したメモリ配置へアクセス
-	//ImGui::InputInt("XOffset", &screenPosXoffset_);
-	//ImGui::SliderInt("PosX", &screenPosXoffset_, -20, 20);
-
-	//終了処理
-	ImGui::End();
+	return scene;
 }

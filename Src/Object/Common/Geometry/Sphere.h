@@ -20,15 +20,13 @@ public:
 
 	//描画
 	void Draw(void);
-	void Draw(int col);
+	void Draw(int col,bool fill = false);
 
 	//親Transformからの相対位置を取得
 	VECTOR GetLocalPos(void) const { return localPos_; }
 
 	//親Transformからの相対位置をセット
 	void SetLocalPos(const VECTOR& pos) { localPos_ = pos; }
-
-	void SetPos(const VECTOR& pos) { localPos_ = pos; }
 
 	//ワールド座標を取得
 	VECTOR GetPos(void) const { return GetRotPos(localPos_); }

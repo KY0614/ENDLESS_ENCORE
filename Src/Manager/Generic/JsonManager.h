@@ -15,14 +15,15 @@ public:
 	static constexpr const char* KEY_ANIMATION = "Animation";
 	static constexpr const char* KEY_ANIM_SPEED = "defaultSpeed";
 	static constexpr const char* KEY_PARAMETER = "Parameter";
-	static constexpr const char* KEY_HP = "hp";
-	static constexpr const char* KEY_MAX_HP = "maxHp";
+	static constexpr const char* KEY_HP = "hp";				//体力
+	static constexpr const char* KEY_MAX_HP = "maxHp";		//最大体力
 
 	//jsonデータの種類
 	enum class JSON_DATA
 	{
 		PLAYER,		//プレイヤー
 		ENEMY,		//敵
+		STAGE,		//ステージ
 	};
 
 	//インスタンスの生成
@@ -45,15 +46,36 @@ public:
 	/// リソースの完全破棄
 	/// </summary>
 	void Destroy(void);
-
-	nlohmann::json GetJsonData(JSON_DATA data);
+		
+	/// <summary>
+	/// Jsonデータを取得
+	/// </summary>
+	/// <param name="dataType">データの種類</param>
+	/// <param name="data">Jsonオブジェクト</param>
+	/// <returns>Jsonデータ</returns>
+	const nlohmann::json& GetJsonData(
+		const JSON_DATA dataType,
+		const std::string data)const;
 
 	/// <summary>
 	/// 指定されたオブジェクト名に基づいてデータを読み込む
 	/// </summary>
 	/// <param name="objName">データを読み込む対象のオブジェクト名</param>
 	/// <returns>オブジェクト名と対応するパラメータ</returns>
-	nlohmann::json LoadData(const std::string& fileName, const std::string& dataName);
+	nlohmann::json LoadJsonData(const std::string& fileName,
+		const std::string& dataName);
+
+	/// <summary>
+	/// 既存のJsonデータを上書きして保存する
+	/// </summary>
+	/// <param name="fileName">保存するファイル名</param>
+	/// <param name="jsonObjectName">指定するJsonオブジェクト名</param>
+	/// <param name="jsonData">指定するJsonデータ</param>
+	void OverWriteJsonData(const std::string& fileName,
+		const std::string& jsonObjectName,
+		const std::string& jsonData);
+
+	void WriteJsonDataTest(void);
 
 	/// <summary>
 	/// JSONデータからVECTOR型へ変換して取得
@@ -64,6 +86,12 @@ public:
 	static const VECTOR GetParseVector(const nlohmann::json& jsonData, const std::string& key);
 
 	//シーンごとにデータを読み込むことにする
+	
+	/// <summary>
+	/// タイトル用のデータを初期化する
+	/// </summary>
+	/// <param name=""></param>
+	void InitTitle(void);
 	
 	/// <summary>
 	/// ゲームシーン用のデータを初期化する

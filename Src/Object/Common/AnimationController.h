@@ -18,11 +18,15 @@ public :
 		float speed = 0.0f;
 		float totalTime = 0.0f;
 		float step = 0.0f;
-		VECTOR movePow = { 0.0f,0.0f,0.0f };
-		VECTOR firstPos = { 0.0f,0.0f,0.0f };
+		float blendRate = 0.0f;	//アニメーションブレンド進行度
 	};
+	//デフォルトのアニメーションブレンド時間
+	static constexpr float DEFAULT_BLEND_ANIM_TIME = 1.0f;
 
-	//コンストラクタ
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="modelId">DモデルID</param>
 	AnimationController(int modelId);
 	//デストラクタ
 	~AnimationController(void);
@@ -31,8 +35,23 @@ public :
 	void Add(int type, const std::string& path, float speed);
 
 	//アニメーション再生
-	void Play(int type, bool isLoop = true, 
-		float startStep = 0.0f, float endStep = -1.0f, bool isStop = false, bool isForce = false);
+	void Play(
+		int type,
+		bool isLoop = true, 
+		float startStep = 0.0f,
+		float endStep = -1.0f,
+		bool isStop = false,
+		bool isForce = false);
+
+	//アニメーション再生（ブレンド時間指定版）
+	void PlayBlend(
+		int type,
+		bool isLoop = true, 
+		float startStep = 0.0f,
+		float endStep = -1.0f,
+		const float blendAnimTime = DEFAULT_BLEND_ANIM_TIME,
+		bool isStop = false,
+		bool isForce = false);
 
 	void Update(void);
 
@@ -45,8 +64,6 @@ public :
 	//再生終了
 	bool IsEnd(void) const;
 
-	VECTOR GetMovePow(void) const;
-
 private :
 
 	//モデルのハンドルID
@@ -54,6 +71,9 @@ private :
 
 	//種類別のアニメーションデータ
 	std::map<int, Animation> animations_;
+
+	//再生中のアニメーションデータマップ
+	std::map<int, Animation> playAnimations_;
 
 	int playType_;
 	Animation playAnim_;
@@ -69,8 +89,22 @@ private :
 	float stepEndLoopEnd_;
 	float endLoopSpeed_;
 
-	//逆再生
+	// 逆再生
 	float switchLoopReverse_;
 
+	//デルタタイム
+	float deltaTime_;
+
+	//ブレンドアニメーション時間
+	float blendAnimTime_;
+
+	// ブレンド
+	float blendAnimRate_;
+
+	// メインの更新処理
+	void UpdateMainAnimation();
+
+	// ブレンドアニメーションの更新処理
+	void UpdateBlendAnimation();
 };
 

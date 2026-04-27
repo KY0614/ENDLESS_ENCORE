@@ -10,14 +10,12 @@ public :
 	enum class TYPE
 	{
 		STAGE,
-
-		FLOOR,
 		PLAYER,
 		ENEMY,
+		CAMERA,
 	};
 
 	//コンストラクタ
-	//template<typename... TArgs>
 	Collider(TYPE type, int modelId);
 
 	//デストラクタ

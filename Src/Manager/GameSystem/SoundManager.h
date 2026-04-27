@@ -14,46 +14,38 @@ public:
 	enum class TYPE {
 		NONE,
 		BGM,
-		SE
+		SE,
+		LOOP_SE,
 	};
 
 	enum class SOUND {
 		//ここに使用する音楽や効果音などを羅列
 		NONE,
 
-		TITLE,
-		PUSH_SPACE,
+		EXPLORE,	//探索BGM
+		LIGHT_UP,	//ライト点灯SE
 
-		TUTORIAL,
-		NEXT_PAGE,
-		RETURN_PAGE,
-		NOT_PAGE,
-		OPEN_DOOR,
+		BATTLE,		//戦闘BGM
 
-		GAME,
-		TIMER,
-		TIMER_FAST,
-		COUNT_DOWN,
-		GAME_START,
-		GAME_FINISH,
-		PICK_UP,
-		ADD_STOCK,
-		PAYING,
-		MENU_BACK,
-		MENU_OPEN,
-		MENU_CLOSE,
-		PUT_ON,
+		//enemy用
+		FIRE,		//敵の弾SE
+		FLAME,		//敵の弾SE
+		BACKSTAB,	//敵の弾SE
+		DAMAGE,
 
-		RESULT,
-		NORMAL,
-		GOOD,
-		GREATE,
+		//PLAYER用
+		WAKE_UP,	//起床SE
+		PARRY,		//パリィSE
+
+		TITLE,		//タイトルBGM
+		PUSH_SPACE,	//ゲーム開始SE
+		FILM_SCROLL,//フィルムスクロールBGM(
 	};
 
 	struct SOUND_DATA
 	{
 		int data;		//音声データ格納
-		TYPE type;		//音声データの種類	※この要素は削除するかも
+		TYPE type;		//音声データの種類
 		int playMode;	//音声データの再生タイプ
 	};
 

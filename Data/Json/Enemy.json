@@ -2,7 +2,7 @@
     "Enemy": {
     "Transform": 
     {
-      "position": [-60.0, 1.0, 250.0],
+      "position": [85.0, -219.0, 3055.0],
       "scale": 1.0,
       "localRotY": 180.0
     },
@@ -10,13 +10,29 @@
     {
       "defaultSpeed":30.0,
       "Idle": "Idle.mv1",
-      "Walk": "Walking.mv1",
-      "Death" : "Death.mv1"
+      "Turn": "Turn.mv1",
+      "Walk": "Walk.mv1",
+      "Walk Right": "Right Walking.mv1",
+      "Walk Left": "Left Walking.mv1",
+      "Run": "Run.mv1",
+      "Attack_Near": "Kick.mv1",
+      "Attack_Far_One": "Magic Attack.mv1",
+      "Attack_Far_All": "Magic Attack All.mv1",
+      "Attack_Charge": "Casting.mv1",
+      "Damage": "Impact.mv1",
+      "Backstab": "Backstab.mv1",
+      "Down": "Standing.mv1",
+      "Death" : "Death.mv1",
+      "Magic Idle": "Magician Idle.mv1",
+      "Cast Spell": "Cast Spell.mv1",
+      "Stand Up": "Stand Up.mv1"
      },
     "Parameter":
     {
-      "hp": 100.0,
-      "maxHp": 200.0
+      "hp": 500.0,
+      "maxHp":500.0,
+      "maxPosition":[2000.0, -219.0, 3900.0],
+      "minPosition":[-2000.0, -219.0, 1200.0]
     }
     }
 }
