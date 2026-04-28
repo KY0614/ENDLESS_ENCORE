@@ -1,4 +1,3 @@
-#include "PlayerTest.h"
 #include <EffekseerForDXLib.h>
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
@@ -15,12 +14,14 @@
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Common/AnimationController.h"
-#include "../Common/Geometry/ColliderLine.h"
+#include "../Common/Collider/ColliderLine.h"
+#include "../Common/Collider/ColliderCapsule.h"
 #include "../Common/Geometry/Capsule.h"
 #include "../Common/Geometry/Sphere.h"
 #include "../Common/Collider.h"
 #include "../UI/HPBar.h"
 #include "../UI/ParryBar.h"
+#include "PlayerTest.h"
 
 // 長いのでnamespaceの省略
 using json = nlohmann::json;
@@ -48,7 +49,7 @@ namespace
 	const float TERM_FOOT_SMOKE = 0.3f;
 
 	//ジャンプ力
-	const float JUMP_POW = 9.0f;
+	const float JUMP_POW = 7.0f;
 	//XZ方向のジャンプ力減衰率
 	const float JUMP_POW_DECEL_RATE = 0.01f;
 	//重力加速度
@@ -213,7 +214,7 @@ void PlayerTest::Draw(void)
 	//丸影描画
 	DrawShadow();
 
-	for (auto col : ownColliders_)
+	for (const auto& col : ownColliders_)
 	{
 		col.second->Draw();
 	}
@@ -375,6 +376,11 @@ void PlayerTest::InitCollider(void)
 		COL_LINE_START_LOCAL_POS, COL_LINE_END_LOCAL_POS);
 	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::LINE), std::move(colLine));
 
+	//カプセルコライダ
+	std::unique_ptr<ColliderCapsule> colCap = std::make_unique<ColliderCapsule>(
+		ColliderBase::TAG::PLAYER, &transform_,
+		localPosTop, localPosDown, capsuleRadius);
+	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), std::move(colCap));
 }
 
 void PlayerTest::InitAnimation(void)
@@ -557,9 +563,14 @@ void PlayerTest::UpdateImGui(void)
 	ImGui::SliderFloat("PosY", &transform_.pos.y, posMin, posMax);
 	ImGui::SliderFloat("PosZ", &transform_.pos.z, posMin, posMax);
 
+	ImGui::SliderFloat("JumpX", &jumpPow_.x, posMin, posMax);
+	ImGui::SliderFloat("JumpY", &jumpPow_.y, posMin, posMax);
+	ImGui::SliderFloat("JumpZ", &jumpPow_.z, posMin, posMax);
+
 	//Jsonデータに保存するボタン
 	if (ImGui::Button("Save to Json"))
 	{
+		//保存処理
 	}
 
 	//ダメージを受けるボタン(10ダメージ)
@@ -720,31 +731,9 @@ void PlayerTest::UpdatePlay(void)
 
 	//ジャンプ処理
 	ProcessJump();
-	// アニメーションごとの線分調整
-	if (animationController_->GetPlayType() == static_cast<int>(ANIM_TYPE::JUMP))
-	{
-		// ジャンプ中は線分を伸ばす
-		if (ownColliders_.count(static_cast<int>(COLLIDER_TYPE::LINE)) != 0)
-		{
-			ColliderLine* colLine = dynamic_cast<ColliderLine*>(
-				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::LINE)).get()
-				);
-			colLine->SetLocalPosStart(COL_LINE_JUMP_START_LOCAL_POS);
-			colLine->SetLocalPosEnd(COL_LINE_JUMP_END_LOCAL_POS);
-		}
-	}
-	else
-	{
-		// 通常時の線分に戻す
-		if (ownColliders_.count(static_cast<int>(COLLIDER_TYPE::LINE)) != 0)
-		{
-			ColliderLine* colLine = dynamic_cast<ColliderLine*>(
-				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::LINE)).get()
-				);
-			colLine->SetLocalPosStart(COL_LINE_START_LOCAL_POS);
-			colLine->SetLocalPosEnd(COL_LINE_END_LOCAL_POS);
-		}
-	}
+
+	//アニメーションごとの線分調整
+	CollisionReserve();
 
 	//回避処理
 	ProcessDodge();
@@ -754,12 +743,6 @@ void PlayerTest::UpdatePlay(void)
 
 	//移動方向に応じた回転
 	Rotate();
-
-	//重力による移動量
-	//CalcGravityPow();
-
-	//衝突判定
-	//Collision();
 
 	//歩きエフェクト
 	//EffectFootSmoke();
@@ -899,30 +882,22 @@ void PlayerTest::ProcessJump(void)
 	//ジャンプ
 	if (isHit && IsEndLanding() && !isDodge_)
 	{
-		//isJump_ = true;
-		////ジャンプの初速度を設定
-		////ここでは、JUMP_POWを初速としてv0に相当する値を設定します
-		//jumpPow_.y = JUMP_POW;
-
-		////ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
-		//jumpPow_.x = movePow_.x * JUMP_POW_DECEL_RATE;
-		//jumpPow_.z = movePow_.z * JUMP_POW_DECEL_RATE;
-
-		////無理やりアニメーション
-		//const float animStartStep = 13.0f;
-		//const float animEndStep = 25.0f;
-		//animationController_->Play((int)ANIM_TYPE::JUMP, true, animStartStep, animEndStep);
-		//const float animLoopStep = 23.0f;
-		//const float animLoopSpeed = 5.0f;
-		//animationController_->SetEndLoop(animLoopStep, animEndStep, animLoopSpeed);
-		
-		// ジャンプ量の計算
-		float jumpSpeed = JUMP_POW * SceneManager::GetInstance().GetDeltaTime();
-		jumpPow_ = VScale(CommonUtility::DIR_U, jumpSpeed);
 		isJump_ = true;
-		// アニメーション再生
-		animationController_->Play(
-			static_cast<int>(ANIM_TYPE::JUMP), false);
+		//ジャンプの初速度を設定
+		//ここでは、JUMP_POWを初速としてv0に相当する値を設定します
+		jumpPow_.y = JUMP_POW;
+
+		//ダッシュジャンプの飛距離を出すために、水平方向の移動速度を初速に加算
+		jumpPow_.x = movePow_.x * JUMP_POW_DECEL_RATE;
+		jumpPow_.z = movePow_.z * JUMP_POW_DECEL_RATE;
+
+		//無理やりアニメーション
+		const float animStartStep = 13.0f;
+		const float animEndStep = 25.0f;
+		animationController_->Play((int)ANIM_TYPE::JUMP, true, animStartStep, animEndStep);
+		const float animLoopStep = 23.0f;
+		const float animLoopSpeed = 5.0f;
+		animationController_->SetEndLoop(animLoopStep, animEndStep, animLoopSpeed);
 	}
 }
 
@@ -1114,7 +1089,7 @@ void PlayerTest::CollisionGravity(void)
 	float gravityPow = GRAVITY_POW;
 	//重力落下チェック用の長さ
 	float checkPow = 10.0f;
-	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
+	//gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 	for (const std::weak_ptr<Collider> c : colliders_)
@@ -1130,18 +1105,42 @@ void PlayerTest::CollisionGravity(void)
 
 			// ジャンプリセット
 			jumpPow_ = CommonUtility::VECTOR_ZERO;
-				if (isJump_)
-				{
-					//ジャンプアニメーションを途中から再生
-					const float animStartStep = 29.0f;
-					const float animEndStep = 45.0f;
-					//着地モーション
-					animationController_->Play(
-						(int)ANIM_TYPE::JUMP, false, animStartStep, animEndStep, false, true);
-				}
+			if (isJump_)
+			{
+				
+			}
 			isJump_ = false;
 		}
 
+	}
+}
+
+void PlayerTest::CollisionReserve(void)
+{
+	// アニメーションごとの線分調整
+	if (animationController_->GetPlayType() == static_cast<int>(ANIM_TYPE::JUMP))
+	{
+		// ジャンプ中は線分を伸ばす
+		if (ownColliders_.count(static_cast<int>(COLLIDER_TYPE::LINE)) != 0)
+		{
+			ColliderLine* colLine = dynamic_cast<ColliderLine*>(
+				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::LINE)).get()
+				);
+			colLine->SetLocalPosStart(COL_LINE_JUMP_START_LOCAL_POS);
+			colLine->SetLocalPosEnd(COL_LINE_JUMP_END_LOCAL_POS);
+		}
+	}
+	else
+	{
+		// 通常時の線分に戻す
+		if (ownColliders_.count(static_cast<int>(COLLIDER_TYPE::LINE)) != 0)
+		{
+			ColliderLine* colLine = dynamic_cast<ColliderLine*>(
+				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::LINE)).get()
+				);
+			colLine->SetLocalPosStart(COL_LINE_START_LOCAL_POS);
+			colLine->SetLocalPosEnd(COL_LINE_END_LOCAL_POS);
+		}
 	}
 }
 
@@ -1177,6 +1176,16 @@ void PlayerTest::CalcGravityPow(void)
 			jumpPow_ = gravity;
 		}
 	}
+}
+
+void PlayerTest::JumpAnimationPlay(void)
+{
+	//ジャンプアニメーションを途中から再生
+	const float animStartStep = 29.0f;
+	const float animEndStep = 45.0f;
+	//着地モーション
+	animationController_->Play(
+		(int)ANIM_TYPE::JUMP, false, animStartStep, animEndStep, false, true);
 }
 
 bool PlayerTest::IsEndLanding(void) const

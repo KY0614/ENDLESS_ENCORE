@@ -2,7 +2,7 @@
 #include "../Object/Common/AnimationController.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/SceneManager.h"
-#include "Geometry/ColliderBase.h"
+#include "Collider/ColliderBase.h"
 #include "ActorBase.h"
 
 ActorBase::ActorBase(void)

@@ -7,7 +7,7 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
-#include "Common/Geometry/ColliderModel.h"
+#include "Common/Collider/ColliderModel.h"
 #include "Stage.h"
 
 // ’·‚¢‚Ì‚Ånamespace‚ÌÈ—ª

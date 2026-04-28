@@ -10,6 +10,7 @@ public:
 	//衝突判定種別
 	enum class COLLIDER_TYPE
 	{
+		CAPSULE,//カプセル
 		SPHERE,	//球体
 		LINE,	//線分
 		MAX,
@@ -36,6 +37,12 @@ public:
 	void Draw(void) override;
 
 protected:
+	static constexpr float MAX_FALL_SPEED = -30.0f;	//最大落下速度
+	// 衝突時の押し戻し試行回数
+	static constexpr int CNT_TRY_COLLISION = 20;
+	// 衝突時の押し戻し量
+	static constexpr float COLLISION_BACK_DIS = 1.0f;
+
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 
@@ -72,9 +79,30 @@ protected:
 	/// </summary>
 	void CalcGravityPower(void);
 
+	// 衝突判定
+	virtual void CollisionReserve(void) {}
+
+	/// <summary>
+	/// 衝突判定
+	/// </summary>
+	/// <param name=""></param>
 	void Collision(void);
 
+	/// <summary>
+	/// カプセルによる衝突判定処理
+	/// </summary>
+	void CollisionCapsule(void);
+
+	/// <summary>
+	/// 重力による衝突判定処理
+	/// </summary>
 	void CollisionGravity(void);
+
+	/// <summary>
+	/// ジャンプアニメーションを途中から再生する処理
+	/// </summary>
+	/// <param name=""></param>
+	virtual void JumpAnimationPlay(void) = 0;
 
 	/// <summary>
 	/// 影の描画処理

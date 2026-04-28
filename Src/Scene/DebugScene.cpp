@@ -1,7 +1,7 @@
 #include <memory>
 #include "../Libs/ImGui/imgui.h"
 #include "../Object/Stage.h"
-#include "../Object/Common/Geometry/ColliderBase.h"
+#include "../Object/Common/Collider/ColliderBase.h"
 #include "../Object/Character/PlayerTest.h"
 #include "../Manager/GameSystem/Camera.h"
 #include "../Manager/GameSystem/InputManager.h"
