@@ -1,6 +1,14 @@
 #include "../Transform.h"
 #include "ColliderSphere.h"
 
+namespace
+{
+	//デバッグ表示の球体半径
+	const float RADIUS = 5.0f;
+	//デバッグ表示の球体ポリゴン分割数
+	const int DIV_NUM = 6;
+}
+
 ColliderSphere::ColliderSphere(
 	const TAG tag,
 	const Transform* follow,
@@ -16,7 +24,7 @@ ColliderSphere::~ColliderSphere(void)
 {
 }
 
-VECTOR ColliderSphere::GetPos(void) const
+const VECTOR& ColliderSphere::GetPos(void) const
 {
 	return GetRotPos(localPos_);
 }

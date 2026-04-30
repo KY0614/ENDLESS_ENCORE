@@ -11,7 +11,7 @@ public:
 
 	enum class COLLIDER_TYPE
 	{
-		STAGE,		//ステージ
+		THEATER,	//劇場
 		MIST_WALL,	//霧の壁
 		MAX,
 	};

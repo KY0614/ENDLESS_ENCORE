@@ -35,7 +35,7 @@ void DebugScene::Init(void)
 	//コライダー登録
 	// ステージモデルのコライダーをプレイヤーに登録
 	playerTest_->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::STAGE)));
+		static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
 }
 
 void DebugScene::Update(void)

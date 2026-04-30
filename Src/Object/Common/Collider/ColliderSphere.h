@@ -25,7 +25,13 @@ public:
 	/// </summary>
 	/// <param name=""></param>
 	/// <returns></returns>
-	VECTOR GetLocalPos(void) const { return localPos_; }
+	const VECTOR GetLocalPos(void) const { return localPos_; }
+
+	/// <summary>
+	/// 半径を取得
+	/// </summary>
+	/// <returns>半径</returns>
+	const float& GetRadius(void) const { return radius_; }
 
 	/// <summary>
 	/// ローカル座標を設定
@@ -34,23 +40,24 @@ public:
 	void SetLocalPos(const VECTOR& localPos) { localPos_ = localPos; }
 
 	/// <summary>
+	/// 半径を設定
+	/// </summary>
+	/// <param name="radius">半径</param>
+	void SetRadius(const float& radius) { radius_ = radius; }
+
+	/// <summary>
 	/// 座標の取得
 	/// </summary>
 	/// <returns>ワールド座標</returns>
-	VECTOR GetPos(void) const;
+	const VECTOR& GetPos(void) const;
 
 protected:
 
-	// デバッグ用描画
+	//デバッグ用描画
 	void DrawDebug(int color) override;
 
 private:
-	// デバッグ表示の球体半径
-	static constexpr float RADIUS = 5.0f;
-	// デバッグ表示の球体ポリゴン分割数
-	static constexpr int DIV_NUM = 6;
-
-	// 線分の開始座標(ローカル)
+	//線分の開始座標(ローカル)
 	VECTOR localPos_;
 
 	//半径

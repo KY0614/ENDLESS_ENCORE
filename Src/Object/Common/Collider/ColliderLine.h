@@ -50,13 +50,13 @@ public:
 	/// ワールド開始座標の取得
 	/// </summary>
 	/// <returns>ワールド開始座標</returns>
-	VECTOR GetPosStart(void) const { return GetRotPos(localPosStart_); }
+	const VECTOR GetPosStart(void) const { return GetRotPos(localPosStart_); }
 
 	/// <summary>
 	/// ワールド終了座標の取得
 	/// </summary>
 	/// <returns>ワールド終了座標</returns>
-	VECTOR GetPosEnd(void) const { return GetRotPos(localPosEnd_); }
+	const VECTOR GetPosEnd(void) const { return GetRotPos(localPosEnd_); }
 
 protected:
 
@@ -64,10 +64,6 @@ protected:
 	void DrawDebug(int color) override;
 
 private:
-	// デバッグ表示の球体半径
-	static constexpr float RADIUS = 5.0f;
-	// デバッグ表示の球体ポリゴン分割数
-	static constexpr int DIV_NUM = 6;
 	// 線分の開始座標(ローカル)
 	VECTOR localPosStart_;
 	// 線分の終了座標(ローカル)

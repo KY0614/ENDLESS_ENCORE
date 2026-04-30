@@ -20,7 +20,7 @@ public:
 	/// 座標の取得
 	/// </summary>
 	/// <returns>ワールド座標</returns>
-	VECTOR GetPos(void) const;
+	const VECTOR GetPos(void) const;
 
 protected:
 
