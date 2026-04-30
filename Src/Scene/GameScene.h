@@ -4,6 +4,7 @@
 #include "../Object/Common/Transform.h"
 #include "SceneBase.h"
 
+class PlayerTest;
 class Player;
 class Enemy;
 class EncountPlayer;
@@ -68,6 +69,7 @@ private:
 	//フェーズ管理
 	bool isFaseChange_;
 
+	std::unique_ptr<PlayerTest> playerTest_;
 	//プレイヤー
 	std::shared_ptr<Player> player_;
 	//エンカウント演出用のプレイヤー

@@ -15,6 +15,7 @@
 #include "../Renderer/ModelMaterial.h"
 #include "../Common/AnimationController.h"
 #include "../Common/Collider/ColliderLine.h"
+#include "../Common/Collider/ColliderSphere.h"
 #include "../Common/Collider/ColliderCapsule.h"
 #include "../Common/Geometry/Capsule.h"
 #include "../Common/Geometry/Sphere.h"
@@ -217,13 +218,6 @@ void PlayerTest::UpdateState(void)
 
 void PlayerTest::Draw(void)
 {
-	VECTOR right = GetTransform().GetRight();
-	VECTOR back = GetTransform().GetBack();
-	VECTOR rightBackDir = VNorm(VAdd(back, right));
-	VECTOR pos = VAdd(GetTransform().pos, VScale(VNorm(rightBackDir), 50.0f));
-	pos.y += 50.0f;
-	DrawSphere3D(pos, 20.0f, 16, 0x00ff00, 0x00ff00, false);
-
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 
@@ -397,6 +391,12 @@ void PlayerTest::InitCollider(void)
 		ColliderBase::TAG::PLAYER, &transform_,
 		localPosTop, localPosDown, capsuleRadius);
 	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), std::move(colCap));
+
+	//球コライダ
+	std::unique_ptr<ColliderSphere> colSphere = std::make_unique<ColliderSphere>(
+		ColliderBase::TAG::PLAYER_PARRY, &transform_,
+		localPos, sphereRadius);
+	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::SPHERE), std::move(colSphere));
 }
 
 void PlayerTest::InitAnimation(void)
