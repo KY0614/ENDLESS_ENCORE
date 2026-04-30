@@ -68,7 +68,6 @@ void CharactorBase::Draw(void)
 
 void CharactorBase::CalcGravityPower(void)
 {
-	if (!isJump_)jumpPow_ = CommonUtility::VECTOR_ZERO;
 	//重力方向
 	VECTOR dirGravity = CommonUtility::DIR_D;
 	//重力の強さ
@@ -153,16 +152,16 @@ void CharactorBase::CollisionCapsule(void)
 				if (pHit)
 				{
 					// 法線の方向にちょっとだけ移動させる
-					//transform_.pos =
-					//	VAdd(transform_.pos,
-					//		VScale(hit.Normal, COLLISION_BACK_DIS));
+					transform_.pos =
+						VAdd(transform_.pos,
+							VScale(hit.Normal, COLLISION_BACK_DIS));
 
-					//法線の方向にちょっとだけ移動させる
-					const float adjustDist = 2.0f;
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, adjustDist));
-					//カプセルも一緒に移動させる
-					trans.pos = movedPos_;
-					trans.Update();
+					////法線の方向にちょっとだけ移動させる
+					//const float adjustDist = 2.0f;
+					//movedPos_ = VAdd(movedPos_, VScale(hit.Normal, adjustDist));
+					////カプセルも一緒に移動させる
+					//trans.pos = movedPos_;
+					//trans.Update();
 					continue;
 				}
 				break;

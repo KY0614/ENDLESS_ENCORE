@@ -195,23 +195,6 @@ protected:
 	virtual void JumpAnimationPlay(void) override;
 
 private:
-	// 衝突判定用カプセル上部球体(ジャンプ時)
-	static constexpr VECTOR COL_CAPSULE_TOP_JUMP_LOCAL_POS =
-	{ 0.0f, 160.0f, 0.0f };
-	// 衝突判定用カプセル下部球体(ジャンプ時)
-	static constexpr VECTOR COL_CAPSULE_DOWN_JUMP_LOCAL_POS =
-	{ 0.0f, 80.0f, 0.0f };
-	// 衝突判定用線分開始(ジャンプ時)
-	static constexpr VECTOR COL_LINE_JUMP_START_LOCAL_POS =
-	{ 0.0f, 130.0f, 0.0f };
-	// 衝突判定用線分終了(ジャンプ時)
-	static constexpr VECTOR COL_LINE_JUMP_END_LOCAL_POS =
-	{ 0.0f, 35.0f, 0.0f };
-	// 衝突判定用線分開始
-	static constexpr VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 80.0f, 0.0f };
-	// 衝突判定用線分終了
-	static constexpr VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, -10.0f, 0.0f };
-
 	//UI
 	std::unique_ptr<HPBar> hpBar_;	//HPバー
 	std::unique_ptr<ParryBar> parryBar_;//パリィバー
@@ -440,30 +423,10 @@ private:
 
 	//衝突判定---------------------------------------
 
-	/// <summary>
-	/// 衝突判定処理
-	/// </summary>
-	void Collision(void);
-
-	/// <summary>
-	/// カプセルの衝突判定処理
-	/// </summary>
-	void CollisionCapsule(void);
-
-	/// <summary>
-	/// 重力方向の衝突判定処理
-	/// </summary>
-	void CollisionGravity(void);
-
 	// 衝突判定
 	void CollisionReserve(void) override;
 
 	//------------------------------------------------
-
-	/// <summary>
-	/// 移動量の計算
-	/// </summary>
-	void CalcGravityPow(void);
 
 	/// <summary>
 	/// 着地モーションが終了したかどうか
