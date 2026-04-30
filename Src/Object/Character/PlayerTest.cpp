@@ -65,7 +65,7 @@ namespace
 	const float TERM_FOOT_SMOKE = 0.3f;
 
 	//ジャンプ力
-	const float JUMP_POW = 7.0f;
+	const float JUMP_POW = 18.0f;
 	//XZ方向のジャンプ力減衰率
 	const float JUMP_POW_DECEL_RATE = 0.01f;
 	//重力加速度
@@ -393,10 +393,10 @@ void PlayerTest::InitCollider(void)
 	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::LINE), std::move(colLine));
 
 	//カプセルコライダ
-	//std::unique_ptr<ColliderCapsule> colCap = std::make_unique<ColliderCapsule>(
-	//	ColliderBase::TAG::PLAYER, &transform_,
-	//	localPosTop, localPosDown, capsuleRadius);
-	//ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), std::move(colCap));
+	std::unique_ptr<ColliderCapsule> colCap = std::make_unique<ColliderCapsule>(
+		ColliderBase::TAG::PLAYER, &transform_,
+		localPosTop, localPosDown, capsuleRadius);
+	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), std::move(colCap));
 }
 
 void PlayerTest::InitAnimation(void)
@@ -1041,11 +1041,11 @@ void PlayerTest::CollisionReserve(void)
 			colLine->SetLocalPosStart(COL_LINE_JUMP_START_LOCAL_POS);
 			colLine->SetLocalPosEnd(COL_LINE_JUMP_END_LOCAL_POS);
 			//カプセルも同様に調整
-			//ColliderCapsule* colCap = dynamic_cast<ColliderCapsule*>(
-			//	ownColliders_.at(static_cast<int>(COLLIDER_TYPE::CAPSULE)).get()
-			//	);
-			//colCap->SetLocalPosTop(COL_LINE_JUMP_START_LOCAL_POS);
-			//colCap->SetLocalPosDown(COL_LINE_JUMP_END_LOCAL_POS);	
+			ColliderCapsule* colCap = dynamic_cast<ColliderCapsule*>(
+				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::CAPSULE)).get()
+				);
+			colCap->SetLocalPosTop(COL_LINE_JUMP_START_LOCAL_POS);
+			colCap->SetLocalPosDown(COL_LINE_JUMP_END_LOCAL_POS);	
 		}
 	}
 	else
@@ -1059,13 +1059,13 @@ void PlayerTest::CollisionReserve(void)
 			colLine->SetLocalPosStart(COL_LINE_START_LOCAL_POS);
 			colLine->SetLocalPosEnd(COL_LINE_END_LOCAL_POS);
 			//カプセルも同様に戻す
-			//ColliderCapsule* colCap = dynamic_cast<ColliderCapsule*>(
-			//	ownColliders_.at(static_cast<int>(COLLIDER_TYPE::CAPSULE)).get()
-			//	);
-			//const VECTOR localPosTop = { 0.0f, 110.0f, 0.0f };
-			//const VECTOR localPosDown = { 0.0f, 20.0f, 0.0f };
-			//colCap->SetLocalPosTop(localPosTop);
-			//colCap->SetLocalPosDown(localPosDown);
+			ColliderCapsule* colCap = dynamic_cast<ColliderCapsule*>(
+				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::CAPSULE)).get()
+				);
+			const VECTOR localPosTop = { 0.0f, 110.0f, 0.0f };
+			const VECTOR localPosDown = { 0.0f, 20.0f, 0.0f };
+			colCap->SetLocalPosTop(localPosTop);
+			colCap->SetLocalPosDown(localPosDown);
 		}
 	}
 }

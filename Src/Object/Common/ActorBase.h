@@ -12,8 +12,8 @@ class ActorBase
 public:
 
 	//重力
-	static constexpr float GRAVITY = 15.0f;				//重力加速度
-	static constexpr float GRAVITY_SCALE = 1.0f;		//重力の減衰率
+	static constexpr float GRAVITY = 9.81f * 100.0f;	//重力加速度
+	static constexpr float GRAVITY_SCALE = 0.05f;		//重力の減衰率
 
 	//コンストラクタ
 	ActorBase(void);
