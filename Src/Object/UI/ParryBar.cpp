@@ -1,4 +1,3 @@
-#include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "ParryBar.h"
 

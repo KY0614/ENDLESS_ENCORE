@@ -1,4 +1,3 @@
-#include "../Transform.h"
 #include "ColliderSphere.h"
 
 namespace
@@ -24,7 +23,7 @@ ColliderSphere::~ColliderSphere(void)
 {
 }
 
-const VECTOR& ColliderSphere::GetPos(void) const
+VECTOR ColliderSphere::GetPos(void) const
 {
 	return GetRotPos(localPos_);
 }

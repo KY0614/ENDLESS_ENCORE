@@ -1,5 +1,4 @@
 #include "ColliderLine.h"
-#include "ColliderCapsule.h"
 
 namespace
 {

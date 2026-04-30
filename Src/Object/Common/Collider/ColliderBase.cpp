@@ -24,7 +24,7 @@ void ColliderBase::Draw(void)
 	DrawDebug(color);
 }
 
-void ColliderBase::SetFollow(Transform* follow)
+void ColliderBase::SetFollow(const Transform* follow)
 {
 	follow_ = follow;
 }

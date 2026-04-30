@@ -1,6 +1,7 @@
 #include "HPBar.h"
 
-HPBar::HPBar(const HPBarInfo hpBarInfo, const float& hp):
+HPBar::HPBar(const HPBarInfo& hpBarInfo,
+	const float& hp):
 	hpBarInfo_(hpBarInfo),
 	hp_(hp)
 {

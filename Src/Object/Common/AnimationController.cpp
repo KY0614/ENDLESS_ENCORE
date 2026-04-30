@@ -1,4 +1,3 @@
-#include <DxLib.h>
 #include "../../Utility/StringUtility.h"
 #include "../../Utility/CommonUtility.h"
 #include "../../Manager/Generic/SceneManager.h"
@@ -7,7 +6,7 @@
 AnimationController::AnimationController(int modelId)
 {
 	modelId_ = modelId;
-
+	deltaTime_ = 0.0f;
 	playType_ = -1;
 	isLoop_ = false;
 

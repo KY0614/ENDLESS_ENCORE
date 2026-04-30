@@ -11,8 +11,6 @@
 #include "../Manager/Generic/JsonManager.h"
 #include "../Manager/GameSystem/InputManager.h"
 #include "../Manager/GameSystem/Camera.h"
-#include "../Renderer/ModelRenderer.h"
-#include "../Renderer/ModelMaterial.h"
 #include "../Common/AnimationController.h"
 #include "../Common/Geometry/Capsule.h"
 #include "../Common/Geometry/Sphere.h"
@@ -87,7 +85,6 @@ namespace
 
 Player::Player(void)
 {
-	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	hp_ = 0.0f;
 	maxHp_ = 0.0f;
@@ -247,7 +244,6 @@ void Player::DrawResultImage(const int img)
 	const float& screenAspectRatio =
 		SceneManager::GetInstance().GetScreenAspectRatio();
 
-	static int interval = 0;
 	//透明度の増加値
 	const int alphaSpeed = 5;
 	const int maxAlpha = 255;
@@ -255,6 +251,8 @@ void Player::DrawResultImage(const int img)
 	resultImgAlpha_ = std::clamp(resultImgAlpha_, 0, maxAlpha);
 	if (resultImgAlpha_ >= maxAlpha)
 	{
+		//結果画像の透明度(静的にしているのは、状態が変わるまで値を保持するため)
+		static int interval = 0;
 		if (++interval > maxInterval)
 		{
 			interval = 0;
@@ -383,7 +381,6 @@ void Player::InitAnimation(void)
 	const char* KEY_EMPTY = "";
 	//アニメーション速度
 	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
-	const float animSpeedSlow = animSpeed / 2.0f;	//ゆっくり再生する速度（半分)
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	//起き上がり
 	animationController_->Add((int)ANIM_TYPE::WAKE_UP, path + animPath.value(KEY_WAKE_UP, KEY_EMPTY),
@@ -798,8 +795,6 @@ void Player::ProcessMove(void)
 	InputManager& ins = InputManager::GetInstance();
 	Quaternion cameraRot = mainCamera->GetQuaRotOutX();
 
-	double rotRad = 0.0;
-
 	//WASDで位置を変える
 	VECTOR dir = CommonUtility::VECTOR_ZERO;
 	movePow_ = CommonUtility::VECTOR_ZERO;
@@ -1157,24 +1152,6 @@ bool Player::IsEndLanding(void) const
 
 	// アニメーションがジャンプではない
 	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP)
-	{
-		return ret;
-	}
-
-	// アニメーションが終了しているか
-	if (animationController_->IsEnd())
-	{
-		return ret;	//終了している
-	}
-
-	return false;
-}
-
-bool Player::IsEndDodge(void) const
-{
-	bool ret = true;
-	// アニメーションが回避ではない
-	if (animationController_->GetPlayType() != (int)ANIM_TYPE::DODGE)
 	{
 		return ret;
 	}

@@ -24,7 +24,7 @@ public:
 	/// コンストラクタ
 	/// </summary>
 	/// <param name="hpBarInfo">HPバー情報（種類、位置、サイズ、最大幅）</param>
-	HPBar(const HPBarInfo hpBarInfo,const float& hp);
+	HPBar(const HPBarInfo& hpBarInfo,const float& hp);
 	//デストラクタ
 	~HPBar(void)override = default;
 

@@ -5,7 +5,6 @@
 #include "../Common/Transform.h"
 
 class ColliderBase;
-class Geometry;
 
 class ActorBase
 {

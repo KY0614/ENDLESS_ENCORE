@@ -1,4 +1,3 @@
-#include <DxLib.h>
 #include "../../Utility/CommonUtility.h"
 #include "Transform.h"
 
@@ -83,7 +82,6 @@ void Transform::SetModel(int model)
 
 void Transform::MakeCollider(Collider::TYPE type)
 {
-
 	if (modelId == -1)
 	{
 		return;
@@ -91,7 +89,6 @@ void Transform::MakeCollider(Collider::TYPE type)
 
 	collider = std::make_shared<Collider>(type, modelId);
 	int ret = MV1SetupCollInfo(modelId, -1, 1, 1, 1);
-
 }
 
 VECTOR Transform::GetForward(void) const

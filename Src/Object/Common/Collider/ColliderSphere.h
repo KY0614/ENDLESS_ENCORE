@@ -18,7 +18,7 @@ public:
 		const VECTOR& localPos,
 		const float& radius);
 	//デストラクタ
-	~ColliderSphere(void);
+	~ColliderSphere(void)override;
 
 	/// <summary>
 	/// ローカル座標を取得
@@ -49,7 +49,7 @@ public:
 	/// 座標の取得
 	/// </summary>
 	/// <returns>ワールド座標</returns>
-	const VECTOR& GetPos(void) const;
+	VECTOR GetPos(void) const;
 
 protected:
 

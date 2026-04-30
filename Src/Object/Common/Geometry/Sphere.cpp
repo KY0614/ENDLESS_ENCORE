@@ -1,12 +1,12 @@
-#include <DxLib.h>
 #include "../Transform.h"
 #include "Sphere.h"
 
 Sphere::Sphere(const Transform& parent) : 
 	transformParent_(parent)
 {
+	parentPos_ = {};
 	radius_ = 0.0f;
-	localPos_ = { 0.0f, 0.0f, 0.0f };
+	localPos_ = {};
 }
 
 Sphere::Sphere(const VECTOR& parentPos,const Transform& parent) : 

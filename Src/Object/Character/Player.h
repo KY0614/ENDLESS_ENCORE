@@ -12,8 +12,6 @@ class AnimationController;
 class Collider;
 class Capsule;
 class Sphere;
-class ModelRenderer;
-class ModelMaterial;
 
 class Player : public ActorBase
 {
@@ -193,10 +191,6 @@ private:
 	//UI
 	std::unique_ptr<HPBar> hpBar_;	//HPバー
 	std::unique_ptr<ParryBar> parryBar_;//パリィバー
-
-	//マテリアル・レンダラー
-	std::unique_ptr<ModelMaterial> material_;
-	std::unique_ptr<ModelRenderer> renderer_;
 
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
@@ -463,13 +457,6 @@ private:
 	/// </summary>
 	/// <returns>true: 着地モーションが終了した場合　false:それ以外</returns>
 	bool IsEndLanding(void) const;
-
-	/// <summary>
-	/// 回避モーションが終了したかどうか
-	/// </summary>
-	/// <param name=""></param>
-	/// <returns>true:回避モーションが終了した場合　false:それ以外</returns>
-	bool IsEndDodge(void) const;
 
 	/// <summary>
 	/// 足煙エフェクトの発生処理

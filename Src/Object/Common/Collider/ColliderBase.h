@@ -52,7 +52,7 @@ public:
 	/// ’Ç]æ‚Ìİ’è
 	/// </summary>
 	/// <param name="follow">’Ç]æ‚ÌTransform</param>
-	void SetFollow(Transform* follow);
+	void SetFollow(const Transform* follow);
 
 	/// <summary>
 	/// Œ`ó‚Ìæ“¾
