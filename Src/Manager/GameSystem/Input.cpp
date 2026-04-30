@@ -1,5 +1,3 @@
-#include<DxLib.h>
-#include<cassert>
 #include "Input.h"
 
 namespace {

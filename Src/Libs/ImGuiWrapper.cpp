@@ -128,19 +128,18 @@ ImGuiWrapper::~ImGuiWrapper(void)
 
 void ImGuiWrapper::UpdateInputMouse(void)
 {
-
-	// マウス情報をImGuiに渡す(InputManager使用)
+	//マウス情報をImGuiに渡す(InputManager使用)
 	ImGuiIO& io = ImGui::GetIO();
 	auto& input = InputManager::GetInstance();
-	auto mousePos = input.GetMousePos();
-	io.AddMousePosEvent(mousePos.x, mousePos.y);
+	const Vector2 mousePos = input.GetMousePos();
+	io.AddMousePosEvent(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 	io.AddMouseButtonEvent(ImGuiMouseButton_Left, input.IsClickMouseLeft());
 	io.AddMouseButtonEvent(ImGuiMouseButton_Right, input.IsClickMouseRight());
 }
 
 void ImGuiWrapper::UpdateNewFrame(void)
 {
-	// ImGui操作前準備
+	//ImGui操作前準備
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();

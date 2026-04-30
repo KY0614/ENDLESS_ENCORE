@@ -1,7 +1,6 @@
 #pragma once
-#include <string>
 #include <map>
-#include <Dxlib.h>
+#include <DxLib.h>
 #include "Input.h"
 #include "../../Common/Vector2.h"
 

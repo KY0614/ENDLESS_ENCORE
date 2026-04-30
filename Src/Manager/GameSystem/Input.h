@@ -1,10 +1,10 @@
 #pragma once
 
-#include<DxLib.h>		//対応表のため
-#include<unordered_map>		//対応表のため
-#include<functional>		//対応表のため
-#include<string>	//対応キーのため
-#include<vector>	//デバイス追加のため
+#include<DxLib.h>		
+#include<unordered_map>		
+#include<functional>		
+#include<string>	
+#include<vector>	
 
 /// <summary>
 /// 周辺機器種別
@@ -36,12 +36,8 @@ enum class AnalogInputType
 	R_TRIGGER	//右トリガー
 };
 
-class KeyConfigScene;
-
 class Input
 {
-	friend KeyConfigScene;	//privateもいじていいよ
-
 public:
 	//コンストラクタ
 	Input();

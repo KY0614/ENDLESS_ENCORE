@@ -1,4 +1,3 @@
-#include <DxLib.h>
 #include "InputManager.h"
 
 InputManager* InputManager::instance_ = nullptr;

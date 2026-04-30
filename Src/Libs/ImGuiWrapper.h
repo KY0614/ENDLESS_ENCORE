@@ -1,5 +1,4 @@
 #pragma once
-#include <Windows.h>
 
 class ImGuiWrapper
 {
@@ -19,23 +18,31 @@ public:
 
 private:
 
-	// 静的インスタンス
+	//静的インスタンス
 	static ImGuiWrapper* instance_;
 
-	// ウインドウプロージャ
+	//ウインドウプロージャ
     static LRESULT CALLBACK WndProc(
         HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-	// デフォルトコンストラクタをprivateにして、
-	// 外部から生成できない様にする
+	//デフォルトコンストラクタをprivateにして、
+	//外部から生成できない様にする
 	ImGuiWrapper(void);
-	// コピーコンストラクタも同様
+	//コピーコンストラクタも同様
 	ImGuiWrapper(const ImGuiWrapper&);
-	// デストラクタも同様
+	//デストラクタも同様
 	~ImGuiWrapper(void);
 
+	/// <summary>
+	/// マウス入力の更新
+	/// </summary>
+	/// <param name=""></param>
 	void UpdateInputMouse(void);
-	void UpdateNewFrame(void);
 
+	/// <summary>
+	/// 新しいフレームの更新
+	/// </summary>
+	/// <param name=""></param>
+	void UpdateNewFrame(void);
 };
 
