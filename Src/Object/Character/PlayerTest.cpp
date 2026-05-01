@@ -106,7 +106,6 @@ namespace
 
 PlayerTest::PlayerTest(void)
 {
-	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	hp_ = 0.0f;
 	maxHp_ = 0.0f;
@@ -131,7 +130,6 @@ PlayerTest::PlayerTest(void)
 	stepJump_ = -1.0f;
 	isJump_ = false;
 	speed_ = -1.0f;
-
 	
 	moveDiff_ = CommonUtility::VECTOR_ZERO;
 	jumpPow_ = CommonUtility::VECTOR_ZERO;

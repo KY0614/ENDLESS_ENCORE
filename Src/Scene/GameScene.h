@@ -69,7 +69,7 @@ private:
 	//フェーズ管理
 	bool isFaseChange_;
 
-	std::unique_ptr<PlayerTest> playerTest_;
+	std::shared_ptr<PlayerTest> playerTest_;
 	//プレイヤー
 	std::shared_ptr<Player> player_;
 	//エンカウント演出用のプレイヤー

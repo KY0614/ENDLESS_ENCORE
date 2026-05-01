@@ -24,6 +24,7 @@ public:
 		PLAYER_ATTACK,	//プレイヤーの攻撃
 		PLAYER_PARRY,	//プレイヤーのパリィ
 		ENEMY,			//敵
+		ENEMY_ATTACK,	//敵の攻撃
 		ENEMY_BULLET,	//敵の弾
 	};
 

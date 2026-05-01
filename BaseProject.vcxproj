@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Manager\GameSystem\CollisionManager.cpp" />
+    <ClCompile Include="Src\Object\Character\EnemyTest.cpp" />
     <ClCompile Include="Src\Object\Common\Collider\ColliderCapsule.cpp" />
     <ClCompile Include="Src\Scene\DebugScene.cpp" />
     <ClCompile Include="Src\Object\Character\PlayerTest.cpp" />
@@ -80,6 +82,8 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Manager\GameSystem\CollisionManager.h" />
+    <ClInclude Include="Src\Object\Character\EnemyTest.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderCapsule.h" />
     <ClInclude Include="Src\Scene\DebugScene.h" />
     <ClInclude Include="Src\Object\Character\PlayerTest.h" />
