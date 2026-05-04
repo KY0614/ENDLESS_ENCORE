@@ -48,7 +48,6 @@ void SceneManager::Init(void)
 {
 	SoundManager::CreateInstance();
 	JsonManager::CreateInstance();
-	JsonManager::CreateInstance();
 
 	sceneId_ = SCENE_ID::NONE;
 	waitSceneId_ = SCENE_ID::NONE;
