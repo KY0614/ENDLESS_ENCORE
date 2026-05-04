@@ -133,7 +133,7 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::MIST_WALL, std::move(res));
 
 	//ƒmƒCƒY—p‰æ‘œ
-	res = std::make_unique<RES>(RES_T::IMG, PATH_MDL + "Stage/Mist/Noise.png");
+	res = std::make_unique<RES>(RES_T::IMG, PATH_MDL + "Stage/MistWall/Noise.png");
 	resourcesMap_.emplace(SRC::NOISE_TEXTURE, std::move(res));
 
 	//“G

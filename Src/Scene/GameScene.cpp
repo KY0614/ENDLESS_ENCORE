@@ -8,7 +8,6 @@
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
-#include "../Object/Character/PlayerTest.h"
 #include "../Object/Character/Player.h"
 #include "../Object/Character/EncountPlayer.h"
 #include "../Object/Character/Enemy.h"
@@ -46,11 +45,6 @@ namespace
 
 GameScene::GameScene(void)
 {
-	player_ = nullptr;
-	encountPlayer_ = nullptr;
-	enemy_ = nullptr;
-	encountEnemy_ = nullptr;
-	stage_ = nullptr;
 	isFaseChange_ = false;
 	state_ = STATE::NONE;
 
@@ -77,20 +71,15 @@ void GameScene::Init(void)
 	InitSound();
 
 	//プレイヤー
-	playerTest_ = std::make_shared<PlayerTest>();
-	playerTest_->Init();
-
-	//プレイヤー
-	//player_ = std::make_shared<Player>();
-	//player_->Init();
+	player_ = std::make_shared<Player>();
+	player_->Init();
 
 	//エンカウント演出用のプレイヤー
 	encountPlayer_ = std::make_shared<EncountPlayer>();
 	encountPlayer_->Init();
 
 	//敵
-	//enemy_ = std::make_shared<Enemy>(*player_);
-	enemy_ = std::make_shared<Enemy>(*playerTest_);
+	enemy_ = std::make_shared<Enemy>(*player_);
 	enemy_->Init();
 
 	//エンカウント演出用の敵
@@ -115,24 +104,13 @@ void GameScene::Init(void)
 		},skipTimer_,SKIP_TIME );
 	skipBarUI_->Init();
 
-	//カメラ
-	//mainCamera->SetFollow(&player_->GetTransform());
-	mainCamera->SetFollow(&playerTest_->GetTransform());
+	//カメラ設定
+	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	//コライダー登録
-	// ステージモデルのコライダーをプレイヤーに登録
-	playerTest_->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
-	playerTest_->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
-	mainCamera->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
-	mainCamera->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
-	//コライダー登録
-	//mainCamera->AddCollider(stage_->GetTransform().collider);
-	//player_->AddCollider(stage_->GetTransform().collider);
+	mainCamera->AddCollider(stage_->GetTransform().collider);
+	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 
 	//フォントハンドルの取得
@@ -493,29 +471,6 @@ void GameScene::UpdateEncount(void)
 			return;
 		}
 	}
-
-#ifdef _DEBUG
-
-	//スローモーション処理
-	//if (encountScene_->IsSlowMotion() &&
-	//	slowMotionFrameCount_++ > 60.0f)slowMotionFrameCount_ = 0.0f;
-
-	//スローモーション中でなければ通常更新
-	//if (encountScene_->IsSlowMotion())
-	//{
-	//	slowMotionFrame_ *= 1.02f; // 徐々に遅くする
-	//	if (slowMotionFrame_ > 60.0f) // 完全停止
-	//	{
-	//		//終了処理など
-	//		return;
-	//	}
-	//	slowMotionFrameCount_++;
-	//	if (slowMotionFrame_ < 1.0f ||
-	//		static_cast<int>(slowMotionFrameCount_) %
-	//		static_cast<int>(slowMotionFrame_) != 0)
-	//		return; // このフレームは処理しない
-	//}
-#endif // _DEBUG
 
 	//エンカウントシーン更新
 	encountScene_->Update();

@@ -5,7 +5,7 @@
 class ModelRenderer;
 class ModelMaterial;
 
-class Stage : public ActorBase
+class Stage
 {
 public:
 

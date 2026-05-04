@@ -19,17 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Manager\GameSystem\CollisionManager.cpp" />
-    <ClCompile Include="Src\Object\Character\EnemyTest.cpp" />
-    <ClCompile Include="Src\Object\Common\Collider\ColliderCapsule.cpp" />
-    <ClCompile Include="Src\Scene\DebugScene.cpp" />
-    <ClCompile Include="Src\Object\Character\PlayerTest.cpp" />
-    <ClCompile Include="Src\Object\Common\Collider\ColliderLine.cpp" />
-    <ClCompile Include="Src\Object\Common\Collider\ColliderModel.cpp" />
-    <ClCompile Include="Src\Object\Character\CharactorBase.cpp" />
-    <ClCompile Include="Src\Object\Common\Collider\ColliderSphere.cpp" />
-    <ClCompile Include="Src\Object\Common\Collider\ColliderBase.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
     <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
     <ClCompile Include="Src\Object\Character\EncountEnemy.cpp" />
     <ClCompile Include="Src\Object\UI\SkipBar.cpp" />
@@ -82,19 +71,8 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Manager\GameSystem\CollisionManager.h" />
-    <ClInclude Include="Src\Object\Character\EnemyTest.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderCapsule.h" />
-    <ClInclude Include="Src\Scene\DebugScene.h" />
-    <ClInclude Include="Src\Object\Character\PlayerTest.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderLine.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderModel.h" />
-    <ClInclude Include="Src\Object\Character\CharactorBase.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderSphere.h" />
-    <ClInclude Include="Src\Object\Common\Collider\ColliderBase.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_dx11.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_win32.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
     <ClInclude Include="Src\Object\Character\EncountPlayer.h" />
     <ClInclude Include="Src\Object\Character\EncountEnemy.h" />
     <ClInclude Include="Src\Object\UI\SkipBar.h" />

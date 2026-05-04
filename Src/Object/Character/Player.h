@@ -87,11 +87,6 @@ public:
 	void DrawResultImage(const int img);
 
 	/// <summary>
-	/// コライダーの削除
-	/// </summary>
-	void ClearCollider(void);
-
-	/// <summary>
 	/// 衝突用カプセルの取得
 	/// </summary>
 	/// <param name=""></param>

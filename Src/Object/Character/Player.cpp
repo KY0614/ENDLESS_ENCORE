@@ -203,18 +203,11 @@ void Player::Update(void)
 
 void Player::Draw(void)
 {
-	VECTOR right = GetTransform().GetRight();
-	VECTOR back = GetTransform().GetBack();
-	VECTOR rightBackDir = VNorm(VAdd(back, right));
-	VECTOR pos = VAdd(GetTransform().pos, VScale(VNorm(rightBackDir), 50.0f));
-	pos.y += 50.0f;
-	DrawSphere3D(pos, 20.0f, 16, 0x00ff00, 0x00ff00, false);
-
 	//ƒ‚ƒfƒ‹‚Ì•`‰æ
 	MV1DrawModel(transform_.modelId);
 
 	//ŠÛ‰e•`‰æ
-	//DrawShadow();
+	DrawShadow();
 }
 
 void Player::DrawBarUI(void)
@@ -280,11 +273,6 @@ void Player::DrawResultImage(const int img)
 		true);
 	SetFontSize(defaultFontSize);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-}
-
-void Player::ClearCollider(void)
-{
-	colliders_.clear();
 }
 
 Capsule& Player::GetCapsule(void) const
