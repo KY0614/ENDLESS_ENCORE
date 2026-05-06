@@ -52,12 +52,6 @@ public:
 	/// <param name=""></param>
 	virtual void UpdateImGui(void) {}
 
-	/// <summary>
-	/// Jsonデータのパラメータを保存する
-	/// </summary>
-	/// <param name=""></param>
-	virtual void SaveParameter(void) {}
-
 protected:
 	//モデル制御の基本情報
 	Transform transform_;

@@ -490,59 +490,21 @@ void Player::UpdateImGui(void)
 
 	ImGui::Text(StringUtility::Wstring2UTF8(
 		L"Ctrlキーを押しながらスライダーをクリックすると、\n入力ボックスに変換されます").c_str());
-	//座標
+	//座標の下限上限値
 	const float posMin = -10000.0f;
 	const float posMax = 10000.0f;
+	//座標のスライダー
 	ImGui::SliderFloat("PosX", &transform_.pos.x,posMin,posMax);
-	//保存ボタン(スライドの横に配置)
-	ImGui::SameLine();
-	if (ImGui::Button(StringUtility::Wstring2UTF8(L"保存").c_str())) 
-	{
-		ImGui::OpenPopup("Save Confirmation");
-	}
-	//元に戻すボタン(保存ボタンの横に配置)
-	ImGui::SameLine();
-	if (ImGui::Button(StringUtility::Wstring2UTF8(L"元に戻す").c_str())) 
-	{
-		transform_.pos.x = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION).x;
-	}
-
-	//ポップアップの処理
-	if (ImGui::BeginPopupModal(
-		"Save Confirmation",
-		NULL,
-		ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		ImGui::Text(StringUtility::Wstring2UTF8(
-			L"変更した内容を保存しますか？").c_str());
-		ImGui::Text(StringUtility::Wstring2UTF8(L"変更内容：%.2ff →　%.2ff").c_str(),
-			JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION).x,
-			transform_.pos.x);
-		const float buttonWidth = 120.0f; // ボタンの横幅
-		const float windowWidth = ImGui::GetWindowSize().x; // 現在のウィンドウの横幅
-		const float posX = (windowWidth - (buttonWidth * 2))/2.0f; // 中央位置を計算
-		ImGui::SetCursorPosX(posX);// ボタンを中央に配置
-		if(ImGui::Button("SAVE", ImVec2(buttonWidth, 0)))
-		{
-			//保存（データを上書き）
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("CANCEL", ImVec2(buttonWidth, 0)))
-		{
-			transform_.pos.x = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION).x;
-			ImGui::CloseCurrentPopup();
-		}
-		ImGui::EndPopup();
-	}
-
 	ImGui::SliderFloat("PosY", &transform_.pos.y,posMin,posMax);
 	ImGui::SliderFloat("PosZ", &transform_.pos.z,posMin,posMax);
 
-	//Jsonデータに保存するボタン
-	if (ImGui::Button("Save to Json"))
-	{
-	}
+	//HPのスライダー
+	ImGui::SliderFloat("HP", &hp_, 0.0f, maxHp_);
+
+	//HPの最大値のスライダー
+	const float maxHpMin = 1.0f;
+	const float maxHpMax = 1000.0f;
+	ImGui::SliderFloat("MaxHP", &maxHp_, maxHpMin, maxHpMax);
 
 	//ダメージを受けるボタン(10ダメージ)
 	if (ImGui::Button("Damage"))
@@ -573,39 +535,8 @@ void Player::UpdateImGui(void)
 	default:
 		break;
 	}
+	//状態を表示
 	ImGui::Text(state.c_str());
-}
-
-void Player::SaveParameter(void)
-{
-	nlohmann::json data;
-	JsonManager& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
-	const json& playerData = jsonM.GetJsonData(
-		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
-
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!playerData.contains(JsonManager::KEY_TRANSFORM))
-	{
-		assert(0 && "データが存在しないか不正なデータです");
-	}
-	//Transformデータ取得
-	json transformData = playerData.at(JsonManager::KEY_TRANSFORM);
-	//座標やスケールなどをJsonデータに保存する
-	transformData[JsonManager::KEY_POSITION] = { transform_.pos.x, transform_.pos.y, transform_.pos.z };
-	transformData[JsonManager::KEY_SCALE] = transform_.scl.x;
-	transformData[JsonManager::KEY_ROT_Y] = transform_.rot.y;
-	//パラメーターデータ取得
-	json paramData = playerData[JsonManager::KEY_PARAMETER];
-	paramData[JsonManager::KEY_HP] = hp_;
-	paramData[JsonManager::KEY_MAX_HP] = maxHp_;
-
-	// 現在の座標やスケールを反映
-	data[KEY_PLAYER]["Transform"]["position"] = { transform_.pos.x, transform_.pos.y, transform_.pos.z };
-	data[KEY_PLAYER]["Transform"]["scale"] = transform_.scl.x;
-	data[KEY_PLAYER]["Transform"]["localRotY"] = transform_.rot.y;
-	// 保存実行
-	//JsonManager::SaveJson("Data/Player.json", data);
 }
 
 void Player::ChangeState(const STATE& state)

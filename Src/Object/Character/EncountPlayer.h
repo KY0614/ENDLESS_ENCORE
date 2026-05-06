@@ -17,7 +17,6 @@ public:
 		STAGE_WALK,	//ステージ上を歩く
 		STAGE_WAIT,	//待機
 		LOOK_AROUND,//周りを見渡す
-		ATTACKED_ENEMY,	//敵に攻撃される
 	};
 
 	//アニメーション種別
@@ -26,7 +25,6 @@ public:
 		IDLE,		//通常
 		WALK_SLOW,	//ゆっくり歩く
 		LOOK_AROUND,//周りを見渡す
-		ATTACKED,	//攻撃をされる
 	};
 
 	//コンストラクタ
@@ -65,11 +63,6 @@ public:
 	/// 周りを見渡す状態へ
 	/// </summary>
 	void LookAround(void);
-
-	/// <summary>
-	/// 攻撃される状態へ	
-	/// </summary>
-	void AttackedEnemy(void);
 
 	/// <summary>
 	/// 現在の状態を取得
@@ -129,12 +122,6 @@ private:
 	/// </summary>
 	void InitAnimation(void);
 
-	/// <summary>
-	/// エンカウント演出：ステージ上を歩く準備
-	/// </summary>
-	/// <param name=""></param>
-	void StageWalkReady(void);
-
 	//状態遷移処理--------------------------------------------------------
 
 	/// <summary>
@@ -159,10 +146,6 @@ private:
 	/// 状態遷移：LOOK_AROUND
 	/// </summary>
 	void ChangeStateLookAround(void);
-	/// <summary>
-	/// 状態遷移：ATTACKED_ENEMY
-	/// </summary>
-	void ChangeStateAttackedEnemy(void);
 
 	//状態遷移処理--------------------------------------------------------
 
@@ -182,10 +165,6 @@ private:
 	/// 状態更新：LOOK_AROUND
 	/// </summary>
 	void UpdateLookAround(void);
-	/// <summary>
-	/// 状態更新：ATTACKED_ENEMY
-	/// </summary>
-	void UpdateAttackedEnemy(void);
 
 	//衝突判定---------------------------------------
 

@@ -65,24 +65,21 @@ void ActorBase::DrawShadow(void)
 	//テクスチャアドレスモードを CLAMP にする( テクスチャの端より先は端のドットが延々続く )
 	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
 
-	//影の高さとサイズを設定
-	const float PLAYER_SHADOW_HEIGHT = 700.0f;
-	const float PLAYER_SHADOW_SIZE = 50.0f;
-
-	const int maxAlpha = 128;	//影の最大不透明度
 	//影を落とすモデルの数だけ繰り返し
 	for (const auto& c : colliders_)
 	{
 		//チェックするモデルは、jが0の時はステージモデル、1以上の場合はコリジョンモデル
+
 		ModelHandle = c.lock()->modelId_;
 
+		//影の高さとサイズを設定
+		const float PLAYER_SHADOW_HEIGHT = 700.0f;
+		const float PLAYER_SHADOW_SIZE = 50.0f;
+
+		const int maxAlpha = 128;	//影の最大不透明度
+
 		//プレイヤーの直下に存在する地面のポリゴンを取得
-		HitResDim = MV1CollCheck_Capsule(
-			ModelHandle, -1, 
-			transform_.pos, 
-			VAdd(transform_.pos,
-				VGet(0.0f,-PLAYER_SHADOW_HEIGHT, 0.0f)),
-			PLAYER_SHADOW_SIZE);
+		HitResDim = MV1CollCheck_Capsule(ModelHandle, -1, transform_.pos, VAdd(transform_.pos, VGet(0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f)), PLAYER_SHADOW_SIZE);
 
 		//頂点データで変化が無い部分をセット
 		Vertex[0].dif = GetColorU8(255, 255, 255, 255);

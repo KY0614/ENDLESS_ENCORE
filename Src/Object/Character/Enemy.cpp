@@ -3,6 +3,7 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Utility/CommonUtility.h"
+#include "../Utility/StringUtility.h"
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Manager/GameSystem/SoundManager.h"
@@ -915,14 +916,18 @@ void Enemy::RandomAttack(void)
 	int attackType = 0;
 	if (CheckPlayerDistance() < ATTACK_NEAR_DISTANCE)
 	{
-		// 距離が近い場合: 近距離攻撃 80% / 遠距離攻撃 20%
-		std::discrete_distribution<int> dist({ 80, 20 });
+		const int nearAttackWeight = 70; // 近距離攻撃の重み
+		const int farAttackWeight = 30;  // 遠距離攻撃の重み
+		// 距離が近い場合: 近距離攻撃 70% / 遠距離攻撃 30%
+		std::discrete_distribution<int> dist({ nearAttackWeight, farAttackWeight });
 		attackType = dist(engine);
 	}
 	else
 	{
-		// 距離が遠い場合: 近距離攻撃 20% / 遠距離攻撃 80%
-		std::discrete_distribution<int> dist({ 20, 80 });
+		const int nearAttackWeight = 30; // 近距離攻撃の重み
+		const int farAttackWeight = 70;  // 遠距離攻撃の重み
+		// 距離が遠い場合: 近距離攻撃 30% / 遠距離攻撃 70%
+		std::discrete_distribution<int> dist({ nearAttackWeight, farAttackWeight });
 		attackType = dist(engine);
 	}
 
@@ -1470,5 +1475,80 @@ const json Enemy::GetJsonData(void)const
 
 void Enemy::UpdateImGui(void)
 {
-	ImGui::Text("isDown_: %d", isDown_);
+	//Jsonデータ取得
+	JsonManager& jsonM = JsonManager::GetInstance();
+	const json& enemyData = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::ENEMY, KEY_ENEMY);
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!enemyData.contains(JsonManager::KEY_TRANSFORM))
+	{
+		assert(0 && "データが存在しないか不正なデータです");
+	}
+	//Transformデータ取得
+	const json& transformData = enemyData.at(JsonManager::KEY_TRANSFORM);
+
+	ImGui::Text(StringUtility::Wstring2UTF8(
+		L"Ctrlキーを押しながらスライダーをクリックすると、\n入力ボックスに変換されます").c_str());
+	//座標の下限上限値
+	const float posMin = -10000.0f;
+	const float posMax = 10000.0f;
+	//座標のスライダー
+	ImGui::SliderFloat("PosX", &transform_.pos.x, posMin, posMax);
+	ImGui::SliderFloat("PosY", &transform_.pos.y, posMin, posMax);
+	ImGui::SliderFloat("PosZ", &transform_.pos.z, posMin, posMax);
+
+	//HPのスライダー
+	ImGui::SliderFloat("HP", &hp_, 0.0f, maxHp_);
+
+	//HPの最大値のスライダー
+	const float maxHpMin = 1.0f;
+	const float maxHpMax = 1000.0f;
+	ImGui::SliderFloat("MaxHP", &maxHp_, maxHpMin, maxHpMax);
+
+	//ダメージを受けるボタン(10ダメージ)
+	if (ImGui::Button("Damage"))
+	{
+		const float damage = 10.0f;
+		Damage(damage);
+	}
+
+	std::string state = "STATE : ";
+	//状態表示
+	switch (state_)
+	{
+	case Enemy::STATE::NONE:
+		state += "NONE";
+		break;
+	case Enemy::STATE::WAIT:
+		state += "WAIT";
+		break;
+	case Enemy::STATE::MOVE:
+		state += "MOVE";
+		break;
+	case Enemy::STATE::ATTACK_NEAR:
+		state += "ATTACK_NEAR";
+		break;
+	case Enemy::STATE::SHOT_ALL:
+		state += "SHOT_ALL";
+		break;
+	case Enemy::STATE::SHOT_ONE:
+		state += "SHOT_ONE";
+		break;
+	case Enemy::STATE::BACKSTAB:
+		state += "BACKSTAB";
+		break;
+	case Enemy::STATE::DOWN:
+		state += "DOWN";
+		break;
+	case Enemy::STATE::ATTACK_CHARGE:
+		state += "ATTACK_CHARGE";
+		break;
+	case Enemy::STATE::DEAD:
+		state += "DEAD";
+		break;
+	default:
+		break;
+	}
+	//状態を表示
+	ImGui::Text(state.c_str());
 }

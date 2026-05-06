@@ -182,8 +182,6 @@ public:
 	/// <param name=""></param>
 	void UpdateImGui(void)override;
 
-	void SaveParameter(void) override;
-
 private:
 	//UI
 	std::unique_ptr<HPBar> hpBar_;	//HPÉoÅ[

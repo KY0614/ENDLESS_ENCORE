@@ -42,7 +42,7 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 	Init3DModel();
 
 	//コライダー初期化
-	InitCollider();
+	//InitCollider();
 
 	//マテリアル初期化
 	InitMaterial(pos, sPos);
