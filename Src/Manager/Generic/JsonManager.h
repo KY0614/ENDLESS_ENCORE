@@ -70,10 +70,30 @@ public:
 	/// </summary>
 	/// <param name="fileName">保存するファイル名</param>
 	/// <param name="jsonObjectName">指定するJsonオブジェクト名</param>
-	/// <param name="jsonData">指定するJsonデータ</param>
-	void OverWriteJsonData(const std::string& fileName,
-		const std::string& jsonObjectName,
-		const std::string& jsonData);
+	/// <param name="jsonData">上書きするJsonデータ</param>
+	/// <param name="value">保存したいデータ</param>
+	template <typename Value>
+	void OverWriteJsonData(const std::string fileName,
+		const std::string jsonObjectA,
+		const std::string jsonObjectB,
+		const std::string jsonData,
+		const Value value)
+	{
+		std::ifstream ifs(fileName);
+		if (!ifs)
+		{
+			assert(0 && "ファイルが見つかりませんでした");
+			return;
+		}
+		//ファイルストリームからjsonオブジェクトに変換
+		nlohmann::json JsonData = nlohmann::json::parse(ifs);
+		//上書き
+		JsonData[jsonObjectA][jsonObjectB][jsonData] = value;
+		//上書きしたjsonオブジェクトをファイルに保存
+		std::ofstream writing_file;
+		writing_file.open(fileName, std::ios::out);
+		writing_file << JsonData.dump(4) << std::endl;
+	}
 
 	void WriteJsonDataTest(void);
 
@@ -83,7 +103,9 @@ public:
 	/// <param name="jsonData">変換するJSONデータ</param>
 	/// <param name="key">取得するキーの文字列</param>
 	/// <returns>取得したVECTOR型データ</returns>
-	static const VECTOR GetParseVector(const nlohmann::json& jsonData, const std::string& key);
+	static const VECTOR GetParseVector(
+		const nlohmann::json& jsonData,
+		const std::string& key);
 
 	//シーンごとにデータを読み込むことにする
 	

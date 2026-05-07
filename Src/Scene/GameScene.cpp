@@ -8,7 +8,6 @@
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
-#include "../Object/Character/PlayerTest.h"
 #include "../Object/Character/Player.h"
 #include "../Object/Character/EncountPlayer.h"
 #include "../Object/Character/Enemy.h"
@@ -77,20 +76,15 @@ void GameScene::Init(void)
 	InitSound();
 
 	//プレイヤー
-	playerTest_ = std::make_shared<PlayerTest>();
-	playerTest_->Init();
-
-	//プレイヤー
-	//player_ = std::make_shared<Player>();
-	//player_->Init();
+	player_ = std::make_shared<Player>();
+	player_->Init();
 
 	//エンカウント演出用のプレイヤー
 	encountPlayer_ = std::make_shared<EncountPlayer>();
 	encountPlayer_->Init();
 
 	//敵
-	//enemy_ = std::make_shared<Enemy>(*player_);
-	enemy_ = std::make_shared<Enemy>(*playerTest_);
+	enemy_ = std::make_shared<Enemy>(*player_);
 	enemy_->Init();
 
 	//エンカウント演出用の敵
@@ -116,23 +110,23 @@ void GameScene::Init(void)
 	skipBarUI_->Init();
 
 	//カメラ
-	//mainCamera->SetFollow(&player_->GetTransform());
-	mainCamera->SetFollow(&playerTest_->GetTransform());
+	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	//コライダー登録
-	// ステージモデルのコライダーをプレイヤーに登録
-	playerTest_->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
-	playerTest_->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
-	mainCamera->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
-	mainCamera->AddHitCollider(stage_->GetOwnCollider(
-		static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
+	//// ステージモデルのコライダーをプレイヤーに登録
+	//playerTest_->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
+	//playerTest_->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
+	//mainCamera->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
+	//mainCamera->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
+	
 	//コライダー登録
-	//mainCamera->AddCollider(stage_->GetTransform().collider);
-	//player_->AddCollider(stage_->GetTransform().collider);
+	mainCamera->AddCollider(stage_->GetTransform().collider);
+	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);
 
 	//フォントハンドルの取得

@@ -90,4 +90,12 @@ protected:
 
 	// Õ“Ë‘Šè‚Ìî•ñ
 	std::vector<std::weak_ptr<ColliderBase>> hitColliders_;
+
+	//ŠÛ‰e
+	int imgShadow_;
+
+	/// <summary>
+	/// ŠÛ‰e•`‰æ
+	/// </summary>
+	void DrawShadow(void);
 };

@@ -71,21 +71,6 @@ nlohmann::json JsonManager::LoadJsonData(
 	return data;
 }
 
-void JsonManager::OverWriteJsonData(const std::string& fileName,
-	const std::string& jsonObjectName,
-	const std::string& jsonData)
-{
-	std::ifstream ifs(fileName);
-	if (!ifs)
-	{
-		assert(0 && "ファイルが見つかりませんでした");
-		return;
-	}
-
-	//ファイルストリームからjsonオブジェクトに変換
-	nlohmann::json data = nlohmann::json::parse(ifs);
-}
-
 void JsonManager::WriteJsonDataTest(void)
 {
 	json data = {
@@ -106,7 +91,9 @@ void JsonManager::WriteJsonDataTest(void)
 	writing_file << data.dump(JSON_INDENT_NUM) << std::endl;
 }
 
-const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const std::string& key)
+const VECTOR JsonManager::GetParseVector(
+	const nlohmann::json& jsonData,
+	const std::string& key)
 {
 	//配列のサイズ
 	const int arraySize = 3;	

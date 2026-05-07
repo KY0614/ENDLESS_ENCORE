@@ -117,7 +117,8 @@ void Stage::Init3DModel(void)
 	transform_.pos = JsonManager::GetParseVector(theaterTransformData, JsonManager::KEY_POSITION);
 	transform_.quaRot = Quaternion();
 	transform_.quaRotLocal = Quaternion();
-	//transform_.MakeCollider(Collider::TYPE::STAGE);
+	//コライダー作成
+	transform_.MakeCollider(Collider::TYPE::STAGE);
 	transform_.Update();
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!data.contains(KEY_MIST_WALL))assert(0 && "データが存在しないか不正なデータです");
@@ -133,7 +134,8 @@ void Stage::Init3DModel(void)
 	mistWallTransform_.pos = JsonManager::GetParseVector(mistWallTransformData, JsonManager::KEY_POSITION);
 	mistWallTransform_.quaRot = Quaternion();
 	mistWallTransform_.quaRotLocal = Quaternion();
-	//mistWallTransform_.MakeCollider(Collider::TYPE::STAGE);
+	//コライダー作成
+	mistWallTransform_.MakeCollider(Collider::TYPE::STAGE);
 	mistWallTransform_.Update();
 	//ノイズテクスチャ読み込み
 	noiseTextureId_ = ResourceManager::GetInstance().Load(
@@ -142,16 +144,16 @@ void Stage::Init3DModel(void)
 
 void Stage::InitCollider(void)
 {
-	//DxLib側の衝突情報セットアップ
-	MV1SetupCollInfo(transform_.modelId,-1);
-	//シアターモデルのコライダ
-	ColliderModel* colModel =
-		new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::THEATER), colModel);
-	//霧の壁モデルのコライダ
-	colModel =
-		new ColliderModel(ColliderBase::TAG::STAGE, &mistWallTransform_);
-	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::MIST_WALL), colModel);
+	////DxLib側の衝突情報セットアップ
+	//MV1SetupCollInfo(transform_.modelId,-1);
+	////シアターモデルのコライダ
+	//ColliderModel* colModel =
+	//	new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
+	//ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::THEATER), colModel);
+	////霧の壁モデルのコライダ
+	//colModel =
+	//	new ColliderModel(ColliderBase::TAG::STAGE, &mistWallTransform_);
+	//ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::MIST_WALL), colModel);
 }	
 
 void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
