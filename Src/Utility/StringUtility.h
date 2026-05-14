@@ -19,10 +19,12 @@ public:
 	/// <param name="wstr">wstring‚Ì•¶Žš—ñ</param>
 	/// <returns>string‚Ì•¶Žš—ñ</returns>
 	static std::string Wstring2String(const std::wstring& wstr);
-
+	
+	/// <summary>
+	/// wstring‚ðUTF-8‚Ìstring‚É•ÏŠ·
+	/// </summary>
+	/// <param name="wstr">wstring‚Ì•¶Žš—ñ</param>
+	/// <returns>UTF-8‚ÌstringŒ^•¶Žš—ñ</returns>
 	static std::string Wstring2UTF8(const std::wstring& wstr);
-
-private:
-
 };
 

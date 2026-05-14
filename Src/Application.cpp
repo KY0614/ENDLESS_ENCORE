@@ -40,9 +40,9 @@ void Application::Init(void)
 	SetWindowText(L"ENDLESS ENCORE");
 
 	//ウィンドウサイズ
-	windowSize_ = { SCREEN_SIZE_X ,SCREEN_SIZE_Y };
+	screenSize_ = { SCREEN_SIZE_X ,SCREEN_SIZE_Y };
 	const int colorBitDepth = 32;	//色深度
-	SetGraphMode(windowSize_.width_, windowSize_.height_, colorBitDepth);
+	SetGraphMode(screenSize_.width_, screenSize_.height_, colorBitDepth);
 
 	//Debugビルドのときはウィンドウモード、Releaseビルドのときはフルスクリーンにする
 #ifdef _DEBUG
@@ -110,7 +110,6 @@ void Application::Run(void)
 
 void Application::Destroy(void)
 {
-
 	InputManager::GetInstance().Destroy();
 	ResourceManager::GetInstance().Destroy();
 	SceneManager::GetInstance().Destroy();
@@ -146,7 +145,7 @@ Application::Application(void)
 	isInitFail_ = false;
 	isReleaseFail_ = false;
 	isEnd_ = false;
-	windowSize_ = {};
+	screenSize_ = {};
 	fps_ = nullptr;
 }
 

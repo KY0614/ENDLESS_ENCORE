@@ -40,7 +40,8 @@ public:
 	static const std::string PATH_FONT;
 	//-------------------------------------------
 
-	struct Size
+	//スクリーンサイズ
+	struct ScreenSize
 	{
 		int width_;
 		int height_;
@@ -67,13 +68,13 @@ public:
 	//解放成功／失敗の判定
 	bool IsReleaseFail(void) const;
 
-	const Size& GetWindowSize(void) const { return windowSize_; }
+	const ScreenSize& GetWindowSize(void) const { return screenSize_; }
 
 	void EndGame(void) { isEnd_ = true; }
 
 private:
 
-	Size windowSize_;
+	ScreenSize screenSize_;
 
 	//静的インスタンス
 	static Application* instance_;
