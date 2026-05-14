@@ -524,7 +524,7 @@ void Player::UpdateImGui(void)
 		hpMin,
 		hpMax,
 		paramData,
-		JsonManager::KEY_POSITION_X);
+		JsonManager::KEY_HP);
 
 	//åªç›ëÃóÕ
 	//ImGui::SliderFloat("HP", &hp_, hpMin, hpMax);

@@ -169,20 +169,58 @@ private:
 
 	// 終端：キーがなくなった時に値を代入する
 	template <typename Value>
-	void SetJsonValue(nlohmann::json& j, const Value& value)
-	{
-		j = value;
-	}
+	void SetJsonValue(nlohmann::json& j, const Value& value);
 
 	// 再帰：キーを一つずつ進めていく
 	template <typename Value, typename Key, typename... Rest>
-	void SetJsonValues(
+	void SetJsonValue(
 		nlohmann::json& jsonData,
 		const Value& value,
-		const Key& key, Rest... rest)
-	{
-		SetJsonValues(jsonData[key], value, rest...);
-	}
+		const Key& key, Rest... rest);
 
 	void UpdateJsonData(JSON_DATA jsonDataType, nlohmann::json& jsonData);
 };
+
+// 終端：キーがなくなった時に値を代入する
+template <typename Value>
+void JsonManager::SetJsonValue(nlohmann::json& j, const Value& value)
+{
+	j = value;
+}
+
+template<typename Value, typename Key, typename ...Rest>
+inline void JsonManager::SetJsonValue(
+	nlohmann::json& jsonData,
+	const Value& value,
+	const Key& key, Rest ...rest)
+{
+	SetJsonValue(jsonData[key], value, rest...);
+}
+
+template<typename Value, typename ...ObjectKeys>
+void JsonManager::OverWriteJsonDatas(
+	const JSON_DATA jsonDataType,
+	const Value value,
+	const ObjectKeys... objectKey)
+{
+	std::ifstream ifs(GetJsonFileName(jsonDataType).c_str());
+	nlohmann::json root = nlohmann::json::parse(ifs);
+	if (!ifs)
+	{
+		assert(0 && "ファイルが見つかりませんでした");
+		return;
+	}
+	SetJsonValue(root, value, objectKey...);
+
+	std::ofstream ofs(GetJsonFileName(jsonDataType).c_str());
+	ofs << root.dump(4) << std::endl;
+
+	////ファイルストリームからjsonオブジェクトに変換
+	//nlohmann::json JsonData = nlohmann::json::parse(ifs);
+	////上書き
+	//JsonData[jsonObjectA][jsonObjectB][jsonData] = value;
+	////上書きしたjsonオブジェクトをファイルに保存
+	//std::ofstream writing_file;
+	//writing_file.open(fileName, std::ios::out);
+	//writing_file << JsonData.dump(4) << std::endl;
+}

@@ -22,18 +22,21 @@ void ImGuiComponentBase::SliderFloatWithSave(
 {
 	//ImGuiのfloat型のスライダー
 	ImGui::SliderFloat(label, variable, min, max);
-	//ポップアップのタイトル
-	const std::string popUpTitle = "Save " + std::string(label);
 
+	//ポップアップのタイトル
+	std::string popUpTitle = "Save " + std::string(label);
+	//保存ボタンのラベル
+	std::string saveLavel = StringUtility::Wstring2UTF8(L"保存##") + label;
 	//保存ボタン(スライドの横に配置)
 	ImGui::SameLine();
-	if (ImGui::Button(StringUtility::Wstring2UTF8(L"保存##").c_str()) + label)
+	if (ImGui::Button(saveLavel.c_str()))
 	{
 		ImGui::OpenPopup(popUpTitle.c_str());
 	}
 	//元に戻すボタン(保存ボタンの横に配置)
 	ImGui::SameLine();
-	if (ImGui::Button(StringUtility::Wstring2UTF8(L"元に戻す##").c_str()) + label)
+	std::string resetLabel = StringUtility::Wstring2UTF8(L"元に戻す##") + label;
+	if (ImGui::Button(resetLabel.c_str()))
 	{
 		*variable = jsonData.value(jsonKey, 0.0f);
 	}
@@ -59,10 +62,11 @@ void ImGuiComponentBase::SliderFloatWithSave(
 		{
 			//保存（データを上書き）
 			jsonM.OverWriteJsonDatas(
-				JsonManager::JSON_DATA::TEST, 
+				JsonManager::JSON_DATA::PLAYER, 
 				*variable,
-				"Test",
-				"Parameter");
+				"Player",
+				"Parameter",
+				jsonKey);
 
 			//ポップアップを閉じる
 			ImGui::CloseCurrentPopup();

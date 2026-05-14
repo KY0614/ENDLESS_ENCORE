@@ -29,9 +29,9 @@
                 85.0,
                 -2400.0
             ],
-            "positionX" : -60.0,
-            "positionY" : 85.0,
-            "positionZ" : -2400.0,
+            "positionX": -60.0,
+            "positionY": 85.0,
+            "positionZ": -2400.0,
             "scale": 0.7
         }
     }

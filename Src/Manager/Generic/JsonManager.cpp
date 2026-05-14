@@ -160,34 +160,6 @@ void JsonManager::LoadJsonData(
 	jsonDataMap_[dataType].jsonData_ = data;
 }
 
-template<typename Value, typename ...ObjectKeys>
-void JsonManager::OverWriteJsonDatas(
-	const JSON_DATA jsonDataType,
-	const Value value,
-	const ObjectKeys... objectKey)
-{
-	std::ifstream ifs(GetJsonFileName(jsonDataType).c_str());
-	nlohmann::json root = nlohmann::json::parse(ifs);
-	if (!ifs)
-	{
-		assert(0 && "ファイルが見つかりませんでした");
-		return;
-	}
-	SetJsonValues(root, value, objectKey...);
-
-	std::ofstream ofs(GetJsonFileName(jsonDataType).c_str());
-	ofs << root.dump(4) << std::endl;
-
-	////ファイルストリームからjsonオブジェクトに変換
-	//nlohmann::json JsonData = nlohmann::json::parse(ifs);
-	////上書き
-	//JsonData[jsonObjectA][jsonObjectB][jsonData] = value;
-	////上書きしたjsonオブジェクトをファイルに保存
-	//std::ofstream writing_file;
-	//writing_file.open(fileName, std::ios::out);
-	//writing_file << JsonData.dump(4) << std::endl;
-}
-
 void JsonManager::UpdateJsonData(JSON_DATA jsonDataType, nlohmann::json& jsonData)
 {
 	jsonDataMap_[jsonDataType].jsonData_ = jsonData;
