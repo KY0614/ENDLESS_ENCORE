@@ -11,6 +11,7 @@ namespace
 	const std::string JSON_PLAYER = "Player";
 	const std::string JSON_ENEMY = "Enemy";
 	const std::string JSON_STAGE = "Stage";
+	const std::string JSON_TEST = "Test";
 
 	const int JSON_INDENT_NUM = 4;	//JSONのインデントスペース数
 }
@@ -33,8 +34,6 @@ JsonManager& JsonManager::GetInstance(void)
 
 void JsonManager::Init(void)
 {
-	//JSONデータの書き込み
-	WriteJsonDataTest();
 }
 
 void JsonManager::Release(void)
@@ -138,4 +137,8 @@ void JsonManager::InitGame(void)
 	const std::string stagePath = "Stage.json";
 	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(
 		PATH_JSON + stagePath, JSON_STAGE));
+	//ステージのデータ読み込み
+	const std::string testPath = "Test.json";
+	jsonDataMap_.emplace(JSON_DATA::TEST, LoadJsonData(
+		PATH_JSON + testPath, JSON_TEST));
 }

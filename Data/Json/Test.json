@@ -1,8 +1,10 @@
 {
-    "param": {
-        "age": 20,
-        "isHungry": true,
-        "name": "Aiueo",
-        "speed": 2.5
+    "Test": {
+        "Parameter": {
+            "hp": 500.0,
+            "isHungry": true,
+            "name": "Aiueo",
+            "speed": 500.0
+        }
     }
 }

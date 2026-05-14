@@ -24,6 +24,7 @@ public:
 		PLAYER,		//プレイヤー
 		ENEMY,		//敵
 		STAGE,		//ステージ
+		TEST,		//ステージ
 	};
 
 	//インスタンスの生成
@@ -69,7 +70,8 @@ public:
 	/// 既存のJsonデータを上書きして保存する
 	/// </summary>
 	/// <param name="fileName">保存するファイル名</param>
-	/// <param name="jsonObjectName">指定するJsonオブジェクト名</param>
+	/// <param name="jsonObjectA">指定するJsonオブジェクト名({}で囲われているもの）</param>
+	/// <param name="jsonObjectB">指定するJsonオブジェクト名(jsonObjectAオブジェクト内で{}で囲われているもの）</param>
 	/// <param name="jsonData">上書きするJsonデータ</param>
 	/// <param name="value">保存したいデータ</param>
 	template <typename Value>
