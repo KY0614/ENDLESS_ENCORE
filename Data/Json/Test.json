@@ -4,7 +4,7 @@
             "hp": 500.0,
             "isHungry": true,
             "name": "Aiueo",
-            "speed": 500.0
+            "speed": 300.0
         }
     }
 }

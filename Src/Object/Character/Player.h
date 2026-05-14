@@ -14,6 +14,7 @@ class Capsule;
 class Sphere;
 class ModelRenderer;
 class ModelMaterial;
+class ImGuiComponentBase;
 
 class Player : public ActorBase
 {
@@ -200,6 +201,9 @@ private:
 
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
+	
+	//ImGui
+	std::unique_ptr<ImGuiComponentBase> imGuiComponent_;
 
 	//状態管理
 	STATE state_;
