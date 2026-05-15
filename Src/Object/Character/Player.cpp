@@ -19,7 +19,7 @@
 #include "../Common/Collider.h"
 #include "../UI/HPBar.h"
 #include "../UI/ParryBar.h"
-#include "../ImGuiComponent/ImGuiComponentBase.h"
+#include "../ImGuiComponent/ImGuiComponentPlayer.h"
 #include "Player.h"
 
 // 長いのでnamespaceの省略
@@ -177,7 +177,7 @@ void Player::Init(void)
 	effectParryResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PARRY_EFKT).handleId_;
 
-	imGuiComponent_ = std::make_unique<ImGuiComponentBase>();
+	imGuiComponent_ = std::make_unique<ImGuiComponentPlayer>();
 
 	//初期状態
 	ChangeState(STATE::WAKE_UP);
@@ -515,174 +515,66 @@ void Player::UpdateImGui(void)
 	ImGui::Text(StringUtility::Wstring2UTF8(
 		L"Ctrlキーを押しながらスライダーをクリックすると、\n入力ボックスに変換されます").c_str());
 
+	//階層の指定
+	std::vector<const char*> hierarchyKeys = { KEY_PLAYER.c_str(), JsonManager::KEY_PARAMETER };
+	imGuiComponent_->SetTargetHierarchy(hierarchyKeys);
+
 	//体力の上限と下限
 	const float hpMin = 0.0f;
 	const float hpMax = 1000.0f;
+	//現在体力
+	std::string sliderLabel = "HP";
 	imGuiComponent_->SliderFloatWithSave(
-		"HP",
+		sliderLabel.c_str(),
 		&hp_,
 		hpMin,
 		hpMax,
 		paramData,
 		JsonManager::KEY_HP);
+	//最大体力
+	sliderLabel = "MaxHP";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&maxHp_,
+		hpMin,
+		hpMax,
+		paramData,
+		JsonManager::KEY_MAX_HP);
 
-	//現在体力
-	//ImGui::SliderFloat("HP", &hp_, hpMin, hpMax);
-	////保存ボタン(スライドの横に配置)
-	//ImGui::SameLine();
-	//if (ImGui::Button(StringUtility::Wstring2UTF8(L"保存##HP").c_str()))
-	//{
-	//	ImGui::OpenPopup("Save HP");
-	//}
-	////元に戻すボタン(保存ボタンの横に配置)
-	//ImGui::SameLine();
-	//if (ImGui::Button(StringUtility::Wstring2UTF8(L"元に戻す##HP").c_str()))
-	//{
-	//	hp_ = paramData.value(JsonManager::KEY_HP, 0.0f);
-	//}
-	//std::string popUpTitle = "Save HP";
-	////ポップアップの処理
-	//if (ImGui::BeginPopupModal(
-	//	popUpTitle.c_str(),
-	//	NULL,
-	//	ImGuiWindowFlags_AlwaysAutoResize))
-	//{
-	//	ImGui::Text(StringUtility::Wstring2UTF8(
-	//		L"変更した内容を保存しますか？").c_str());
-	//	ImGui::Text(StringUtility::Wstring2UTF8(L"変更内容：%.2ff →　%.2ff").c_str(),
-	//		paramData.value(JsonManager::KEY_HP, 0.0f),
-	//		hp_);
-	//	const float buttonWidth = 120.0f; // ボタンの横幅
-	//	const float windowWidth = ImGui::GetWindowSize().x; // 現在のウィンドウの横幅
-	//	const float posX = (windowWidth - (buttonWidth * 2)) / 2.0f; // 中央位置を計算
-	//	ImGui::SetCursorPosX(posX);// ボタンを中央に配置
-	//	if (ImGui::Button("SAVE", ImVec2(buttonWidth, 0)))
-	//	{
-	//		//保存（データを上書き）
-	//		jsonM.OverWriteJsonData(
-	//			Application::PATH_JSON + "Player.json",
-	//			KEY_PLAYER,
-	//			JsonManager::KEY_PARAMETER,
-	//			"hp",
-	//			hp_
-	//		);
-
-	//		//ポップアップを閉じる
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::SameLine();
-	//	if (ImGui::Button("CANCEL", ImVec2(buttonWidth, 0)))
-	//	{
-	//		//ポップアップを閉じる
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::EndPopup();
-	//}
-
-	////最大体力
-	//ImGui::SliderFloat("MaxHP", &maxHp_, hpMin, hpMax);
-	////保存ボタン(スライドの横に配置)
-	//ImGui::SameLine();
-	//if (ImGui::Button(StringUtility::Wstring2UTF8(L"保存##MaxHP").c_str()))
-	//{
-	//	ImGui::OpenPopup("Save MaxHP");
-	//}
-	////元に戻すボタン(保存ボタンの横に配置)
-	//ImGui::SameLine();
-	//if (ImGui::Button(StringUtility::Wstring2UTF8(L"元に戻す##MaxHP").c_str()))
-	//{
-	//	maxHp_ = paramData.value(JsonManager::KEY_MAX_HP, 0.0f);
-	//}
-	//popUpTitle = "Save MaxHP";
-	////ポップアップの処理
-	//if (ImGui::BeginPopupModal(
-	//	popUpTitle.c_str(),
-	//	NULL,
-	//	ImGuiWindowFlags_AlwaysAutoResize))
-	//{
-	//	ImGui::Text(StringUtility::Wstring2UTF8(
-	//		L"変更した内容を保存しますか？").c_str());
-	//	ImGui::Text(StringUtility::Wstring2UTF8(L"変更内容：%.2ff →　%.2ff").c_str(),
-	//		paramData.value(JsonManager::KEY_MAX_HP, 0.0f),
-	//		maxHp_);
-	//	const float buttonWidth = 120.0f; // ボタンの横幅
-	//	const float windowWidth = ImGui::GetWindowSize().x; // 現在のウィンドウの横幅
-	//	const float posX = (windowWidth - (buttonWidth * 2)) / 2.0f; // 中央位置を計算
-	//	ImGui::SetCursorPosX(posX);// ボタンを中央に配置
-	//	if (ImGui::Button("SAVE", ImVec2(buttonWidth, 0)))
-	//	{
-	//		//保存（データを上書き）
-	//		jsonM.OverWriteJsonData(
-	//			Application::PATH_JSON + "Player.json",
-	//			KEY_PLAYER,
-	//			JsonManager::KEY_PARAMETER,
-	//			"maxHp",
-	//			maxHp_
-	//		);
-
-	//		//ポップアップを閉じる
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::SameLine();
-	//	if (ImGui::Button("CANCEL", ImVec2(buttonWidth, 0)))
-	//	{
-	//		//ポップアップを閉じる
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::EndPopup();
-	//}
-
-	//座標
+	//階層の指定
+	hierarchyKeys = { KEY_PLAYER.c_str(), JsonManager::KEY_TRANSFORM };
+	imGuiComponent_->SetTargetHierarchy(hierarchyKeys);
+	//座標の上限と下限
 	const float posMin = -10000.0f;
 	const float posMax = 10000.0f;
-	ImGui::SliderFloat("PosX", &transform_.pos.x,posMin,posMax);
-	////保存ボタン(スライドの横に配置)
-	//ImGui::SameLine();
-	//if (ImGui::Button(StringUtility::Wstring2UTF8(L"保存").c_str())) 
-	//{
-	//	ImGui::OpenPopup("Save Confirmation");
-	//}
-	////元に戻すボタン(保存ボタンの横に配置)
-	//ImGui::SameLine();
-	//if (ImGui::Button(StringUtility::Wstring2UTF8(L"元に戻す").c_str())) 
-	//{
-	//	transform_.pos.x = JsonManager::GetParseVector(
-	//		transformData, JsonManager::KEY_POSITION).x;
-	//}
+	//現在の座標X
+	sliderLabel = "PositionX";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&transform_.pos.x,
+		posMin,
+		posMax,
+		transformData,
+		JsonManager::KEY_POSITION_X);
+	//Y座標
+	sliderLabel = "PositionY";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&transform_.pos.y,
+		posMin,
+		posMax,
+		transformData,
+		JsonManager::KEY_POSITION_Y);
+	//Z座標
+	sliderLabel = "PositionZ";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&transform_.pos.z,
+		posMin,
+		posMax,
+		transformData,
+		JsonManager::KEY_POSITION_Z);
 
-	ImGui::SliderFloat("PosY", &transform_.pos.y, posMin, posMax);
-	ImGui::SliderFloat("PosZ", &transform_.pos.z, posMin, posMax);
-
-	//ポップアップの処理
-	//if (ImGui::BeginPopupModal(
-	//	"Save Confirmation",
-	//	NULL,
-	//	ImGuiWindowFlags_AlwaysAutoResize))
-	//{
-	//	ImGui::Text(StringUtility::Wstring2UTF8(
-	//		L"変更した内容を保存しますか？").c_str());
-	//	ImGui::Text(StringUtility::Wstring2UTF8(L"変更内容：%.2ff →　%.2ff").c_str(),
-	//		JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION).x,
-	//		transform_.pos.x);
-	//	const float buttonWidth = 120.0f; // ボタンの横幅
-	//	const float windowWidth = ImGui::GetWindowSize().x; // 現在のウィンドウの横幅
-	//	const float posX = (windowWidth - (buttonWidth * 2))/2.0f; // 中央位置を計算
-	//	ImGui::SetCursorPosX(posX);// ボタンを中央に配置
-	//	if(ImGui::Button("SAVE", ImVec2(buttonWidth, 0)))
-	//	{
-	//		//保存（データを上書き）
-
-	//		//ポップアップを閉じる
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::SameLine();
-	//	if (ImGui::Button("CANCEL", ImVec2(buttonWidth, 0)))
-	//	{
-	//		//ポップアップを閉じる
-	//		ImGui::CloseCurrentPopup();
-	//	}
-	//	ImGui::EndPopup();
-	//}
 
 	//ダメージを受けるボタン(10ダメージ)
 	if (ImGui::Button("Damage"))

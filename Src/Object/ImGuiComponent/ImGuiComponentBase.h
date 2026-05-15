@@ -19,7 +19,6 @@ public:
 	/// <param name="max">上限値</param>
 	/// <param name="jsonData">上限値</param>
 	/// <param name="jsonKey">上限値</param>
-	
 	void SliderFloatWithSave(
 		const char* label,
 		float* variable,
@@ -28,8 +27,21 @@ public:
 		const nlohmann::json& jsonData,
 		const char* jsonKey);
 
+	/// <summary>
+	/// jsonデータの階層を指定する(Jsonオブジェクトの名前を指定する)
+	/// </summary>
+	/// <param name="hierarchyKeys">指定するJsonオブジェクトの名前</param>
+	void SetTargetHierarchy(
+		const std::vector<const char*>& hierarchyKeys
+	);
+
 protected:
 
+	virtual void SaveJsonData(
+		const float* variable,
+		const char* jsonDataKe) = 0;
 
+	//階層のキー（Jsonオブジェクトの名前）
+	std::vector<const char*> hierarchyKeys_;
 };
 

@@ -33,14 +33,18 @@ void ImGuiComponentBase::SliderFloatWithSave(
 	{
 		ImGui::OpenPopup(popUpTitle.c_str());
 	}
-	//元に戻すボタン(保存ボタンの横に配置)
-	ImGui::SameLine();
-	std::string resetLabel = StringUtility::Wstring2UTF8(L"元に戻す##") + label;
-	if (ImGui::Button(resetLabel.c_str()))
+	//スライドの値とJsonデータの値が異なる場合、元に戻すボタンを表示
+	float subValue = jsonData.value(jsonKey, 0.0f) - *variable;
+	if (subValue > 0.0f || subValue < 0.0f)
 	{
-		*variable = jsonData.value(jsonKey, 0.0f);
+		//元に戻すボタン(保存ボタンの横に配置)
+		ImGui::SameLine();
+		std::string resetLabel = StringUtility::Wstring2UTF8(L"元に戻す##") + label;
+		if (ImGui::Button(resetLabel.c_str()))
+		{
+			*variable = jsonData.value(jsonKey, 0.0f);
+		}
 	}
-
 	//JsonManagerのインスタンスを取得
 	JsonManager& jsonM = JsonManager::GetInstance();
 	//ポップアップの処理
@@ -54,19 +58,14 @@ void ImGuiComponentBase::SliderFloatWithSave(
 		ImGui::Text(StringUtility::Wstring2UTF8(L"変更内容：%.2ff →　%.2ff").c_str(),
 			jsonData.value(jsonKey, 0.0f),
 			*variable);
-		const float buttonWidth = 120.0f; // ボタンの横幅
-		const float windowWidth = ImGui::GetWindowSize().x; // 現在のウィンドウの横幅
-		const float posX = (windowWidth - (buttonWidth * 2)) / 2.0f; // 中央位置を計算
-		ImGui::SetCursorPosX(posX);// ボタンを中央に配置
+		const float buttonWidth = 120.0f; //ボタンの横幅
+		const float windowWidth = ImGui::GetWindowSize().x;				//現在のウィンドウの横幅
+		const float posX = (windowWidth - (buttonWidth * 2)) / 2.0f;	//中央位置を計算
+		ImGui::SetCursorPosX(posX);//ボタンを中央に配置
 		if (ImGui::Button("SAVE", ImVec2(buttonWidth, 0)))
 		{
 			//保存（データを上書き）
-			jsonM.OverWriteJsonDatas(
-				JsonManager::JSON_DATA::PLAYER, 
-				*variable,
-				"Player",
-				"Parameter",
-				jsonKey);
+			SaveJsonData(variable,jsonKey);
 
 			//ポップアップを閉じる
 			ImGui::CloseCurrentPopup();
@@ -79,4 +78,10 @@ void ImGuiComponentBase::SliderFloatWithSave(
 		}
 		ImGui::EndPopup();
 	}
+}
+
+void ImGuiComponentBase::SetTargetHierarchy(const std::vector<const char*>& hierarchyKeys)
+{
+	//中身が入っていても上書き
+	hierarchyKeys_ = hierarchyKeys;
 }

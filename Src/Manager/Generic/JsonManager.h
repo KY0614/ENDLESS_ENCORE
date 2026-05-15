@@ -22,6 +22,8 @@ public:
 	static constexpr const char* KEY_HP = "hp";				//体力
 	static constexpr const char* KEY_MAX_HP = "maxHp";		//最大体力
 
+	static constexpr int JSON_INDENT_NUM = 4;	//JSONのインデントスペース数
+
 	struct JsonFileInfo
 	{
 		std::string fileName_;		//Jsonファイル名
@@ -80,12 +82,12 @@ public:
 	const std::string& GetJsonFileName(const JSON_DATA dataType)const;
 
 	/// <summary>
-/// 既存のJsonデータを上書きして保存する
-/// </summary>
-/// <param name="fileName">保存するファイル名</param>
-/// <param name="objectKeys">指定するJsonオブジェクト名({}で囲われているもの）</param>
-/// <param name="jsonData">上書きするJsonデータ</param>
-/// <param name="value">保存したいデータ</param>
+	/// 既存のJsonデータを上書きして保存する
+	/// </summary>
+	/// <param name="fileName">保存するファイル名</param>
+	/// <param name="objectKeys">指定するJsonオブジェクト名({}で囲われているもの）</param>
+	/// <param name="jsonData">上書きするJsonデータ</param>
+	/// <param name="value">保存したいデータ</param>
 	template <typename Value,typename... ObjectKeys>
 	void OverWriteJsonDatas(
 		const JSON_DATA jsonDataType,
@@ -120,7 +122,7 @@ public:
 		//上書きしたjsonオブジェクトをファイルに保存
 		std::ofstream writing_file;
 		writing_file.open(fileName, std::ios::out);
-		writing_file << JsonData.dump(4) << std::endl;
+		writing_file << JsonData.dump(JSON_INDENT_NUM) << std::endl;
 	}
 
 	void WriteJsonDataTest(void);
@@ -168,17 +170,40 @@ private:
 		const std::string& dataName);
 
 	// 終端：キーがなくなった時に値を代入する
+
+	/// <summary>
+	/// JSONオブジェクトに値を代入する（再帰の終わり用）
+	/// </summary>
+	/// <typeparam name="Value"></typeparam>
+	/// <param name="j"></param>
+	/// <param name="value"></param>
 	template <typename Value>
 	void SetJsonValue(nlohmann::json& j, const Value& value);
 
 	// 再帰：キーを一つずつ進めていく
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <typeparam name="Value"></typeparam>
+	/// <typeparam name="Key"></typeparam>
+	/// <typeparam name="...Rest"></typeparam>
+	/// <param name="jsonData"></param>
+	/// <param name="value"></param>
+	/// <param name="key"></param>
+	/// <param name="...rest"></param>
 	template <typename Value, typename Key, typename... Rest>
 	void SetJsonValue(
 		nlohmann::json& jsonData,
 		const Value& value,
 		const Key& key, Rest... rest);
 
-	void UpdateJsonData(JSON_DATA jsonDataType, nlohmann::json& jsonData);
+	/// <summary>
+	/// 登録しているJsonデータを上書きして保存する
+	/// </summary>
+	/// <param name="jsonDataType">JSON_DATAの種類</param>
+	/// <param name="jsonData">jsonデータ</param>
+	void UpdateJsonData(const JSON_DATA jsonDataType, const nlohmann::json jsonData);
 };
 
 // 終端：キーがなくなった時に値を代入する
@@ -213,14 +238,5 @@ void JsonManager::OverWriteJsonDatas(
 	SetJsonValue(root, value, objectKey...);
 
 	std::ofstream ofs(GetJsonFileName(jsonDataType).c_str());
-	ofs << root.dump(4) << std::endl;
-
-	////ファイルストリームからjsonオブジェクトに変換
-	//nlohmann::json JsonData = nlohmann::json::parse(ifs);
-	////上書き
-	//JsonData[jsonObjectA][jsonObjectB][jsonData] = value;
-	////上書きしたjsonオブジェクトをファイルに保存
-	//std::ofstream writing_file;
-	//writing_file.open(fileName, std::ios::out);
-	//writing_file << JsonData.dump(4) << std::endl;
+	ofs << root.dump(JSON_INDENT_NUM) << std::endl;
 }

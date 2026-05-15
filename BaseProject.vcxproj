@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Object\ImGuiComponent\ImGuiCoponentPlayer.cpp" />
+    <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentPlayer.cpp" />
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentBase.cpp" />
     <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
     <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
@@ -74,7 +74,7 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Object\ImGuiComponent\ImGuiCoponentPlayer.h" />
+    <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentPlayer.h" />
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentBase.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_dx11.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_win32.h" />

@@ -160,7 +160,7 @@ void JsonManager::LoadJsonData(
 	jsonDataMap_[dataType].jsonData_ = data;
 }
 
-void JsonManager::UpdateJsonData(JSON_DATA jsonDataType, nlohmann::json& jsonData)
+void JsonManager::UpdateJsonData(const JSON_DATA jsonDataType, const nlohmann::json jsonData)
 {
 	jsonDataMap_[jsonDataType].jsonData_ = jsonData;
 }
