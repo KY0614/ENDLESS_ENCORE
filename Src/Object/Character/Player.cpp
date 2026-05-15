@@ -575,7 +575,6 @@ void Player::UpdateImGui(void)
 		transformData,
 		JsonManager::KEY_POSITION_Z);
 
-
 	//ダメージを受けるボタン(10ダメージ)
 	if (ImGui::Button("Damage"))
 	{
@@ -606,38 +605,6 @@ void Player::UpdateImGui(void)
 		break;
 	}
 	ImGui::Text(state.c_str());
-}
-
-void Player::SaveParameter(void)
-{
-	nlohmann::json data;
-	JsonManager& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
-	const json& playerData = jsonM.GetJsonData(
-		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
-
-	//データが含まれていない場合はエラーメッセージを出す
-	if (!playerData.contains(JsonManager::KEY_TRANSFORM))
-	{
-		assert(0 && "データが存在しないか不正なデータです");
-	}
-	//Transformデータ取得
-	json transformData = playerData.at(JsonManager::KEY_TRANSFORM);
-	//座標やスケールなどをJsonデータに保存する
-	transformData[JsonManager::KEY_POSITION] = { transform_.pos.x, transform_.pos.y, transform_.pos.z };
-	transformData[JsonManager::KEY_SCALE] = transform_.scl.x;
-	transformData[JsonManager::KEY_ROT_Y] = transform_.rot.y;
-	//パラメーターデータ取得
-	json paramData = playerData[JsonManager::KEY_PARAMETER];
-	paramData[JsonManager::KEY_HP] = hp_;
-	paramData[JsonManager::KEY_MAX_HP] = maxHp_;
-
-	// 現在の座標やスケールを反映
-	data[KEY_PLAYER]["Transform"]["position"] = { transform_.pos.x, transform_.pos.y, transform_.pos.z };
-	data[KEY_PLAYER]["Transform"]["scale"] = transform_.scl.x;
-	data[KEY_PLAYER]["Transform"]["localRotY"] = transform_.rot.y;
-	// 保存実行
-	//JsonManager::SaveJson("Data/Player.json", data);
 }
 
 void Player::ChangeState(const STATE& state)
