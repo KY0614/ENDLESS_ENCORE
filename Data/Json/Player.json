@@ -24,11 +24,6 @@
         },
         "Transform": {
             "localRotY": 180.0,
-            "position": [
-                -60.0,
-                85.0,
-                -2400.0
-            ],
             "positionX": -60.0,
             "positionY": 85.0,
             "positionZ": -2400.0,

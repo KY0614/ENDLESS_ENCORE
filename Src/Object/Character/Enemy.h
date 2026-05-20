@@ -50,7 +50,6 @@ public:
 		ATTACK_CHARGE,	//ため攻撃
 		DAMAGE,			//ダメージ
 		BACKSTAB,		//バックスタブ(致命攻撃される)
-		STAND_UP,		//起き上がり
 		DOWN,			//ダウン
 		DEATH,			//死
 	};
@@ -58,7 +57,7 @@ public:
 	//コンストラクタ
 	Enemy(Player& player);
 	//デストラクタ
-	~Enemy(void);
+	~Enemy(void)override;
 
 	/// <summary>
 	///	初期化

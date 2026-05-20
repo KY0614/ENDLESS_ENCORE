@@ -25,7 +25,7 @@ public:
 	{
 		NONE,
 		WAKE_UP,	//起き上がる
-		WAIT,		//待機
+		BATTLE_START_WAIT,		//戦闘開始まで待機
 		PLAY,		//操作可能
 		BACKSTAB,	//バックスタブ
 		DEAD,		//死亡
@@ -49,7 +49,7 @@ public:
 	//コンストラクタ
 	Player(void);
 	//デストラクタ
-	~Player(void);
+	~Player(void)override;
 
 	/// <summary>
 	///	初期化
@@ -129,7 +129,7 @@ public:
 	/// ダメージを与える
 	/// </summary>
 	/// <param name="subHp">ダメージ量</param>
-	void Damage(float subHp);
+	void Damage(const float subHp);
 
 	/// <summary>
 	/// 回避中かどうかを取得する
@@ -240,11 +240,6 @@ private:
 	//球体
 	std::unique_ptr<Sphere> sphere_;
 
-	//足煙エフェクト
-	int effectSmokeResId_;	//エフェクトリソースID
-	int effectSmokePlayId_;	//エフェクト再生ID
-	float stepFootSmoke_;	//足煙エフェクト発生までの時間経過
-
 	//パリィエフェクト
 	int effectParryResId_;	//エフェクトリソースID
 	int effectParryPlayId_;	//エフェクト再生ID
@@ -345,9 +340,9 @@ private:
 	/// </summary>
 	void ChangeStateWakeUp(void);
 	/// <summary>
-	/// 状態遷移：WAIT
+	/// 状態遷移：BATTLE_START_WAIT
 	/// </summary>
-	void ChangeStateWait(void);
+	void ChangeStateBattleStartWait(void);
 	/// <summary>
 	/// 状態遷移：PLAY
 	/// </summary>
@@ -372,9 +367,9 @@ private:
 	/// </summary>
 	void UpdateWakeUp(void);
 	/// <summary>
-	/// 状態更新：WAIT
+	/// 状態更新：BATTLE_START_WAIT
 	/// </summary>
-	void UpdateWait(void);
+	void UpdateBattleStartWait(void);
 	/// <summary>
 	/// 更新：PLAY
 	/// </summary>
@@ -461,11 +456,6 @@ private:
 	/// </summary>
 	/// <returns>true: 着地モーションが終了した場合　false:それ以外</returns>
 	bool IsEndLanding(void) const;
-
-	/// <summary>
-	/// 足煙エフェクトの発生処理
-	/// </summary>
-	void EffectFootSmoke(void);
 
 	/// <summary>
 	/// パリィエフェクトの発生処理

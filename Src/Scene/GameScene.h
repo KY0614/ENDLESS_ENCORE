@@ -112,6 +112,8 @@ private:
 	/// </summary>
 	void InitStateExplore(void);
 
+	void InitStaeEncount(void);
+
 	/// <summary>
 	/// í“¬ó‘Ô‰Šú‰»ˆ—
 	/// </summary>

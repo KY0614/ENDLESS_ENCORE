@@ -318,7 +318,6 @@ void Enemy::InitAnimation(void)
 	const std::string path = Application::PATH_MODEL + "Enemy/Animation/";
 	const char* KEY_EMPTY = "";
 	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
-	const float animSpeedSlow = animSpeed / 2.0f;
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + animPath.value(KEY_IDLE, KEY_EMPTY),
 		animSpeed);
@@ -349,10 +348,6 @@ void Enemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::DOWN, path + animPath.value(KEY_DOWN, KEY_EMPTY),
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::DEATH, path + animPath.value(KEY_DEATH, KEY_EMPTY),
-		animSpeed);
-	animationController_->Add((int)ANIM_TYPE::STAND_UP, path + animPath.value(KEY_STAND_UP, KEY_EMPTY),
-		animSpeed);
-	animationController_->Add((int)ANIM_TYPE::STAND_UP, path + animPath.value(KEY_STAND_UP, KEY_EMPTY),
 		animSpeed);
 	//初期アニメーションはアイドルを再生
 	animationController_->Play((int)ANIM_TYPE::IDLE);
@@ -436,7 +431,7 @@ void Enemy::ChangeStateFollow(void)
 
 void Enemy::ChangeStateMove(void)
 {
-	if (!isEncount_)isEncount_ = true;
+	isEncount_ = true;
 	moveDir_ = transform_.GetRight();
 	animationController_->Play((int)ANIM_TYPE::WALK_RIGHT);
 	stateUpdate_ = std::bind(&Enemy::UpdateMove, this);
@@ -997,13 +992,11 @@ float Enemy::CheckPlayerDistance(void)
 
 bool Enemy::IsCastSpell(void)
 {
-	bool ret = true;
-
 	//アニメーションが終了しているか
 	if (animationController_->IsEnd() && 
 		animationController_->GetPlayType() == (int)ANIM_TYPE::CAST_SPELL)
 	{
-		return ret;	//終了している
+		return true;	//終了している
 	}
 
 	return false;
@@ -1011,13 +1004,11 @@ bool Enemy::IsCastSpell(void)
 
 bool Enemy::IsSpellAttack(void)
 {
-	bool ret = true;
-
 	//アニメーションが終了しているか
 	if (animationController_->IsEnd() &&
 		animationController_->GetPlayType() == (int)ANIM_TYPE::ATTACK_FAR_ONE)
 	{
-		return ret;	//終了している
+		return true;	//終了している
 	}
 
 	return false;
@@ -1025,7 +1016,7 @@ bool Enemy::IsSpellAttack(void)
 
 bool Enemy::CheckBackstab(void)
 {
-	// プレイヤーの座標を取得
+	//プレイヤーの座標を取得
 	VECTOR pPos = player_.GetTransform().pos;
 
 	//エネミーからプレイヤーまでのベクトル
@@ -1087,7 +1078,6 @@ void Enemy::FollowPlayer(VECTOR& pos)
 		//向き画像を決める
 		//水平か鉛直を選択する
 		//※数値を絶対値(abs関数)としてみる
-
 		VECTOR dir = CommonUtility::VECTOR_ZERO;
 
 		if (abs(dirNorm.x) < abs(dirNorm.y))
@@ -1117,7 +1107,6 @@ void Enemy::FollowPlayer(VECTOR& pos)
 
 		//敵からプレイヤーへの位置ベクトルを作成
 		float angle = atan2(lookAt.x, lookAt.z);
-		float angleDegrees = CommonUtility::Rad2DegF(angle);
 		SetGoalRotate(angle);
 	}
 }
@@ -1305,13 +1294,12 @@ void Enemy::CreateBullets(const int createNum)
 	baseShotPos.x = distance;
 
 	//他の弾の座標を設定
-	const float angleStepDeg = 45.0f;
 	for (int i = 0; i < createNum; ++i)
 	{
-		//
-		float sngleStepDeg = ANGLE_OFFSET_DEG + (static_cast<float>(i) * ANGLE_STEP_DEG);
+		//弾の座標を回転させる角度を計算
+		float singleStepDeg = ANGLE_OFFSET_DEG + (static_cast<float>(i) * ANGLE_STEP_DEG);
 		Quaternion rot = Quaternion::AngleAxis(
-			CommonUtility::Deg2RadD(sngleStepDeg), CommonUtility::AXIS_Z);
+			CommonUtility::Deg2RadD(singleStepDeg), CommonUtility::AXIS_Z);
 		VECTOR rotLocalPos = rot.PosAxis(baseShotPos);
 		//弾の相対座標にセットする
 		bullets_[i]->SetOffsetPos(offSetPos);

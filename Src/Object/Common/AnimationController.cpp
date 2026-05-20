@@ -23,10 +23,6 @@ AnimationController::AnimationController(int modelId)
 
 AnimationController::~AnimationController(void)
 {
-	//for (const auto& anim : animations_)
-	//{
-	//	MV1DeleteModel(anim.second.model);
-	//}
 }
 
 void AnimationController::Add(int type, const std::string& path, float speed)
@@ -98,81 +94,6 @@ void AnimationController::Play(int type, bool isLoop,
 
 	//アニメーションしない
 	isStop_ = isStop;
-
-	stepEndLoopStart_ = -1.0f;
-	stepEndLoopEnd_ = -1.0f;
-	switchLoopReverse_ = 1.0f;
-}
-
-void AnimationController::PlayBlend(int type, bool isLoop, float startStep, float endStep, const float blendAnimTime, bool isStop, bool isForce)
-{
-	//同じ種類かつ強制再生を行わない場合
-	if (type == playType_ && !isForce)
-	{
-		return;
-	}
-
-	//再生中の種類を設定
-	playType_ = type;
-
-	//ブレンドアニメーション率を初期化
-	blendAnimRate_ = 0.0f;
-
-	//再生中のアニメーション情報がある場合
-	if (playAnimations_.find(playType_) != playAnimations_.end())
-	{
-		return;
-	}
-	if (playType_ != -1)
-	{
-		//モデルからアニメーションを外す
-		playAnim_.attachNo = MV1DetachAnim(modelId_, playAnim_.attachNo);
-	}
-	//新規アニメーションデータを生成
-	Animation anim = animations_[playType_];
-
-	//ブレンドアニメーション時間の設定
-	blendAnimTime_ = blendAnimTime;
-
-	//初期化
-	anim.step = startStep;
-
-	//モデルにアニメーションを付ける
-	int animIdx = 0;
-	if (MV1GetAnimNum(anim.model) > 1)
-	{
-		// アニメーションが複数保存されていたら、番号1を指定
-		animIdx = 1;
-	}
-
-	//アニメーションのアタッチ
-	anim.attachNo = MV1AttachAnim(modelId_, animIdx, anim.model);
-
-	//アニメーション総時間の取得
-	if (endStep > 0.0f)
-	{
-		anim.totalTime = endStep;
-	}
-	else
-	{
-		anim.totalTime = MV1GetAttachAnimTotalTime(modelId_, anim.attachNo);
-	}
-
-	//アニメーションループ
-	isLoop_ = isLoop;
-
-	//アニメーションしない
-	isStop_ = isStop;
-
-	//再生中のアニメーション配列が空の場合
-	if (playAnimations_.empty())
-	{
-		//進行率は最大にしておく
-		anim.blendRate = 1.0f;
-	}
-
-	// ブレンドアニメーションを追加
-	playAnimations_.emplace(playType_, anim);
 
 	stepEndLoopStart_ = -1.0f;
 	stepEndLoopEnd_ = -1.0f;

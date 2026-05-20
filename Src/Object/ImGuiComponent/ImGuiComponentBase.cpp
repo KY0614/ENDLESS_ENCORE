@@ -1,7 +1,6 @@
 #include "../Application.h"
 #include "../Libs/ImGui/imgui.h"
 #include "../Utility/StringUtility.h"
-#include "../Manager/Generic/JsonManager.h"
 #include "ImGuiComponentBase.h"
 
 ImGuiComponentBase::ImGuiComponentBase(void)
@@ -45,8 +44,6 @@ void ImGuiComponentBase::SliderFloatWithSave(
 			*variable = jsonData.value(jsonKey, 0.0f);
 		}
 	}
-	//JsonManagerのインスタンスを取得
-	JsonManager& jsonM = JsonManager::GetInstance();
 	//ポップアップの処理
 	if (ImGui::BeginPopupModal(
 		popUpTitle.c_str(),

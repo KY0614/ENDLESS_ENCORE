@@ -73,7 +73,6 @@ EncountPlayer::EncountPlayer(void)
 	stateChanges_.emplace(STATE::STAGE_WALK, std::bind(&EncountPlayer::ChangeStateStageWalk, this));
 	stateChanges_.emplace(STATE::STAGE_WAIT, std::bind(&EncountPlayer::ChangeStateStageWait, this));
 	stateChanges_.emplace(STATE::LOOK_AROUND, std::bind(&EncountPlayer::ChangeStateLookAround, this));
-	stateChanges_.emplace(STATE::ATTACKED_ENEMY, std::bind(&EncountPlayer::ChangeStateAttackedEnemy, this));
 }
 
 EncountPlayer::~EncountPlayer(void)
@@ -126,11 +125,6 @@ void EncountPlayer::StageWalk(void)
 void EncountPlayer::LookAround(void)
 {
 	ChangeState(STATE::LOOK_AROUND);
-}
-
-void EncountPlayer::AttackedEnemy(void)
-{
-	ChangeState(STATE::ATTACKED_ENEMY);
 }
 
 void EncountPlayer::UpdateImGui(void)
@@ -221,9 +215,6 @@ void EncountPlayer::InitAnimation(void)
 	//Žü‚è‚ðŒ©“n‚·
 	animationController_->Add((int)ANIM_TYPE::LOOK_AROUND, path + animPath.value(KEY_LOOK_AROUND, KEY_EMPTY),
 		animSpeed);
-	//UŒ‚‚ð‚³‚ê‚é
-	animationController_->Add((int)ANIM_TYPE::ATTACKED, path + animPath.value(KEY_ATTACKED, KEY_EMPTY),
-		animSpeedSlow);
 }
 
 void EncountPlayer::ChangeState(const STATE& state)
@@ -261,15 +252,6 @@ void EncountPlayer::ChangeStateLookAround(void)
 	stateUpdate_ = std::bind(&EncountPlayer::UpdateLookAround, this);
 }
 
-void EncountPlayer::ChangeStateAttackedEnemy(void)
-{
-	//UŒ‚‚ðŽó‚¯‚éƒAƒjƒ[ƒVƒ‡ƒ“‚É•ÏX
-	const float animEndStep = 20.0f;
-	animationController_->Play((int)ANIM_TYPE::ATTACKED, false, 0.0f, animEndStep);
-	transform_.pos.z = ATTACKED_POS_Z;
-	stateUpdate_ = std::bind(&EncountPlayer::UpdateAttackedEnemy, this);
-}
-
 void EncountPlayer::UpdateNone(void)
 {
 }
@@ -301,9 +283,5 @@ void EncountPlayer::UpdateStageWait(void)
 }
 
 void EncountPlayer::UpdateLookAround(void)
-{
-}
-
-void EncountPlayer::UpdateAttackedEnemy(void)
 {
 }

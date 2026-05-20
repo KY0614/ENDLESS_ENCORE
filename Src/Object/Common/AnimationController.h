@@ -43,16 +43,6 @@ public :
 		bool isStop = false,
 		bool isForce = false);
 
-	//アニメーション再生（ブレンド時間指定版）
-	void PlayBlend(
-		int type,
-		bool isLoop = true, 
-		float startStep = 0.0f,
-		float endStep = -1.0f,
-		const float blendAnimTime = DEFAULT_BLEND_ANIM_TIME,
-		bool isStop = false,
-		bool isForce = false);
-
 	void Update(void);
 
 	//アニメーション終了後に繰り返すループステップ

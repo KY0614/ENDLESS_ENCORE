@@ -32,10 +32,6 @@ namespace
 	const float CAMERA_PLAYER_HEAD_OFFSET_Y = 100.0f;	//プレイヤーの頭の高さ
 	const float CAMERA_PLAYER_CHEST_OFFSET_Y = 70.0f;	//プレイヤーの胸の高さ
 
-	//スローモーション関連
-	const float SLOW_MOTION_SPEED = 0.1f; //スローモーションの速度
-	const float SLOW_MOTION_SPEED_ACCEL = 1.2f; //スローモーションの加速度
-
 	//UIの座標
 	const Vector2 SKIP_BAR_POS = { Application::SCREEN_SIZE_X - 200, Application::SCREEN_SIZE_Y - 120 };
 
@@ -233,10 +229,22 @@ void GameScene::InitStateExplore(void)
 	//カメラ
 	mainCamera->SetFollow(&player_->GetTransform());
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
-	//BGM再生
-	SoundManager& sound = SoundManager::GetInstance();
-	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, EXPLORE_BGM_VOLUME);
-	sound.Play(SoundManager::SOUND::EXPLORE);
+}
+
+void GameScene::InitStaeEncount(void)
+{
+	//敵とプレイヤーの状態設定
+	enemy_->ChangeState(Enemy::STATE::NONE);
+	player_->Wait();
+	player_->Update(); //状態変更後すぐに更新しておく
+	//スキップ関連初期化
+	skipTimer_ = 0.0f;
+	isSkip_ = false;
+	//フェードイン開始
+	SceneManager::GetInstance().GetFader().lock()->SetFade(Fader::STATE::FADE_IN);
+	//カメラ
+	mainCamera->SetFollow(&player_->GetTransform());
+	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 }
 
 void GameScene::InitStateBattle(void)
@@ -312,16 +320,22 @@ void GameScene::ChangeStateWakeUp(void)
 
 void GameScene::ChangeStateExplore(void)
 {
+	//探索状態の初期化
 	InitStateExplore();
+
+	//BGM再生
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.AdjustVolume(SoundManager::SOUND::EXPLORE, EXPLORE_BGM_VOLUME);
+	sound.Play(SoundManager::SOUND::EXPLORE);
+
 	stateUpdate_ = std::bind(&GameScene::UpdateExplore, this);
 	stateDraw_ = std::bind(&GameScene::DrawExplore, this);
 }
 
 void GameScene::ChangeStateEncount(void)
 {
-	skipTimer_ = 0.0f;
-	isSkip_ = false;
-	player_->Wait();
+	//エンカウント状態の初期化
+	InitStaeEncount();
 	stateUpdate_ = std::bind(&GameScene::UpdateEncount, this);
 	stateDraw_ = std::bind(&GameScene::DrawEncount, this);
 }
@@ -476,29 +490,6 @@ void GameScene::UpdateEncount(void)
 			return;
 		}
 	}
-
-#ifdef _DEBUG
-
-	//スローモーション処理
-	//if (encountScene_->IsSlowMotion() &&
-	//	slowMotionFrameCount_++ > 60.0f)slowMotionFrameCount_ = 0.0f;
-
-	//スローモーション中でなければ通常更新
-	//if (encountScene_->IsSlowMotion())
-	//{
-	//	slowMotionFrame_ *= 1.02f; // 徐々に遅くする
-	//	if (slowMotionFrame_ > 60.0f) // 完全停止
-	//	{
-	//		//終了処理など
-	//		return;
-	//	}
-	//	slowMotionFrameCount_++;
-	//	if (slowMotionFrame_ < 1.0f ||
-	//		static_cast<int>(slowMotionFrameCount_) %
-	//		static_cast<int>(slowMotionFrame_) != 0)
-	//		return; // このフレームは処理しない
-	//}
-#endif // _DEBUG
 
 	//エンカウントシーン更新
 	encountScene_->Update();

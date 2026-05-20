@@ -92,17 +92,13 @@ Player::Player(void)
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&Player::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&Player::ChangeStateWakeUp, this));
-	stateChanges_.emplace(STATE::WAIT, std::bind(&Player::ChangeStateWait, this));
+	stateChanges_.emplace(STATE::BATTLE_START_WAIT, std::bind(&Player::ChangeStateBattleStartWait, this));
 	stateChanges_.emplace(STATE::PLAY, std::bind(&Player::ChangeStatePlay, this));
 	stateChanges_.emplace(STATE::BACKSTAB, std::bind(&Player::ChangeStateBackstab, this));
 	stateChanges_.emplace(STATE::DEAD, std::bind(&Player::ChangeStateDead, this));
 
 	gravHitPosDown_ = CommonUtility::VECTOR_ZERO;
 	gravHitPosUp_ = CommonUtility::VECTOR_ZERO;
-
-	effectSmokePlayId_ = -1;
-	effectSmokeResId_ = -1;
-	stepFootSmoke_ = -1.0f;
 
 	effectParryPlayId_ = -1;
 	effectParryResId_ = -1;
@@ -162,13 +158,6 @@ void Player::Init(void)
 
 	//UIの初期化
 	InitUI();
-
-	//足煙エフェクト
-	effectSmokeResId_ = ResourceManager::GetInstance().Load(
-		ResourceManager::SRC::FOOT_SMOKE).handleId_;
-
-	//足煙エフェクトの発生間隔
-	stepFootSmoke_ = TERM_FOOT_SMOKE;
 
 	//パリィのエフェクトのリソース読み込み
 	effectParryResId_ = ResourceManager::GetInstance().Load(
@@ -441,15 +430,12 @@ void Player::InitBattle(void)
 	//パラメータを取得
 	const json& paramData = playerData[JsonManager::KEY_PARAMETER];
 	//座標をステージ上の端(手前側)に設定
-	//transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
-	transform_.pos.x = transformData.value(JsonManager::KEY_POSITION_X, 0.0f);
-	transform_.pos.y = transformData.value(JsonManager::KEY_POSITION_Y, 0.0f);
-	transform_.pos.z = transformData.value(JsonManager::KEY_POSITION_Z, 0.0f);
+	transform_.pos = JsonManager::GetParseVector(paramData, KEY_STAGE_POS);
 	//正面を向かせる(Z軸方向)
 	transform_.quaRot = Quaternion();
 }
 
-void Player::Damage(float subHp)
+void Player::Damage(const float subHp)
 {
 	if (hp_ <= 0.0f)return;
 	hp_ -= subHp;
@@ -477,7 +463,7 @@ void Player::Wait(void)
 	//戦闘開始前の状態にする
 	InitBattle();
 	//状態をWAITに変更
-	ChangeState(STATE::WAIT);
+	ChangeState(STATE::BATTLE_START_WAIT);
 }
 
 void Player::Backstab(void)
@@ -492,6 +478,7 @@ void Player::UpdateImGui(void)
 	JsonManager& jsonM = JsonManager::GetInstance();
 	const json& playerData = jsonM.GetJsonData(
 		JsonManager::JSON_DATA::PLAYER, KEY_PLAYER);
+
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!playerData.contains(JsonManager::KEY_TRANSFORM))
 	{
@@ -499,6 +486,7 @@ void Player::UpdateImGui(void)
 	}
 	//Transformデータ取得
 	const json& transformData = playerData.at(JsonManager::KEY_TRANSFORM);
+	//パラメータを取得
 	const json& paramData = playerData.at(JsonManager::KEY_PARAMETER);
 
 	//スライダーの説明文
@@ -579,8 +567,8 @@ void Player::UpdateImGui(void)
 	case Player::STATE::NONE:
 		state += "NONE";
 		break;
-	case Player::STATE::WAIT:
-		state += "WAIT";
+	case Player::STATE::BATTLE_START_WAIT:
+		state += "BATTLE_START_WAIT";
 		break;
 	case Player::STATE::PLAY:
 		state += "PLAY";
@@ -622,9 +610,9 @@ void Player::ChangeStateWakeUp(void)
 	stateUpdate_ = std::bind(&Player::UpdateWakeUp, this);
 }
 
-void Player::ChangeStateWait(void)
+void Player::ChangeStateBattleStartWait(void)
 {
-	stateUpdate_ = std::bind(&Player::UpdateWait, this);
+	stateUpdate_ = std::bind(&Player::UpdateBattleStartWait, this);
 }
 
 void Player::ChangeStatePlay(void)
@@ -672,7 +660,7 @@ void Player::UpdateWakeUp(void)
 	}
 }
 
-void Player::UpdateWait(void)
+void Player::UpdateBattleStartWait(void)
 {
 	//重力による移動量
 	CalcGravityPow();
@@ -715,9 +703,6 @@ void Player::UpdatePlay(void)
 
 	//衝突判定
 	Collision();
-
-	//歩きエフェクト
-	//EffectFootSmoke();
 
 	//パリィエフェクト位置更新
 	EffectParryPosUpdate();
@@ -1143,34 +1128,6 @@ bool Player::IsEndLanding(void) const
 	}
 
 	return false;
-}
-
-void Player::EffectFootSmoke(void)
-{
-	stepFootSmoke_ -= SceneManager::GetInstance().GetDeltaTime();
-
-	float len = CommonUtility::MagnitudeF(moveDiff_);
-
-	if (len >= 1.0f &&
-		stepFootSmoke_ < 0.0f)
-	{
-
-		stepFootSmoke_ = TERM_FOOT_SMOKE;
-
-		//エフェクト再生
-		effectSmokePlayId_ = PlayEffekseer3DEffect(effectSmokeResId_);
-
-		//大きさ
-		const float SCALE = 5.0f;
-		SetScalePlayingEffekseer3DEffect(effectSmokePlayId_, SCALE, SCALE, SCALE);
-
-		//位置の設定
-		SetPosPlayingEffekseer3DEffect(
-			effectSmokePlayId_,
-			transform_.pos.x,
-			transform_.pos.y,
-			transform_.pos.z);
-	}
 }
 
 void Player::EffectParry(void)
