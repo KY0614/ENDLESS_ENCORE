@@ -11,6 +11,7 @@ namespace
 	const std::string JSON_PLAYER = "Player";
 	const std::string JSON_ENEMY = "Enemy";
 	const std::string JSON_STAGE = "Stage";
+	const std::string JSON_TEST = "Test";
 
 	const int JSON_INDENT_NUM = 4;	//JSONのインデントスペース数
 }
@@ -33,8 +34,6 @@ JsonManager& JsonManager::GetInstance(void)
 
 void JsonManager::Init(void)
 {
-	//JSONデータの書き込み
-	WriteJsonDataTest();
 }
 
 void JsonManager::Release(void)
@@ -55,35 +54,17 @@ const nlohmann::json& JsonManager::GetJsonData(
 	const JSON_DATA dataType,
 	const std::string data)const
 {
-	return jsonDataMap_.at(dataType).at(data);
+	return jsonDataMap_.at(dataType).jsonData_.at(data);
 }
 
-nlohmann::json JsonManager::LoadJsonData(
-	const std::string& fileName,
-	const std::string& dataName)
+const nlohmann::json& JsonManager::GetJsonDataType(const JSON_DATA dataType) const
 {
-	std::ifstream ifs(fileName);
-	if (!ifs)return nlohmann::json();
-
-	//ファイルストリームからjsonオブジェクトに変換
-	nlohmann::json data = nlohmann::json::parse(ifs);
-	if (!data.contains(dataName))return{};
-	return data;
+	return jsonDataMap_.at(dataType).jsonData_;
 }
 
-void JsonManager::OverWriteJsonData(const std::string& fileName,
-	const std::string& jsonObjectName,
-	const std::string& jsonData)
+const std::string& JsonManager::GetJsonFileName(const JSON_DATA dataType) const
 {
-	std::ifstream ifs(fileName);
-	if (!ifs)
-	{
-		assert(0 && "ファイルが見つかりませんでした");
-		return;
-	}
-
-	//ファイルストリームからjsonオブジェクトに変換
-	nlohmann::json data = nlohmann::json::parse(ifs);
+	return jsonDataMap_.at(dataType).fileName_;
 }
 
 void JsonManager::WriteJsonDataTest(void)
@@ -106,7 +87,9 @@ void JsonManager::WriteJsonDataTest(void)
 	writing_file << data.dump(JSON_INDENT_NUM) << std::endl;
 }
 
-const VECTOR JsonManager::GetParseVector(const nlohmann::json& jsonData, const std::string& key)
+const VECTOR JsonManager::GetParseVector(
+	const nlohmann::json& jsonData,
+	const std::string& key)
 {
 	//配列のサイズ
 	const int arraySize = 3;	
@@ -131,7 +114,8 @@ void JsonManager::InitTitle(void)
 
 	//ステージのデータ読み込み
 	const std::string stagePath = "Stage.json";
-	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(PATH_JSON + stagePath, JSON_STAGE));
+	LoadJsonData(JSON_DATA::STAGE, PATH_JSON + stagePath, JSON_STAGE);
+	//jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(PATH_JSON + stagePath, JSON_STAGE));
 }
 
 void JsonManager::InitGame(void)
@@ -141,14 +125,42 @@ void JsonManager::InitGame(void)
 
 	//プレイヤーのデータ読み込み
 	const std::string playerPath = "Player.json";
-	jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadJsonData(
-		PATH_JSON + playerPath, JSON_PLAYER));
+	LoadJsonData(JSON_DATA::PLAYER, PATH_JSON + playerPath, JSON_PLAYER);
+	//jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadJsonData(
+	//	PATH_JSON + playerPath, JSON_PLAYER));
 	//敵のデータ読み込み
 	const std::string enemyPath = "Enemy.json";
-	jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadJsonData(
-		PATH_JSON + enemyPath, JSON_ENEMY));
+	LoadJsonData(JSON_DATA::ENEMY, PATH_JSON + enemyPath, JSON_ENEMY);
+	//jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadJsonData(
+	//	PATH_JSON + enemyPath, JSON_ENEMY));
 	//ステージのデータ読み込み
 	const std::string stagePath = "Stage.json";
-	jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(
-		PATH_JSON + stagePath, JSON_STAGE));
+	LoadJsonData(JSON_DATA::STAGE, PATH_JSON + stagePath, JSON_STAGE);
+	//jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(
+	//	PATH_JSON + stagePath, JSON_STAGE));
+	//ステージのデータ読み込み
+	const std::string testPath = "Test.json";
+	LoadJsonData(JSON_DATA::TEST, PATH_JSON + testPath, JSON_TEST);
+	//jsonDataMap_.emplace(JSON_DATA::TEST, LoadJsonData(
+	//	PATH_JSON + testPath, JSON_TEST));
+}
+
+void JsonManager::LoadJsonData(
+	const JSON_DATA& dataType,
+	const std::string& filepath,
+	const std::string& dataName)
+{
+	jsonDataMap_[dataType].fileName_ = filepath;
+	//jsonデータの読み込み
+	std::ifstream ifs(filepath);
+	if (!ifs)return;
+	//ファイルストリームからjsonオブジェクトに変換
+	nlohmann::json data = nlohmann::json::parse(ifs);
+	if (!data.contains(dataName))return;
+	jsonDataMap_[dataType].jsonData_ = data;
+}
+
+void JsonManager::UpdateJsonData(const JSON_DATA jsonDataType, const nlohmann::json jsonData)
+{
+	jsonDataMap_[jsonDataType].jsonData_ = jsonData;
 }

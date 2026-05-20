@@ -1,6 +1,14 @@
 #include "../Transform.h"
 #include "ColliderBase.h"
 
+namespace
+{
+	//有効なコライダの描画色
+	const int COLOR_VALID = GetColor(0, 255, 0);
+	//無効なコライダの描画色
+	const int COLOR_INVALID = GetColor(255, 0, 0);
+}
+
 ColliderBase::ColliderBase(SHAPE shape, TAG tag, const Transform* follow)
 	:
 	shape_(shape),

@@ -15,6 +15,7 @@
 #include "../Renderer/ModelMaterial.h"
 #include "../Common/AnimationController.h"
 #include "../Common/Collider/ColliderLine.h"
+#include "../Common/Collider/ColliderSphere.h"
 #include "../Common/Collider/ColliderCapsule.h"
 #include "../Common/Geometry/Capsule.h"
 #include "../Common/Geometry/Sphere.h"
@@ -41,6 +42,22 @@ namespace
 	static const std::string KEY_BACKSTAB = "Backstab";
 	static const std::string KEY_DEATH = "Death";
 	static const std::string KEY_STAGE_POS = "stageWalkPosition";
+	// 衝突判定用カプセル上部球体(ジャンプ時)
+	const VECTOR COL_CAPSULE_TOP_JUMP_LOCAL_POS =
+	{ 0.0f, 160.0f, 0.0f };
+	// 衝突判定用カプセル下部球体(ジャンプ時)
+	const VECTOR COL_CAPSULE_DOWN_JUMP_LOCAL_POS =
+	{ 0.0f, 80.0f, 0.0f };
+	// 衝突判定用線分開始(ジャンプ時)
+	const VECTOR COL_LINE_JUMP_START_LOCAL_POS =
+	{ 0.0f, 130.0f, 0.0f };
+	// 衝突判定用線分終了(ジャンプ時)
+	const VECTOR COL_LINE_JUMP_END_LOCAL_POS =
+	{ 0.0f, 35.0f, 0.0f };
+	// 衝突判定用線分開始
+	const VECTOR COL_LINE_START_LOCAL_POS = { 0.0f, 80.0f, 0.0f };
+	// 衝突判定用線分終了
+	const VECTOR COL_LINE_END_LOCAL_POS = { 0.0f, -10.0f, 0.0f };
 
 	//回転完了までの時間
 	const float TIME_ROT = 0.3f;
@@ -49,7 +66,7 @@ namespace
 	const float TERM_FOOT_SMOKE = 0.3f;
 
 	//ジャンプ力
-	const float JUMP_POW = 7.0f;
+	const float JUMP_POW = 18.0f;
 	//XZ方向のジャンプ力減衰率
 	const float JUMP_POW_DECEL_RATE = 0.01f;
 	//重力加速度
@@ -89,7 +106,6 @@ namespace
 
 PlayerTest::PlayerTest(void)
 {
-	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	hp_ = 0.0f;
 	maxHp_ = 0.0f;
@@ -114,7 +130,6 @@ PlayerTest::PlayerTest(void)
 	stepJump_ = -1.0f;
 	isJump_ = false;
 	speed_ = -1.0f;
-
 	
 	moveDiff_ = CommonUtility::VECTOR_ZERO;
 	jumpPow_ = CommonUtility::VECTOR_ZERO;
@@ -201,13 +216,6 @@ void PlayerTest::UpdateState(void)
 
 void PlayerTest::Draw(void)
 {
-	VECTOR right = GetTransform().GetRight();
-	VECTOR back = GetTransform().GetBack();
-	VECTOR rightBackDir = VNorm(VAdd(back, right));
-	VECTOR pos = VAdd(GetTransform().pos, VScale(VNorm(rightBackDir), 50.0f));
-	pos.y += 50.0f;
-	DrawSphere3D(pos, 20.0f, 16, 0x00ff00, 0x00ff00, false);
-
 	//モデルの描画
 	MV1DrawModel(transform_.modelId);
 
@@ -381,6 +389,12 @@ void PlayerTest::InitCollider(void)
 		ColliderBase::TAG::PLAYER, &transform_,
 		localPosTop, localPosDown, capsuleRadius);
 	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::CAPSULE), std::move(colCap));
+
+	//球コライダ
+	std::unique_ptr<ColliderSphere> colSphere = std::make_unique<ColliderSphere>(
+		ColliderBase::TAG::PLAYER_PARRY, &transform_,
+		localPos, sphereRadius);
+	ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::SPHERE), std::move(colSphere));
 }
 
 void PlayerTest::InitAnimation(void)
@@ -1010,115 +1024,11 @@ void PlayerTest::Rotate(void)
 		playerRotY_, goalQuaRot_, (TIME_ROT - stepRotTime_) / TIME_ROT);
 }
 
-void PlayerTest::Collision(void)
-{
-	//現在座標を起点に移動後座標を決める
-	movedPos_ = VAdd(transform_.pos, movePow_);
-
-	//衝突(カプセル)
-	//CollisionCapsule();
-
-	//衝突(重力)
-	//CollisionGravity();
-
-	//移動
-	moveDiff_ = VSub(movedPos_, transform_.pos);
-	transform_.pos = movedPos_;
-}
-
-void PlayerTest::CollisionCapsule(void)
-{
-	//カプセルを移動させる
-	Transform trans = Transform(transform_);
-	trans.pos = movedPos_;
-	trans.Update();
-	Capsule cap = Capsule(*capsule_, trans);
-	//カプセルとの衝突判定
-	for (const std::weak_ptr<Collider> c : colliders_)
-	{
-		MV1_COLL_RESULT_POLY_DIM hits = MV1CollCheck_Capsule(
-			c.lock()->modelId_, -1,
-			cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius());
-		//衝突した複数のポリゴンと衝突回避するまで、
-		//プレイヤーの位置を移動させる
-		for (int i = 0; i < hits.HitNum; i++)
-		{
-			MV1_COLL_RESULT_POLY hit = hits.Dim[i];
-			//地面と異なり、衝突回避位置が不明なため、何度か移動させる
-			//この時、移動させる方向は、移動前座標に向いた方向であったり、
-			//衝突したポリゴンの法線方向だったりする
-			const int maxTryCnt = 10;
-			for (int tryCnt = 0; tryCnt < maxTryCnt; tryCnt++)
-			{
-				//再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
-				//最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
-				int pHit = HitCheck_Capsule_Triangle(
-					cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius(),
-					hit.Position[0], hit.Position[1], hit.Position[2]);
-
-				if (pHit)
-				{
-					//法線の方向にちょっとだけ移動させる
-					const float adjustDist = 2.0f;
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, adjustDist));
-					//カプセルも一緒に移動させる
-					trans.pos = movedPos_;
-					trans.Update();
-					continue;
-				}
-				break;
-			}
-		}
-		//検出した地面ポリゴン情報の後始末
-		MV1CollResultPolyDimTerminate(hits);
-	}
-}
-
-void PlayerTest::CollisionGravity(void)
-{
-	//ジャンプ量を加算
-	movedPos_ = VAdd(movedPos_, jumpPow_);
-
-	//重力方向
-	VECTOR dirGravity = CommonUtility::DIR_D;
-
-	//重力方向の反対
-	VECTOR dirUpGravity = CommonUtility::DIR_U;
-
-	//重力の強さ
-	float gravityPow = GRAVITY_POW;
-	//重力落下チェック用の長さ
-	float checkPow = 10.0f;
-	//gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
-	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
-	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
-	for (const std::weak_ptr<Collider> c : colliders_)
-	{
-		//地面との衝突
-		auto hit = MV1CollCheck_Line(
-			c.lock()->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
-
-		if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
-		{
-			// 衝突地点から、少し上に移動
-			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
-
-			// ジャンプリセット
-			jumpPow_ = CommonUtility::VECTOR_ZERO;
-			if (isJump_)
-			{
-				
-			}
-			isJump_ = false;
-		}
-
-	}
-}
-
 void PlayerTest::CollisionReserve(void)
 {
 	// アニメーションごとの線分調整
-	if (animationController_->GetPlayType() == static_cast<int>(ANIM_TYPE::JUMP))
+	if (animationController_->GetPlayType() == static_cast<int>(ANIM_TYPE::JUMP)&&
+		isJump_)
 	{
 		// ジャンプ中は線分を伸ばす
 		if (ownColliders_.count(static_cast<int>(COLLIDER_TYPE::LINE)) != 0)
@@ -1128,6 +1038,12 @@ void PlayerTest::CollisionReserve(void)
 				);
 			colLine->SetLocalPosStart(COL_LINE_JUMP_START_LOCAL_POS);
 			colLine->SetLocalPosEnd(COL_LINE_JUMP_END_LOCAL_POS);
+			//カプセルも同様に調整
+			ColliderCapsule* colCap = dynamic_cast<ColliderCapsule*>(
+				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::CAPSULE)).get()
+				);
+			colCap->SetLocalPosTop(COL_LINE_JUMP_START_LOCAL_POS);
+			colCap->SetLocalPosDown(COL_LINE_JUMP_END_LOCAL_POS);	
 		}
 	}
 	else
@@ -1140,40 +1056,14 @@ void PlayerTest::CollisionReserve(void)
 				);
 			colLine->SetLocalPosStart(COL_LINE_START_LOCAL_POS);
 			colLine->SetLocalPosEnd(COL_LINE_END_LOCAL_POS);
-		}
-	}
-}
-
-void PlayerTest::CalcGravityPow(void)
-{
-	// ジャンプ中の場合のみ重力を適用
-	if (isJump_)
-	{
-		// 重力による速度の減少
-		// v = v0 + at の式に相当
-		jumpPow_.y -= GRAVITY_POW * SceneManager::GetInstance().GetDeltaTime();
-	}
-	else
-	{
-		//地面にいる場合はジャンプ力をリセット
-		jumpPow_ = CommonUtility::VECTOR_ZERO;
-
-		//重力方向
-		VECTOR dirGravity = CommonUtility::DIR_D;
-
-		//重力の強さ
-		float gravityPow = GRAVITY_POW;
-
-		//重力
-		VECTOR gravity = VScale(dirGravity, gravityPow);
-		jumpPow_ = VAdd(jumpPow_, gravity);
-
-		//内積
-		float dot = VDot(dirGravity, jumpPow_);
-		if (dot >= 0.0f)
-		{
-			//重力方向と反対方向(マイナス)でなければ、ジャンプ力を無くす
-			jumpPow_ = gravity;
+			//カプセルも同様に戻す
+			ColliderCapsule* colCap = dynamic_cast<ColliderCapsule*>(
+				ownColliders_.at(static_cast<int>(COLLIDER_TYPE::CAPSULE)).get()
+				);
+			const VECTOR localPosTop = { 0.0f, 110.0f, 0.0f };
+			const VECTOR localPosDown = { 0.0f, 20.0f, 0.0f };
+			colCap->SetLocalPosTop(localPosTop);
+			colCap->SetLocalPosDown(localPosDown);
 		}
 	}
 }

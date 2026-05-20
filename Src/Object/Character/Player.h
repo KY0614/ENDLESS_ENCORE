@@ -12,6 +12,9 @@ class AnimationController;
 class Collider;
 class Capsule;
 class Sphere;
+class ModelRenderer;
+class ModelMaterial;
+class ImGuiComponentPlayer;
 
 class Player : public ActorBase
 {
@@ -185,8 +188,6 @@ public:
 	/// <param name=""></param>
 	void UpdateImGui(void)override;
 
-	void SaveParameter(void) override;
-
 private:
 	//UI
 	std::unique_ptr<HPBar> hpBar_;	//HPバー
@@ -194,6 +195,9 @@ private:
 
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
+	
+	//ImGui
+	std::unique_ptr<ImGuiComponentPlayer> imGuiComponent_;
 
 	//状態管理
 	STATE state_;

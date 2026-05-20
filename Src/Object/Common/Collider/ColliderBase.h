@@ -24,6 +24,7 @@ public:
 		PLAYER_ATTACK,	//プレイヤーの攻撃
 		PLAYER_PARRY,	//プレイヤーのパリィ
 		ENEMY,			//敵
+		ENEMY_ATTACK,	//敵の攻撃
 		ENEMY_BULLET,	//敵の弾
 	};
 
@@ -68,10 +69,6 @@ public:
 
 protected:
 
-	//デバッグ表示の色
-	static constexpr int COLOR_VALID = 0xff0000;
-	static constexpr int COLOR_INVALID = 0xaaaaaa;
-
 	//形状
 	SHAPE shape_;
 
@@ -84,7 +81,11 @@ protected:
 	//有効フラグ
 	bool isValid_;
 
-	//ローカル座標をワールド座標に変換
+	/// <summary>
+	/// ローカル座標をワールド座標に変換する
+	/// </summary>
+	/// <param name="localPos">ローカル座標</param>
+	/// <returns>ワールド座標</returns>
 	VECTOR GetRotPos(const VECTOR& localPos) const;
 
 	//デバッグ用描画

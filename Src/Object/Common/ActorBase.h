@@ -11,8 +11,8 @@ class ActorBase
 public:
 
 	//重力
-	static constexpr float GRAVITY = 15.0f;				//重力加速度
-	static constexpr float GRAVITY_SCALE = 1.0f;		//重力の減衰率
+	static constexpr float GRAVITY = 9.81f * 100.0f;	//重力加速度
+	static constexpr float GRAVITY_SCALE = 0.05f;		//重力の減衰率
 
 	//コンストラクタ
 	ActorBase(void);
@@ -89,4 +89,12 @@ protected:
 
 	// 衝突相手の情報
 	std::vector<std::weak_ptr<ColliderBase>> hitColliders_;
+
+	//丸影
+	int imgShadow_;
+
+	/// <summary>
+	/// 丸影描画
+	/// </summary>
+	void DrawShadow(void);
 };

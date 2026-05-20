@@ -114,6 +114,17 @@ void GameScene::Init(void)
 	mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 
 	//コライダー登録
+	//// ステージモデルのコライダーをプレイヤーに登録
+	//playerTest_->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
+	//playerTest_->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
+	//mainCamera->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::THEATER)));
+	//mainCamera->AddHitCollider(stage_->GetOwnCollider(
+	//	static_cast<int>(Stage::COLLIDER_TYPE::MIST_WALL)));
+	
+	//コライダー登録
 	mainCamera->AddCollider(stage_->GetTransform().collider);
 	player_->AddCollider(stage_->GetTransform().collider);
 	enemy_->AddCollider(stage_->GetTransform().collider);

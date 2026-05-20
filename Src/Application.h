@@ -68,8 +68,15 @@ public:
 	//解放成功／失敗の判定
 	bool IsReleaseFail(void) const;
 
+	/// <summary>
+	/// ウィンドウサイズの取得
+	/// </summary>
+	/// <returns>ウィンドウサイズ</returns>
 	const ScreenSize& GetWindowSize(void) const { return screenSize_; }
 
+	/// <summary>
+	/// ゲームを終了する
+	/// </summary>
 	void EndGame(void) { isEnd_ = true; }
 
 private:
