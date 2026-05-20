@@ -7,7 +7,6 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
-#include "Common/Collider/ColliderModel.h"
 #include "Stage.h"
 
 // 長いのでnamespaceの省略
@@ -56,28 +55,6 @@ void Stage::Update(void)
 	//マテリアルの定数バッファ更新
 	UpdateStageMaterialConstBuf();	//ステージ
 	UpdateMistWallMaterialConstBuf();	//霧の壁
-
-	InputManager& ins = InputManager::GetInstance();
-	static bool isDissolve_ = true;
-	if (ins.IsTrgDown(KEY_INPUT_Q))
-	{
-		isDissolve_ = !isDissolve_;
-	}
-	if (isDissolve_)
-	{
-		dissolveAlphaLine_ += SceneManager::GetInstance().GetDeltaTime() * 0.5f;
-		if (dissolveAlphaLine_ >= ALPHA_LINE_MAX)
-		{
-			dissolveAlphaLine_ = ALPHA_LINE_MAX;
-		}
-	}
-	else {
-		dissolveAlphaLine_ -= SceneManager::GetInstance().GetDeltaTime() * 0.5f;
-		if (dissolveAlphaLine_ <= ALPHA_LINE_MIN)
-		{
-			dissolveAlphaLine_ = ALPHA_LINE_MIN;
-		}
-	}
 
 	transform_.Update();
 	mistWallTransform_.Update();

@@ -37,9 +37,14 @@ public:
 
 protected:
 
+	/// <summary>
+	/// Jsonデータを保存する
+	/// </summary>
+	/// <param name="variable">保存する値</param>
+	/// <param name="jsonDataKey">保存するJsonデータのキー</param>
 	virtual void SaveJsonData(
 		const float* variable,
-		const char* jsonDataKe) = 0;
+		const char* jsonDataKey) = 0;
 
 	//階層のキー（Jsonオブジェクトの名前）
 	std::vector<const char*> hierarchyKeys_;

@@ -2,7 +2,6 @@
 #include "../Object/Common/AnimationController.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/SceneManager.h"
-#include "Collider/ColliderBase.h"
 #include "ActorBase.h"
 
 ActorBase::ActorBase(void)
@@ -27,13 +26,6 @@ void ActorBase::Update(void)
 
 void ActorBase::Draw(void)
 {
-#ifdef _DEBUG
-	//所有しているコライダの描画
-	//for (const auto& own : ownColliders_)
-	//{
-	//	own.second->Draw();
-	//}
-#endif // _DEBUG
 }
 
 const Transform& ActorBase::GetTransform(void) const
@@ -52,34 +44,6 @@ const VECTOR ActorBase::GetFramePos(const std::wstring& frameName) const
 void ActorBase::AddCollider(std::weak_ptr<Collider> collider)
 {
 	colliders_.emplace_back(collider);
-}
-
-void ActorBase::AddHitCollider(const std::weak_ptr<ColliderBase> hitCollider)
-{
-	for (const auto& c : hitColliders_)
-	{
-		if (c.lock() == hitCollider.lock())
-		{
-			return;
-		}
-	}
-	hitColliders_.emplace_back(hitCollider);
-}
-
-void ActorBase::ClearHitCollider(void)
-{
-	hitColliders_.clear();
-}
-
-const std::weak_ptr<ColliderBase> ActorBase::GetOwnCollider(int key) const
-{
-	//指定されたキーに対応する自身の衝突情報が存在しない場合は空を返す
-	if (ownColliders_.count(key) == 0)
-	{
-		static std::weak_ptr<ColliderBase> nullPtr;
-		return nullPtr;
-	}
-	return ownColliders_.find(key)->second;
 }
 
 void ActorBase::DrawShadow(void)

@@ -3,6 +3,8 @@
 
 namespace
 {
+	//Jsonデータのキー
+	//プレイヤーオブジェクトのキー
 	const char* KEY_PLAYER = "Player";
 }
 

@@ -141,7 +141,7 @@ void Tutorial::UpdateNone(void)
 
 void Tutorial::UpdateMove(void)
 {
-	InputManager& ins = InputManager::GetInstance();
+	const InputManager& ins = InputManager::GetInstance();
 	
 	if(ins.IsInputPressed("Up") ||
 	   ins.IsInputPressed("Down") ||
@@ -156,7 +156,7 @@ void Tutorial::UpdateMove(void)
 
 void Tutorial::UpdateCamera(void)
 {
-	InputManager& ins = InputManager::GetInstance();
+	const InputManager& ins = InputManager::GetInstance();
 
 	if (ins.IsInputPressed("CameraUp") ||
 		ins.IsInputPressed("CameraDown") ||
@@ -175,7 +175,7 @@ void Tutorial::UpdateDash(void)
 
 void Tutorial::UpdateJump(void)
 {
-	InputManager& ins = InputManager::GetInstance();
+	const InputManager& ins = InputManager::GetInstance();
 
 	if (ins.IsInputTriggered("Jump"))
 	{
@@ -187,7 +187,7 @@ void Tutorial::UpdateJump(void)
 
 void Tutorial::UpdateDodge(void)
 {
-	InputManager& ins = InputManager::GetInstance();
+	const InputManager& ins = InputManager::GetInstance();
 
 	if (ins.IsInputTriggered("Dodge"))
 	{
@@ -199,7 +199,7 @@ void Tutorial::UpdateDodge(void)
 
 void Tutorial::UpdateParry(void)
 {
-	InputManager& ins = InputManager::GetInstance();
+	const InputManager& ins = InputManager::GetInstance();
 
 	if (ins.IsInputTriggered("Parry"))
 	{

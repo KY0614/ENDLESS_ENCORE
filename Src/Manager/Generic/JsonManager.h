@@ -169,8 +169,6 @@ private:
 		const std::string& filepath,
 		const std::string& dataName);
 
-	// 終端：キーがなくなった時に値を代入する
-
 	/// <summary>
 	/// JSONオブジェクトに値を代入する（再帰の終わり用）
 	/// </summary>

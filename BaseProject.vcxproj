@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentPlayer.cpp" />
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentBase.cpp" />
-    <ClCompile Include="Src\Object\Common\Geometry\Box.cpp" />
     <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
     <ClCompile Include="Src\Object\Character\EncountEnemy.cpp" />
     <ClCompile Include="Src\Object\UI\SkipBar.cpp" />
@@ -78,7 +77,6 @@
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentBase.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_dx11.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_win32.h" />
-    <ClInclude Include="Src\Object\Common\Geometry\Box.h" />
     <ClInclude Include="Src\Object\Character\EncountPlayer.h" />
     <ClInclude Include="Src\Object\Character\EncountEnemy.h" />
     <ClInclude Include="Src\Object\UI\SkipBar.h" />
