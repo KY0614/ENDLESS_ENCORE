@@ -11,6 +11,7 @@ class Player;
 class EnemyBullet;
 class ModelRenderer;
 class ModelMaterial;
+class ImGuiComponentCharacter;
 
 class Enemy : public ActorBase
 {
@@ -151,6 +152,9 @@ private:
 	//近接攻撃用の当たり判定球
 	std::unique_ptr<Sphere> sphereNear_;
 
+	//ImGui
+	std::unique_ptr<ImGuiComponentCharacter> imGuiComponent_;
+
 	//当たり判定用カプセル
 	Player& player_;
 
@@ -232,8 +236,12 @@ private:
 	/// <summary>
 	/// UI初期化
 	/// </summary>
-	/// <param name=""></param>
 	void InitUI(void);
+
+	/// <summary>
+	/// マテリアルの更新
+	/// </summary>
+	void UpdateMaterial(void);
 
 	/// <summary>
 	/// HPを設定

@@ -34,9 +34,6 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     float3 normal = PSInput.normal;
     //ライト
     float lihgt = dot(normal, -g_light_dir);
-    //霧
-    float fogFactor = PSInput.fogFactor;
-    float3 fogCol = g_fog_color.rgb;
     
     //リムライト
     //視線方向（カメラ→ピクセル）
@@ -54,12 +51,16 @@ float4 main(PS_INPUT PSInput) : SV_TARGET
     float3 rimColor = float3(1.0, 0.0, 0.0);
     
     //色の合成
-    float3 rgb = (color.rgb * g_color.rgb * lihgt) + +g_ambient_color.rgb;
+    float3 rgb = (color.rgb * g_color.rgb * lihgt) + g_ambient_color.rgb;
+    //リムライト成分も合成
+    rgb += rim * rimColor * pulse * 2.0;
+    rgb.r += 0.1;
+    
+    //霧
+    float fogFactor = PSInput.fogFactor;
+    float3 fogCol = g_fog_color.rgb;
     //霧の合成
     float3 finalColor = lerp(fogCol, rgb, fogFactor);
-    //リムの合成
-    finalColor.rgb += rim * rimColor * pulse * 2.0;
-    finalColor.r += 0.1;
     
     return float4(finalColor, color.a);
 }

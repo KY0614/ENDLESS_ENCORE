@@ -210,7 +210,7 @@
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentPlayer.cpp">
+    <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -515,7 +515,7 @@
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentPlayer.h">
+    <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -17,7 +17,7 @@
 #include "../Common/Collider.h"
 #include "../UI/HPBar.h"
 #include "../UI/ParryBar.h"
-#include "../ImGuiComponent/ImGuiComponentPlayer.h"
+#include "../ImGuiComponent/ImGuiComponentCharacter.h"
 #include "Player.h"
 
 // ’·‚¢‚Ì‚Ånamespace‚ÌÈ—ª
@@ -163,7 +163,8 @@ void Player::Init(void)
 	effectParryResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::PARRY_EFKT).handleId_;
 
-	imGuiComponent_ = std::make_unique<ImGuiComponentPlayer>();
+	//ImGui‚Ì‰Šú‰»
+	imGuiComponent_ = std::make_unique<ImGuiComponentCharacter>(ImGuiComponentCharacter::CHARACTER_TYPE::PLAYER);
 
 	//‰Šúó‘Ô
 	ChangeState(STATE::WAKE_UP);

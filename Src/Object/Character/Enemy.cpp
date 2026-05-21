@@ -3,6 +3,7 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Utility/CommonUtility.h"
+#include "../Utility/StringUtility.h"
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Manager/GameSystem/SoundManager.h"
@@ -16,6 +17,7 @@
 #include "../Common/Geometry/Sphere.h"
 #include "../UI/HPBar.h"
 #include "../EnemyBullet.h"
+#include "../ImGuiComponent/ImGuiComponentCharacter.h"
 #include "Player.h"
 #include "Enemy.h"
 
@@ -158,6 +160,9 @@ void Enemy::Init(void)
 	effectChargeAtkResId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::EXPLOSIVE_EFFECT).handleId_;
 
+	//ImGuiの初期化
+	imGuiComponent_ = std::make_unique<ImGuiComponentCharacter>(ImGuiComponentCharacter::CHARACTER_TYPE::ENEMY);
+
 	//初期の状態を設定
 	ChangeState(STATE::NONE);
 }
@@ -177,23 +182,8 @@ void Enemy::Update(void)
 		ChangeState(STATE::DEAD);
 	}
 
-	//マテリアルの定数バッファ更新
-	//カメラ座標更新
-	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
-	material_->SetConstBufVS(0, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
-	//フォグ座標更新
-	float fogStart, fogEnd = 0.0f;
-	GetFogStartEnd(&fogStart, &fogEnd);
-	material_->SetConstBufVS(1, { fogStart,fogEnd,0.0f,0.0f });
-	//ピクセルシェーダー
-	//フォグの色
-	int fogColorR, fogColorG, fogColorB;
-	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
-	material_->SetConstBufPS(3, { 0.0f,0.0f,0.0f,0.0f });
-	//カメラの位置
-	material_->SetConstBufPS(4, 
-		{ cameraPos.x,cameraPos.y,cameraPos.z,
-		SceneManager::GetInstance().GetTotalTime() });
+	//マテリアルの更新
+	UpdateMaterial();
 
 	//更新ステップ
 	stateUpdate_();
@@ -411,6 +401,29 @@ void Enemy::InitUI(void)
 			Vector2(static_cast<int>(maxHp_), HP_BAR_HEIGHT)
 		}, hp_);
 	hpBar_->Init();
+}
+
+void Enemy::UpdateMaterial(void)
+{
+	//マテリアルの定数バッファ更新
+	//カメラ座標更新
+	int constBufPSIdx = 0;	//定数バッファのインデックス
+	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->SetConstBufVS(0, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+	//フォグ座標更新
+	float fogStart, fogEnd = 0.0f;
+	constBufPSIdx = 1;		//定数バッファのインデックス
+	GetFogStartEnd(&fogStart, &fogEnd);
+	material_->SetConstBufVS(constBufPSIdx, { fogStart,fogEnd,0.0f,0.0f });
+	//ピクセルシェーダー
+	//フォグの色
+	constBufPSIdx = 3;		//定数バッファのインデックス
+	material_->SetConstBufPS(constBufPSIdx, { 0.0f,0.0f,0.0f,0.0f });
+	//カメラの位置
+	constBufPSIdx = 4;		//定数バッファのインデックス
+	material_->SetConstBufPS(constBufPSIdx,
+		{ cameraPos.x,cameraPos.y,cameraPos.z,
+		SceneManager::GetInstance().GetTotalTime() });
 }
 
 void Enemy::ChangeStateNone(void)
@@ -1458,5 +1471,134 @@ const json Enemy::GetJsonData(void)const
 
 void Enemy::UpdateImGui(void)
 {
-	ImGui::Text("isDown_: %d", isDown_);
+	//Jsonデータ取得
+	JsonManager& jsonM = JsonManager::GetInstance();
+	const json& enemyData = GetJsonData();
+
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!enemyData.contains(JsonManager::KEY_TRANSFORM))
+	{
+		assert(0 && "データが存在しないか不正なデータです");
+	}
+	//Transformデータ取得
+	const json& transformData = enemyData.at(JsonManager::KEY_TRANSFORM);
+	//パラメータを取得
+	const json& paramData = enemyData.at(JsonManager::KEY_PARAMETER);
+
+	//スライダーの説明文
+	ImGui::Text(StringUtility::Wstring2UTF8(
+		L"Ctrlキーを押しながらスライダーをクリックすると、\n入力ボックスに変換されます").c_str());
+
+	//階層の指定
+	std::vector<const char*> hierarchyKeys = { KEY_ENEMY.c_str(), JsonManager::KEY_PARAMETER };
+	imGuiComponent_->SetTargetHierarchy(hierarchyKeys);
+
+	//体力の上限と下限
+	const float hpMin = 0.0f;
+	const float hpMax = 1000.0f;
+	//現在体力
+	std::string sliderLabel = "HP";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&hp_,
+		hpMin,
+		hpMax,
+		paramData,
+		JsonManager::KEY_HP);
+	//最大体力
+	sliderLabel = "MaxHP";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&maxHp_,
+		hpMin,
+		hpMax,
+		paramData,
+		JsonManager::KEY_MAX_HP);
+
+	//階層の指定
+	hierarchyKeys = { KEY_ENEMY.c_str(), JsonManager::KEY_TRANSFORM };
+	imGuiComponent_->SetTargetHierarchy(hierarchyKeys);
+	//座標の上限と下限
+	const float posMin = -10000.0f;
+	const float posMax = 10000.0f;
+	//現在の座標X
+	sliderLabel = "PositionX";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&transform_.pos.x,
+		posMin,
+		posMax,
+		transformData,
+		JsonManager::KEY_POSITION_X);
+	//Y座標
+	sliderLabel = "PositionY";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&transform_.pos.y,
+		posMin,
+		posMax,
+		transformData,
+		JsonManager::KEY_POSITION_Y);
+	//Z座標
+	sliderLabel = "PositionZ";
+	imGuiComponent_->SliderFloatWithSave(
+		sliderLabel.c_str(),
+		&transform_.pos.z,
+		posMin,
+		posMax,
+		transformData,
+		JsonManager::KEY_POSITION_Z);
+
+	//ダメージを受けるボタン(10ダメージ)
+	if (ImGui::Button("Damage"))
+	{
+		//ダメージ量
+		const float damage = 10.0f;
+		Damage(damage);
+	}
+
+	std::string state = "STATE : ";
+	//状態表示
+	switch (state_)
+	{
+	case Enemy::STATE::NONE:
+		state += "NONE";
+		break;
+	case Enemy::STATE::MOVE:
+		state += "MOVE";
+		break;
+	case Enemy::STATE::WAIT:
+		state += "WAIT";
+		break;
+	case Enemy::STATE::FOLLOW:
+		state += "FOLLOW";
+		break;
+	case Enemy::STATE::ATTACK_NEAR:
+		state += "ATTACK_NEAR";
+		break;
+	case Enemy::STATE::SHOT_ALL:
+		state += "SHOT_ALL";
+		break;
+	case Enemy::STATE::SHOT_ONE:
+		state += "SHOT_ONE";
+		break;
+	case Enemy::STATE::CHARGE:
+		state += "CHARGE";
+		break;
+	case Enemy::STATE::ATTACK_CHARGE:
+		state += "ATTACK_CHARGE";
+		break;
+	case Enemy::STATE::BACKSTAB:
+		state += "BACKSTAB";
+		break;
+	case Enemy::STATE::DOWN:
+		state += "DOWN";
+		break;
+	case Enemy::STATE::DEAD:
+		state += "DEAD";
+		break;
+	default:
+		break;
+	}
+	ImGui::Text(state.c_str());
 }

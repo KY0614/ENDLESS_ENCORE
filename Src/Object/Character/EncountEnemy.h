@@ -113,6 +113,11 @@ private:
 	/// </summary>
 	void InitMaterial(void);
 
+	/// <summary>
+	/// マテリアルの更新
+	/// </summary>
+	void UpdateMaterial(void);
+
 	//状態遷移--------------------------------------------------------
 
 	/// <summary>

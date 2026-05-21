@@ -25,6 +25,7 @@ public:
 		EXPLORE,		//探索
 		ENCOUNT,		//エンカウント演出
 		BATTLE,			//戦闘
+		SUMMON,			//召喚
 	};
 
 	//コンストラクタ
@@ -89,10 +90,6 @@ private:
 	float skipTimer_;
 	//スキップ中かどうか
 	bool isSkip_;	
-
-	//スローモーション用フレームカウント
-	float slowMotionFrameCount_;
-	float slowMotionFrame_;
 
 	///フォントハンドル
 	int fontHandle_;

@@ -51,8 +51,6 @@ GameScene::GameScene(void)
 
 	skipTimer_ = 0.0f;
 	isSkip_ = false;
-	slowMotionFrameCount_ = 0.0f;
-	slowMotionFrame_ = 0.1f;
 	fontHandle_ = -1;
 	//状態管理
 	stateChanges_.emplace(STATE::WAKE_UP, std::bind(&GameScene::ChangeStateWakeUp, this));
@@ -524,8 +522,11 @@ void GameScene::DrawEncount(void)
 }
 
 void GameScene::UpdateBattle(void)
-{
-	InputManager& ins = InputManager::GetInstance();
+{	
+	if (enemy_->GetIsDead())
+	{
+		ChangeState(STATE::SUMMON);
+	}
 
 	//Z位置制限（霧の壁の外にでないように)
 	if(player_->GetTransform().pos.z < BATTLE_STAGE_Z)
@@ -616,8 +617,6 @@ void GameScene::SkipBarDraw(void)
 void GameScene::UpdateImGui(void)
 {
 	ImGui::Text("GameScene");
-	ImGui::Text("slowFrameCnt : %d", slowMotionFrameCount_);
-	ImGui::Text("slowMotionFrame : %.2f", slowMotionFrame_);
 	//状態遷移ボタン
 	//探索
 	if (ImGui::Button("Explore"))
@@ -664,11 +663,14 @@ void GameScene::ObjectUpdateImGui(void)
 			encountPlayer_->UpdateImGui();
 			ImGui::EndTabItem();
 		}
-		//敵のImGui
-		if (ImGui::BeginTabItem("Enemy"))
+		if(state_ == STATE::BATTLE)
 		{
-			enemy_->UpdateImGui();
-			ImGui::EndTabItem();
+			//敵のImGui
+			if (ImGui::BeginTabItem("Enemy"))
+			{
+				enemy_->UpdateImGui();
+				ImGui::EndTabItem();
+			}
 		}
 		//チュートリアルのImGui
 		if (ImGui::BeginTabItem("Tutorial"))

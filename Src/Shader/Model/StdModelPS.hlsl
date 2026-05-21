@@ -17,7 +17,7 @@ cbuffer cbParam : register(b4)
     
     float4 g_ambient_color; // ŠÂ‹«Œõ‚ÌF
     
-    float4 g_fog_color;
+    float4 g_fog_color;     //–¶‚ÌF
     
     float3 g_pointlight_pos;
     float g_pointlight_range; //Œõ‚ÌÅ‘å‹——£

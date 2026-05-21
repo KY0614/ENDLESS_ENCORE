@@ -91,11 +91,6 @@ private:
 	void Init3DModel(void);
 
 	/// <summary>
-	/// コライダー初期化
-	/// </summary>
-	void InitCollider(void);
-
-	/// <summary>
 	/// マテリアル初期化
 	/// </summary>
 	/// <param name="pos">ポイントライトの座標</param>

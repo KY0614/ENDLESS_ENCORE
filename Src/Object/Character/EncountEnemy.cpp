@@ -60,6 +60,9 @@ void EncountEnemy::Update(void)
 	//更新ステップ
 	stateUpdate_();
 
+	//マテリアルの更新
+	UpdateMaterial();
+
 	animationController_->Update();
 	transform_.Update();
 }
@@ -185,6 +188,29 @@ void EncountEnemy::InitMaterial(void)
 	material_->AddConstBufPS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
 
 	renderer_ = std::make_unique<ModelRenderer>(transform_.modelId, *material_);
+}
+
+void EncountEnemy::UpdateMaterial(void)
+{
+	//マテリアルの定数バッファ更新
+	//カメラ座標更新
+	int constBufPSIdx = 0;	//定数バッファのインデックス
+	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
+	material_->SetConstBufVS(0, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+	//フォグ座標更新
+	float fogStart, fogEnd = 0.0f;
+	constBufPSIdx = 1;		//定数バッファのインデックス
+	GetFogStartEnd(&fogStart, &fogEnd);
+	material_->SetConstBufVS(constBufPSIdx, { fogStart,fogEnd,0.0f,0.0f });
+	//ピクセルシェーダー
+	//フォグの色
+	constBufPSIdx = 3;		//定数バッファのインデックス
+	material_->SetConstBufPS(constBufPSIdx, { 0.0f,0.0f,0.0f,0.0f });
+	//カメラの位置
+	constBufPSIdx = 4;		//定数バッファのインデックス
+	material_->SetConstBufPS(constBufPSIdx,
+		{ cameraPos.x,cameraPos.y,cameraPos.z,
+		SceneManager::GetInstance().GetTotalTime() });
 }
 
 void EncountEnemy::ChangeStateNone(void)

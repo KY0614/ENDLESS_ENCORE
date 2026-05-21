@@ -1,0 +1,10 @@
+{
+    "Test": {
+        "Parameter": {
+            "hp": 500.0,
+            "isHungry": true,
+            "name": "Aiueo",
+            "speed": 200.0
+        }
+    }
+}

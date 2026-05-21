@@ -41,9 +41,6 @@ void Stage::Init(VECTOR pos, VECTOR sPos)
 	//3Dモデル初期化
 	Init3DModel();
 
-	//コライダー初期化
-	InitCollider();
-
 	//マテリアル初期化
 	InitMaterial(pos, sPos);
 }
@@ -118,20 +115,6 @@ void Stage::Init3DModel(void)
 	noiseTextureId_ = ResourceManager::GetInstance().Load(
 		ResourceManager::SRC::NOISE_TEXTURE).handleId_;
 }
-
-void Stage::InitCollider(void)
-{
-	////DxLib側の衝突情報セットアップ
-	//MV1SetupCollInfo(transform_.modelId,-1);
-	////シアターモデルのコライダ
-	//ColliderModel* colModel =
-	//	new ColliderModel(ColliderBase::TAG::STAGE, &transform_);
-	//ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::THEATER), colModel);
-	////霧の壁モデルのコライダ
-	//colModel =
-	//	new ColliderModel(ColliderBase::TAG::STAGE, &mistWallTransform_);
-	//ownColliders_.emplace(static_cast<int>(COLLIDER_TYPE::MIST_WALL), colModel);
-}	
 
 void Stage::InitMaterial(const VECTOR pos, VECTOR sPos)
 {
@@ -225,8 +208,6 @@ void Stage::UpdateStageMaterialConstBuf(void)
 	GetFogStartEnd(&fogStart, &fogEnd);
 	stageMaterial_->SetConstBufVS(1, { fogStart,fogEnd,0.0f,0.0f });
 	//フォグの色
-	int fogColorR, fogColorG, fogColorB;
-	GetFogColor(&fogColorR, &fogColorG, &fogColorB);
 	stageMaterial_->SetConstBufPS(3, { 0.0f,0.0f,0.0f,0.0f });
 }
 
