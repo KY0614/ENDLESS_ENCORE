@@ -71,6 +71,7 @@
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Object\Tutorial.cpp" />
+    <ClCompile Include="Src\Object\Character\SummonEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="Src\Utility\StringUtility.h" />
     <ClInclude Include="Src\Object\Stage.h" />
     <ClInclude Include="Src\Object\Tutorial.h" />
+    <ClInclude Include="Src\Object\Character\SummonEnemy.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />

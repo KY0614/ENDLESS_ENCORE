@@ -6,6 +6,7 @@
 
 class Player;
 class Enemy;
+class SummonEnemy;
 class EncountPlayer;
 class EncountEnemy;
 class Stage;
@@ -26,6 +27,7 @@ public:
 		ENCOUNT,		//エンカウント演出
 		BATTLE,			//戦闘
 		SUMMON,			//召喚
+		LAST_BATTEL,	//ラストバトル
 	};
 
 	//コンストラクタ
@@ -75,6 +77,9 @@ private:
 	std::shared_ptr<EncountPlayer> encountPlayer_;
 	//敵
 	std::shared_ptr<Enemy> enemy_;
+	//召喚した敵
+	std::unique_ptr<SummonEnemy> summonEnemy_;
+	std::unique_ptr<SummonEnemy> summonEnemy2_;
 	//エンカウント演出用の敵
 	std::shared_ptr<EncountEnemy> encountEnemy_;
 	//ステージ
@@ -149,6 +154,16 @@ private:
 	/// </summary>
 	void ChangeStateBattle(void);
 
+	/// <summary>
+	/// 状態遷移：SUMMON
+	/// </summary>
+	void ChangeStateSummon(void);
+
+	/// <summary>
+	/// 状態遷移：LAST_BATTLE
+	/// </summary>
+	void ChangeStateLastBattle(void);
+
 	//状態ごとの更新と描画
 	//ゲーム開始-----------------------------------------------------
 
@@ -174,7 +189,7 @@ private:
 	/// </summary>
 	void DrawExplore(void);
 
-	//エンカウント演出
+	//エンカウント演出-----------------------------------------------------
 
 	/// <summary>
 	/// エンカウント中の更新処理
@@ -186,17 +201,41 @@ private:
 	/// </summary>
 	void DrawEncount(void);
 
-	//戦闘-----------------------------------------------------
+	//ボス戦-----------------------------------------------------
 
 	/// <summary>
-	/// ゲーム中の更新処理
+	/// 召喚中の更新処理
 	/// </summary>
 	void UpdateBattle(void);
 
 	/// <summary>
-	/// ゲーム中の描画
+	/// 召喚中の描画処理
 	/// </summary>
 	void DrawBattle(void);
+
+	//召喚-----------------------------------------------------
+
+	/// <summary>
+	/// 召喚中の更新処理
+	/// </summary>
+	void UpdateSummon(void);
+
+	/// <summary>
+	/// 召喚中の描画処理
+	/// </summary>
+	void DrawSummon(void);
+
+	//最後の戦闘-----------------------------------------------------
+
+	/// <summary>
+	/// ゲーム中の更新処理
+	/// </summary>
+	void UpdateLastBattle(void);
+
+	/// <summary>
+	/// ゲーム中の描画
+	/// </summary>
+	void DrawLastBattle(void);
 
 	//---------------------------------------------------------
 

@@ -11,6 +11,7 @@
 #include "../Object/Character/Player.h"
 #include "../Object/Character/EncountPlayer.h"
 #include "../Object/Character/Enemy.h"
+#include "../Object/Character/SummonEnemy.h"
 #include "../Object/Character/EncountEnemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
@@ -57,6 +58,8 @@ GameScene::GameScene(void)
 	stateChanges_.emplace(STATE::EXPLORE, std::bind(&GameScene::ChangeStateExplore, this));
 	stateChanges_.emplace(STATE::ENCOUNT, std::bind(&GameScene::ChangeStateEncount, this));
 	stateChanges_.emplace(STATE::BATTLE, std::bind(&GameScene::ChangeStateBattle, this));
+	stateChanges_.emplace(STATE::SUMMON, std::bind(&GameScene::ChangeStateSummon, this));
+	stateChanges_.emplace(STATE::LAST_BATTEL, std::bind(&GameScene::ChangeStateLastBattle, this));
 }
 
 GameScene::~GameScene(void)
@@ -345,6 +348,41 @@ void GameScene::ChangeStateBattle(void)
 	stateDraw_ = std::bind(&GameScene::DrawBattle, this);
 }
 
+void GameScene::ChangeStateSummon(void)
+{
+	//“G‚Ìó‘Ô‰Šú‰»
+	enemy_->Init();
+	enemy_->ChangeState(Enemy::STATE::WAIT);
+
+	summonEnemy_ = std::make_unique<SummonEnemy>(*player_);
+	summonEnemy_->Init();
+
+	summonEnemy2_ = std::make_unique<SummonEnemy>(*player_);
+	summonEnemy2_->Init();
+	//Ží—ÞÝ’è
+	summonEnemy_->SetSummonType(SummonEnemy::TYPE::ATTACK_NEAR);
+	summonEnemy2_->SetSummonType(SummonEnemy::TYPE::ATTACK_FAR);
+	//¢Š«ˆÊ’uÝ’è
+	VECTOR summonPos = enemy_->GetTransform().pos;
+	//“G‚Ì‰º‚ÖÝ’è
+	summonPos = VAdd(enemy_->GetTransform().pos, VScale(enemy_->GetTransform().GetDown(), 50.0f));
+	VECTOR summonPos1 = VAdd(summonPos, VScale(enemy_->GetTransform().GetRight(), 100.0f));	//“G‚Ì‰E‘¤
+	VECTOR summonPos2 = VAdd(summonPos, VScale(enemy_->GetTransform().GetLeft(), 100.0f));	//“G‚Ì‰E‘¤
+	summonEnemy_->SetSummonPos(summonPos1);
+	summonEnemy2_->SetSummonPos(summonPos2);
+	summonEnemy_->Summon();
+	summonEnemy2_->Summon();
+	stateUpdate_ = std::bind(&GameScene::UpdateSummon, this);
+	stateDraw_ = std::bind(&GameScene::DrawSummon, this);
+}
+
+void GameScene::ChangeStateLastBattle(void)
+{
+	enemy_->ChangeState(Enemy::STATE::MOVE);
+	stateUpdate_ = std::bind(&GameScene::UpdateLastBattle, this);
+	stateDraw_ = std::bind(&GameScene::DrawLastBattle, this);
+}
+
 void GameScene::UpdateWakeUp(void)
 {
 	InputManager& ins = InputManager::GetInstance();
@@ -552,9 +590,69 @@ void GameScene::DrawBattle(void)
 	//“G•`‰æ
 	enemy_->Draw();
 
+	//–¶‚Ì•Ç•`‰æ
+	stage_->DrawTranslucent();
+
+	//UI•`‰æ
+	enemy_->DrawBarUI();
+	//UI•`‰æ
+	player_->DrawBarUI();
+}
+
+void GameScene::UpdateSummon(void)
+{
+	if(summonEnemy_->GetIsSummoned() &&
+		summonEnemy2_->GetIsSummoned())
+	{
+		ChangeState(STATE::LAST_BATTEL);
+	}
+
+	//ŠeƒIƒuƒWƒFƒNƒgXV
+	player_->Update();	//ƒvƒŒƒCƒ„[
+	enemy_->Update();	//“G
+	summonEnemy_->Update();	//“G
+	summonEnemy2_->Update();	//“G
+	stage_->Update();	//ƒXƒe[ƒW
+}
+
+void GameScene::DrawSummon(void)
+{
+	//ƒXƒe[ƒW•`‰æ
+	stage_->Draw();
+	//ƒvƒŒƒCƒ„[•`‰æ
+	player_->Draw();
+	//“G•`‰æ
+	enemy_->Draw();
+	summonEnemy_->Draw();
+	summonEnemy2_->Draw();
+}
+
+void GameScene::UpdateLastBattle(void)
+{
+	//ŠeƒIƒuƒWƒFƒNƒgXV
+	player_->Update();	//ƒvƒŒƒCƒ„[
+	enemy_->Update();	//“G
+	summonEnemy_->Update();	//“G
+	summonEnemy2_->Update();	//“G
+	stage_->Update();	//ƒXƒe[ƒW
+}
+
+void GameScene::DrawLastBattle(void)
+{
+	//ƒXƒe[ƒW•`‰æ
+	stage_->Draw();
+	//ƒvƒŒƒCƒ„[•`‰æ
+	player_->Draw();
+	//“G•`‰æ
+	enemy_->Draw();
+	summonEnemy_->Draw();
+	summonEnemy2_->Draw();
+
+	//–¶‚Ì•Ç•`‰æ
+	stage_->DrawTranslucent();
 
 	//“G‚ªŽ€‚ñ‚Å‚¢‚½‚çVictory•`‰æ
-	if(enemy_->GetIsDead())
+	if (enemy_->GetIsDead())
 	{
 		player_->DrawVictory();
 	}
@@ -562,12 +660,9 @@ void GameScene::DrawBattle(void)
 	//YouDied•`‰æ
 	player_->DrawDead();
 
-	//–¶‚Ì•Ç•`‰æ
-	stage_->DrawTranslucent();
-
-	//UI•`‰æ
+	//“GUI•`‰æ
 	enemy_->DrawBarUI();
-	//UI•`‰æ
+	//ƒvƒŒƒCƒ„[UI•`‰æ
 	player_->DrawBarUI();
 }
 
@@ -617,6 +712,33 @@ void GameScene::SkipBarDraw(void)
 void GameScene::UpdateImGui(void)
 {
 	ImGui::Text("GameScene");
+	std::string stateStr = "";
+	switch (state_)
+	{
+	case GameScene::STATE::NONE:
+		break;
+	case GameScene::STATE::WAKE_UP:
+		stateStr = "WAKE_UP";
+		break;
+	case GameScene::STATE::EXPLORE:
+		stateStr = "EXPLORE";
+		break;
+	case GameScene::STATE::ENCOUNT:
+		stateStr = "ENCOUNT";
+		break;
+	case GameScene::STATE::BATTLE:
+		stateStr = "BATTLE";
+		break;
+	case GameScene::STATE::SUMMON:
+		stateStr = "SUMMON";
+		break;
+	case GameScene::STATE::LAST_BATTEL:
+		stateStr = "LAST_BATTLE";
+		break;
+	default:
+		break;
+	}
+	ImGui::Text(stateStr.c_str());
 	//ó‘Ô‘JˆÚƒ{ƒ^ƒ“
 	//’Tõ
 	if (ImGui::Button("Explore"))
@@ -663,7 +785,8 @@ void GameScene::ObjectUpdateImGui(void)
 			encountPlayer_->UpdateImGui();
 			ImGui::EndTabItem();
 		}
-		if(state_ == STATE::BATTLE)
+		if(state_ == STATE::BATTLE ||
+			state_ == STATE::LAST_BATTEL)
 		{
 			//“G‚ÌImGui
 			if (ImGui::BeginTabItem("Enemy"))
