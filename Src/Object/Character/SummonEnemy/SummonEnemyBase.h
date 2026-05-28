@@ -1,56 +1,50 @@
 #pragma once
 #include <map>
 #include <functional>
-#include "../Common/ActorBase.h"
-#include "Player.h"
+#include "../../Common/ActorBase.h"
 
-class SummonEnemy : public ActorBase
+class Player;
+
+class SummonEnemyBase : public ActorBase
 {
 public:
-	//クラスで分けたほうがいいかも
-	//召喚する敵の種類
-	enum class TYPE
-	{
-		NONE,
-		ATTACK_NEAR,//近距離攻撃タイプ
-		ATTACK_FAR,	//遠距離攻撃タイプ
-	};
 
+	//状態
 	enum class STATE
 	{
-		NONE,
-		SUMMON,	//召喚中
-		MOVE,	//移動中
-		LOOK,	//プレイヤーの方を向く
-	};;
-
-	//コンストラクタ
-	SummonEnemy(Player& player);
+		NONE,		
+		SUMMON,	//召喚
+		MOVE,	//移動
+		ATTACK,	//攻撃
+		DEAD,	//死亡
+	};
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="player">プレイヤーの参照</param>
+	SummonEnemyBase(Player& player);
 	//デストラクタ
-	~SummonEnemy(void) override;
+	virtual ~SummonEnemyBase(void) override;
 
 	/// <summary>
 	///	初期化
 	/// </summary>
-	void Init(void) override;
+	virtual void Init(void) override = 0;
 
 	/// <summary>
 	///	更新処理
 	/// </summary>
-	void Update(void) override;
+	virtual void Update(void) override = 0;
 
 	/// <summary>
 	/// 描画処理
 	/// </summary>
-	void Draw(void) override;
-
-	void Summon(void);
+	virtual void Draw(void) override = 0;
 
 	/// <summary>
-	/// 召喚する敵の種類を設定
+	/// 召喚する
 	/// </summary>
-	/// <param name="type">召喚する種類</param>
-	void SetSummonType(const TYPE& type) { type_ = type; }
+	void Summon(void) { ChangeState(STATE::SUMMON); }
 
 	/// <summary>
 	/// 召喚する位置を設定
@@ -64,7 +58,7 @@ public:
 	/// <returns>ture:完了　false:未完了</returns>
 	const bool GetIsSummoned(void) const { return isSummoned_; }
 
-private:
+protected:
 
 	//状態管理(状態遷移時初期処理)
 	std::map<STATE, std::function<void(void)>> stateChanges_;
@@ -72,11 +66,9 @@ private:
 	//状態管理(更新ステップ)
 	std::function<void(void)> stateUpdate_;
 
-	STATE state_;		//現在の状態
+	//現在の状態
+	STATE state_;
 
-	//召喚する敵の種類
-	TYPE type_;
-	
 	//プレイヤーの参照
 	Player& player_;
 
@@ -85,38 +77,52 @@ private:
 	Quaternion goalQuaRot_;		//目標回転
 	float stepRotTime_;			//回転完了までの時間経過
 
-	bool isSummoned_;	//召喚完了フラグ
+	//召喚完了したかどうか
+	bool isSummoned_;
+
+	//追従速度
+	float followSpeed_;		
 
 	/// <summary>
 	/// 3Dモデル初期化
 	/// </summary>
-	void Init3DModel(void);
-
+	virtual void Init3DModel(void) = 0;
+	 
 	/// <summary>
 	/// 状態変更
 	/// </summary>
 	/// <param name="state"></param>
 	void ChangeState(const STATE& state);
 
-	void ChangeStateNone(void);
-	void ChangeStateSummon(void);
-	void ChangeStateMove(void);
-	void ChangeStateLook(void);
-
-	void UpdateNone(void);
-	void UpdateSummon(void);
-	void UpdateMove(void);
-	void UpdateLook(void);
+	//その他---------------------------------------------------------
 
 	/// <summary>
 	/// 召喚完了
 	/// </summary>
 	void IsSummoned(void) { isSummoned_ = true; }
 
+	/// <summary>
+	/// 追従速度設定
+	/// </summary>
+	/// <param name="speed">追従速度</param>
+	void SetFollowSpeed(const float speed) { followSpeed_ = speed; }
+
+	//回転---------------------------------------------------------
+
+	/// <summary>
+	/// 目標回転角度の設定
+	/// </summary>
+	/// <param name="rotRad">目標回転角度</param>
 	void SetGoalRotate(double rotRad);
 
+	/// <summary>
+	/// 回転処理
+	/// </summary>
 	void Rotate(void);
 
+	/// <summary>
+	/// プレイヤーの方向へ回転する処理
+	/// </summary>
 	void Rotate2Player(void);
 };
 

@@ -1,7 +1,6 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Utility/CommonUtility.h"
-#include "Player.h"
-#include "SummonEnemy.h"
+#include "FighterEnemy.h"
 
 namespace
 {
@@ -10,32 +9,31 @@ namespace
 	const float TIME_ROT = 0.1f;		//回転にかける時間
 }
 
-SummonEnemy::SummonEnemy(Player& player):
-	player_(player)
+FighterEnemy::FighterEnemy(Player& player):
+	SummonEnemyBase(player)
 {
-	type_ = TYPE::NONE;
 	state_ = STATE::NONE;
 	stepRotTime_ = 0.0f;
 	isSummoned_ = false;
 
 	//状態管理
-	stateChanges_.emplace(STATE::NONE, std::bind(&SummonEnemy::ChangeStateNone, this));
-	stateChanges_.emplace(STATE::SUMMON, std::bind(&SummonEnemy::ChangeStateSummon, this));
-	stateChanges_.emplace(STATE::MOVE, std::bind(&SummonEnemy::ChangeStateMove, this));
-	stateChanges_.emplace(STATE::LOOK, std::bind(&SummonEnemy::ChangeStateLook, this));
+	stateChanges_.emplace(STATE::NONE, std::bind(&FighterEnemy::ChangeStateNone, this));
+	stateChanges_.emplace(STATE::SUMMON, std::bind(&FighterEnemy::ChangeStateSummon, this));
+	stateChanges_.emplace(STATE::MOVE, std::bind(&FighterEnemy::ChangeStateMove, this));
+	stateChanges_.emplace(STATE::MOVE, std::bind(&FighterEnemy::ChangeStateAttack, this));
 }
 
-SummonEnemy::~SummonEnemy(void)
+FighterEnemy::~FighterEnemy(void)
 {
 }
 
-void SummonEnemy::Init(void)
+void FighterEnemy::Init(void)
 {
 	//3Dモデルの初期化
 	Init3DModel();
 }
 
-void SummonEnemy::Update(void)
+void FighterEnemy::Update(void)
 {
 	//更新ステップ
 	stateUpdate_();
@@ -43,14 +41,13 @@ void SummonEnemy::Update(void)
 	transform_.Update();
 }
 
-void SummonEnemy::Draw(void)
+void FighterEnemy::Draw(void)
 {
 	//球体を仮で描画
 	const float rad = 30.0f;
 	const int div = 16;
-	//赤：近距離攻撃タイプ、緑：遠距離攻撃タイプ
+	//赤：近距離攻撃タイプ
 	int col = GetColor(255, 0, 0);
-	if (type_ == TYPE::ATTACK_FAR)col = GetColor(0, 255, 0);
 	DrawSphere3D(
 		transform_.pos,
 		rad,
@@ -59,7 +56,7 @@ void SummonEnemy::Draw(void)
 		col,
 		true);
 
-	VECTOR forward = VAdd(transform_.pos,VScale(transform_.GetForward(),40.0f));
+	VECTOR forward = VAdd(transform_.pos, VScale(transform_.GetForward(), 40.0f));
 	DrawLine3D(
 		transform_.pos,
 		forward,
@@ -72,12 +69,7 @@ void SummonEnemy::Draw(void)
 		GetColor(255, 0, 0));
 }
 
-void SummonEnemy::Summon(void)
-{
-	ChangeState(STATE::SUMMON);
-}
-
-void SummonEnemy::Init3DModel(void)
+void FighterEnemy::Init3DModel(void)
 {
 	//モデルの基本設定
 	//transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
@@ -94,58 +86,56 @@ void SummonEnemy::Init3DModel(void)
 	transform_.Update();
 }
 
-
-void SummonEnemy::ChangeState(const STATE& state)
+void FighterEnemy::ChangeStateNone(void)
 {
-	state_ = state;
-
-	//各状態遷移の初期処理
-	stateChanges_[state_]();
+	stateUpdate_ = std::bind(&FighterEnemy::UpdateNone, this);
 }
 
-void SummonEnemy::ChangeStateNone(void)
+void FighterEnemy::ChangeStateSummon(void)
 {
-	stateUpdate_ = std::bind(&SummonEnemy::UpdateNone, this);
+	stateUpdate_ = std::bind(&FighterEnemy::UpdateSummon, this);
 }
 
-void SummonEnemy::ChangeStateSummon(void)
+void FighterEnemy::ChangeStateMove(void)
 {
-	stateUpdate_ = std::bind(&SummonEnemy::UpdateSummon, this);
+	stateUpdate_ = std::bind(&FighterEnemy::UpdateMove, this);
 }
 
-void SummonEnemy::ChangeStateMove(void)
+void FighterEnemy::ChangeStateAttack(void)
 {
-	stateUpdate_ = std::bind(&SummonEnemy::UpdateMove, this);
+	stateUpdate_ = std::bind(&FighterEnemy::UpdateAttack, this);
 }
 
-void SummonEnemy::ChangeStateLook(void)
-{
-	stateUpdate_ = std::bind(&SummonEnemy::UpdateLook, this);
+void FighterEnemy::UpdateNone(void)
+{//何もしない
 }
 
-void SummonEnemy::UpdateNone(void)
-{
-}
-
-void SummonEnemy::UpdateSummon(void)
+void FighterEnemy::UpdateSummon(void)
 {
 	transform_.pos.y++;
-	if(transform_.pos.y >= -100.0f)
+	if (transform_.pos.y >= -100.0f)
 	{
 		transform_.pos.y = -100.0f;
 		IsSummoned();
-		if(type_ == TYPE::ATTACK_NEAR)
-		{
-			ChangeState(STATE::MOVE);
-		}
-		else
-		{
-			ChangeState(STATE::LOOK);
-		}
+		ChangeState(STATE::MOVE);
 	}
 }
 
-void SummonEnemy::UpdateMove(void)
+void FighterEnemy::UpdateMove(void)
+{
+	//追従処理
+	FollowMove();
+
+	//回転処理
+	Rotate();
+}
+
+void FighterEnemy::UpdateAttack(void)
+{
+	//攻撃処理
+}
+
+void FighterEnemy::FollowMove(void)
 {
 	// プレイヤーの位置
 	VECTOR playerPos = player_.GetTransform().pos;
@@ -180,7 +170,6 @@ void SummonEnemy::UpdateMove(void)
 
 		//向き画像を決める
 		//水平か鉛直を選択する
-		//※数値を絶対値(abs関数)としてみる
 		VECTOR dir = CommonUtility::VECTOR_ZERO;
 
 		if (abs(dirNorm.x) < abs(dirNorm.y))
@@ -212,57 +201,4 @@ void SummonEnemy::UpdateMove(void)
 		float angle = atan2(lookAt.x, lookAt.z);
 		SetGoalRotate(angle);
 	}
-
-	//回転処理
-	Rotate();
-}
-
-void SummonEnemy::UpdateLook(void)
-{
-	Rotate2Player();
-}
-
-void SummonEnemy::SetGoalRotate(double rotRad)
-{
-	Quaternion axis =
-		Quaternion::AngleAxis(
-			rotRad, CommonUtility::AXIS_Y);
-
-	//現在設定されている回転との角度差を取る
-	double angleDiff = Quaternion::Angle(axis, goalQuaRot_);
-
-	//しきい値
-	if (angleDiff > 0.1)
-	{
-		stepRotTime_ = TIME_ROT;
-	}
-	//目標回転を設定
-	goalQuaRot_ = axis;
-}
-
-void SummonEnemy::Rotate(void)
-{
-	//回転時間の減少
-	stepRotTime_ -= SceneManager::GetInstance().GetDeltaTime();
-
-	//回転の球面補間
-	enemyRotY_ = Quaternion::Slerp(
-		enemyRotY_, goalQuaRot_, (TIME_ROT - stepRotTime_) / TIME_ROT);
-
-	//重力方向に沿って回転させる
-	transform_.quaRot = Quaternion::Quaternion();
-	transform_.quaRot = transform_.quaRot.Mult(enemyRotY_);
-}
-
-void SummonEnemy::Rotate2Player(void)
-{
-	//プレイヤーの座標から敵の座標を引く
-	VECTOR lookAt;
-	lookAt = VSub(player_.GetTransform().pos, transform_.pos);
-	//atan2 で角度を計算
-	float angle = atan2(lookAt.x, lookAt.z);
-	SetGoalRotate(angle);
-
-	//回転処理
-	Rotate();
 }

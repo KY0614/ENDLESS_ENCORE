@@ -207,7 +207,7 @@ void Enemy::Draw(void)
 	}
 
 	//ŠÛ‰e•`‰æ
-	//DrawShadow();
+	DrawShadow();
 }
 
 void Enemy::DrawBarUI(void)

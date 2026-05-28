@@ -726,10 +726,7 @@ void Camera::UpdateImGui(void)
 	ImGui::Text("targetPos: %.2f, %.2f, %.2f", targetPos_.x, targetPos_.y, targetPos_.z);
 	//座標
 	ImGui::Text("Pos: %.2f, %.2f, %.2f", transform_.pos.x, transform_.pos.y, transform_.pos.z);
-	//角度
-	ImGui::Text("AngleX : %.2f", angles_.x);
-	//視野角(数値入力)
-	ImGui::InputFloat("Fov", &fov_);
+
 	//視野角(スライダー)
 	const float fovMin = 8.0f;
 	const float fovMax = 170.0f;

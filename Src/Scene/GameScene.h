@@ -6,7 +6,7 @@
 
 class Player;
 class Enemy;
-class SummonEnemy;
+class FighterEnemy;
 class EncountPlayer;
 class EncountEnemy;
 class Stage;
@@ -78,8 +78,7 @@ private:
 	//敵
 	std::shared_ptr<Enemy> enemy_;
 	//召喚した敵
-	std::unique_ptr<SummonEnemy> summonEnemy_;
-	std::unique_ptr<SummonEnemy> summonEnemy2_;
+	std::unique_ptr<FighterEnemy> fighterEnemy_;
 	//エンカウント演出用の敵
 	std::shared_ptr<EncountEnemy> encountEnemy_;
 	//ステージ
@@ -248,4 +247,6 @@ private:
 	/// オブジェクトのImGui更新処理
 	/// </summary>
 	void ObjectUpdateImGui(void);
+
+	void CollisionCupsule(void);
 };

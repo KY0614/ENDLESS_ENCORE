@@ -150,6 +150,12 @@ public:
 	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
 
 	/// <summary>
+	/// 座標の設定
+	/// </summary>
+	/// <param name="pos">指定する座標</param>
+	void SetMovedPos(const VECTOR& pos) { movedPos_ = pos; }
+
+	/// <summary>
 	/// Z座標を設定
 	/// </summary>
 	/// <param name="pos">設定するZ座標</param>

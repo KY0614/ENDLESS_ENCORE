@@ -86,6 +86,8 @@ public:
 	/// <param name="state">‘JˆÚ‚µ‚½‚¢ó‘Ô</param>
 	void ChangeState(const STATE& state);
 
+	Capsule& GetCapsule(void) { return *capsule_; }
+
 	/// <summary>
 	/// Œ»İ‚Ìó‘Ô‚ğæ“¾
 	/// </summary>
@@ -433,7 +435,6 @@ private:
 	/// <summary>
 	/// ƒvƒŒƒCƒ„[‚Ì•ûŒü‚Ö‰ñ“]‚·‚éˆ—
 	/// </summary>
-	/// <param name=""></param>
 	void RotateToPlayer(void);
 
 	//’e--------------------------------------------------------

@@ -3,15 +3,17 @@
 #include "../Libs/ImGui/imgui.h"
 #include "../Application.h"
 #include "../Common/Fader.h"
+#include "../Utility/CommonUtility.h"
 #include "../Manager/GameSystem/Camera.h"
 #include "../Manager/GameSystem/InputManager.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
+#include "../Object/Common/Geometry/Capsule.h"
 #include "../Object/Character/Player.h"
 #include "../Object/Character/EncountPlayer.h"
 #include "../Object/Character/Enemy.h"
-#include "../Object/Character/SummonEnemy.h"
+#include "../Object/Character/SummonEnemy/FighterEnemy.h"
 #include "../Object/Character/EncountEnemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
@@ -354,24 +356,17 @@ void GameScene::ChangeStateSummon(void)
 	enemy_->Init();
 	enemy_->ChangeState(Enemy::STATE::WAIT);
 
-	summonEnemy_ = std::make_unique<SummonEnemy>(*player_);
-	summonEnemy_->Init();
+	fighterEnemy_ = std::make_unique<FighterEnemy>(*player_);
+	fighterEnemy_->Init();
 
-	summonEnemy2_ = std::make_unique<SummonEnemy>(*player_);
-	summonEnemy2_->Init();
-	//種類設定
-	summonEnemy_->SetSummonType(SummonEnemy::TYPE::ATTACK_NEAR);
-	summonEnemy2_->SetSummonType(SummonEnemy::TYPE::ATTACK_FAR);
 	//召喚位置設定
 	VECTOR summonPos = enemy_->GetTransform().pos;
 	//敵の下へ設定
 	summonPos = VAdd(enemy_->GetTransform().pos, VScale(enemy_->GetTransform().GetDown(), 50.0f));
 	VECTOR summonPos1 = VAdd(summonPos, VScale(enemy_->GetTransform().GetRight(), 100.0f));	//敵の右側
 	VECTOR summonPos2 = VAdd(summonPos, VScale(enemy_->GetTransform().GetLeft(), 100.0f));	//敵の右側
-	summonEnemy_->SetSummonPos(summonPos1);
-	summonEnemy2_->SetSummonPos(summonPos2);
-	summonEnemy_->Summon();
-	summonEnemy2_->Summon();
+	fighterEnemy_->SetSummonPos(summonPos1);
+	fighterEnemy_->Summon();
 	stateUpdate_ = std::bind(&GameScene::UpdateSummon, this);
 	stateDraw_ = std::bind(&GameScene::DrawSummon, this);
 }
@@ -572,6 +567,9 @@ void GameScene::UpdateBattle(void)
 		player_->SetPosZ(BATTLE_STAGE_Z);
 	}
 
+	//プレイヤーと敵のカプセルによる押し出し
+	CollisionCupsule();
+
 	//各オブジェクト更新
 	player_->Update();	//プレイヤー
 	enemy_->Update();	//敵
@@ -601,8 +599,8 @@ void GameScene::DrawBattle(void)
 
 void GameScene::UpdateSummon(void)
 {
-	if(summonEnemy_->GetIsSummoned() &&
-		summonEnemy2_->GetIsSummoned())
+	if(fighterEnemy_->GetIsSummoned()/* &&
+		summonEnemy2_->GetIsSummoned()*/)
 	{
 		ChangeState(STATE::LAST_BATTEL);
 	}
@@ -610,8 +608,7 @@ void GameScene::UpdateSummon(void)
 	//各オブジェクト更新
 	player_->Update();	//プレイヤー
 	enemy_->Update();	//敵
-	summonEnemy_->Update();	//敵
-	summonEnemy2_->Update();	//敵
+	fighterEnemy_->Update();	//敵
 	stage_->Update();	//ステージ
 }
 
@@ -623,17 +620,18 @@ void GameScene::DrawSummon(void)
 	player_->Draw();
 	//敵描画
 	enemy_->Draw();
-	summonEnemy_->Draw();
-	summonEnemy2_->Draw();
+	fighterEnemy_->Draw();
 }
 
 void GameScene::UpdateLastBattle(void)
 {
+	//プレイヤーと敵のカプセルによる押し出し
+	CollisionCupsule();
+
 	//各オブジェクト更新
 	player_->Update();	//プレイヤー
 	enemy_->Update();	//敵
-	summonEnemy_->Update();	//敵
-	summonEnemy2_->Update();	//敵
+	fighterEnemy_->Update();	//敵
 	stage_->Update();	//ステージ
 }
 
@@ -645,8 +643,7 @@ void GameScene::DrawLastBattle(void)
 	player_->Draw();
 	//敵描画
 	enemy_->Draw();
-	summonEnemy_->Draw();
-	summonEnemy2_->Draw();
+	fighterEnemy_->Draw();
 
 	//霧の壁描画
 	stage_->DrawTranslucent();
@@ -712,28 +709,28 @@ void GameScene::SkipBarDraw(void)
 void GameScene::UpdateImGui(void)
 {
 	ImGui::Text("GameScene");
-	std::string stateStr = "";
+	std::string stateStr = "STATE : ";
 	switch (state_)
 	{
 	case GameScene::STATE::NONE:
 		break;
 	case GameScene::STATE::WAKE_UP:
-		stateStr = "WAKE_UP";
+		stateStr += "WAKE_UP";
 		break;
 	case GameScene::STATE::EXPLORE:
-		stateStr = "EXPLORE";
+		stateStr += "EXPLORE";
 		break;
 	case GameScene::STATE::ENCOUNT:
-		stateStr = "ENCOUNT";
+		stateStr += "ENCOUNT";
 		break;
 	case GameScene::STATE::BATTLE:
-		stateStr = "BATTLE";
+		stateStr += "BATTLE";
 		break;
 	case GameScene::STATE::SUMMON:
-		stateStr = "SUMMON";
+		stateStr += "SUMMON";
 		break;
 	case GameScene::STATE::LAST_BATTEL:
-		stateStr = "LAST_BATTLE";
+		stateStr += "LAST_BATTLE";
 		break;
 	default:
 		break;
@@ -757,6 +754,7 @@ void GameScene::UpdateImGui(void)
 	}
 	//バトル開始位置
 	const VECTOR battlePos = { 10.0, -217.0, 900.0 };
+	//戦闘
 	if (ImGui::Button("Battle"))
 	{
 		player_->SetPos(battlePos);
@@ -764,6 +762,24 @@ void GameScene::UpdateImGui(void)
 		mainCamera->SetFollow(&player_->GetTransform());
 		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
 		ChangeState(STATE::BATTLE);
+	}
+	//召喚
+	if (ImGui::Button("Summon"))
+	{
+		player_->SetPos(battlePos);
+		InitStateBattle();
+		mainCamera->SetFollow(&player_->GetTransform());
+		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+		ChangeState(STATE::SUMMON);
+	}
+	//ラストバトル
+	if (ImGui::Button("LastBattle"))
+	{
+		player_->SetPos(battlePos);
+		InitStateBattle();
+		mainCamera->SetFollow(&player_->GetTransform());
+		mainCamera->ChangeMode(Camera::MODE::FOLLOW);
+		ChangeState(STATE::LAST_BATTEL);
 	}
 }
 
@@ -812,4 +828,29 @@ void GameScene::ObjectUpdateImGui(void)
 	}
 
 	ImGui::End();
+}
+
+void GameScene::CollisionCupsule(void)
+{
+	//敵とプレイヤーの距離を作成
+	VECTOR player2Enemy = VSub(enemy_->GetTransform().pos,player_->GetTransform().pos);
+	float distance = VSize(player2Enemy);
+	float hitDistance = enemy_->GetCapsule().GetRadius() + player_->GetCapsule().GetRadius();
+	//距離が当たり判定距離より大きい場合は処理しない
+	//if (distance > hitDistance)return;
+	//プレイヤーの下端が敵の上端より高い場合は処理しない
+	if (player_->GetCapsule().GetPosDown().y > enemy_->GetCapsule().GetPosTop().y)return;
+
+	float sqDistance = VSquareSize(player2Enemy);
+	if (sqDistance > 0.001f &&
+		sqDistance < hitDistance * hitDistance)
+	{
+		float dis = sqrtf(sqDistance);
+		float pushBackLength = hitDistance - distance;
+		VECTOR pushBackDir = VScale(player2Enemy, -1.0f / dis);
+		VECTOR pushBack = VScale(pushBackDir, pushBackLength);
+		//敵を押し戻す
+		VECTOR movedPos = VAdd(player_->GetTransform().pos, pushBack);
+		player_->SetPos(movedPos);
+	}
 }
