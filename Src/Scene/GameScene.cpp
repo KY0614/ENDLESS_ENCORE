@@ -14,6 +14,7 @@
 #include "../Object/Character/EncountPlayer.h"
 #include "../Object/Character/Enemy.h"
 #include "../Object/Character/SummonEnemy/FighterEnemy.h"
+#include "../Object/Character/SummonEnemy/ShooterEnemy.h"
 #include "../Object/Character/EncountEnemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
@@ -359,6 +360,9 @@ void GameScene::ChangeStateSummon(void)
 	fighterEnemy_ = std::make_unique<FighterEnemy>(*player_);
 	fighterEnemy_->Init();
 
+	shooterEnemy_ = std::make_unique<ShooterEnemy>(*player_);
+	shooterEnemy_->Init();
+
 	//¢Š«ˆÊ’uÝ’è
 	VECTOR summonPos = enemy_->GetTransform().pos;
 	//“G‚Ì‰º‚ÖÝ’è
@@ -367,6 +371,8 @@ void GameScene::ChangeStateSummon(void)
 	VECTOR summonPos2 = VAdd(summonPos, VScale(enemy_->GetTransform().GetLeft(), 100.0f));	//“G‚Ì‰E‘¤
 	fighterEnemy_->SetSummonPos(summonPos1);
 	fighterEnemy_->Summon();
+	shooterEnemy_->SetSummonPos(summonPos2);
+	shooterEnemy_->Summon();
 	stateUpdate_ = std::bind(&GameScene::UpdateSummon, this);
 	stateDraw_ = std::bind(&GameScene::DrawSummon, this);
 }
@@ -599,8 +605,9 @@ void GameScene::DrawBattle(void)
 
 void GameScene::UpdateSummon(void)
 {
-	if(fighterEnemy_->GetIsSummoned()/* &&
-		summonEnemy2_->GetIsSummoned()*/)
+	//“G‚ª—¼•û‚Æ‚à¢Š«‚³‚ê‚½‚çƒ‰ƒXƒgƒoƒgƒ‹‚Ö‘JˆÚ
+	if(fighterEnemy_->GetIsSummoned() &&
+		shooterEnemy_->GetIsSummoned())
 	{
 		ChangeState(STATE::LAST_BATTEL);
 	}
@@ -609,6 +616,7 @@ void GameScene::UpdateSummon(void)
 	player_->Update();	//ƒvƒŒƒCƒ„[
 	enemy_->Update();	//“G
 	fighterEnemy_->Update();	//“G
+	shooterEnemy_->Update();	//“G
 	stage_->Update();	//ƒXƒe[ƒW
 }
 
@@ -621,6 +629,7 @@ void GameScene::DrawSummon(void)
 	//“G•`‰æ
 	enemy_->Draw();
 	fighterEnemy_->Draw();
+	shooterEnemy_->Draw();
 }
 
 void GameScene::UpdateLastBattle(void)
@@ -632,6 +641,7 @@ void GameScene::UpdateLastBattle(void)
 	player_->Update();	//ƒvƒŒƒCƒ„[
 	enemy_->Update();	//“G
 	fighterEnemy_->Update();	//“G
+	shooterEnemy_->Update();	//“G
 	stage_->Update();	//ƒXƒe[ƒW
 }
 
@@ -644,6 +654,7 @@ void GameScene::DrawLastBattle(void)
 	//“G•`‰æ
 	enemy_->Draw();
 	fighterEnemy_->Draw();
+	shooterEnemy_->Draw();
 
 	//–¶‚Ì•Ç•`‰æ
 	stage_->DrawTranslucent();

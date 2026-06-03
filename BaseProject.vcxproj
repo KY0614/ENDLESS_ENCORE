@@ -73,7 +73,6 @@
     <ClCompile Include="Src\Utility\StringUtility.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Object\Tutorial.cpp" />
-    <ClCompile Include="Src\Object\Character\SummonEnemy\SummonEnemy.cpp" />
     <ClCompile Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +179,6 @@
     <ClInclude Include="Src\Utility\StringUtility.h" />
     <ClInclude Include="Src\Object\Stage.h" />
     <ClInclude Include="Src\Object\Tutorial.h" />
-    <ClInclude Include="Src\Object\Character\SummonEnemy\SummonEnemy.h" />
     <ClInclude Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.h" />
   </ItemGroup>
   <ItemGroup>
