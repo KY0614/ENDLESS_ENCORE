@@ -126,3 +126,7 @@ void ShooterEnemy::UpdateAttack(void)
 {
 	//UŒ‚ˆ—
 }
+
+void ShooterEnemy::Shoot(void)
+{
+}
