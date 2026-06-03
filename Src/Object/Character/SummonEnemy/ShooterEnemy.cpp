@@ -1,4 +1,6 @@
 #include "../Utility/CommonUtility.h"
+#include "../Manager/Generic/SceneManager.h"
+#include "../../EnemyBullet.h"
 #include "ShooterEnemy.h"
 
 ShooterEnemy::ShooterEnemy(Player& player) :
@@ -7,12 +9,13 @@ ShooterEnemy::ShooterEnemy(Player& player) :
 	state_ = STATE::NONE;
 	stepRotTime_ = 0.0f;
 	isSummoned_ = false;
+	bulletInterval_ = 0.0f;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&ShooterEnemy::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::SUMMON, std::bind(&ShooterEnemy::ChangeStateSummon, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&ShooterEnemy::ChangeStateMove, this));
-	stateChanges_.emplace(STATE::MOVE, std::bind(&ShooterEnemy::ChangeStateAttack, this));
+	stateChanges_.emplace(STATE::ATTACK, std::bind(&ShooterEnemy::ChangeStateAttack, this));
 }
 
 ShooterEnemy::~ShooterEnemy(void)
@@ -23,6 +26,9 @@ void ShooterEnemy::Init(void)
 {
 	//3Dモデルの初期化
 	Init3DModel();
+
+	bullet_ = std::make_unique<EnemyBullet>(transform_);
+	bullet_->Init();
 }
 
 void ShooterEnemy::Update(void)
@@ -95,6 +101,11 @@ void ShooterEnemy::ChangeStateMove(void)
 
 void ShooterEnemy::ChangeStateAttack(void)
 {
+	VECTOR headPos = VAdd(transform_.pos, VScale(transform_.GetUp(), 60.0f));
+	VECTOR ofssetPos = VSub(headPos, transform_.pos);
+	bullet_->SetOffsetPos(ofssetPos);
+	bullet_->SetLocalPos(CommonUtility::VECTOR_ZERO);
+	bullet_->SetPos(headPos);
 	stateUpdate_ = std::bind(&ShooterEnemy::UpdateAttack, this);
 }
 
@@ -115,6 +126,15 @@ void ShooterEnemy::UpdateSummon(void)
 
 void ShooterEnemy::UpdateMove(void)
 {
+	bulletInterval_ += SceneManager::GetInstance().GetDeltaTime();
+
+	if(bulletInterval_ >= 3.0f)
+	{
+		bulletInterval_ = 0.0f;
+		ChangeState(STATE::ATTACK);
+		return;
+	}
+
 	//プレイヤーを見続ける
 	Rotate2Player();
 
@@ -124,9 +144,36 @@ void ShooterEnemy::UpdateMove(void)
 
 void ShooterEnemy::UpdateAttack(void)
 {
-	//攻撃処理
+	//攻撃
+	Shoot();
+
+	//プレイヤーを見続ける
+	Rotate2Player();
+
+	//回転処理
+	Rotate();
+
+	bullet_->Update();
 }
 
 void ShooterEnemy::Shoot(void)
 {
+	bulletInterval_ += SceneManager::GetInstance().GetDeltaTime();
+
+	const float interval = 1.0f;	//弾の発射間隔
+	if (bullet_->GetState() == EnemyBullet::STATE::NONE &&
+		bulletInterval_ >= interval)
+	{
+		bullet_->SetStateReady();
+		bulletInterval_ = 0.0f;
+	}
+
+	if(bulletInterval_ >= interval &&
+		bullet_->GetState() == EnemyBullet::STATE::READY)
+	{
+		//弾を発射
+		bullet_->SetStateShot();
+		//弾のターゲット座標をプレイヤーの位置に設定
+		bullet_->SetTargetPos(player_.GetTransform().pos);
+	}
 }

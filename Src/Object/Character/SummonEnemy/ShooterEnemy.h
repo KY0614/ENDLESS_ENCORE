@@ -2,6 +2,8 @@
 #include "../Player.h"
 #include "SummonEnemyBase.h"
 
+class EnemyBullet;
+
 class ShooterEnemy : public SummonEnemyBase
 {
 public:
@@ -33,6 +35,11 @@ public:
 	void Draw(void) override;
 
 private:
+
+	//’e
+	std::unique_ptr<EnemyBullet> bullet_;
+
+	float bulletInterval_;	//’e‚Ì”­ËŠÔŠu
 
 	/// <summary>
 	/// 3Dƒ‚ƒfƒ‹‰Šú‰»
