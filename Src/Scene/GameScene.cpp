@@ -359,9 +359,11 @@ void GameScene::ChangeStateSummon(void)
 
 	fighterEnemy_ = std::make_unique<FighterEnemy>(*player_);
 	fighterEnemy_->Init();
+	fighterEnemy_->AddCollider(stage_->GetTransform().collider);
 
 	shooterEnemy_ = std::make_unique<ShooterEnemy>(*player_);
 	shooterEnemy_->Init();
+	shooterEnemy_->AddCollider(stage_->GetTransform().collider);
 
 	//¢Š«ˆÊ’uÝ’è
 	VECTOR summonPos = enemy_->GetTransform().pos;

@@ -198,7 +198,8 @@ void EnemyBullet::UpdateShot(void)
 	lifeTime_ -= SceneManager::GetInstance().GetDeltaTime();
 	if (lifeTime_ <= 0.0f)
 	{
-		SetStateDestroy();
+		//生存時間が尽きたら、破棄状態へ遷移
+		ChangeState(STATE::DESTROY);
 		return;
 	}
 
@@ -207,6 +208,9 @@ void EnemyBullet::UpdateShot(void)
 
 	//弾の移動処理
 	Move();
+
+	//当たり判定処理
+	CollisionSphere();
 }
 
 void EnemyBullet::UpdateReverse(void)
@@ -220,6 +224,44 @@ void EnemyBullet::UpdateReverse(void)
 
 void EnemyBullet::UpdateDestroy(void)
 {
+}
+
+void EnemyBullet::CollisionSphere(void)
+{
+	//球体との衝突判定
+	for (const std::weak_ptr<Collider> c : colliders_)
+	{
+		MV1_COLL_RESULT_POLY_DIM hits = MV1CollCheck_Sphere(
+			c.lock()->modelId_, -1,
+			GetSphere().GetPos(), GetSphere().GetRadius());
+		//衝突した複数のポリゴンと衝突回避するまで、
+		//プレイヤーの位置を移動させる
+		for (int i = 0; i < hits.HitNum; i++)
+		{
+			MV1_COLL_RESULT_POLY hit = hits.Dim[i];
+			//地面と異なり、衝突回避位置が不明なため、何度か移動させる
+			//この時、移動させる方向は、移動前座標に向いた方向であったり、
+			//衝突したポリゴンの法線方向だったりする
+			for (int tryCnt = 0; tryCnt < 10; tryCnt++)
+			{
+				//再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
+				//最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
+				int pHit = HitCheck_Sphere_Triangle(
+					GetSphere().GetPos(), GetSphere().GetRadius(),
+					hit.Position[0], hit.Position[1], hit.Position[2]);
+
+				if (pHit)
+				{
+					//弾を破棄状態へ遷移
+					ChangeState(STATE::DESTROY);
+					continue;
+				}
+				break;
+			}
+		}
+		//検出した地面ポリゴン情報の後始末
+		MV1CollResultPolyDimTerminate(hits);
+	}
 }
 
 void EnemyBullet::Move(void)

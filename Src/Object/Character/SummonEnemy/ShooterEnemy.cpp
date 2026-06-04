@@ -1,5 +1,7 @@
 #include "../Utility/CommonUtility.h"
 #include "../Manager/Generic/SceneManager.h"
+#include "../../Common/Geometry/Sphere.h"
+#include "../../Common/Geometry/Capsule.h"
 #include "../../EnemyBullet.h"
 #include "ShooterEnemy.h"
 
@@ -106,6 +108,11 @@ void ShooterEnemy::ChangeStateAttack(void)
 	bullet_->SetOffsetPos(ofssetPos);
 	bullet_->SetLocalPos(CommonUtility::VECTOR_ZERO);
 	bullet_->SetPos(headPos);
+	//コライダを弾に追加
+	for (const std::weak_ptr<Collider> c : colliders_)
+	{
+		bullet_->AddCollider(c);
+	}
 	stateUpdate_ = std::bind(&ShooterEnemy::UpdateAttack, this);
 }
 
@@ -176,4 +183,21 @@ void ShooterEnemy::Shoot(void)
 		//弾のターゲット座標をプレイヤーの位置に設定
 		bullet_->SetTargetPos(player_.GetTransform().pos);
 	}
+
+	if (CommonUtility::IsHitSphereCapsule(
+		bullet_->GetSphere().GetPos(),
+		bullet_->GetSphere().GetRadius(),
+		player_.GetCapsule().GetPosTop(),
+		player_.GetCapsule().GetPosDown(),
+		player_.GetCapsule().GetRadius()))
+	{
+		//プレイヤーにダメージを与える
+		player_.Damage(10.0f);
+		//弾を消す
+		bullet_->SetStateDestroy();
+		bulletInterval_ = 0.0f;
+		ChangeState(STATE::MOVE);
+	}
+
+	
 }

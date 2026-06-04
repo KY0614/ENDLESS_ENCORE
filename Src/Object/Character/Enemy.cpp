@@ -16,8 +16,8 @@
 #include "../Common/Geometry/Capsule.h"
 #include "../Common/Geometry/Sphere.h"
 #include "../UI/HPBar.h"
-#include "../EnemyBullet.h"
 #include "../ImGuiComponent/ImGuiComponentCharacter.h"
+#include "../EnemyBullet.h"
 #include "Player.h"
 #include "Enemy.h"
 
@@ -1271,7 +1271,7 @@ void Enemy::RotateToPlayer(void)
 
 void Enemy::CreateBullets(const int createNum)
 {
-	//’e‚Ì¶¬”‚ª1ˆÈ‰º‚È‚ç‰½‚à‚µ‚È‚¢
+	//’e‚Ì¶¬”‚ª1ˆÈ‰º‚È‚ç‰½‚à¶¬‚µ‚È‚¢
 	if (createNum <= 1)return;
 	//–¢¶¬‚¾‚Á‚½‚ç’e‚ğ¶¬‚·‚é
 	if (bullets_.empty())
@@ -1280,6 +1280,13 @@ void Enemy::CreateBullets(const int createNum)
 		{
 			bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
 			bullets_.back()->Init();
+		}
+
+		//“G‚Æ“¯‚¶“–‚½‚è”»’è‚ğ’Ç‰Á‚·‚é
+		if (colliders_.empty())return;	//“–‚½‚è”»’è‚ª‚È‚¯‚ê‚Î’Ç‰Á‚µ‚È‚¢
+		for (const std::weak_ptr<Collider> c : colliders_)
+		{
+			bullets_.back()->AddCollider(c);
 		}
 	}
 	bullets_.resize(createNum);
