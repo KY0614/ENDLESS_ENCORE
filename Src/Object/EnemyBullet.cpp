@@ -147,6 +147,8 @@ void EnemyBullet::ChangeStateReady(void)
 	sound.Play(SoundManager::SOUND::FIRE);
 	//¶‘¶ó‘Ô‚Ö
 	SetIsAlive(true);
+	//¶‘¶ŠÔ‚ÌƒŠƒZƒbƒg
+	lifeTime_ = LIFE_TIME;
 	EffectFire();
 	stateUpdate_ = std::bind(&EnemyBullet::UpdateReady, this);
 }
@@ -176,7 +178,7 @@ void EnemyBullet::ChangeStateDestroy(void)
 {
 	SetIsAlive(false);
 	StopEffekseer3DEffect(effectFirePlayId_);
-	lifeTime_ = LIFE_TIME;
+	lifeTime_ = 0.0f;
 	stateUpdate_ = std::bind(&EnemyBullet::UpdateDestroy, this);
 }
 

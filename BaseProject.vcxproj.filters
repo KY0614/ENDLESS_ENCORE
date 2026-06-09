@@ -557,5 +557,7 @@
     <FxCompile Include="Src\Shader\PostEffect\RetroTheater.hlsl" />
     <FxCompile Include="Src\Shader\Model\EnemyRimLightVS.hlsl" />
     <FxCompile Include="Src\Shader\Model\EnemyRimLightPS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\GhostPS.hlsl" />
+    <FxCompile Include="Src\Shader\Model\GhostVS.hlsl" />
   </ItemGroup>
 </Project>

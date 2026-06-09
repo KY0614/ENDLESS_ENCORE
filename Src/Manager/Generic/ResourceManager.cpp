@@ -137,8 +137,12 @@ void ResourceManager::InitGame(void)
 	resourcesMap_.emplace(SRC::NOISE_TEXTURE, std::move(res));
 
 	//“G
-	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician_.mv1");
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Magician/Magician.mv1");
 	resourcesMap_.emplace(SRC::ENEMY, std::move(res));
+
+	//G‹›“G(‹ßÚŒ^‚Ì—H—ì)
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Fighter_Ghost/Fighter_BIG.mv1");
+	resourcesMap_.emplace(SRC::FIGHTER_GHOST, std::move(res));
 
 	//“G‚Ì’e
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Arrow.mv1");
@@ -232,11 +236,11 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Barrior.efkefc");
 	resourcesMap_.emplace(SRC::PARRY_EFKT, std::move(res));
 
-	//“G‚Ì’e
-	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "fire_test.efkefc");
+	//“G‚Ì’e(‰Î‰Š)
+	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "Fire_Ball.efkefc");
 	resourcesMap_.emplace(SRC::FIRE_EFFECT, std::move(res));
 
-	//“G‚Ìƒ`ƒƒ[ƒW
+	//ƒ`ƒƒ[ƒW(‘«Œ³‚ªŒõ‚é)
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge.efkefc");
 	resourcesMap_.emplace(SRC::CHARGE_EFFECT, std::move(res));
 
@@ -248,7 +252,7 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "charge_atk.efkefc");
 	resourcesMap_.emplace(SRC::EXPLOSIVE_EFFECT, std::move(res));
 
-	//“G‚Ìƒ`ƒƒ[ƒW
+	//ŒŒ‚µ‚Ô‚«
 	res = std::make_unique<RES>(RES_T::EFFEKSEER, PATH_EFF + "LossOfBlood.efkefc");
 	resourcesMap_.emplace(SRC::BLOOD_EFFECT, std::move(res));
 

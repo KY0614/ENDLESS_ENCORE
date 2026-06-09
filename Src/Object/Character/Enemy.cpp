@@ -44,7 +44,6 @@ namespace
 	static const std::string KEY_BACKSTAB = "Backstab";			//バックスタブ
 	static const std::string KEY_MAGIC_IDLE = "Magic Idle";		//魔法待機
 	static const std::string KEY_CAST_SPELL = "Cast Spell";		//魔法詠唱
-	static const std::string KEY_STAND_UP = "Stand Up";			//立ち上がり
 	static const std::string KEY_DEATH = "Death";				//死亡
 
 	//近接攻撃当たり判定球のローカル座標
@@ -305,7 +304,7 @@ void Enemy::InitAnimation(void)
 	const json& animPath = data[JsonManager::KEY_ANIMATION];
 
 	//アニメーションコントローラーの生成とアニメーションの登録
-	const std::string path = Application::PATH_MODEL + "Enemy/Animation/";
+	const std::string path = Application::PATH_MODEL + "Enemy/Magician/Animation/";
 	const char* KEY_EMPTY = "";
 	const float animSpeed = animPath.value(JsonManager::KEY_ANIM_SPEED, 0.0f);
 	animationController_ = std::make_unique<AnimationController>(transform_.modelId);

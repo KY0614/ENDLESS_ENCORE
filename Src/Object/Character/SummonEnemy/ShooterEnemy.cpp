@@ -198,6 +198,4 @@ void ShooterEnemy::Shoot(void)
 		bulletInterval_ = 0.0f;
 		ChangeState(STATE::MOVE);
 	}
-
-	
 }

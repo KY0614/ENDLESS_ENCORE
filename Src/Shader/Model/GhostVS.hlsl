@@ -9,15 +9,15 @@
 #define VS_OUTPUT VertexToPixelLit
 #include "../Common/Vertex/VertexShader3DHeader.hlsli"
 
-// 定数バッファ：スロット7番目(b7と書く)
+// 定数バッファ 
 cbuffer cbParam : register(b7)
 {
-    float3 g_camera_pos;    //カメラ座標
-    float dummy;            //ダミー
+    float3 g_camera_pos; //カメラ座標
+    float dummy; //ダミー
     
-    float g_fog_start;  //フォグの開始座標
-    float g_fog_end;    //フォグの終了座標
-    float2 dummy2;      //ダミー
+    float g_fog_start; //フォグの開始座標
+    float g_fog_end; //フォグの終了座標
+    float2 dummy2; //ダミー
 }
 
 #define L_W_MAT g_localWorldMatrix.lwMatrix
@@ -27,42 +27,37 @@ VS_OUTPUT main(VS_INPUT VSInput)
 // スキンメッシュ用のローカル⇒ワールド変換行列を作成+++( 開始 )
     int4 lBoneIdx;
     float4 lL_W_Mat[3];
+    float4 lWeight;
 // BONE4
     lBoneIdx = VSInput.blendIndices0;
-
-    lL_W_Mat[0] = L_W_MAT[lBoneIdx.x + 0] * VSInput.blendWeight0.xxxx;
-    lL_W_Mat[1] = L_W_MAT[lBoneIdx.x + 1] * VSInput.blendWeight0.xxxx;
-    lL_W_Mat[2] = L_W_MAT[lBoneIdx.x + 2] * VSInput.blendWeight0.xxxx;
-
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * VSInput.blendWeight0.yyyy;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * VSInput.blendWeight0.yyyy;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * VSInput.blendWeight0.yyyy;
-
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * VSInput.blendWeight0.zzzz;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * VSInput.blendWeight0.zzzz;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * VSInput.blendWeight0.zzzz;
-
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * VSInput.blendWeight0.wwww;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * VSInput.blendWeight0.wwww;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * VSInput.blendWeight0.wwww;
-    
+    lWeight = VSInput.blendWeight0;
+    lL_W_Mat[0] = L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
+    lL_W_Mat[1] = L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
+    lL_W_Mat[2] = L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
 // BONE8
     lBoneIdx = VSInput.blendIndices1;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.x + 0] * VSInput.blendWeight1.xxxx;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.x + 1] * VSInput.blendWeight1.xxxx;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.x + 2] * VSInput.blendWeight1.xxxx;
-
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * VSInput.blendWeight1.yyyy;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * VSInput.blendWeight1.yyyy;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * VSInput.blendWeight1.yyyy;
-
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * VSInput.blendWeight1.zzzz;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * VSInput.blendWeight1.zzzz;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * VSInput.blendWeight1.zzzz;
-
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * VSInput.blendWeight1.wwww;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * VSInput.blendWeight1.wwww;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * VSInput.blendWeight1.wwww;
+    lWeight = VSInput.blendWeight1;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
 
 // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 開始 )
     VS_OUTPUT ret;
@@ -95,7 +90,6 @@ VS_OUTPUT main(VS_INPUT VSInput)
     float fog = (g_fog_end - distance) / (g_fog_end - g_fog_start);
     fog = saturate(fog);
     ret.fogFactor = fog;
-    
     // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 終了 )
     
     // その他、ピクセルシェーダへ引継&初期化 ++++++++++++( 開始 )
@@ -108,7 +102,7 @@ VS_OUTPUT main(VS_INPUT VSInput)
     ret.normal.y = dot(VSInput.norm, lL_W_Mat[1]);
     ret.normal.z = dot(VSInput.norm, lL_W_Mat[2]);
     ret.normal = normalize(ret.normal);
-    
+
     // ディフューズカラー
     ret.diffuse = VSInput.diffuse;
     

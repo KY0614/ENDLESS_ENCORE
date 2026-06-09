@@ -24,8 +24,7 @@
       "Down": "Standing.mv1",
       "Death" : "Death.mv1",
       "Magic Idle": "Magician Idle.mv1",
-      "Cast Spell": "Cast Spell.mv1",
-      "Stand Up": "Stand Up.mv1"
+      "Cast Spell": "Cast Spell.mv1"
      },
     "Parameter":
     {

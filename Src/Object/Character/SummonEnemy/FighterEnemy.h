@@ -2,6 +2,10 @@
 #include "../Player.h"
 #include "SummonEnemyBase.h"
 
+class ModelRenderer;
+class ModelMaterial;
+class AnimationController;
+
 class FighterEnemy : public SummonEnemyBase
 {
 public:
@@ -10,6 +14,13 @@ public:
 	{
 		SLASH,	//斬撃
 		MAX
+	};
+
+	enum class ANIM_TYPE
+	{
+		IDLE,		//待機
+		MOVE,		//移動
+		ATTACK,		//攻撃
 	};
 
 	//コンストラクタ
@@ -34,10 +45,23 @@ public:
 
 private:
 
+	//アニメーション
+	std::unique_ptr<AnimationController> animationController_;
+
+	//マテリアルとレンダー
+	std::unique_ptr<ModelMaterial> material_;
+	std::unique_ptr<ModelRenderer> renderer_;
+
+	float stateTimer_;		//状態遷移のタイマー
+
 	/// <summary>
 	/// 3Dモデル初期化
 	/// </summary>
 	void Init3DModel(void)override;
+
+	void InitAnimation(void);
+
+	void InitMaterial(void);
 
 	//状態遷移--------------------------------------------------------
 
@@ -82,5 +106,8 @@ private:
 	/// 追従処理（追いかける)
 	/// </summary>
 	void FollowMove(void);
+
+
+	bool IsEndAttack(void);
 };
 

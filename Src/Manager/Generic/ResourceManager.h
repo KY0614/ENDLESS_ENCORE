@@ -15,32 +15,35 @@ public:
 		NONE,
 
 		//タイトル関連
-		TITLE_LOGO,
-		PUSH_SPACE,
-		FILM_NOISE,
+		TITLE_LOGO,	//タイトルロゴ画像
+		PUSH_SPACE,	//プッシュスペース画像
+		FILM_NOISE,	//フィルムノイズ
 
 		//キャラクター関連
 		CHARACTOR_SHADOW,	//キャラクターの影
 
 		//プレイヤー関連
-		PLAYER,
-		PLAYER_HP_BAR,
-		BAR_BACK,
-		BAR_FRAME,
-		PLAYER_PARYY_BAR,
-		PLAYER_PARYY_CD_BAR,
-		FOOT_SMOKE,
-		PARRY_EFKT,
+		PLAYER,				//プレイヤーの3Dモデル
+		PLAYER_HP_BAR,		//プレイヤーのHPバー
+		BAR_BACK,			//HPバーの背景
+		BAR_FRAME,			//HPバーの額縁
+		PLAYER_PARYY_BAR,	//パリィバー
+		PLAYER_PARYY_CD_BAR,//パリィクールダウンバー
+		FOOT_SMOKE,			//足元の煙エフェクト
+		PARRY_EFKT,			//パリィエフェクト
 
-		//敵関連
-		FIRE_EFFECT,
-		CHARGE_EFFECT,
-		EXPLOSIVE_EFFECT,
-		COSMIC_EFFECT,
-		BLOOD_EFFECT,
-		ENEMY,
-		ENEMY_BULLET,
-		ENEMY_HP_BAR,
+		//ボス敵関連
+		FIRE_EFFECT,	//火炎エフェクト
+		CHARGE_EFFECT,	//チャージエフェクト
+		EXPLOSIVE_EFFECT,//爆発エフェクト
+		COSMIC_EFFECT,	//コズミックエフェクト
+		BLOOD_EFFECT,	//血しぶき
+		ENEMY,			//敵
+		ENEMY_BULLET,	//敵の弾
+		ENEMY_HP_BAR,	//敵のHPバー
+
+		//雑魚敵関連
+		FIGHTER_GHOST,	//近接型の幽霊
 
 		//演出関連
 		VICTORY,
