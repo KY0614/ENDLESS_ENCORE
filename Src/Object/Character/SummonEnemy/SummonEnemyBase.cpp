@@ -6,7 +6,7 @@
 namespace
 {
 	//‰ñ“]‚É‚©‚¯‚éŽžŠÔ
-	const float TIME_ROT = 0.1f;		
+	const float TIME_ROT = 1.0f;		
 }
 
 SummonEnemyBase::SummonEnemyBase(Player& player):

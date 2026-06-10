@@ -6,6 +6,8 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../../Common/AnimationController.h"
 #include "../Utility/CommonUtility.h"
+#include "../../Common/Geometry/Capsule.h"
+#include "../../Common/Geometry/Sphere.h"
 #include "FighterEnemy.h"
 
 namespace
@@ -22,6 +24,7 @@ FighterEnemy::FighterEnemy(Player& player):
 	stepRotTime_ = 0.0f;
 	isSummoned_ = false;
 	stateTimer_ = 0.0f;
+	isAttack_ = false;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&FighterEnemy::ChangeStateNone, this));
@@ -44,6 +47,9 @@ void FighterEnemy::Init(void)
 
 	//マテリアルの初期化
 	InitMaterial();
+
+	//当たり判定の初期化
+	InitCollider();
 }
 
 void FighterEnemy::Update(void)
@@ -53,7 +59,15 @@ void FighterEnemy::Update(void)
 
 	VECTOR cameraPos = SceneManager::GetInstance().GetCamera().lock()->GetPos();
 	material_->SetConstBufVS(0, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
-	material_->SetConstBufPS(4, { cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
+	//フォグ座標更新
+	float fogStart, fogEnd = 0.0f;
+	GetFogStartEnd(&fogStart, &fogEnd);
+	material_->SetConstBufVS(1, { fogStart,fogEnd,fogStart,fogEnd });
+	//ライトの方向
+	VECTOR lightDir = GetLightDirection();
+	material_->SetConstBufPS(1, { lightDir.x,lightDir.y,lightDir.z,0.0f });
+	material_->SetConstBufPS(4, { cameraPos.x,cameraPos.y,cameraPos.z,
+		SceneManager::GetInstance().GetTotalTime()});
 
 	transform_.Update();
 	animationController_->Update();
@@ -62,33 +76,7 @@ void FighterEnemy::Update(void)
 void FighterEnemy::Draw(void)
 {
 	//モデルの描画
-	MV1DrawModel(transform_.modelId);
-	//renderer_->Draw();
-
-	//球体を仮で描画
-	const float rad = 30.0f;
-	const int div = 16;
-	//赤：近距離攻撃タイプ
-	//int col = GetColor(255, 0, 0);
-	//DrawSphere3D(
-	//	transform_.pos,
-	//	rad,
-	//	div,
-	//	col,
-	//	col,
-	//	true);
-
-	//VECTOR forward = VAdd(transform_.pos, VScale(transform_.GetForward(), 40.0f));
-	//DrawLine3D(
-	//	transform_.pos,
-	//	forward,
-	//	GetColor(0, 0, 255));
-
-	//VECTOR right = VAdd(transform_.pos, VScale(transform_.GetRight(), 40.0f));
-	//DrawLine3D(
-	//	transform_.pos,
-	//	right,
-	//	GetColor(255, 0, 0));
+	renderer_->Draw();
 }
 
 void FighterEnemy::Init3DModel(void)
@@ -98,6 +86,7 @@ void FighterEnemy::Init3DModel(void)
 		ResourceManager::SRC::FIGHTER_GHOST));
 	//モデルの大きさ(Jsonデータから取得できなかったら1.0f)
 	const float scale = 0.7f;
+	//const float scale = 50.0f;
 	transform_.scl = { scale ,scale ,scale };
 	//モデルの初期位置
 	transform_.pos = CommonUtility::VECTOR_ZERO;
@@ -125,11 +114,6 @@ void FighterEnemy::InitMaterial(void)
 	//シェーダー毎の定数バッファ数
 	const int VS_CONST_BUF_NUM = 2;
 	const int PS_CONST_BUF_NUM = 5;
-	//モデル描画用
-	//material_ = std::make_unique<ModelMaterial>(
-	//	"EnemyRimLightVS.cso", VS_CONST_BUF_NUM,
-	//	"EnemyRimLightPS.cso", PS_CONST_BUF_NUM
-	//);
 	material_ = std::make_unique<ModelMaterial>(
 		"GhostVS.cso", VS_CONST_BUF_NUM,
 		"GhostPS.cso", PS_CONST_BUF_NUM
@@ -160,21 +144,30 @@ void FighterEnemy::InitMaterial(void)
 	//フォグの色
 	const FLOAT4 fogColor = { 0.1f,0.1f,0.1f,1.0f };
 	material_->AddConstBufPS(fogColor);
-	////ポイントライト
-	//const float pointLightRange = 500.0f;	//範囲
-	//material_->AddConstBufPS({ 0.0f,0.0f,0.0f,pointLightRange });
-
-	////スポットライト
-	//const float spotLightRange = 600.0f;	//範囲
-	//material_->AddConstBufPS({ 0.0f,0.0f,0.0f,spotLightRange });
-	//VECTOR spotDir = CommonUtility::DIR_D;
-	//const float spotLightAngle = 120.0f;	//角度
-	//material_->AddConstBufPS({ spotDir.x,spotDir.y,spotDir.z,spotLightAngle });
 
 	//カメラの位置
 	material_->AddConstBufPS({ cameraPos.x,cameraPos.y,cameraPos.z,0.0f });
 
 	renderer_ = std::make_unique<ModelRenderer>(transform_.modelId, *material_);
+}
+
+void FighterEnemy::InitCollider(void)
+{
+	//カプセルコライダ
+	capsule_ = std::make_unique<Capsule>(transform_);
+	const VECTOR localPosTop = { 0.0f, 70.0f, 0.0f };
+	const VECTOR localPosDown = { 0.0f, 20.0f, 0.0f };
+	const float capsuleRadius = 20.0f;
+	capsule_->SetLocalPosTop(localPosTop);
+	capsule_->SetLocalPosDown(localPosDown);
+	capsule_->SetRadius(capsuleRadius);
+
+	//球コライダ
+	const VECTOR localPos = { 0.0f, 40.0f, 30.0f };
+	const float sphereRadius = 25.0f;
+	sphere_ = std::make_unique<Sphere>(transform_);
+	sphere_->SetLocalPos(localPos);
+	sphere_->SetRadius(sphereRadius);
 }
 
 void FighterEnemy::ChangeStateNone(void)
@@ -206,9 +199,9 @@ void FighterEnemy::UpdateNone(void)
 void FighterEnemy::UpdateSummon(void)
 {
 	transform_.pos.y++;
-	if (transform_.pos.y >= -160.0f)
+	if (transform_.pos.y >= -200.0f)
 	{
-		transform_.pos.y = -160.0f;
+		transform_.pos.y = -200.0f;
 		IsSummoned();
 		ChangeState(STATE::MOVE);
 	}
@@ -235,11 +228,32 @@ void FighterEnemy::UpdateMove(void)
 void FighterEnemy::UpdateAttack(void)
 {
 	//攻撃処理
+	const float currentStep = animationController_->GetPlayAnimStep();
+	//攻撃の当たり判定を有効にするタイミング（斧を振りかぶるとき）
+	if (currentStep > 25.0f && currentStep < 35.0f)
+	{
+		isAttack_ = true;
+		return;
+	}
+	isAttack_ = false;
+
+	//アニメーションが終わったら移動状態に遷移
 	if(IsEndAttack())
 	{
 		ChangeState(STATE::MOVE);
 	}
 
+	if (CommonUtility::IsHitSphereCapsule(
+		sphere_->GetPos(), sphere_->GetRadius(),
+		player_.GetCapsule().GetPosTop(),
+		player_.GetCapsule().GetPosDown(),
+		player_.GetCapsule().GetRadius()
+	) && isAttack_)
+	{
+		player_.Damage(10.0f);
+	}
+
+	if (animationController_->GetPlayAnimStep() > 35.0f)return;
 	Rotate2Player();
 
 	//回転処理

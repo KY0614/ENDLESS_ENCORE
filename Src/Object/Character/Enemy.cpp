@@ -414,7 +414,11 @@ void Enemy::UpdateMaterial(void)
 	constBufPSIdx = 1;		//定数バッファのインデックス
 	GetFogStartEnd(&fogStart, &fogEnd);
 	material_->SetConstBufVS(constBufPSIdx, { fogStart,fogEnd,0.0f,0.0f });
+
 	//ピクセルシェーダー
+	//ライトの方向
+	VECTOR lightDir = GetLightDirection();
+	material_->SetConstBufPS(1, { lightDir.x,lightDir.y,lightDir.z,0.0f });
 	//フォグの色
 	constBufPSIdx = 3;		//定数バッファのインデックス
 	material_->SetConstBufPS(constBufPSIdx, { 0.0f,0.0f,0.0f,0.0f });

@@ -501,5 +501,7 @@ void SceneManager::UpdateImGui(void)
 		ChangeScene(SCENE_ID::GAME);
 	}
 
+	ImGui::SliderFloat3("LightDir", &lightDir_.x, -10.0f, 10.0f);
+
 	ImGui::End();
 }

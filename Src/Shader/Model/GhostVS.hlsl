@@ -31,33 +31,39 @@ VS_OUTPUT main(VS_INPUT VSInput)
 // BONE4
     lBoneIdx = VSInput.blendIndices0;
     lWeight = VSInput.blendWeight0;
-    lL_W_Mat[0] = L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
-    lL_W_Mat[1] = L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
-    lL_W_Mat[2] = L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
+    lL_W_Mat[0] = L_W_MAT[lBoneIdx.x + 0] * VSInput.blendWeight0.xxxx;
+    lL_W_Mat[1] = L_W_MAT[lBoneIdx.x + 1] * VSInput.blendWeight0.xxxx;
+    lL_W_Mat[2] = L_W_MAT[lBoneIdx.x + 2] * VSInput.blendWeight0.xxxx;
+    
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * VSInput.blendWeight0.yyyy;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * VSInput.blendWeight0.yyyy;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * VSInput.blendWeight0.yyyy;
+    
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * VSInput.blendWeight0.zzzz;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * VSInput.blendWeight0.zzzz;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * VSInput.blendWeight0.zzzz;
+    
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * VSInput.blendWeight0.wwww;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * VSInput.blendWeight0.wwww;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * VSInput.blendWeight0.wwww;
 // BONE8
     lBoneIdx = VSInput.blendIndices1;
-    lWeight = VSInput.blendWeight1;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.x + 0] * lWeight.xxxx;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.x + 1] * lWeight.xxxx;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.x + 2] * lWeight.xxxx;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * lWeight.yyyy;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * lWeight.yyyy;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * lWeight.yyyy;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * lWeight.zzzz;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * lWeight.zzzz;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * lWeight.zzzz;
-    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * lWeight.wwww;
-    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * lWeight.wwww;
-    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * lWeight.wwww;
+    //lWeight = VSInput.blendWeight1;
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.x + 0] * VSInput.blendWeight1.xxxx;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.x + 1] * VSInput.blendWeight1.xxxx;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.x + 2] * VSInput.blendWeight1.xxxx;
+    
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.y + 0] * VSInput.blendWeight1.yyyy;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.y + 1] * VSInput.blendWeight1.yyyy;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.y + 2] * VSInput.blendWeight1.yyyy;
+    
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.z + 0] * VSInput.blendWeight1.zzzz;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.z + 1] * VSInput.blendWeight1.zzzz;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.z + 2] * VSInput.blendWeight1.zzzz;
+    
+    lL_W_Mat[0] += L_W_MAT[lBoneIdx.w + 0] * VSInput.blendWeight1.wwww;
+    lL_W_Mat[1] += L_W_MAT[lBoneIdx.w + 1] * VSInput.blendWeight1.wwww;
+    lL_W_Mat[2] += L_W_MAT[lBoneIdx.w + 2] * VSInput.blendWeight1.wwww;
 
 // 頂点座標変換 +++++++++++++++++++++++++++++++++++++( 開始 )
     VS_OUTPUT ret;

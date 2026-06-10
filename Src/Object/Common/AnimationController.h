@@ -54,6 +54,9 @@ public :
 	//再生終了
 	bool IsEnd(void) const;
 
+	//再生中のアニメーションの時間
+	float GetPlayAnimStep(void) const { return playAnim_.step; }
+
 private :
 
 	//モデルのハンドルID

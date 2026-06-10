@@ -207,6 +207,9 @@ void Stage::UpdateStageMaterialConstBuf(void)
 	float fogStart, fogEnd = 0.0f;
 	GetFogStartEnd(&fogStart, &fogEnd);
 	stageMaterial_->SetConstBufVS(1, { fogStart,fogEnd,0.0f,0.0f });
+	//ライトの方向
+	VECTOR lightDir = GetLightDirection();
+	stageMaterial_->SetConstBufPS(1, { lightDir.x,lightDir.y,lightDir.z,0.0f });
 	//フォグの色
 	stageMaterial_->SetConstBufPS(3, { 0.0f,0.0f,0.0f,0.0f });
 }
