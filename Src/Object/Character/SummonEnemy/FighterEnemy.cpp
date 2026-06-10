@@ -227,15 +227,14 @@ void FighterEnemy::UpdateMove(void)
 
 void FighterEnemy::UpdateAttack(void)
 {
+	isAttack_ = false;
 	//攻撃処理
 	const float currentStep = animationController_->GetPlayAnimStep();
 	//攻撃の当たり判定を有効にするタイミング（斧を振りかぶるとき）
 	if (currentStep > 25.0f && currentStep < 35.0f)
 	{
 		isAttack_ = true;
-		return;
 	}
-	isAttack_ = false;
 
 	//アニメーションが終わったら移動状態に遷移
 	if(IsEndAttack())
@@ -251,9 +250,10 @@ void FighterEnemy::UpdateAttack(void)
 	) && isAttack_)
 	{
 		player_.Damage(10.0f);
+		return;
 	}
 
-	if (animationController_->GetPlayAnimStep() > 35.0f)return;
+	if (animationController_->GetPlayAnimStep() > 25.0f)return;
 	Rotate2Player();
 
 	//回転処理
