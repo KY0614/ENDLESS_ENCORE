@@ -218,15 +218,18 @@ void FighterEnemy::UpdateSummon(void)
 void FighterEnemy::UpdateMove(void)
 {
 	//追従処理
-	//FollowMove();
+	FollowMove();
 
-	stateTimer_ += SceneManager::GetInstance().GetDeltaTime();
-	if(stateTimer_ >= 2.0f)
+	//プレイヤーとの距離を測る
+	VECTOR playerToEnemy = VSub(player_.GetTransform().pos, transform_.pos);
+	//ベクトルの大きさを測る
+	float distance = VSize(playerToEnemy);
+	if(distance < 70.0f)
 	{
-		stateTimer_ = 0.0f;
 		ChangeState(STATE::ATTACK);
 	}
 
+	//追従（プレイヤーを見続ける）
 	Rotate2Player();
 
 	//回転処理

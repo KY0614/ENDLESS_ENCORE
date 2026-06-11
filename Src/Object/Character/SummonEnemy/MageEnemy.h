@@ -2,9 +2,14 @@
 #include "../Player.h"
 #include "SummonEnemyBase.h"
 
+class ModelRenderer;
+class ModelMaterial;
+class AnimationController;
+class Capsule;
+class Sphere;
 class EnemyBullet;
 
-class ShooterEnemy : public SummonEnemyBase
+class MageEnemy : public SummonEnemyBase
 {
 public:
 	//攻撃の種類
@@ -14,10 +19,17 @@ public:
 		MAX
 	};
 
+	//アニメーションの種類
+	enum class ANIM_TYPE
+	{
+		IDLE,		//待機
+		ATTACK,		//攻撃
+	};
+
 	//コンストラクタ
-	ShooterEnemy(Player& player);
+	MageEnemy(Player& player);
 	//デストラクタ
-	~ShooterEnemy(void)override;
+	~MageEnemy(void)override;
 
 	/// <summary>
 	///	初期化
@@ -35,6 +47,17 @@ public:
 	void Draw(void) override;
 
 private:
+	//アニメーション
+	std::unique_ptr<AnimationController> animationController_;
+
+	//マテリアルとレンダー
+	std::unique_ptr<ModelMaterial> material_;
+	std::unique_ptr<ModelRenderer> renderer_;
+
+	//カプセル
+	std::unique_ptr<Capsule> capsule_;
+	//球体
+	std::unique_ptr<Sphere> sphere_;
 
 	//弾
 	std::unique_ptr<EnemyBullet> bullet_;
@@ -45,6 +68,21 @@ private:
 	/// 3Dモデル初期化
 	/// </summary>
 	void Init3DModel(void)override;
+
+	/// <summary>
+	/// アニメーション初期化
+	/// </summary>
+	void InitAnimation(void);
+
+	/// <summary>
+	/// マテリアルの初期化
+	/// </summary>
+	void InitMaterial(void);
+
+	/// <summary>
+	/// 当たり判定の初期化
+	/// </summary>
+	void InitCollider(void);
 
 	//状態遷移--------------------------------------------------------
 

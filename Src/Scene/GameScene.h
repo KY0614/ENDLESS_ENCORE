@@ -7,7 +7,7 @@
 class Player;
 class Enemy;
 class FighterEnemy;
-class ShooterEnemy;
+class MageEnemy;
 class EncountPlayer;
 class EncountEnemy;
 class Stage;
@@ -80,7 +80,7 @@ private:
 	std::shared_ptr<Enemy> enemy_;
 	//召喚した敵
 	std::unique_ptr<FighterEnemy> fighterEnemy_;	//近接型
-	std::unique_ptr<ShooterEnemy> shooterEnemy_;	//遠距離型
+	std::unique_ptr<MageEnemy> mageEnemy_;			//遠距離型
 	//エンカウント演出用の敵
 	std::shared_ptr<EncountEnemy> encountEnemy_;
 	//ステージ

@@ -18,6 +18,7 @@ public:
 		MAX
 	};
 
+	//アニメーションの種類
 	enum class ANIM_TYPE
 	{
 		IDLE,		//待機

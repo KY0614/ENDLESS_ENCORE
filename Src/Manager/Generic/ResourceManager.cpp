@@ -144,6 +144,10 @@ void ResourceManager::InitGame(void)
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Fighter_Ghost/Fighter_BIG.mv1");
 	resourcesMap_.emplace(SRC::FIGHTER_GHOST, std::move(res));
 
+	//ŽG‹›“G(‰“‹——£Œ^‚Ì—H—ì)
+	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Mage_Ghost/Mage_Ghost.mv1");
+	resourcesMap_.emplace(SRC::MAGE_GHOST, std::move(res));
+
 	//“G‚Ì’e
 	res = std::make_unique<RES>(RES_T::MODEL, PATH_MDL + "Enemy/Arrow.mv1");
 	resourcesMap_.emplace(SRC::ENEMY_BULLET, std::move(res));

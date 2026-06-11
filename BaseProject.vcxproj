@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Object\Character\SummonEnemy\ShooterEnemy.cpp" />
+    <ClCompile Include="Src\Object\Character\SummonEnemy\MageEnemy.cpp" />
     <ClCompile Include="Src\Object\Character\SummonEnemy\FighterEnemy.cpp" />
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.cpp" />
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentBase.cpp" />
@@ -76,7 +76,7 @@
     <ClCompile Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Object\Character\SummonEnemy\ShooterEnemy.h" />
+    <ClInclude Include="Src\Object\Character\SummonEnemy\MageEnemy.h" />
     <ClInclude Include="Src\Object\Character\SummonEnemy\FighterEnemy.h" />
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.h" />
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentBase.h" />

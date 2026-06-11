@@ -44,6 +44,7 @@ public:
 
 		//ŽG‹›“GŠÖ˜A
 		FIGHTER_GHOST,	//‹ßÚŒ^‚Ì—H—ì
+		MAGE_GHOST,		//‰“‹——£Œ^‚Ì—H—ì
 
 		//‰‰oŠÖ˜A
 		VICTORY,

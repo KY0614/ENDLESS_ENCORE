@@ -15,7 +15,7 @@
 #include "../Object/Character/EventScene/EncountEnemy.h"
 #include "../Object/Character/Enemy.h"
 #include "../Object/Character/SummonEnemy/FighterEnemy.h"
-#include "../Object/Character/SummonEnemy/ShooterEnemy.h"
+#include "../Object/Character/SummonEnemy/MageEnemy.h"
 #include "../Object/Stage.h"
 #include "../Object/Tutorial.h"
 #include "../Object/UI/SkipBar.h"
@@ -361,9 +361,9 @@ void GameScene::ChangeStateSummon(void)
 	fighterEnemy_->Init();
 	fighterEnemy_->AddCollider(stage_->GetTransform().collider);
 
-	shooterEnemy_ = std::make_unique<ShooterEnemy>(*player_);
-	shooterEnemy_->Init();
-	shooterEnemy_->AddCollider(stage_->GetTransform().collider);
+	mageEnemy_ = std::make_unique<MageEnemy>(*player_);
+	mageEnemy_->Init();
+	mageEnemy_->AddCollider(stage_->GetTransform().collider);
 
 	//¢Š«ˆÊ’uÝ’è
 	VECTOR summonPos = enemy_->GetTransform().pos;
@@ -373,15 +373,15 @@ void GameScene::ChangeStateSummon(void)
 	VECTOR summonPos2 = VAdd(summonPos, VScale(enemy_->GetTransform().GetLeft(), 100.0f));	//“G‚Ì‰E‘¤
 	fighterEnemy_->SetSummonPos(summonPos1);
 	fighterEnemy_->Summon();
-	shooterEnemy_->SetSummonPos(summonPos2);
-	shooterEnemy_->Summon();
+	mageEnemy_->SetSummonPos(summonPos2);
+	mageEnemy_->Summon();
 	stateUpdate_ = std::bind(&GameScene::UpdateSummon, this);
 	stateDraw_ = std::bind(&GameScene::DrawSummon, this);
 }
 
 void GameScene::ChangeStateLastBattle(void)
 {
-	enemy_->ChangeState(Enemy::STATE::MOVE);
+	//enemy_->ChangeState(Enemy::STATE::MOVE);
 	stateUpdate_ = std::bind(&GameScene::UpdateLastBattle, this);
 	stateDraw_ = std::bind(&GameScene::DrawLastBattle, this);
 }
@@ -609,7 +609,7 @@ void GameScene::UpdateSummon(void)
 {
 	//“G‚ª—¼•û‚Æ‚à¢Š«‚³‚ê‚½‚çƒ‰ƒXƒgƒoƒgƒ‹‚Ö‘JˆÚ
 	if(fighterEnemy_->GetIsSummoned() &&
-		shooterEnemy_->GetIsSummoned())
+		mageEnemy_->GetIsSummoned())
 	{
 		ChangeState(STATE::LAST_BATTEL);
 	}
@@ -618,7 +618,7 @@ void GameScene::UpdateSummon(void)
 	player_->Update();	//ƒvƒŒƒCƒ„[
 	enemy_->Update();	//“G
 	fighterEnemy_->Update();	//“G
-	shooterEnemy_->Update();	//“G
+	mageEnemy_->Update();	//“G
 	stage_->Update();	//ƒXƒe[ƒW
 }
 
@@ -631,7 +631,7 @@ void GameScene::DrawSummon(void)
 	//“G•`‰æ
 	enemy_->Draw();
 	fighterEnemy_->Draw();
-	shooterEnemy_->Draw();
+	mageEnemy_->Draw();
 }
 
 void GameScene::UpdateLastBattle(void)
@@ -641,9 +641,9 @@ void GameScene::UpdateLastBattle(void)
 
 	//ŠeƒIƒuƒWƒFƒNƒgXV
 	player_->Update();	//ƒvƒŒƒCƒ„[
-	enemy_->Update();	//“G
+	//enemy_->Update();	//“G
 	fighterEnemy_->Update();	//“G
-	shooterEnemy_->Update();	//“G
+	mageEnemy_->Update();	//“G
 	stage_->Update();	//ƒXƒe[ƒW
 }
 
@@ -654,9 +654,9 @@ void GameScene::DrawLastBattle(void)
 	//ƒvƒŒƒCƒ„[•`‰æ
 	player_->Draw();
 	//“G•`‰æ
-	enemy_->Draw();
+	//enemy_->Draw();
 	fighterEnemy_->Draw();
-	shooterEnemy_->Draw();
+	mageEnemy_->Draw();
 
 	//–¶‚Ì•Ç•`‰æ
 	stage_->DrawTranslucent();
