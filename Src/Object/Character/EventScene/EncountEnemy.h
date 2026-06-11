@@ -1,7 +1,8 @@
 //#pragma once
 #include <functional>
 #include <map>
-#include "../Common/ActorBase.h"
+#include "../Libs/nlohmann/json.hpp"
+#include "../../Common/ActorBase.h"
 
 class EnemyBullet;
 class AnimationController;

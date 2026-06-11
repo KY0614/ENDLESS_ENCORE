@@ -23,8 +23,8 @@
     <ClCompile Include="Src\Object\Character\SummonEnemy\FighterEnemy.cpp" />
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.cpp" />
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentBase.cpp" />
-    <ClCompile Include="Src\Object\Character\EncountPlayer.cpp" />
-    <ClCompile Include="Src\Object\Character\EncountEnemy.cpp" />
+    <ClCompile Include="Src\Object\Character\EventScene\EncountPlayer.cpp" />
+    <ClCompile Include="Src\Object\Character\EventScene\EncountEnemy.cpp" />
     <ClCompile Include="Src\Object\UI\SkipBar.cpp" />
     <ClCompile Include="Src\Object\UI\ParryBar.cpp" />
     <ClCompile Include="Src\Object\UI\HPBar.cpp" />
@@ -82,8 +82,8 @@
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentBase.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_dx11.h" />
     <ClInclude Include="Src\Libs\ImGui\backend\imgui_impl_win32.h" />
-    <ClInclude Include="Src\Object\Character\EncountPlayer.h" />
-    <ClInclude Include="Src\Object\Character\EncountEnemy.h" />
+    <ClInclude Include="Src\Object\Character\EventScene\EncountPlayer.h" />
+    <ClInclude Include="Src\Object\Character\EventScene\EncountEnemy.h" />
     <ClInclude Include="Src\Object\UI\SkipBar.h" />
     <ClInclude Include="Src\Object\UI\ParryBar.h" />
     <ClInclude Include="Src\Object\UI\HPBar.h" />

@@ -71,6 +71,9 @@ private:
 	//UŒ‚’†‚©‚Ç‚¤‚©
 	bool isAttack_;
 
+	//UŒ‚‚ª“–‚½‚Á‚½‚©‚Ç‚¤‚©
+	bool isHitAttack_;
+
 	/// <summary>
 	/// 3Dƒ‚ƒfƒ‹‰Šú‰»
 	/// </summary>

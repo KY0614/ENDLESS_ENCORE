@@ -25,6 +25,7 @@ FighterEnemy::FighterEnemy(Player& player):
 	isSummoned_ = false;
 	stateTimer_ = 0.0f;
 	isAttack_ = false;
+	isHitAttack_ = false;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&FighterEnemy::ChangeStateNone, this));
@@ -77,6 +78,10 @@ void FighterEnemy::Draw(void)
 {
 	//モデルの描画
 	renderer_->Draw();
+
+	int col = Sphere::COLOR;
+	if (isAttack_)col = 0xFF0000;
+	sphere_->Draw(col,true);
 }
 
 void FighterEnemy::Init3DModel(void)
@@ -188,7 +193,10 @@ void FighterEnemy::ChangeStateMove(void)
 
 void FighterEnemy::ChangeStateAttack(void)
 {
+	//攻撃アニメーション再生(ループなし)
 	animationController_->Play((int)ANIM_TYPE::ATTACK,false);
+	isAttack_ = false;
+	isHitAttack_ = false;
 	stateUpdate_ = std::bind(&FighterEnemy::UpdateAttack, this);
 }
 
@@ -230,8 +238,10 @@ void FighterEnemy::UpdateAttack(void)
 	isAttack_ = false;
 	//攻撃処理
 	const float currentStep = animationController_->GetPlayAnimStep();
+	const float attackStartStep = 25.0f;
+	const float attackEndStep = 35.0f;
 	//攻撃の当たり判定を有効にするタイミング（斧を振りかぶるとき）
-	if (currentStep > 25.0f && currentStep < 35.0f)
+	if (currentStep > attackStartStep && currentStep < attackEndStep)
 	{
 		isAttack_ = true;
 	}
@@ -242,18 +252,25 @@ void FighterEnemy::UpdateAttack(void)
 		ChangeState(STATE::MOVE);
 	}
 
-	if (CommonUtility::IsHitSphereCapsule(
-		sphere_->GetPos(), sphere_->GetRadius(),
-		player_.GetCapsule().GetPosTop(),
-		player_.GetCapsule().GetPosDown(),
-		player_.GetCapsule().GetRadius()
-	) && isAttack_)
+	//攻撃の当たり判定
+	if (!isHitAttack_ && isAttack_)
 	{
-		player_.Damage(10.0f);
-		return;
+		if(CommonUtility::IsHitSphereCapsule(
+			sphere_->GetPos(), sphere_->GetRadius(),
+			player_.GetCapsule().GetPosTop(),
+			player_.GetCapsule().GetPosDown(),
+			player_.GetCapsule().GetRadius()
+		))
+		{
+			player_.Damage(10.0f);
+			isHitAttack_ = true;
+			//画面揺らし
+			SceneManager::GetInstance().StartShakeScreen();
+		}
 	}
 
-	if (animationController_->GetPlayAnimStep() > 25.0f)return;
+	if (animationController_->GetPlayAnimStep() > attackStartStep)return;
+	//追従（プレイヤーを見続ける）
 	Rotate2Player();
 
 	//回転処理

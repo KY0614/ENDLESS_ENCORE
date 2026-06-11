@@ -6,8 +6,8 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
-#include "../Common/AnimationController.h"
-#include "../EnemyBullet.h"
+#include "../../Common/AnimationController.h"
+#include "../../EnemyBullet.h"
 #include "EncountEnemy.h"
 
 // ’·‚¢‚Ì‚Ånamespace‚ÌÈ—ª

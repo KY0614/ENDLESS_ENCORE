@@ -21,6 +21,8 @@ Capsule::~Capsule(void)
 
 void Capsule::Draw(void)
 {
+	//Zバッファを有効にして描画(球体同士の前後関係を正しく描画するため)
+	SetUseZBufferFlag(true);
 	const int divNum = 5;
 	//上の球体
 	VECTOR pos1 = GetPosTop();
@@ -60,7 +62,7 @@ void Capsule::Draw(void)
 
 	//カプセルの中心
 	DrawSphere3D(GetCenter(), 5.0f, 10, COLOR, COLOR, true);
-
+	SetUseZBufferFlag(false);	//戻す
 }
 
 VECTOR Capsule::GetLocalPosTop(void) const

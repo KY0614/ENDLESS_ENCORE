@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include <map>
-#include "../Common/ActorBase.h"
+#include "../../Common/ActorBase.h"
 
 class Capsule;
 class AnimationController;

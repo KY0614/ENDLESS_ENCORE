@@ -6,8 +6,8 @@
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
-#include "../Common/AnimationController.h"
-#include "../Common/Geometry/Capsule.h"
+#include "../../Common/AnimationController.h"
+#include "../../Common/Geometry/Capsule.h"
 #include "EncountPlayer.h"
 
 // ’·‚¢‚Ì‚Ånamespace‚ÌÈ—ª
