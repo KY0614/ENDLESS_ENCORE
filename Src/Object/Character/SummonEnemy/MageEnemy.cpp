@@ -180,7 +180,7 @@ void MageEnemy::ChangeStateAttack(void)
 			bullet_->AddCollider(c);
 		}
 	}
-	VECTOR headPos = VAdd(transform_.pos, VScale(transform_.GetUp(), 60.0f));
+	VECTOR headPos = VAdd(transform_.pos, VScale(transform_.GetUp(), 100.0f));
 	VECTOR ofssetPos = VSub(headPos, transform_.pos);
 	bullet_->SetOffsetPos(ofssetPos);
 	bullet_->SetLocalPos(CommonUtility::VECTOR_ZERO);
@@ -189,6 +189,8 @@ void MageEnemy::ChangeStateAttack(void)
 	{
 		bullet_->Reset(transform_);
 	}
+	//弾を発射可能状態にする
+	bullet_->SetStateReady();
 	//攻撃アニメーション再生(ループなし)
 	animationController_->Play((int)ANIM_TYPE::ATTACK, false);
 	stateUpdate_ = std::bind(&MageEnemy::UpdateAttack, this);
@@ -232,6 +234,13 @@ void MageEnemy::UpdateAttack(void)
 	//攻撃
 	Shoot();
 
+	//攻撃アニメーションが終わったら移動状態へ遷移
+	if (animationController_->IsEnd())
+	{
+		bulletInterval_ = 0.0f;
+		ChangeState(STATE::MOVE);
+	}
+
 	//プレイヤーを見続ける
 	Rotate2Player();
 
@@ -246,16 +255,17 @@ void MageEnemy::Shoot(void)
 	bulletInterval_ += SceneManager::GetInstance().GetDeltaTime();
 
 	const float interval = 2.0f;	//弾の発射間隔
-	if (bullet_->GetState() == EnemyBullet::STATE::NONE &&
-		bulletInterval_ >= interval)
-	{
-		bullet_->SetStateReady();
-		bulletInterval_ = 0.0f;
-	}
+	//if (bullet_->GetState() == EnemyBullet::STATE::NONE &&
+	//	bulletInterval_ >= interval)
+	//{
+	//	bullet_->SetStateReady();
+	//	bulletInterval_ = 0.0f;
+	//}
 
 	if(bulletInterval_ >= interval &&
 		bullet_->GetState() == EnemyBullet::STATE::READY)
 	{
+		bulletInterval_ = 0.0f;
 		//弾を発射
 		bullet_->SetStateShot();
 		//弾のターゲット座標をプレイヤーの位置に設定
