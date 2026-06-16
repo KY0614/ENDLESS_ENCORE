@@ -7,6 +7,7 @@ class ModelMaterial;
 class AnimationController;
 class Capsule;
 class Sphere;
+class HPBar;
 
 class FighterEnemy : public SummonEnemyBase
 {
@@ -67,6 +68,9 @@ private:
 	//球体
 	std::unique_ptr<Sphere> sphere_;
 
+	//HPバー
+	std::unique_ptr<HPBar> hpBar_;
+
 	//状態遷移のタイマー
 	float stateTimer_;		
 
@@ -84,17 +88,22 @@ private:
 	/// <summary>
 	/// アニメーション初期化
 	/// </summary>
-	void InitAnimation(void);
+	void InitAnimation(void)override;
 
 	/// <summary>
 	/// マテリアルの初期化
 	/// </summary>
-	void InitMaterial(void);
+	void InitMaterial(void)override;
 
 	/// <summary>
 	/// 当たり判定の初期化
 	/// </summary>
-	void InitCollider(void);
+	void InitCollider(void)override;
+
+	/// <summary>
+	/// UIの初期化
+	/// </summary>
+	void InitUI(void)override;
 
 	//状態遷移--------------------------------------------------------
 

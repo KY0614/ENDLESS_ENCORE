@@ -10,6 +10,7 @@
 #include "../Utility/StringUtility.h"
 #include "../../Common/Geometry/Capsule.h"
 #include "../../Common/Geometry/Sphere.h"
+#include "../../UI/HPBar.h"
 #include "FighterEnemy.h"
 
 // 長いのでnamespaceの省略
@@ -116,7 +117,7 @@ void FighterEnemy::Init3DModel(void)
 	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	//モデルの初期回転(度数法で保存されているのでラジアンに変換)
 	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
-	transform_.quaRot = Quaternion();
+	transform_.quaRot = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
 
@@ -137,7 +138,7 @@ void FighterEnemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::ATTACK, path + "Fighter_Attack.mv1",
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::DAMAGE, path + "Damage.mv1",
-		animSpeed);
+		animSpeed * 2);
 }
 
 void FighterEnemy::InitMaterial(void)
@@ -201,6 +202,24 @@ void FighterEnemy::InitCollider(void)
 	sphere_->SetRadius(sphereRadius);
 }
 
+void FighterEnemy::InitUI(void)
+{
+	//HPバーの高さ
+	const int HP_BAR_HEIGHT = 30;
+	const int posX = Application::SCREEN_SIZE_X / 2 - static_cast<int>(maxHp_) / 2;
+	//const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
+	//画面を10分割したうちの9/10の位置
+	const float heightRatio = 0.9f;
+	const int posY = static_cast<int>(Application::SCREEN_SIZE_Y * heightRatio);
+	hpBar_ = std::make_unique<HPBar>(
+		HPBar::HPBarInfo{
+			HPBar::TYPE::ENEMY,
+			{posX,posY},
+			Vector2(static_cast<int>(maxHp_), HP_BAR_HEIGHT)
+		}, hp_);
+	hpBar_->Init();
+}
+
 void FighterEnemy::ChangeStateNone(void)
 {
 	stateUpdate_ = std::bind(&FighterEnemy::UpdateNone, this);
@@ -259,7 +278,7 @@ void FighterEnemy::UpdateMove(void)
 	Rotate2Player();
 
 	//回転処理
-	Rotate();
+	//Rotate();
 }
 
 void FighterEnemy::UpdateAttack(void)

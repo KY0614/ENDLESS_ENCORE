@@ -18,6 +18,8 @@ SummonEnemyBase::SummonEnemyBase(Player& player):
 	goalQuaRot_ = Quaternion::Quaternion();
 	stepRotTime_ = 0.0f;
 	followSpeed_ = 0.0f;
+	hp_ = 0.0f;
+	maxHp_ = 0.0f;
 }
 
 SummonEnemyBase::~SummonEnemyBase(void)
@@ -38,14 +40,6 @@ void SummonEnemyBase::SetGoalRotate(double rotRad)
 		Quaternion::AngleAxis(
 			rotRad, CommonUtility::AXIS_Y);
 
-	//Œ»İİ’è‚³‚ê‚Ä‚¢‚é‰ñ“]‚Æ‚ÌŠp“x·‚ğæ‚é
-	double angleDiff = Quaternion::Angle(axis, goalQuaRot_);
-
-	//‚µ‚«‚¢’l
-	if (angleDiff > 0.1)
-	{
-		stepRotTime_ = TIME_ROT;
-	}
 	//–Ú•W‰ñ“]‚ğİ’è
 	goalQuaRot_ = axis;
 }

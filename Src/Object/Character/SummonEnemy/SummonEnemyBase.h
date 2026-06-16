@@ -91,7 +91,27 @@ protected:
 	/// 3Dモデル初期化
 	/// </summary>
 	virtual void Init3DModel(void) = 0;
-	 
+
+	/// <summary>
+	/// アニメーション初期化
+	/// </summary>
+	virtual void InitAnimation(void) = 0;
+
+	/// <summary>
+	/// マテリアルの初期化
+	/// </summary>
+	virtual void InitMaterial(void) = 0;
+
+	/// <summary>
+	/// 当たり判定の初期化
+	/// </summary>
+	virtual void InitCollider(void) = 0;
+	
+	/// <summary>
+	/// UI初期化
+	/// </summary>
+	virtual void InitUI(void) = 0;
+
 	/// <summary>
 	/// 状態変更
 	/// </summary>

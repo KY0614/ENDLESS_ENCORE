@@ -75,9 +75,6 @@ void MageEnemy::Draw(void)
 {
 	//ƒ‚ƒfƒ‹‚Ì•`‰æ
 	renderer_->Draw();
-
-	DrawFormatString(10, 100, 0xFFFFFF,
-		L"Mage HP: %2.f", hp_);
 }
 
 void MageEnemy::Init3DModel(void)
@@ -123,7 +120,7 @@ void MageEnemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::ATTACK, path + "Mage_Attack.mv1",
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::DAMAGE, path + "Damage.mv1",
-		animSpeed);
+		animSpeed * 2);
 }
 
 void MageEnemy::InitMaterial(void)
@@ -185,6 +182,10 @@ void MageEnemy::InitCollider(void)
 	sphere_ = std::make_unique<Sphere>(transform_);
 	sphere_->SetLocalPos(localPos);
 	sphere_->SetRadius(sphereRadius);
+}
+
+void MageEnemy::InitUI(void)
+{
 }
 
 void MageEnemy::ChangeStateNone(void)

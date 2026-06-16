@@ -356,15 +356,14 @@ void GameScene::ChangeStateSummon(void)
 	//“G‚Ìó‘Ô‰Šú‰»
 	enemy_->Init();
 	enemy_->ChangeState(Enemy::STATE::WAIT);
-
+	//‹ßÚŒ^‚Ì“G
 	fighterEnemy_ = std::make_unique<FighterEnemy>(*player_);
 	fighterEnemy_->Init();
 	fighterEnemy_->AddCollider(stage_->GetTransform().collider);
-
+	//–‚–@Œ^‚Ì“G
 	mageEnemy_ = std::make_unique<MageEnemy>(*player_);
 	mageEnemy_->Init();
 	mageEnemy_->AddCollider(stage_->GetTransform().collider);
-
 	//¢Š«ˆÊ’uİ’è
 	VECTOR summonPos = enemy_->GetTransform().pos;
 	//“G‚Ì‰º‚Öİ’è
