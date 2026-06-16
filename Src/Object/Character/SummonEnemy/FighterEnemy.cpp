@@ -2,19 +2,29 @@
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Manager/GameSystem/Camera.h"
+#include "../Manager/Generic/JsonManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../../Common/AnimationController.h"
 #include "../Utility/CommonUtility.h"
+#include "../Utility/StringUtility.h"
 #include "../../Common/Geometry/Capsule.h"
 #include "../../Common/Geometry/Sphere.h"
 #include "FighterEnemy.h"
 
+// 長いのでnamespaceの省略
+using json = nlohmann::json;
+
 namespace
 {
-	const float FOLLOW_SPEED = 7.0f;	//追従速度
+	//JSONのデータのオブジェクト指定キー
+	static const std::string KEY_FIGHTER = "Fighter";
+	//アニメーションキー名
+	static const std::string KEY_IDLE = "Idle";		//通常
+	static const std::string KEY_ATTACK = "Attack";	//攻撃
 
-	const float TIME_ROT = 0.1f;		//回転にかける時間
+	//追従速度
+	const float FOLLOW_SPEED = 7.0f;
 }
 
 FighterEnemy::FighterEnemy(Player& player):
@@ -86,20 +96,34 @@ void FighterEnemy::Draw(void)
 
 void FighterEnemy::Init3DModel(void)
 {
+	const JsonManager& jsonM = JsonManager::GetInstance();
+	const json& data = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::FIGHTER_GHOST, KEY_FIGHTER);
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(JsonManager::KEY_TRANSFORM))
+	{
+		assert(0 && "データが存在しないか不正なデータです");
+	}
+	const json& transformData = data[JsonManager::KEY_TRANSFORM];
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::FIGHTER_GHOST));
 	//モデルの大きさ(Jsonデータから取得できなかったら1.0f)
-	const float scale = 0.7f;
+	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
 	//const float scale = 50.0f;
 	transform_.scl = { scale ,scale ,scale };
 	//モデルの初期位置
-	transform_.pos = CommonUtility::VECTOR_ZERO;
+	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	//モデルの初期回転(度数法で保存されているのでラジアンに変換)
-	const float rotY = 180.0f;
+	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 	transform_.quaRot = Quaternion();
 	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
+
+	//HPを設定
+	const json& paramData = data[JsonManager::KEY_PARAMETER];
+	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
+	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 }
 
 void FighterEnemy::InitAnimation(void)

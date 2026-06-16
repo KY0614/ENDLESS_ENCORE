@@ -10,6 +10,8 @@ namespace
 {
 	const std::string JSON_PLAYER = "Player";
 	const std::string JSON_ENEMY = "Enemy";
+	const std::string JSON_FIGHTER = "Fighter";
+	const std::string JSON_MAGE = "Mage";
 	const std::string JSON_STAGE = "Stage";
 	const std::string JSON_TEST = "Test";
 
@@ -50,6 +52,11 @@ void JsonManager::Destroy(void)
 	delete instance_;
 }
 
+const nlohmann::json& JsonManager::GetJsonData(const JSON_DATA dataType) const
+{
+	return jsonDataMap_.at(dataType).jsonData_;
+}
+
 const nlohmann::json& JsonManager::GetJsonData(
 	const JSON_DATA dataType,
 	const std::string data)const
@@ -65,26 +72,6 @@ const nlohmann::json& JsonManager::GetJsonDataType(const JSON_DATA dataType) con
 const std::string& JsonManager::GetJsonFileName(const JSON_DATA dataType) const
 {
 	return jsonDataMap_.at(dataType).fileName_;
-}
-
-void JsonManager::WriteJsonDataTest(void)
-{
-	json data = {
-		{"param",{
-		{"name", "Aiueo"},
-		{"age", 20},
-		{"speed", 2.5f},
-		{"isHungry", true}
-			}}
-	};
-
-	std::string fileName = "Data/Json/Test.json";
-	//名前だけ上書き
-	//data["param"]["name"] = "Kakikukeo";
-
-	std::ofstream writing_file;
-	writing_file.open(fileName,std::ios::out);
-	writing_file << data.dump(JSON_INDENT_NUM) << std::endl;
 }
 
 const VECTOR JsonManager::GetParseVector(
@@ -126,23 +113,17 @@ void JsonManager::InitGame(void)
 	//プレイヤーのデータ読み込み
 	const std::string playerPath = "Player.json";
 	LoadJsonData(JSON_DATA::PLAYER, PATH_JSON + playerPath, JSON_PLAYER);
-	//jsonDataMap_.emplace(JSON_DATA::PLAYER, LoadJsonData(
-	//	PATH_JSON + playerPath, JSON_PLAYER));
 	//敵のデータ読み込み
 	const std::string enemyPath = "Enemy.json";
 	LoadJsonData(JSON_DATA::ENEMY, PATH_JSON + enemyPath, JSON_ENEMY);
-	//jsonDataMap_.emplace(JSON_DATA::ENEMY, LoadJsonData(
-	//	PATH_JSON + enemyPath, JSON_ENEMY));
+	//近接型のデータ読み込み
+	const std::string summonEnemyPath = "SummonEnemy.json";
+	LoadJsonData(JSON_DATA::FIGHTER_GHOST, PATH_JSON + summonEnemyPath, JSON_FIGHTER);
+	//遠距離型のデータ読み込み
+	LoadJsonData(JSON_DATA::MAGE_GHOST, PATH_JSON + summonEnemyPath, JSON_MAGE);
 	//ステージのデータ読み込み
 	const std::string stagePath = "Stage.json";
 	LoadJsonData(JSON_DATA::STAGE, PATH_JSON + stagePath, JSON_STAGE);
-	//jsonDataMap_.emplace(JSON_DATA::STAGE, LoadJsonData(
-	//	PATH_JSON + stagePath, JSON_STAGE));
-	//ステージのデータ読み込み
-	const std::string testPath = "Test.json";
-	LoadJsonData(JSON_DATA::TEST, PATH_JSON + testPath, JSON_TEST);
-	//jsonDataMap_.emplace(JSON_DATA::TEST, LoadJsonData(
-	//	PATH_JSON + testPath, JSON_TEST));
 }
 
 void JsonManager::LoadJsonData(

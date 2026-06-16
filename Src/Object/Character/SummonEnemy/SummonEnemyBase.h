@@ -83,6 +83,10 @@ protected:
 	//追従速度
 	float followSpeed_;		
 
+	//体力
+	float hp_;		//現在体力
+	float maxHp_;	//最大体力
+
 	/// <summary>
 	/// 3Dモデル初期化
 	/// </summary>
@@ -94,7 +98,17 @@ protected:
 	/// <param name="state"></param>
 	void ChangeState(const STATE& state);
 
-	//その他---------------------------------------------------------
+	/// <summary>
+	/// 現在体力を設定する　
+	/// </summary>
+	/// <param name="hp">現在体力</param>
+	void SetHP(const float hp) { hp_ = hp; }
+
+	/// <summary>
+	/// 最大体力を設定する　
+	/// </summary>
+	/// <param name="maxHp">最大体力</param>
+	void SetMaxHP(const float maxHp) { maxHp_ = maxHp; }
 
 	/// <summary>
 	/// 召喚完了

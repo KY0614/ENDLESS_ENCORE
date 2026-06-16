@@ -249,8 +249,10 @@ void Enemy::InitSound(void)
 
 void Enemy::Init3DModel(void)
 {
+	const JsonManager& jsonM = JsonManager::GetInstance();
 	//Jsonデータ取得
-	const json data = GetJsonData();
+	const json& data = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::ENEMY, KEY_ENEMY);
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!data.contains(JsonManager::KEY_TRANSFORM))assert(0 && "データが存在しないか不正なデータです");
@@ -297,8 +299,10 @@ void Enemy::InitCollider(void)
 
 void Enemy::InitAnimation(void)
 {
-	//Jsonデータ取得w
-	const json& data = GetJsonData();
+	const JsonManager& jsonM = JsonManager::GetInstance();
+	//Jsonデータ取得
+	const json& data = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::ENEMY, KEY_ENEMY);
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!data.contains(JsonManager::KEY_ANIMATION))assert(0 && "データが存在しないか不正なデータです");
 	const json& animPath = data[JsonManager::KEY_ANIMATION];
@@ -1469,21 +1473,12 @@ void Enemy::EffectChargeAtk(void)
 		transform_.pos.z);
 }
 
-const json Enemy::GetJsonData(void)const
-{
-	JsonManager& jsonM = JsonManager::GetInstance();
-	//Jsonデータ取得
-	const json data = jsonM.GetJsonData(
-		JsonManager::JSON_DATA::ENEMY,KEY_ENEMY);
-
-	return data;
-}
-
 void Enemy::UpdateImGui(void)
 {
 	//Jsonデータ取得
 	JsonManager& jsonM = JsonManager::GetInstance();
-	const json& enemyData = GetJsonData();
+	const json& enemyData = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::ENEMY, KEY_ENEMY);
 
 	//データが含まれていない場合はエラーメッセージを出す
 	if (!enemyData.contains(JsonManager::KEY_TRANSFORM))

@@ -35,8 +35,9 @@ public:
 	{
 		PLAYER,		//プレイヤー
 		ENEMY,		//敵
+		FIGHTER_GHOST,	//近接型の敵
+		MAGE_GHOST,		//遠距離型の敵
 		STAGE,		//ステージ
-		TEST,		//ステージ
 	};
 
 	//インスタンスの生成
@@ -59,6 +60,15 @@ public:
 	/// リソースの完全破棄
 	/// </summary>
 	void Destroy(void);
+		
+	/// <summary>
+	/// Jsonデータを取得
+	/// </summary>
+	/// <param name="dataType">データの種類</param>
+	/// <returns>Jsonデータ</returns>
+	const nlohmann::json& GetJsonData(
+		const JSON_DATA dataType)const;
+		
 		
 	/// <summary>
 	/// Jsonデータを取得
@@ -124,8 +134,6 @@ public:
 		writing_file.open(fileName, std::ios::out);
 		writing_file << JsonData.dump(JSON_INDENT_NUM) << std::endl;
 	}
-
-	void WriteJsonDataTest(void);
 
 	/// <summary>
 	/// JSONデータからVECTOR型へ変換して取得

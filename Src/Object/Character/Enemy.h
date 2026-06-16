@@ -477,14 +477,5 @@ private:
 	/// </summary>
 	/// <param name=""></param>
 	void EffectChargeAtk(void);
-
-	//--------------------------------------------------------
-
-	/// <summary>
-	/// Jsonデータ取得
-	/// </summary>
-	/// <returns>Jsonデータ</returns>
-	const nlohmann::json GetJsonData(void)const;
-
 };
 
