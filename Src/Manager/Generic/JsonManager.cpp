@@ -13,7 +13,6 @@ namespace
 	const std::string JSON_FIGHTER = "Fighter";
 	const std::string JSON_MAGE = "Mage";
 	const std::string JSON_STAGE = "Stage";
-	const std::string JSON_TEST = "Test";
 
 	const int JSON_INDENT_NUM = 4;	//JSONのインデントスペース数
 }

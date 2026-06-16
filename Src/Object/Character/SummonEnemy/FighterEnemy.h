@@ -24,6 +24,7 @@ public:
 		IDLE,		//待機
 		MOVE,		//移動
 		ATTACK,		//攻撃
+		DAMAGE,		//ダメージを受ける
 	};
 
 	//コンストラクタ
@@ -139,7 +140,10 @@ private:
 	/// </summary>
 	void FollowMove(void);
 
-
+	/// <summary>
+	/// 攻撃アニメーションが終了したかどうか
+	/// </summary>
+	/// <returns>true:終了　false:未終了</returns>
 	bool IsEndAttack(void);
 };
 

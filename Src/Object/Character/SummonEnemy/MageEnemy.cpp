@@ -2,6 +2,7 @@
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Manager/GameSystem/Camera.h"
+#include "../Manager/Generic/JsonManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
 #include "../../Common/AnimationController.h"
@@ -10,6 +11,18 @@
 #include "../../Common/Geometry/Sphere.h"
 #include "../../EnemyBullet.h"
 #include "MageEnemy.h"
+
+// 長いのでnamespaceの省略
+using json = nlohmann::json;
+
+namespace
+{
+	//JSONのデータのオブジェクト指定キー
+	static const std::string KEY_MAGE = "Mage";
+	//アニメーションキー名
+	static const std::string KEY_IDLE = "Idle";		//通常
+	static const std::string KEY_ATTACK = "Attack";	//攻撃
+}
 
 MageEnemy::MageEnemy(Player& player) :
 	SummonEnemyBase(player)
@@ -62,23 +75,41 @@ void MageEnemy::Draw(void)
 {
 	//モデルの描画
 	renderer_->Draw();
+
+	DrawFormatString(10, 100, 0xFFFFFF,
+		L"Mage HP: %2.f", hp_);
 }
 
 void MageEnemy::Init3DModel(void)
 {
+	const JsonManager& jsonM = JsonManager::GetInstance();
+	const json& data = jsonM.GetJsonData(
+		JsonManager::JSON_DATA::FIGHTER_GHOST, KEY_MAGE);
+	//データが含まれていない場合はエラーメッセージを出す
+	if (!data.contains(JsonManager::KEY_TRANSFORM))
+	{
+		assert(0 && "データが存在しないか不正なデータです");
+	}
+	const json& transformData = data[JsonManager::KEY_TRANSFORM];
 	//モデルの基本設定
 	transform_.SetModel(ResourceManager::GetInstance().LoadModelDuplicate(
 		ResourceManager::SRC::MAGE_GHOST));
 	//モデルの大きさ(Jsonデータから取得できなかったら1.0f)
-	const float scale = 0.7f;
+	const float scale = transformData.value(JsonManager::KEY_SCALE, 1.0f);
+	//const float scale = 50.0f;
 	transform_.scl = { scale ,scale ,scale };
 	//モデルの初期位置
-	transform_.pos = CommonUtility::VECTOR_ZERO;
+	transform_.pos = JsonManager::GetParseVector(transformData, JsonManager::KEY_POSITION);
 	//モデルの初期回転(度数法で保存されているのでラジアンに変換)
-	const float rotY = 180.0f;
+	const float rotY = transformData.value(JsonManager::KEY_ROT_Y, 0.0f);
 	transform_.quaRot = Quaternion();
 	transform_.quaRotLocal = Quaternion::Euler({ 0.0f, CommonUtility::Deg2RadF(rotY), 0.0f });
 	transform_.Update();
+
+	//HPを設定
+	const json& paramData = data[JsonManager::KEY_PARAMETER];
+	SetHP(paramData.value(JsonManager::KEY_HP, 0.0f));
+	SetMaxHP(paramData.value(JsonManager::KEY_MAX_HP, 0.0f));
 }
 
 void MageEnemy::InitAnimation(void)
@@ -90,6 +121,8 @@ void MageEnemy::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Ghost_Idle.mv1",
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::ATTACK, path + "Mage_Attack.mv1",
+		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::DAMAGE, path + "Damage.mv1",
 		animSpeed);
 }
 
@@ -272,6 +305,35 @@ void MageEnemy::Shoot(void)
 		bullet_->SetTargetPos(player_.GetTransform().pos);
 	}
 
+	if (bullet_->GetState() == EnemyBullet::STATE::DESTROY)return;
+
+	//パリィ
+	if (player_.GetIsParry() &&
+		CommonUtility::IsHitSpheres(
+			bullet_->GetSphere().GetPos(),
+			bullet_->GetSphere().GetRadius(),
+			player_.GetSphere().GetPos(),
+			player_.GetSphere().GetRadius()))
+	{
+		bullet_->SetStateReverse();
+		VECTOR targetPos = transform_.pos;
+		targetPos.y += 80.0f;
+		bullet_->SetTargetPos(targetPos);
+	}
+
+	//
+	if (bullet_->GetState() == EnemyBullet::STATE::REVERSE &&
+		CommonUtility::IsHitSpheres(
+		bullet_->GetSphere().GetPos(),
+		bullet_->GetSphere().GetRadius(),
+		sphere_->GetPos(),
+		sphere_->GetRadius()))
+	{
+		hp_ -= 10.0f;
+		bullet_->SetStateDestroy();
+		animationController_->Play((int)ANIM_TYPE::DAMAGE, false);
+	}
+
 	if (CommonUtility::IsHitSphereCapsule(
 		bullet_->GetSphere().GetPos(),
 		bullet_->GetSphere().GetRadius(),
@@ -284,6 +346,7 @@ void MageEnemy::Shoot(void)
 		//弾を消す
 		bullet_->SetStateDestroy();
 		bulletInterval_ = 0.0f;
-		ChangeState(STATE::MOVE);
+		//画面揺らし
+		SceneManager::GetInstance().StartShakeScreen();
 	}
 }

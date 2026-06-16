@@ -136,6 +136,8 @@ void FighterEnemy::InitAnimation(void)
 		animSpeed);
 	animationController_->Add((int)ANIM_TYPE::ATTACK, path + "Fighter_Attack.mv1",
 		animSpeed);
+	animationController_->Add((int)ANIM_TYPE::DAMAGE, path + "Damage.mv1",
+		animSpeed);
 }
 
 void FighterEnemy::InitMaterial(void)
@@ -268,20 +270,30 @@ void FighterEnemy::UpdateAttack(void)
 	const float attackStartStep = 25.0f;
 	const float attackEndStep = 35.0f;
 	//攻撃の当たり判定を有効にするタイミング（斧を振りかぶるとき）
-	if (currentStep > attackStartStep && currentStep < attackEndStep)
+	if (animationController_->GetPlayType() == (int)ANIM_TYPE::ATTACK &&
+		currentStep > attackStartStep &&
+		currentStep < attackEndStep)
 	{
 		isAttack_ = true;
-	}
-
-	//アニメーションが終わったら移動状態に遷移
-	if(IsEndAttack())
-	{
-		ChangeState(STATE::MOVE);
 	}
 
 	//攻撃の当たり判定
 	if (!isHitAttack_ && isAttack_)
 	{
+		//パリィの判定
+		if (player_.GetIsParry() &&
+			CommonUtility::IsHitSpheres(
+			sphere_->GetPos(),
+			sphere_->GetRadius(),
+			player_.GetSphere().GetPos(),
+			player_.GetSphere().GetRadius()
+		))
+		{
+			hp_ -= 10.0f;
+			animationController_->Play((int)ANIM_TYPE::DAMAGE,false);
+			return;
+		}
+		//プレイヤーのダメージ判定
 		if(CommonUtility::IsHitSphereCapsule(
 			sphere_->GetPos(), sphere_->GetRadius(),
 			player_.GetCapsule().GetPosTop(),
@@ -296,12 +308,19 @@ void FighterEnemy::UpdateAttack(void)
 		}
 	}
 
+	//アニメーションが終わったら移動状態に遷移
+	if (animationController_->IsEnd())
+	{
+		ChangeState(STATE::MOVE);
+	}
+
 	if (animationController_->GetPlayAnimStep() > attackStartStep)return;
 	//追従（プレイヤーを見続ける）
 	Rotate2Player();
 
 	//回転処理
 	Rotate();
+
 }
 
 void FighterEnemy::FollowMove(void)

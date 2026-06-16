@@ -19,6 +19,22 @@
     }
     },
     "Mage":{
-    "A":0
+    "Transform":
+    {
+      "position": [0.0, 0.0, 0.0],
+      "scale": 0.7,
+      "localRotY": 180.0
+    },
+    "Animation": 
+    {
+      "defaultSpeed":15.0,
+      "Idle": "Ghost_Idle.mv1",
+      "Attack":"Mage_Attack.mv1"
+    },
+    "Parameter":
+    {
+      "hp": 100.0,
+      "maxHp":100.0
+    }
     }
 }

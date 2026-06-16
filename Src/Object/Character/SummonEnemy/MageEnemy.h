@@ -24,6 +24,7 @@ public:
 	{
 		IDLE,		//待機
 		ATTACK,		//攻撃
+		DAMAGE,		//ダメージを受ける
 	};
 
 	//コンストラクタ
