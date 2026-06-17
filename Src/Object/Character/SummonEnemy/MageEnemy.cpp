@@ -10,6 +10,7 @@
 #include "../../Common/Geometry/Capsule.h"
 #include "../../Common/Geometry/Sphere.h"
 #include "../../EnemyBullet.h"
+#include "../../UI/HPBar.h"
 #include "MageEnemy.h"
 
 // ’·‚¢‚Ì‚Ånamespace‚ÌÈ—ª
@@ -57,6 +58,9 @@ void MageEnemy::Init(void)
 	//“–‚½‚è”»’è‚Ì‰Šú‰»
 	InitCollider();
 
+	//UI‚Ì‰Šú‰»
+	InitUI();
+
 	//’e‚Ì¶¬‚Æ‰Šú‰»
 	bullet_ = std::make_unique<EnemyBullet>(transform_);
 	bullet_->Init();
@@ -77,6 +81,16 @@ void MageEnemy::Draw(void)
 	renderer_->Draw();
 }
 
+void MageEnemy::DrawUI(void)
+{
+	//HP‚ªÅ‘å’l‚æ‚èŒ¸‚Á‚Ä‚¢‚½‚ç•\¦
+	if (hp_ < maxHp_)hpBar_->SetActive(true);
+	else hpBar_->SetActive(false);
+
+	//HPƒo[‚Ì•`‰æ
+	hpBar_->DrawBillboard();
+}
+ 
 void MageEnemy::Init3DModel(void)
 {
 	const JsonManager& jsonM = JsonManager::GetInstance();
@@ -186,6 +200,18 @@ void MageEnemy::InitCollider(void)
 
 void MageEnemy::InitUI(void)
 {
+	const VECTOR offset = { 0.0f, 100.0f, 0.0f };
+	const float uiScale = 1.0f;
+	hpBar_ = std::make_unique<HPBar>(
+		HPBar::BillboardInfo{
+			HPBar::TYPE::ENEMY,
+			&transform_.pos,
+			offset,
+			uiScale,//UI‚ÌŠg‘å—¦X
+			uiScale	//UI‚ÌŠg‘å—¦Y
+		},
+		hp_, maxHp_);
+	hpBar_->Init();
 }
 
 void MageEnemy::ChangeStateNone(void)

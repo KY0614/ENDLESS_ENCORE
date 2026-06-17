@@ -71,7 +71,7 @@ void HPBar::Draw(void)
 	);
 }
 
-void HPBar::DrawWorld2Screen(void)
+void HPBar::DrawBillboard(void)
 {
 	if (!isActive_ || hp_ <= 0.0f)return;
 	

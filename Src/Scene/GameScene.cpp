@@ -654,8 +654,8 @@ void GameScene::DrawLastBattle(void)
 	player_->Draw();
 	//“G•`‰æ
 	//enemy_->Draw();
-	fighterEnemy_->Draw();
-	mageEnemy_->Draw();
+	fighterEnemy_->Draw();	//‹ßÚŒ^‚Ì“G•`‰æ
+	mageEnemy_->Draw();		//‰“‹——£Œ^‚Ì“G•`‰æ
 
 	//–¶‚Ì•Ç•`‰æ
 	stage_->DrawTranslucent();
@@ -670,7 +670,8 @@ void GameScene::DrawLastBattle(void)
 	player_->DrawDead();
 
 	//¢Š«‚³‚ê‚½“G‚ÌUI•`‰æ
-	fighterEnemy_->DrawUI();
+	fighterEnemy_->DrawUI();	//‹ßÚŒ^‚ÌUI•`‰æ
+	mageEnemy_->DrawUI();		//‰“‹——£Œ^‚ÌUI•`‰æ
 	//“GUI•`‰æ
 	enemy_->DrawBarUI();
 	//ƒvƒŒƒCƒ„[UI•`‰æ

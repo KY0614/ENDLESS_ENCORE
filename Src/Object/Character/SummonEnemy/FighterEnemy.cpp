@@ -105,7 +105,7 @@ void FighterEnemy::DrawUI(void)
 	else hpBar_->SetActive(false);
 
 	//HPƒo[‚Ì•`‰æ
-	hpBar_->DrawWorld2Screen();
+	hpBar_->DrawBillboard();
 }
 
 void FighterEnemy::Init3DModel(void)

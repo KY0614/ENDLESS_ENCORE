@@ -62,7 +62,7 @@ public:
 	/// ワールド座標からスクリーン座標に変換して描画する
 	/// </summary>
 	/// <param name="">ビルボード描画てきな</param>
-	void DrawWorld2Screen(void);
+	void DrawBillboard(void);
 
 private:
 	//HPバーの情報

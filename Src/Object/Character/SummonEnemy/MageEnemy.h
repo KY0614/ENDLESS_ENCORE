@@ -8,6 +8,7 @@ class AnimationController;
 class Capsule;
 class Sphere;
 class EnemyBullet;
+class HPBar;
 
 class MageEnemy : public SummonEnemyBase
 {
@@ -47,6 +48,11 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// UI描画
+	/// </summary>
+	void DrawUI(void);
+
 private:
 	//アニメーション
 	std::unique_ptr<AnimationController> animationController_;
@@ -62,6 +68,9 @@ private:
 
 	//弾
 	std::unique_ptr<EnemyBullet> bullet_;
+
+	//HPバーUI
+	std::unique_ptr<HPBar> hpBar_;
 
 	float bulletInterval_;	//弾の発射間隔
 

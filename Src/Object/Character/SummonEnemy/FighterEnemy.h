@@ -48,6 +48,10 @@ public:
 	/// </summary>
 	void Draw(void) override;
 
+	/// <summary>
+	/// UI描画
+	/// </summary>
+	/// <param name=""></param>
 	void DrawUI(void);
 	
 	/// <summary>
@@ -70,7 +74,7 @@ private:
 	//球体
 	std::unique_ptr<Sphere> sphere_;
 
-	//HPバー
+	//HPバーUI
 	std::unique_ptr<HPBar> hpBar_;
 
 	//状態遷移のタイマー
