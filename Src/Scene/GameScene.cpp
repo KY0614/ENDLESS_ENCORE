@@ -669,6 +669,8 @@ void GameScene::DrawLastBattle(void)
 	//YouDied•`‰æ
 	player_->DrawDead();
 
+	//¢Š«‚³‚ê‚½“G‚ÌUI•`‰æ
+	fighterEnemy_->DrawUI();
 	//“GUI•`‰æ
 	enemy_->DrawBarUI();
 	//ƒvƒŒƒCƒ„[UI•`‰æ

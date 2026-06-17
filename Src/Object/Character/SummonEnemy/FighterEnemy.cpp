@@ -62,6 +62,9 @@ void FighterEnemy::Init(void)
 
 	//当たり判定の初期化
 	InitCollider();
+
+	//UIの初期化
+	InitUI();
 }
 
 void FighterEnemy::Update(void)
@@ -93,6 +96,16 @@ void FighterEnemy::Draw(void)
 	int col = Sphere::COLOR;
 	if (isAttack_)col = 0xFF0000;
 	sphere_->Draw(col,true);
+}
+
+void FighterEnemy::DrawUI(void)
+{
+	//HPが最大値より減っていたら表示
+	if (hp_ < maxHp_)hpBar_->SetActive(true);
+	else hpBar_->SetActive(false);
+
+	//HPバーの描画
+	hpBar_->DrawWorld2Screen();
 }
 
 void FighterEnemy::Init3DModel(void)
@@ -204,19 +217,17 @@ void FighterEnemy::InitCollider(void)
 
 void FighterEnemy::InitUI(void)
 {
-	//HPバーの高さ
-	const int HP_BAR_HEIGHT = 30;
-	const int posX = Application::SCREEN_SIZE_X / 2 - static_cast<int>(maxHp_) / 2;
-	//const int posY = Application::SCREEN_SIZE_Y - (HP_BAR_HEIGHT * 3);
-	//画面を10分割したうちの9/10の位置
-	const float heightRatio = 0.9f;
-	const int posY = static_cast<int>(Application::SCREEN_SIZE_Y * heightRatio);
+	const VECTOR offset = { 0.0f, 100.0f, 0.0f };
+	const float uiScale = 1.0f;
 	hpBar_ = std::make_unique<HPBar>(
-		HPBar::HPBarInfo{
+		HPBar::BillboardInfo{
 			HPBar::TYPE::ENEMY,
-			{posX,posY},
-			Vector2(static_cast<int>(maxHp_), HP_BAR_HEIGHT)
-		}, hp_);
+			&transform_.pos,
+			offset,
+			uiScale,//UIの拡大率X
+			uiScale	//UIの拡大率Y
+		}, 
+		hp_,maxHp_);
 	hpBar_->Init();
 }
 

@@ -47,6 +47,8 @@ public:
 	/// •`‰æˆ—
 	/// </summary>
 	void Draw(void) override;
+
+	void DrawUI(void);
 	
 	/// <summary>
 	/// UŒ‚’†‚©‚Ç‚¤‚©
