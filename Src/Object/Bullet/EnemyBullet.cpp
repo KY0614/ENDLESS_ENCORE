@@ -4,8 +4,9 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Utility/CommonUtility.h"
-#include "Common/Geometry/Sphere.h"
+#include "../Common/Geometry/Sphere.h"
 #include "EnemyBullet.h"
+#include "BulletBase.h"
 
 namespace 
 {
@@ -88,7 +89,7 @@ void EnemyBullet::Update(void)
 
 	transform_.Update();
 }
- 
+
 void EnemyBullet::Draw(void)
 {
 }
@@ -110,9 +111,8 @@ void EnemyBullet::Reset(const Transform& transform)
 	ChangeState(STATE::NONE);
 	transform_.pos = transform.pos;
 	transform_.quaRot = transform.quaRot;
-	//èîÅXÉÇÉfÉãÇÃèâä˙âª
-	const VECTOR ARROW_LOCAL_POS = { 0.0f, 185.0f, 0.0f };
-	VECTOR localPos = transform_.quaRot.PosAxis(ARROW_LOCAL_POS);
+	const VECTOR LOCAL_POS = { 0.0f, 0.0f, 0.0f };
+	VECTOR localPos = transform_.quaRot.PosAxis(LOCAL_POS);
 	transform_.pos = VAdd(transform_.pos, localPos);
 }
 

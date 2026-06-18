@@ -1,11 +1,11 @@
 #pragma once
 #include <functional>
 #include <map>
-#include "Common/ActorBase.h"
+#include "../Common/ActorBase.h"
 
 class Sphere;
 
-class EnemyBullet :  public ActorBase
+class BulletBase : public ActorBase
 {
 public:
 	//状態
@@ -18,47 +18,26 @@ public:
 		DESTROY,//破棄
 	};
 
-	//弾の種類
-	enum class SHOT_TYPE
-	{
-		NORMAL,	//通常弾
-		HOMING,	//追尾弾
-	};
-
-	/// <summary>
-	/// コンストラクタ
-	/// </summary>
-	/// <param name="parent">親のTransform</param>
-	EnemyBullet(Transform& parent);
+	//コンストラクタ
+	BulletBase(Transform& parent);
 	//デストラクタ
-	~EnemyBullet(void)override;
+	virtual ~BulletBase(void)override;
 
 	/// <summary>
 	///	初期化
 	/// </summary>
-	void Init(void) override;
+	virtual void Init(void) override;
 
 	/// <summary>
 	///	更新処理
 	/// </summary>
-	void Update(void) override;
-
-	/// <summary>
-	/// 描画処理
-	/// </summary>
-	void Draw(void) override;
+	virtual void Update(void) override;
 
 	/// <summary>
 	/// 状態を取得
 	/// </summary>
 	/// <returns>現在の状態</returns>
 	const STATE& GetState(void)const { return state_; }
-
-	/// <summary>
-	/// 弾の種類を取得
-	/// </summary>
-	/// <returns>弾の種類</returns>
-	const SHOT_TYPE& GetShotType(void)const { return shotType_; }
 
 	/// <summary>
 	/// 当たり判定用の球体を取得
@@ -86,7 +65,7 @@ public:
 	/// <summary>
 	/// 反射状態へ遷移
 	/// </summary>
-	void SetStateReverse(void) { ChangeState(STATE::REVERSE);}
+	void SetStateReverse(void) { ChangeState(STATE::REVERSE); }
 
 	/// <summary>
 	/// 速度を設定
@@ -101,30 +80,6 @@ public:
 	void SetIsAlive(const bool isAlive) { isAlive_ = isAlive; }
 
 	/// <summary>
-	/// ターゲット座標を設定
-	/// </summary>
-	/// <param name="targetPos">指定するターゲット座標</param>
-	void SetTargetPos(const VECTOR& targetPos) { targetPos_ = targetPos; }
-
-	/// <summary>
-	/// オフセット座標を設定
-	/// </summary>
-	/// <param name="pos">指定するローカル座標</param>
-	void SetOffsetPos(const VECTOR& offset);
-
-	/// <summary>
-	/// ローカル座標を設定
-	/// </summary>
-	/// <param name="pos">指定するローカル座標</param>
-	void SetLocalPos(const VECTOR& local);
-
-	/// <summary>
-	/// 座標を設定
-	/// </summary>
-	/// <param name="pos">座標</param>
-	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
-
-	/// <summary>
 	/// リセットする
 	/// </summary>
 	void Reset(const Transform& transform);
@@ -135,10 +90,9 @@ public:
 	/// <param name="state">遷移したい状態</param>
 	void ChangeState(const STATE& state);
 
-private:
+protected:
 	//状態管理
-	STATE state_;			//現在の状態
-	SHOT_TYPE shotType_;	//弾の種類
+	STATE state_;
 
 	//状態管理(状態遷移時初期処理)
 	std::map<STATE, std::function<void(void)>> stateChanges_;
@@ -146,13 +100,11 @@ private:
 	//状態管理(更新ステップ)
 	std::function<void(void)> stateUpdate_;
 
+	//球体
+	std::unique_ptr<Sphere> sphere_;
+
 	//親のモデル情報
 	Transform& parentTran_;
-
-	//座標情報	
-	VECTOR localPos_;	//ローカル座標
-	VECTOR offsetPos_;	//オフセット座標
-	VECTOR targetPos_;	//ターゲット座標
 
 	//速度
 	float speed_;
@@ -163,8 +115,9 @@ private:
 	//生存状態
 	bool isAlive_;
 
-	//球体
-	std::unique_ptr<Sphere> sphere_;
+	//座標情報	
+	VECTOR localPos_;	//ローカル座標
+	VECTOR offsetPos_;	//オフセット座標
 
 	//炎エフェクト
 	int effectFireResId_;	//エフェクトリソースID
@@ -186,46 +139,46 @@ private:
 	/// <summary>
 	/// 状態遷移：NONE
 	/// </summary>
-	void ChangeStateNone(void);
+	virtual void ChangeStateNone(void) = 0;
 	/// <summary>
 	/// 状態遷移：READY
 	/// </summary>
-	void ChangeStateReady(void);
+	virtual void ChangeStateReady(void) = 0;
 	/// <summary>
 	/// 状態遷移：SHOT
 	/// </summary>
-	void ChangeStateShot(void);
+	virtual void ChangeStateShot(void) = 0;
 	/// <summary>
 	/// 状態遷移：REVERSE
 	/// </summary>
-	void ChangeStateReverse(void);
+	virtual void ChangeStateReverse(void) = 0;
 	/// <summary>
 	/// 状態遷移：DESTROY
 	/// </summary>
-	void ChangeStateDestroy(void);
+	virtual void ChangeStateDestroy(void) = 0;
 
 	//状態更新処理------------------------------------------------------
 
 	/// <summary>
 	/// 更新：NONE
 	/// </summary>
-	void UpdateNone(void);
+	virtual void UpdateNone(void) = 0;
 	/// <summary>
 	/// 更新：READY
 	/// </summary>
-	void UpdateReady(void);
+	virtual void UpdateReady(void) = 0;
 	/// <summary>
 	/// 更新：SHOT
 	/// </summary>
-	void UpdateShot(void);
+	virtual void UpdateShot(void) = 0;
 	/// <summary>
 	///	 更新：REVERSE
 	/// </summary>
-	void UpdateReverse(void);
+	virtual void UpdateReverse(void) = 0;
 	/// <summary>
 	/// 更新：DESTROY
 	/// </summary>
-	void UpdateDestroy(void);
+	virtual void UpdateDestroy(void) = 0;
 
 	//当たり判定処理------------------------------------------------------
 
@@ -239,7 +192,7 @@ private:
 	/// <summary>
 	/// 移動処理
 	/// </summary>
-	void Move(void);
+	virtual void Move(void) = 0;
 
 	/// <summary>
 	/// 相対座標を親の回転に同期させる

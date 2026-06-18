@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Bullet\BulletBase.cpp" />
+    <ClCompile Include="Src\Object\Bullet\HomingBullet.cpp" />
     <ClCompile Include="Src\Object\Character\SummonEnemy\MageEnemy.cpp" />
     <ClCompile Include="Src\Object\Character\SummonEnemy\FighterEnemy.cpp" />
     <ClCompile Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.cpp" />
@@ -32,7 +34,7 @@
     <ClCompile Include="Src\Scene\EncountScene.cpp" />
     <ClCompile Include="Src\Common\FpsController.cpp" />
     <ClCompile Include="Src\Manager\Generic\JsonManager.cpp" />
-    <ClCompile Include="Src\Object\EnemyBullet.cpp" />
+    <ClCompile Include="Src\Object\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="Src\Object\Character\Enemy.cpp" />
     <ClCompile Include="Src\Manager\GameSystem\SoundManager.cpp" />
     <ClCompile Include="Src\Common\Easing.cpp" />
@@ -76,6 +78,8 @@
     <ClCompile Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Bullet\BulletBase.h" />
+    <ClInclude Include="Src\Object\Bullet\HomingBullet.h" />
     <ClInclude Include="Src\Object\Character\SummonEnemy\MageEnemy.h" />
     <ClInclude Include="Src\Object\Character\SummonEnemy\FighterEnemy.h" />
     <ClInclude Include="Src\Object\ImGuiComponent\ImGuiComponentCharacter.h" />
@@ -91,7 +95,7 @@
     <ClInclude Include="Src\Scene\EncountScene.h" />
     <ClInclude Include="Src\Common\FpsController.h" />
     <ClInclude Include="Src\Manager\Generic\JsonManager.h" />
-    <ClInclude Include="Src\Object\EnemyBullet.h" />
+    <ClInclude Include="Src\Object\Bullet\EnemyBullet.h" />
     <ClInclude Include="Src\Object\Character\Enemy.h" />
     <ClInclude Include="Src\Manager\GameSystem\SoundManager.h" />
     <ClInclude Include="Src\Common\Easing.h" />
