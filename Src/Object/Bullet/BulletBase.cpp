@@ -1,6 +1,8 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "../Utility/CommonUtility.h"
+#include "../Manager/Generic/ResourceManager.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "../Common/Geometry/Sphere.h"
 #include "BulletBase.h"
 
@@ -36,10 +38,6 @@ void BulletBase::Update(void)
 {
 }
 
-void BulletBase::Draw(void)
-{
-}
-
 void BulletBase::Reset(const Transform& transform)
 {
 	//‰Šúó‘Ô‚Ö
@@ -55,6 +53,14 @@ void BulletBase::ChangeState(const STATE& state)
 
 	//Šeó‘Ô‘JˆÚ‚Ì‰Šúˆ—
 	stateChanges_[state_]();
+}
+
+void BulletBase::InitSound(void)
+{
+	//ƒTƒEƒ“ƒh‚Ì“o˜^
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::FIRE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::FIRE_SE).handleId_);
 }
 
 void BulletBase::CollisionSphere(void)

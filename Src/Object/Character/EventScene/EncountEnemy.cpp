@@ -7,7 +7,7 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/Generic/JsonManager.h"
 #include "../../Common/AnimationController.h"
-#include "../../EnemyBullet.h"
+#include "../../Bullet/EnemyBullet.h"
 #include "EncountEnemy.h"
 
 // ’·‚¢‚Ì‚Ånamespace‚ÌÈ—ª

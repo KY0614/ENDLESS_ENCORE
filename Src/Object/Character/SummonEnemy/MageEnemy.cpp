@@ -10,7 +10,7 @@
 #include "../Utility/CommonUtility.h"
 #include "../../Common/Geometry/Capsule.h"
 #include "../../Common/Geometry/Sphere.h"
-#include "../../EnemyBullet.h"
+#include "../../Bullet/EnemyBullet.h"
 #include "../../UI/HPBar.h"
 #include "MageEnemy.h"
 

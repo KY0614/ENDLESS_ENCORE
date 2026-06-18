@@ -9,6 +9,7 @@ class AnimationController;
 class Sphere;
 class Player;
 class EnemyBullet;
+class HomingBullet;
 class ModelRenderer;
 class ModelMaterial;
 class ImGuiComponentCharacter;
@@ -150,6 +151,7 @@ private:
 
 	//’e
 	std::vector<std::unique_ptr<EnemyBullet>> bullets_;
+	std::vector<std::unique_ptr<HomingBullet>> bulletsH_;
 
 	//‹ßÚUŒ‚—p‚Ì“–‚½‚è”»’è‹…
 	std::unique_ptr<Sphere> sphereNear_;

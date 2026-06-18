@@ -17,7 +17,8 @@
 #include "../Common/Geometry/Sphere.h"
 #include "../UI/HPBar.h"
 #include "../ImGuiComponent/ImGuiComponentCharacter.h"
-#include "../EnemyBullet.h"
+#include "../Bullet/EnemyBullet.h"
+#include "../Bullet/HomingBullet.h"
 #include "Player.h"
 #include "Enemy.h"
 
@@ -172,12 +173,18 @@ void Enemy::Update(void)
 	if (hp_ <= 0.0f)
 	{
 		hitCount_ = 0;
-		for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+		//for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+		//{
+		//	//弾をすべて破棄状態にする
+		//	bullet->SetStateDestroy();
+		//}
+		for (const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 		{
 			//弾をすべて破棄状態にする
 			bullet->SetStateDestroy();
 		}
-		bullets_.clear();
+		//bullets_.clear();
+		bulletsH_.clear();
 		ChangeState(STATE::DEAD);
 	}
 
@@ -200,7 +207,12 @@ void Enemy::Draw(void)
 	//MV1DrawModel(transform_.modelId);
 	renderer_->Draw();
 
-	for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//{
+	//	bullet->Draw();
+	//}
+
+	for(const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
 		bullet->Draw();
 	}
@@ -661,16 +673,30 @@ void Enemy::UpdateShotOne(void)
 	//状態時間更新
 	stateStep_ += SceneManager::GetInstance().GetDeltaTime();
 
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//{
+	//	bullet->Update();
+	//}
+
+	for (const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
 		bullet->Update();
 	}
 
 	//弾を0.7f間隔で順々に準備状態にする
 	const float bulletInterval = 0.7f;
-	for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//{
+	//	if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
+	//	if (stateStep_ > bulletInterval)
+	//	{
+	//		bullet->SetStateReady();
+	//		stateStep_ = 0.0f;
+	//	}
+	//}
+	for (std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
-		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
+		if (bullet->GetState() != BulletBase::STATE::NONE)continue;
 		if (stateStep_ > bulletInterval)
 		{
 			bullet->SetStateReady();
@@ -682,7 +708,13 @@ void Enemy::UpdateShotOne(void)
 	ShootBulletOne(bulletInterval);
 
 	//全弾命中でダウン状態へ
-	if (hitCount_ >= static_cast<int>(bullets_.size()))
+	//if (hitCount_ >= static_cast<int>(bullets_.size()))
+	//{
+	//	ChangeState(STATE::DOWN);
+	//	hitCount_ = 0;
+	//	return;
+	//}
+	if (hitCount_ >= static_cast<int>(bulletsH_.size()))
 	{
 		ChangeState(STATE::DOWN);
 		hitCount_ = 0;
@@ -714,9 +746,19 @@ void Enemy::UpdateShotAll(void)
 
 	//弾を順々に準備状態にする
 	const float bulletInterval = 0.4f;
-	for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for (std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//{
+	//	if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
+	//	if (stateStep_ > bulletInterval)
+	//	{
+	//		bullet->SetStateReady();
+	//		stateStep_ = 0.0f;
+	//		continue;
+	//	}
+	//}
+	for (std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
-		if (bullet->GetState() != EnemyBullet::STATE::NONE)continue;
+		if (bullet->GetState() != BulletBase::STATE::NONE)continue;
 		if (stateStep_ > bulletInterval)
 		{
 			bullet->SetStateReady();
@@ -727,19 +769,88 @@ void Enemy::UpdateShotAll(void)
 	if (CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ALL, false);
 
 	//弾が全部準備できたらプレイヤーに向けて発射する
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//{
+	//	if (CheckBulletDestroy())break;
+	//	//準備済みの弾をプレイヤーに向けて発射する
+	//	if (stateStep_ > bulletInterval &&
+	//		bullet->GetState() == EnemyBullet::STATE::READY)
+	//	{
+	//		//ターゲットに発射
+	//		bullet->SetStateShot();
+	//		bullet->SetTargetPos(player_.GetTransform().pos);
+	//	}
+	//	//プレイヤーを追い続ける
+	//	if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
+
+	//	bullet->Update();
+
+	//	//パリィ判定
+	//	if (CommonUtility::IsHitSpheres(
+	//		bullet->GetSphere().GetPos(), bullet->GetSphere().GetRadius(),
+	//		player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
+	//	{
+	//		//破棄状態の弾は無視
+	//		if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+	//		//パリィ中にあたったら弾を跳ね返す
+	//		if (player_.GetIsParry())
+	//		{
+	//			bullet->SetStateReverse();
+	//			//ターゲット座標に高さを加えて胸のあたりを狙う
+	//			const float targetOffY = 80.0f;
+	//			VECTOR targetPos = VAdd(transform_.pos, VGet(0.0f, targetOffY, 0.0f));
+	//			bullet->SetTargetPos(targetPos);
+	//			continue;
+	//		}
+	//	}
+
+	//	//弾とプレイヤーの当たり判定
+	//	if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+	//		bullet->GetSphere().GetRadius(), player_.GetCapsule().GetPosTop(),
+	//		player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
+	//	{
+	//		//破棄状態の弾は無視
+	//		if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+	//		//回避中だったらダメージを受けない
+	//		if (player_.GetIsDodge())
+	//		{
+	//			continue;
+	//		}
+	//		//ダメージ処理(当たった弾は破棄)
+	//		player_.Damage(ATTACK_FAR_DAMAGE);
+	//		SceneManager::GetInstance().StartShakeScreen();
+	//		bullet->SetStateDestroy();
+	//	}
+
+	//	//反射された弾と敵の当たり判定
+	//	if (CommonUtility::IsHitSphereCapsule(bullet->GetSphere().GetPos(),
+	//		bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
+	//		capsule_->GetPosDown(), capsule_->GetRadius()))
+	//	{
+	//		if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
+	//		//ダメージ処理(当たった弾は破棄)
+	//		Damage(PARRY_DAMAGE);
+	//		//ダメージ音再生
+	//		SoundManager::GetInstance().Play(SoundManager::SOUND::DAMAGE);
+	//		bullet->SetStateDestroy();
+	//		hitCount_++;
+	//		continue;
+	//	}
+	//}
+
+	for (const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
 		if (CheckBulletDestroy())break;
 		//準備済みの弾をプレイヤーに向けて発射する
 		if (stateStep_ > bulletInterval &&
-			bullet->GetState() == EnemyBullet::STATE::READY)
+			bullet->GetState() == BulletBase::STATE::READY)
 		{
 			//ターゲットに発射
 			bullet->SetStateShot();
-			bullet->SetTargetPos(player_.GetTransform().pos);
+			//bullet->SetTargetPos(player_.GetTransform().pos);
 		}
 		//プレイヤーを追い続ける
-		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
+		if (bullet->GetState() == BulletBase::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
 
 		bullet->Update();
 
@@ -749,7 +860,7 @@ void Enemy::UpdateShotAll(void)
 			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
 		{
 			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			if (bullet->GetState() == BulletBase::STATE::DESTROY)continue;
 			//パリィ中にあたったら弾を跳ね返す
 			if (player_.GetIsParry())
 			{
@@ -768,7 +879,7 @@ void Enemy::UpdateShotAll(void)
 			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
 		{
 			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			if (bullet->GetState() == BulletBase::STATE::DESTROY)continue;
 			//回避中だったらダメージを受けない
 			if (player_.GetIsDodge())
 			{
@@ -785,7 +896,7 @@ void Enemy::UpdateShotAll(void)
 			bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
 			capsule_->GetPosDown(), capsule_->GetRadius()))
 		{
-			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
+			if (bullet->GetState() != BulletBase::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
 			Damage(PARRY_DAMAGE);
 			//ダメージ音再生
@@ -797,7 +908,14 @@ void Enemy::UpdateShotAll(void)
 	}
 
 	//全弾命中でダウン状態へ
-	if (hitCount_ >= static_cast<int>(bullets_.size()))
+	//if (hitCount_ >= static_cast<int>(bullets_.size()))
+	//{
+	//	stateStep_ = 0.0f;
+	//	ChangeState(STATE::DOWN);
+	//	hitCount_ = 0;
+	//	return;
+	//}
+	if (hitCount_ >= static_cast<int>(bulletsH_.size()))
 	{
 		stateStep_ = 0.0f;
 		ChangeState(STATE::DOWN);
@@ -1284,27 +1402,34 @@ void Enemy::CreateBullets(const int createNum)
 	//弾の生成数が1以下なら何も生成しない
 	if (createNum <= 1)return;
 	//未生成だったら弾を生成する
-	if (bullets_.empty())
+	//if (bullets_.empty())
+	if (bulletsH_.empty())
 	{
 		for (int i = 0; i < createNum; i++)
 		{
-			bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
-			bullets_.back()->Init();
+			//bullets_.emplace_back(std::make_unique<EnemyBullet>(transform_));
+			//bullets_.back()->Init();
+			bulletsH_.emplace_back(std::make_unique<HomingBullet>(transform_,player_.GetTransform().pos));
+			bulletsH_.back()->Init();
 		}
 
 		//敵と同じ当たり判定を追加する
 		if (colliders_.empty())return;	//当たり判定がなければ追加しない
 		for (const std::weak_ptr<Collider> c : colliders_)
 		{
-			bullets_.back()->AddCollider(c);
+			//bullets_.back()->AddCollider(c);
+			bulletsH_.back()->AddCollider(c);
 		}
 	}
-	bullets_.resize(createNum);
+	//bullets_.resize(createNum);
+	bulletsH_.resize(createNum);
 	//破棄済みの弾を探して再利用する
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	for (const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
 		//弾が消滅していたら再利用する
-		if (bullet->GetState() != EnemyBullet::STATE::DESTROY)continue;
+		//if (bullet->GetState() != EnemyBullet::STATE::DESTROY)continue;
+		if (bullet->GetState() != BulletBase::STATE::DESTROY)continue;
 		bullet->Reset(transform_);
 	}
 	//敵の座標から調整位置を計算
@@ -1331,10 +1456,14 @@ void Enemy::CreateBullets(const int createNum)
 		Quaternion rot = Quaternion::AngleAxis(
 			CommonUtility::Deg2RadD(singleStepDeg), CommonUtility::AXIS_Z);
 		VECTOR rotLocalPos = rot.PosAxis(baseShotPos);
-		//弾の相対座標にセットする
-		bullets_[i]->SetOffsetPos(offSetPos);
-		bullets_[i]->SetLocalPos(rotLocalPos);
-		bullets_[i]->SetPos(
+		////弾の相対座標にセットする
+		//bullets_[i]->SetOffsetPos(offSetPos);
+		//bullets_[i]->SetLocalPos(rotLocalPos);
+		//bullets_[i]->SetPos(
+		//	VAdd(headPos, transform_.quaRot.PosAxis(rotLocalPos)));
+		bulletsH_[i]->SetOffsetPos(offSetPos);
+		bulletsH_[i]->SetLocalPos(rotLocalPos);
+		bulletsH_[i]->SetPos(
 			VAdd(headPos, transform_.quaRot.PosAxis(rotLocalPos)));
 	}
 }
@@ -1342,19 +1471,22 @@ void Enemy::CreateBullets(const int createNum)
 void Enemy::ShootBulletOne(const float shotInterval)
 {
 	//弾が全部準備できたらプレイヤーに向けて１つずつ発射する
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	for (const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
 		//弾の状態を確認し、全部消滅していたら処理しない
 		if (CheckBulletDestroy())break;
 		if (CheckBulletReady())animationController_->Play((int)ANIM_TYPE::ATTACK_FAR_ONE, false);
-		if (stateStep_ > shotInterval && bullet->GetState() == EnemyBullet::STATE::READY)
+		//if (stateStep_ > shotInterval && bullet->GetState() == EnemyBullet::STATE::READY)
+		if (stateStep_ > shotInterval && bullet->GetState() == BulletBase::STATE::READY)
 		{
 			//ターゲットに発射
 			bullet->SetStateShot();
 			bullet->SetTargetPos(player_.GetTransform().pos);
 			stateStep_ = 0.0f;
 		}
-		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
+		//if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
+		if (bullet->GetState() == BulletBase::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
 
 		//パリィ判定
 		if (CommonUtility::IsHitSpheres(
@@ -1362,7 +1494,8 @@ void Enemy::ShootBulletOne(const float shotInterval)
 			player_.GetSphere().GetPos(), player_.GetSphere().GetRadius()))
 		{
 			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			//if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			if (bullet->GetState() == BulletBase::STATE::DESTROY)continue;
 			if (player_.GetIsParry())
 			{
 				bullet->SetStateReverse();
@@ -1380,7 +1513,8 @@ void Enemy::ShootBulletOne(const float shotInterval)
 			player_.GetCapsule().GetPosDown(), player_.GetCapsule().GetRadius()))
 		{
 			//破棄状態の弾は無視
-			if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			//if (bullet->GetState() == EnemyBullet::STATE::DESTROY)continue;
+			if (bullet->GetState() == BulletBase::STATE::DESTROY)continue;
 			//回避中だったらダメージを受けない
 			if (player_.GetIsDodge())continue;
 			//ダメージ処理(当たった弾は破棄)
@@ -1394,7 +1528,8 @@ void Enemy::ShootBulletOne(const float shotInterval)
 			bullet->GetSphere().GetRadius(), capsule_->GetPosTop(),
 			capsule_->GetPosDown(), capsule_->GetRadius()))
 		{
-			if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
+			//if (bullet->GetState() != EnemyBullet::STATE::REVERSE)continue;
+			if (bullet->GetState() != BulletBase::STATE::REVERSE)continue;
 			//ダメージ処理(当たった弾は破棄)
 			Damage(PARRY_DAMAGE);
 			//ダメージ音再生
@@ -1408,9 +1543,11 @@ void Enemy::ShootBulletOne(const float shotInterval)
 
 bool Enemy::CheckBulletReady(void)
 {
-	for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for(const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	for(const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
-		if (bullet->GetState() != EnemyBullet::STATE::READY)
+		//if (bullet->GetState() != EnemyBullet::STATE::READY)
+		if (bullet->GetState() != BulletBase::STATE::READY)
 		{
 			return false;
 		}
@@ -1420,9 +1557,11 @@ bool Enemy::CheckBulletReady(void)
 
 bool Enemy::CheckBulletDestroy(void)
 {
-	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	//for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
+	for (const std::unique_ptr<HomingBullet>& bullet : bulletsH_)
 	{
-		if (bullet->GetState() != EnemyBullet::STATE::DESTROY)
+		//if (bullet->GetState() != EnemyBullet::STATE::DESTROY)
+		if (bullet->GetState() != BulletBase::STATE::DESTROY)
 		{
 			return false;
 		}

@@ -76,6 +76,7 @@
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Object\Tutorial.cpp" />
     <ClCompile Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.cpp" />
+    <ClCompile Include="Src\Object\Bullet\StraightBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Bullet\BulletBase.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="Src\Object\Stage.h" />
     <ClInclude Include="Src\Object\Tutorial.h" />
     <ClInclude Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.h" />
+    <ClInclude Include="Src\Object\Bullet\StraightBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />

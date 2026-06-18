@@ -8,6 +8,14 @@ class Sphere;
 class BulletBase : public ActorBase
 {
 public:
+
+	//弾の速度
+	static constexpr float BULLET_SPEED = 20.0f;
+	//弾の生存時間
+	static constexpr float LIFE_TIME = 8.0f;
+	//SEの音量
+	static constexpr int FIRE_SE_VOLUME = 70;
+
 	//状態
 	enum class STATE
 	{
@@ -80,6 +88,23 @@ public:
 	void SetIsAlive(const bool isAlive) { isAlive_ = isAlive; }
 
 	/// <summary>
+	/// オフセット座標を設定
+	/// </summary>
+	/// <param name="pos">指定するローカル座標</param>
+	void SetOffsetPos(const VECTOR& offset) { offsetPos_ = offset; }
+
+	/// <summary>
+	/// ローカル座標を設定
+	/// </summary>
+	/// <param name="pos">指定するローカル座標</param>
+	void SetLocalPos(const VECTOR& local) { localPos_ = local; }
+	/// <summary>
+	/// 座標を設定
+	/// </summary>
+	/// <param name="pos">座標</param>
+	void SetPos(const VECTOR& pos) { transform_.pos = pos; }
+
+	/// <summary>
 	/// リセットする
 	/// </summary>
 	void Reset(const Transform& transform);
@@ -122,6 +147,17 @@ protected:
 	//炎エフェクト
 	int effectFireResId_;	//エフェクトリソースID
 	int effectFirePlayId_;	//エフェクト再生ID
+
+	/// <summary>
+	/// モデルの基本情報を初期化
+	/// </summary>
+	/// <param name=""></param>
+	virtual void InitTransform(void) = 0;
+
+	/// <summary>
+	/// 当たり判定用のコライダーを初期化
+	/// </summary>
+	virtual void InitCollider(void) = 0;
 
 	/// <summary>
 	/// サウンド初期化
