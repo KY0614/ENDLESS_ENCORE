@@ -20,6 +20,7 @@ public:
 		Vector2 size_ = {};	//サイズ
 	};
 
+	//HPバー情報構造体（ビルボードバージョン）
 	struct BillboardInfo
 	{
 		TYPE type_ = TYPE::PLAYER;		//HPバーの種類

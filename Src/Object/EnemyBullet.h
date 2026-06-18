@@ -18,6 +18,13 @@ public:
 		DESTROY,//”jŠü
 	};
 
+	//’e‚Ìí—Ş
+	enum class SHOT_TYPE
+	{
+		NORMAL,	//’Êí’e
+		HOMING,	//’Ç”ö’e
+	};
+
 	/// <summary>
 	/// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 	/// </summary>
@@ -46,6 +53,12 @@ public:
 	/// </summary>
 	/// <returns>Œ»İ‚Ìó‘Ô</returns>
 	const STATE& GetState(void)const { return state_; }
+
+	/// <summary>
+	/// ’e‚Ìí—Ş‚ğæ“¾
+	/// </summary>
+	/// <returns>’e‚Ìí—Ş</returns>
+	const SHOT_TYPE& GetShotType(void)const { return shotType_; }
 
 	/// <summary>
 	/// “–‚½‚è”»’è—p‚Ì‹…‘Ì‚ğæ“¾
@@ -124,7 +137,8 @@ public:
 
 private:
 	//ó‘ÔŠÇ—
-	STATE state_;
+	STATE state_;			//Œ»İ‚Ìó‘Ô
+	SHOT_TYPE shotType_;	//’e‚Ìí—Ş
 
 	//ó‘ÔŠÇ—(ó‘Ô‘JˆÚ‰Šúˆ—)
 	std::map<STATE, std::function<void(void)>> stateChanges_;

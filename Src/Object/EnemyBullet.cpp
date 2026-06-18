@@ -17,7 +17,8 @@ namespace
 	const int FIRE_SE_VOLUME = 70;
 }
 
-EnemyBullet::EnemyBullet(Transform& parent)
+EnemyBullet::EnemyBullet(
+	Transform& parent)
 	: parentTran_(parent)
 {
 	localPos_ = CommonUtility::VECTOR_ZERO;

@@ -1,3 +1,4 @@
+#include <random>
 #include "../Application.h"
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
@@ -32,12 +33,16 @@ MageEnemy::MageEnemy(Player& player) :
 	stepRotTime_ = 0.0f;
 	isSummoned_ = false;
 	bulletInterval_ = 0.0f;
+	movedPos_ = CommonUtility::VECTOR_ZERO;		
+	movePow_ = CommonUtility::VECTOR_ZERO;
+	moveDir_ = CommonUtility::VECTOR_ZERO;
 
 	//状態管理
 	stateChanges_.emplace(STATE::NONE, std::bind(&MageEnemy::ChangeStateNone, this));
 	stateChanges_.emplace(STATE::SUMMON, std::bind(&MageEnemy::ChangeStateSummon, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&MageEnemy::ChangeStateMove, this));
 	stateChanges_.emplace(STATE::ATTACK, std::bind(&MageEnemy::ChangeStateAttack, this));
+	stateChanges_.emplace(STATE::DAMAGE, std::bind(&MageEnemy::ChangeStateDamage, this));
 }
 
 MageEnemy::~MageEnemy(void)
@@ -79,6 +84,24 @@ void MageEnemy::Draw(void)
 {
 	//モデルの描画
 	renderer_->Draw();
+
+	switch (bullet_->GetState())
+	{
+	case EnemyBullet::STATE::SHOT:
+		DrawString(10, 100, L"SHOT", 0xFFFFFFFF);
+		break;
+
+	case EnemyBullet::STATE::REVERSE:
+		DrawString(10, 100, L"REVERSE", 0xFFFFFFFF);
+		break;
+
+	case EnemyBullet::STATE::DESTROY:
+		DrawString(10, 100, L"DESTROY", 0xFFFFFFFF);
+		break;
+
+	default:
+		break;
+	}
 }
 
 void MageEnemy::DrawUI(void)
@@ -240,20 +263,27 @@ void MageEnemy::ChangeStateAttack(void)
 			bullet_->AddCollider(c);
 		}
 	}
+	if (bullet_->GetState() == EnemyBullet::STATE::DESTROY)
+	{
+		bullet_->Reset(transform_);
+	}
 	VECTOR headPos = VAdd(transform_.pos, VScale(transform_.GetUp(), 100.0f));
 	VECTOR ofssetPos = VSub(headPos, transform_.pos);
 	bullet_->SetOffsetPos(ofssetPos);
 	bullet_->SetLocalPos(CommonUtility::VECTOR_ZERO);
 	bullet_->SetPos(headPos);
-	if(bullet_->GetState() == EnemyBullet::STATE::DESTROY)
-	{
-		bullet_->Reset(transform_);
-	}
 	//弾を発射可能状態にする
 	bullet_->SetStateReady();
 	//攻撃アニメーション再生(ループなし)
 	animationController_->Play((int)ANIM_TYPE::ATTACK, false);
 	stateUpdate_ = std::bind(&MageEnemy::UpdateAttack, this);
+}
+
+void MageEnemy::ChangeStateDamage(void)
+{
+	//ダメージアニメーション再生(ループなし)
+	animationController_->Play((int)ANIM_TYPE::DAMAGE, false);
+	stateUpdate_ = std::bind(&MageEnemy::UpdateDamage, this);
 }
 
 void MageEnemy::UpdateNone(void)
@@ -282,11 +312,29 @@ void MageEnemy::UpdateMove(void)
 		return;
 	}
 
+	//移動
+	Move();
+
 	//プレイヤーを見続ける
 	Rotate2Player();
 
 	//回転処理
 	Rotate();
+
+	//ダメージ判定
+	if (bullet_->GetState() == EnemyBullet::STATE::REVERSE &&
+		CommonUtility::IsHitSpheres(
+			bullet_->GetSphere().GetPos(),
+			bullet_->GetSphere().GetRadius(),
+			sphere_->GetPos(),
+			sphere_->GetRadius()))
+	{
+		hp_ -= 10.0f;
+		bullet_->SetStateDestroy();
+		ChangeState(STATE::DAMAGE);
+	}
+
+	bullet_->Update();
 }
 
 void MageEnemy::UpdateAttack(void)
@@ -295,7 +343,9 @@ void MageEnemy::UpdateAttack(void)
 	Shoot();
 
 	//攻撃アニメーションが終わったら移動状態へ遷移
-	if (animationController_->IsEnd())
+	if (animationController_->IsEnd() &&
+		(bullet_->GetState() == EnemyBullet::STATE::DESTROY ||
+		 bullet_->GetState() == EnemyBullet::STATE::REVERSE))
 	{
 		bulletInterval_ = 0.0f;
 		ChangeState(STATE::MOVE);
@@ -308,6 +358,38 @@ void MageEnemy::UpdateAttack(void)
 	Rotate();
 
 	bullet_->Update();
+}
+
+void MageEnemy::UpdateDamage(void)
+{
+	//ダメージアニメーションが終わったら移動状態へ遷移
+	if(animationController_->IsEnd())
+	{
+		ChangeState(STATE::MOVE);
+	}
+}
+
+void MageEnemy::Move(void)
+{
+	//移動方向変更の経過時間
+	changeDirStep_ += SceneManager::GetInstance().GetDeltaTime();
+	//一定時間経過したら移動方向をランダムで変更
+	const float changeInterval = 1.0f;
+	if (changeDirStep_ >= changeInterval)
+	{
+		changeDirStep_ = 0.0f;
+		std::vector<VECTOR> moveDir =
+		{ transform_.GetRight(), transform_.GetLeft() };
+		// 乱数生成器の初期化
+		std::random_device rd; //非決定的な乱数生成器
+		std::mt19937 engine(rd()); //メルセンヌ・ツイスタ法による乱数生成器
+		std::shuffle(moveDir.begin(), moveDir.end(), engine);
+		moveDir_ = moveDir[0];
+	}
+	movePow_ = VScale(moveDir_, 1.5f);
+	//移動処理
+	movedPos_ = VAdd(transform_.pos, movePow_);
+	transform_.pos = movedPos_;
 }
 
 void MageEnemy::Shoot(void)
@@ -329,7 +411,9 @@ void MageEnemy::Shoot(void)
 		//弾を発射
 		bullet_->SetStateShot();
 		//弾のターゲット座標をプレイヤーの位置に設定
-		bullet_->SetTargetPos(player_.GetTransform().pos);
+		VECTOR targetPos = player_.GetTransform().pos;
+		targetPos.y += 80.0f;
+		bullet_->SetTargetPos(targetPos);
 	}
 
 	if (bullet_->GetState() == EnemyBullet::STATE::DESTROY)return;
@@ -348,7 +432,7 @@ void MageEnemy::Shoot(void)
 		bullet_->SetTargetPos(targetPos);
 	}
 
-	//
+	//ダメージ判定
 	if (bullet_->GetState() == EnemyBullet::STATE::REVERSE &&
 		CommonUtility::IsHitSpheres(
 		bullet_->GetSphere().GetPos(),
@@ -358,7 +442,7 @@ void MageEnemy::Shoot(void)
 	{
 		hp_ -= 10.0f;
 		bullet_->SetStateDestroy();
-		animationController_->Play((int)ANIM_TYPE::DAMAGE, false);
+		ChangeState(STATE::DAMAGE);
 	}
 
 	if (CommonUtility::IsHitSphereCapsule(

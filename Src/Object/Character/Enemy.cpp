@@ -730,6 +730,7 @@ void Enemy::UpdateShotAll(void)
 	for (const std::unique_ptr<EnemyBullet>& bullet : bullets_)
 	{
 		if (CheckBulletDestroy())break;
+		//準備済みの弾をプレイヤーに向けて発射する
 		if (stateStep_ > bulletInterval &&
 			bullet->GetState() == EnemyBullet::STATE::READY)
 		{
@@ -737,7 +738,9 @@ void Enemy::UpdateShotAll(void)
 			bullet->SetStateShot();
 			bullet->SetTargetPos(player_.GetTransform().pos);
 		}
+		//プレイヤーを追い続ける
 		if (bullet->GetState() == EnemyBullet::STATE::SHOT)bullet->SetTargetPos(player_.GetTransform().pos);
+
 		bullet->Update();
 
 		//パリィ判定

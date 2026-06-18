@@ -72,7 +72,15 @@ private:
 	//HPバーUI
 	std::unique_ptr<HPBar> hpBar_;
 
-	float bulletInterval_;	//弾の発射間隔
+	//弾の発射間隔
+	float bulletInterval_;	
+	//方向転換用の時間管理変数
+	float changeDirStep_;
+
+	//移動関係
+	VECTOR movedPos_;		//移動後の位置
+	VECTOR movePow_;		//移動量
+	VECTOR moveDir_;		//移動方向
 
 	/// <summary>
 	/// 3Dモデル初期化
@@ -117,6 +125,10 @@ private:
 	/// 状態遷移：ATTACK
 	/// </summary>
 	void ChangeStateAttack(void);
+	/// <summary>
+	/// 状態遷移：DAMAGE
+	/// </summary>
+	void ChangeStateDamage(void);
 
 	//更新ステップ--------------------------------------------------------
 	/// <summary>
@@ -135,6 +147,15 @@ private:
 	/// 更新：ATTACK
 	/// </summary>
 	void UpdateAttack(void);
+	/// <summary>
+	/// 更新：DAMAGE
+	/// </summary>
+	void UpdateDamage(void);
+
+	/// <summary>
+	/// 移動
+	/// </summary>
+	void Move(void);
 
 	//攻撃---------------------------------------------------------
 

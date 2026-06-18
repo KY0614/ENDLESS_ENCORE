@@ -16,6 +16,7 @@ public:
 		SUMMON,	//¢Š«
 		MOVE,	//ˆÚ“®
 		ATTACK,	//UŒ‚
+		DAMAGE,	//ƒ_ƒ[ƒW	
 		DEAD,	//Ž€–S
 	};
 	/// <summary>

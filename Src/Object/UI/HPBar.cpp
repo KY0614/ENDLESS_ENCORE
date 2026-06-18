@@ -77,10 +77,12 @@ void HPBar::DrawBillboard(void)
 	
 	//描画座標を計算（ワールド座標→スクリーン座標）
 	VECTOR drawPos = VAdd(*billboardInfo_.pos_,billboardInfo_.ofsset_);
+	// カメラの視界外（画面外やカメラの後ろ）にある場合は描画しない
+	if (CheckCameraViewClip(drawPos) == true) return;
 	VECTOR pos = ConvWorldPosToScreenPos(drawPos);
 
 	//画像拡大率
-	float scale = 0.5f;
+	float scale = 0.5f;	//小さめに
 	scale *= SceneManager::GetInstance().GetScreenAspectRatio();	//画面比率に合わせる
 	//額縁
 	DrawRotaGraph(
