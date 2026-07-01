@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Audience.cpp" />
     <ClCompile Include="Src\Object\Bullet\BulletBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\HomingBullet.cpp" />
     <ClCompile Include="Src\Object\Character\SummonEnemy\MageEnemy.cpp" />
@@ -79,6 +80,7 @@
     <ClCompile Include="Src\Object\Bullet\StraightBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Audience.h" />
     <ClInclude Include="Src\Object\Bullet\BulletBase.h" />
     <ClInclude Include="Src\Object\Bullet\HomingBullet.h" />
     <ClInclude Include="Src\Object\Character\SummonEnemy\MageEnemy.h" />

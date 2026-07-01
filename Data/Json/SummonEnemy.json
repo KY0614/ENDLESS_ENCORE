@@ -9,13 +9,15 @@
     "Animation": 
     {
       "defaultSpeed":15.0,
+      "damageAnimSpeed":30.0,
       "Idle": "Ghost_Idle.mv1",
-      "Attack":"Fighter_Attack.mv1"
+      "Attack":"Fighter_Attack.mv1",
+      "Damage":""Damage.mv1"
     },
     "Parameter":
     {
-      "hp": 150.0,
-      "maxHp":150.0
+      "hp": 120.0,
+      "maxHp":120.0
     }
     },
     "Mage":{
@@ -28,13 +30,15 @@
     "Animation": 
     {
       "defaultSpeed":15.0,
+      "damageAnimSpeed":30.0,
       "Idle": "Ghost_Idle.mv1",
-      "Attack":"Mage_Attack.mv1"
+      "Attack":"Mage_Attack.mv1",
+      "Damage":""Damage.mv1"
     },
     "Parameter":
     {
-      "hp": 100.0,
-      "maxHp":100.0
+      "hp": 80.0,
+      "maxHp":80.0
     }
     }
 }
