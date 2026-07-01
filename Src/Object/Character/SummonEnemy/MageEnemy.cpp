@@ -34,6 +34,7 @@ MageEnemy::MageEnemy(Player& player) :
 	stepRotTime_ = 0.0f;
 	isSummoned_ = false;
 	bulletInterval_ = 0.0f;
+	changeDirStep_ = 0.0f;
 	movedPos_ = CommonUtility::VECTOR_ZERO;		
 	movePow_ = CommonUtility::VECTOR_ZERO;
 	moveDir_ = CommonUtility::VECTOR_ZERO;
@@ -86,23 +87,13 @@ void MageEnemy::Draw(void)
 	//モデルの描画
 	renderer_->Draw();
 
-	switch (bullet_->GetState())
-	{
-	case StraightBullet::STATE::SHOT:
-		DrawString(10, 100, L"SHOT", 0xFFFFFFFF);
-		break;
-
-	case StraightBullet::STATE::REVERSE:
-		DrawString(10, 100, L"REVERSE", 0xFFFFFFFF);
-		break;
-
-	case StraightBullet::STATE::DESTROY:
-		DrawString(10, 100, L"DESTROY", 0xFFFFFFFF);
-		break;
-
-	default:
-		break;
-	}
+	//弾のターゲット座標をプレイヤーの位置に設定
+	VECTOR targetPos = player_.GetTransform().pos;
+	targetPos.y += 80.0f;
+	VECTOR forward = player_.GetTransform().GetForward();
+	const float dis = 200.0f;
+	targetPos = VAdd(targetPos, VScale(forward, dis));
+	DrawSphere3D(targetPos, 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 }
 
 void MageEnemy::DrawUI(void)
@@ -412,6 +403,9 @@ void MageEnemy::Shoot(void)
 		//弾のターゲット座標をプレイヤーの位置に設定
 		VECTOR targetPos = player_.GetTransform().pos;
 		targetPos.y += 80.0f;
+		VECTOR forward = player_.GetTransform().GetForward();
+		const float dis = 200.0f;
+		targetPos = VAdd(targetPos, VScale(forward, dis));
 		bullet_->SetTargetPos(targetPos);
 		//弾を発射
 		bullet_->SetStateShot();
@@ -433,7 +427,7 @@ void MageEnemy::Shoot(void)
 		bullet_->SetTargetPos(targetPos);
 	}
 
-	//ダメージ判定
+	//ダメージ判定（反射された弾と敵の当たり判定）
 	if (bullet_->GetState() == StraightBullet::STATE::REVERSE &&
 		CommonUtility::IsHitSpheres(
 		bullet_->GetSphere().GetPos(),
@@ -446,6 +440,7 @@ void MageEnemy::Shoot(void)
 		ChangeState(STATE::DAMAGE);
 	}
 
+	//プレイヤーと弾の当たり判定
 	if (CommonUtility::IsHitSphereCapsule(
 		bullet_->GetSphere().GetPos(),
 		bullet_->GetSphere().GetRadius(),
