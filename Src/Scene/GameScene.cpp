@@ -360,10 +360,12 @@ void GameScene::ChangeStateSummon(void)
 	fighterEnemy_ = std::make_unique<FighterEnemy>(*player_);
 	fighterEnemy_->Init();
 	fighterEnemy_->AddCollider(stage_->GetTransform().collider);
+	fighterEnemy_->AddCollider(stage_->GetMistWallTransform().collider);
 	//–‚–@Œ^‚Ì“G
 	mageEnemy_ = std::make_unique<MageEnemy>(*player_);
 	mageEnemy_->Init();
 	mageEnemy_->AddCollider(stage_->GetTransform().collider);
+	mageEnemy_->AddCollider(stage_->GetMistWallTransform().collider);
 	//¢Š«ˆÊ’uİ’è
 	VECTOR summonPos = enemy_->GetTransform().pos;
 	//“G‚Ì‰º‚Öİ’è

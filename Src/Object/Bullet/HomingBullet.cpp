@@ -70,8 +70,7 @@ void HomingBullet::InitCollider(void)
 	//“–‚½‚è”»’è—p‚Ì‹…‚ğ¶¬
 	sphere_ = std::make_unique<Sphere>(transform_);
 	sphere_->SetLocalPos(CommonUtility::VECTOR_ZERO);
-	const float sphereRadius = 20.0f;
-	sphere_->SetRadius(sphereRadius);
+	sphere_->SetRadius(BULLET_RADIUS);
 }
 
 void HomingBullet::ChangeStateNone(void)

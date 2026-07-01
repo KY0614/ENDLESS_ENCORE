@@ -11,6 +11,7 @@
 #include "../../Common/Geometry/Capsule.h"
 #include "../../Common/Geometry/Sphere.h"
 #include "../../Bullet/EnemyBullet.h"
+#include "../../Bullet/StraightBullet.h"
 #include "../../UI/HPBar.h"
 #include "MageEnemy.h"
 
@@ -67,7 +68,7 @@ void MageEnemy::Init(void)
 	InitUI();
 
 	//弾の生成と初期化
-	bullet_ = std::make_unique<EnemyBullet>(transform_);
+	bullet_ = std::make_unique<StraightBullet>(transform_,player_.GetTransform().pos);
 	bullet_->Init();
 }
 
@@ -87,15 +88,15 @@ void MageEnemy::Draw(void)
 
 	switch (bullet_->GetState())
 	{
-	case EnemyBullet::STATE::SHOT:
+	case StraightBullet::STATE::SHOT:
 		DrawString(10, 100, L"SHOT", 0xFFFFFFFF);
 		break;
 
-	case EnemyBullet::STATE::REVERSE:
+	case StraightBullet::STATE::REVERSE:
 		DrawString(10, 100, L"REVERSE", 0xFFFFFFFF);
 		break;
 
-	case EnemyBullet::STATE::DESTROY:
+	case StraightBullet::STATE::DESTROY:
 		DrawString(10, 100, L"DESTROY", 0xFFFFFFFF);
 		break;
 
@@ -263,7 +264,7 @@ void MageEnemy::ChangeStateAttack(void)
 			bullet_->AddCollider(c);
 		}
 	}
-	if (bullet_->GetState() == EnemyBullet::STATE::DESTROY)
+	if (bullet_->GetState() == StraightBullet::STATE::DESTROY)
 	{
 		bullet_->Reset(transform_);
 	}
@@ -322,7 +323,7 @@ void MageEnemy::UpdateMove(void)
 	Rotate();
 
 	//ダメージ判定
-	if (bullet_->GetState() == EnemyBullet::STATE::REVERSE &&
+	if (bullet_->GetState() == StraightBullet::STATE::REVERSE &&
 		CommonUtility::IsHitSpheres(
 			bullet_->GetSphere().GetPos(),
 			bullet_->GetSphere().GetRadius(),
@@ -344,8 +345,8 @@ void MageEnemy::UpdateAttack(void)
 
 	//攻撃アニメーションが終わったら移動状態へ遷移
 	if (animationController_->IsEnd() &&
-		(bullet_->GetState() == EnemyBullet::STATE::DESTROY ||
-		 bullet_->GetState() == EnemyBullet::STATE::REVERSE))
+		(bullet_->GetState() == StraightBullet::STATE::DESTROY ||
+		 bullet_->GetState() == StraightBullet::STATE::REVERSE))
 	{
 		bulletInterval_ = 0.0f;
 		ChangeState(STATE::MOVE);
@@ -405,18 +406,18 @@ void MageEnemy::Shoot(void)
 	//}
 
 	if(bulletInterval_ >= interval &&
-		bullet_->GetState() == EnemyBullet::STATE::READY)
+		bullet_->GetState() == StraightBullet::STATE::READY)
 	{
 		bulletInterval_ = 0.0f;
-		//弾を発射
-		bullet_->SetStateShot();
 		//弾のターゲット座標をプレイヤーの位置に設定
 		VECTOR targetPos = player_.GetTransform().pos;
 		targetPos.y += 80.0f;
 		bullet_->SetTargetPos(targetPos);
+		//弾を発射
+		bullet_->SetStateShot();
 	}
 
-	if (bullet_->GetState() == EnemyBullet::STATE::DESTROY)return;
+	if (bullet_->GetState() == StraightBullet::STATE::DESTROY)return;
 
 	//パリィ
 	if (player_.GetIsParry() &&
@@ -433,7 +434,7 @@ void MageEnemy::Shoot(void)
 	}
 
 	//ダメージ判定
-	if (bullet_->GetState() == EnemyBullet::STATE::REVERSE &&
+	if (bullet_->GetState() == StraightBullet::STATE::REVERSE &&
 		CommonUtility::IsHitSpheres(
 		bullet_->GetSphere().GetPos(),
 		bullet_->GetSphere().GetRadius(),

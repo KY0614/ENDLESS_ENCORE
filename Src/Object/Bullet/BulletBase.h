@@ -15,6 +15,8 @@ public:
 	static constexpr float LIFE_TIME = 8.0f;
 	//SE‚Ì‰¹—Ê
 	static constexpr int FIRE_SE_VOLUME = 70;
+	//’e‚Ì“–‚½‚è”»’è—p‚Ì‹…‘Ì‚Ì”¼Œa
+	static constexpr float BULLET_RADIUS = 20.0f;
 
 	//ó‘Ô
 	enum class STATE

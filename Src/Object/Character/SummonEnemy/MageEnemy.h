@@ -7,7 +7,7 @@ class ModelMaterial;
 class AnimationController;
 class Capsule;
 class Sphere;
-class EnemyBullet;
+class StraightBullet;
 class HPBar;
 
 class MageEnemy : public SummonEnemyBase
@@ -67,7 +67,7 @@ private:
 	std::unique_ptr<Sphere> sphere_;
 
 	//íe
-	std::unique_ptr<EnemyBullet> bullet_;
+	std::unique_ptr<StraightBullet> bullet_;
 
 	//HPÉoÅ[UI
 	std::unique_ptr<HPBar> hpBar_;
