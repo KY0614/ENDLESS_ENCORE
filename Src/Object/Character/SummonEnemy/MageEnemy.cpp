@@ -86,14 +86,6 @@ void MageEnemy::Draw(void)
 {
 	//モデルの描画
 	renderer_->Draw();
-
-	//弾のターゲット座標をプレイヤーの位置に設定
-	VECTOR targetPos = player_.GetTransform().pos;
-	targetPos.y += 80.0f;
-	VECTOR forward = player_.GetTransform().GetForward();
-	const float dis = 200.0f;
-	targetPos = VAdd(targetPos, VScale(forward, dis));
-	DrawSphere3D(targetPos, 10.0f, 16, GetColor(255, 0, 0), GetColor(255, 0, 0), true);
 }
 
 void MageEnemy::DrawUI(void)
