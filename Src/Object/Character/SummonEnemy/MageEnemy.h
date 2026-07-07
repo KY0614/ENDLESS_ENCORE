@@ -106,7 +106,7 @@ private:
 	/// UIの初期化
 	/// </summary>
 	void InitUI(void)override;
-
+	void InitSound(void);
 	//状態遷移--------------------------------------------------------
 
 	/// <summary>
@@ -129,6 +129,10 @@ private:
 	/// 状態遷移：DAMAGE
 	/// </summary>
 	void ChangeStateDamage(void);
+	/// <summary>
+	/// 状態遷移：DEAD
+	/// </summary>
+	void ChangeStateDead(void);
 
 	//更新ステップ--------------------------------------------------------
 	/// <summary>
@@ -151,6 +155,10 @@ private:
 	/// 更新：DAMAGE
 	/// </summary>
 	void UpdateDamage(void);
+	/// <summary>
+	/// 更新：DEAD
+	/// </summary>
+	void UpdateDead(void);
 
 	/// <summary>
 	/// 移動

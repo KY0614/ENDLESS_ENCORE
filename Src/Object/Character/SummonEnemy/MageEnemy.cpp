@@ -3,6 +3,7 @@
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Manager/GameSystem/Camera.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/JsonManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
@@ -45,6 +46,7 @@ MageEnemy::MageEnemy(Player& player) :
 	stateChanges_.emplace(STATE::MOVE, std::bind(&MageEnemy::ChangeStateMove, this));
 	stateChanges_.emplace(STATE::ATTACK, std::bind(&MageEnemy::ChangeStateAttack, this));
 	stateChanges_.emplace(STATE::DAMAGE, std::bind(&MageEnemy::ChangeStateDamage, this));
+	stateChanges_.emplace(STATE::DEAD, std::bind(&MageEnemy::ChangeStateDead, this));
 }
 
 MageEnemy::~MageEnemy(void)
@@ -53,6 +55,7 @@ MageEnemy::~MageEnemy(void)
 
 void MageEnemy::Init(void)
 {
+	isAlive_ = true;
 	//3Dモデルの初期化
 	Init3DModel();
 
@@ -68,6 +71,8 @@ void MageEnemy::Init(void)
 	//UIの初期化
 	InitUI();
 
+	//サウンドの初期化
+	InitSound();
 	//弾の生成と初期化
 	bullet_ = std::make_unique<StraightBullet>(transform_,player_.GetTransform().pos);
 	bullet_->Init();
@@ -75,6 +80,12 @@ void MageEnemy::Init(void)
 
 void MageEnemy::Update(void)
 {
+	if (!isAlive_)return;
+	if(hp_ <= 0.0f && state_ != STATE::DEAD)
+	{
+		ChangeState(STATE::DEAD);
+	}
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -84,6 +95,7 @@ void MageEnemy::Update(void)
 
 void MageEnemy::Draw(void)
 {
+	if (!isAlive_)return;
 	//モデルの描画
 	renderer_->Draw();
 }
@@ -221,6 +233,14 @@ void MageEnemy::InitUI(void)
 	hpBar_->Init();
 }
 
+void MageEnemy::InitSound(void)
+{
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::DAMAGE, 70);
+}
+
 void MageEnemy::ChangeStateNone(void)
 {
 	stateUpdate_ = std::bind(&MageEnemy::UpdateNone, this);
@@ -267,7 +287,15 @@ void MageEnemy::ChangeStateDamage(void)
 {
 	//ダメージアニメーション再生(ループなし)
 	animationController_->Play((int)ANIM_TYPE::DAMAGE, false);
+	//ダメージ音再生
+	SoundManager::GetInstance().Play(SoundManager::SOUND::DAMAGE);
 	stateUpdate_ = std::bind(&MageEnemy::UpdateDamage, this);
+}
+
+void MageEnemy::ChangeStateDead(void)
+{
+	bullet_->SetStateDestroy();
+	stateUpdate_ = std::bind(&MageEnemy::UpdateDead, this);
 }
 
 void MageEnemy::UpdateNone(void)
@@ -297,7 +325,7 @@ void MageEnemy::UpdateMove(void)
 	}
 
 	//移動
-	Move();
+	//Move();
 
 	//プレイヤーを見続ける
 	Rotate2Player();
@@ -351,6 +379,11 @@ void MageEnemy::UpdateDamage(void)
 	{
 		ChangeState(STATE::MOVE);
 	}
+}
+
+void MageEnemy::UpdateDead(void)
+{
+	isAlive_ = false;
 }
 
 void MageEnemy::Move(void)

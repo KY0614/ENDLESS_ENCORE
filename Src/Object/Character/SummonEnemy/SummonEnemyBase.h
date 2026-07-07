@@ -59,6 +59,8 @@ public:
 	/// <returns>ture:Š®—¹@false:–¢Š®—¹</returns>
 	const bool GetIsSummoned(void) const { return isSummoned_; }
 
+	void Dead(void) { hp_ = 0.0f; }
+
 protected:
 
 	//ó‘ÔŠÇ—(ó‘Ô‘JˆÚ‰Šúˆ—)
@@ -87,6 +89,8 @@ protected:
 	//‘Ì—Í
 	float hp_;		//Œ»İ‘Ì—Í
 	float maxHp_;	//Å‘å‘Ì—Í
+
+	bool isAlive_;	//¶‘¶‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©
 
 	/// <summary>
 	/// 3Dƒ‚ƒfƒ‹‰Šú‰»

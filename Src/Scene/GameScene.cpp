@@ -382,7 +382,7 @@ void GameScene::ChangeStateSummon(void)
 
 void GameScene::ChangeStateLastBattle(void)
 {
-	//enemy_->ChangeState(Enemy::STATE::MOVE);
+	enemy_->ChangeState(Enemy::STATE::MOVE);
 	stateUpdate_ = std::bind(&GameScene::UpdateLastBattle, this);
 	stateDraw_ = std::bind(&GameScene::DrawLastBattle, this);
 }
@@ -640,9 +640,15 @@ void GameScene::UpdateLastBattle(void)
 	//ƒvƒŒƒCƒ„[‚Æ“G‚ÌƒJƒvƒZƒ‹‚É‚æ‚é‰Ÿ‚µo‚µ
 	CollisionCupsule();
 
+	if(enemy_->GetIsDead())
+	{
+		fighterEnemy_->Dead();	
+		mageEnemy_->Dead();
+	}
+
 	//ŠeƒIƒuƒWƒFƒNƒgXV
 	player_->Update();	//ƒvƒŒƒCƒ„[
-	//enemy_->Update();	//“G
+	enemy_->Update();	//“G
 	fighterEnemy_->Update();	//“G
 	mageEnemy_->Update();	//“G
 	stage_->Update();	//ƒXƒe[ƒW
@@ -655,7 +661,7 @@ void GameScene::DrawLastBattle(void)
 	//ƒvƒŒƒCƒ„[•`‰æ
 	player_->Draw();
 	//“G•`‰æ
-	//enemy_->Draw();
+	enemy_->Draw();
 	fighterEnemy_->Draw();	//‹ßÚŒ^‚Ì“G•`‰æ
 	mageEnemy_->Draw();		//‰“‹——£Œ^‚Ì“G•`‰æ
 
