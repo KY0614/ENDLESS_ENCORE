@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Character\EventScene\ClearPlayer.cpp" />
     <ClCompile Include="Src\Object\Audience.cpp" />
     <ClCompile Include="Src\Object\Bullet\BulletBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\HomingBullet.cpp" />
@@ -78,8 +79,10 @@
     <ClCompile Include="Src\Object\Tutorial.cpp" />
     <ClCompile Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.cpp" />
     <ClCompile Include="Src\Object\Bullet\StraightBullet.cpp" />
+    <ClCompile Include="Src\Manager\GameSystem\UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Character\EventScene\ClearPlayer.h" />
     <ClInclude Include="Src\Object\Audience.h" />
     <ClInclude Include="Src\Object\Bullet\BulletBase.h" />
     <ClInclude Include="Src\Object\Bullet\HomingBullet.h" />
@@ -188,6 +191,7 @@
     <ClInclude Include="Src\Object\Tutorial.h" />
     <ClInclude Include="Src\Object\Character\SummonEnemy\SummonEnemyBase.h" />
     <ClInclude Include="Src\Object\Bullet\StraightBullet.h" />
+    <ClInclude Include="Src\Manager\GameSystem\UIManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\PixelShader2DHeader.hlsli" />
