@@ -2,6 +2,7 @@
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/ModelMaterial.h"
 #include "../Manager/GameSystem/Camera.h"
+#include "../Manager/GameSystem/SoundManager.h"
 #include "../Manager/Generic/JsonManager.h"
 #include "../Manager/Generic/SceneManager.h"
 #include "../Manager/Generic/ResourceManager.h"
@@ -43,6 +44,7 @@ FighterEnemy::FighterEnemy(Player& player):
 	stateChanges_.emplace(STATE::SUMMON, std::bind(&FighterEnemy::ChangeStateSummon, this));
 	stateChanges_.emplace(STATE::MOVE, std::bind(&FighterEnemy::ChangeStateMove, this));
 	stateChanges_.emplace(STATE::ATTACK, std::bind(&FighterEnemy::ChangeStateAttack, this));
+	stateChanges_.emplace(STATE::DEAD, std::bind(&FighterEnemy::ChangeStateDead, this));
 }
 
 FighterEnemy::~FighterEnemy(void)
@@ -51,6 +53,7 @@ FighterEnemy::~FighterEnemy(void)
 
 void FighterEnemy::Init(void)
 {
+	isAlive_ = true;
 	//3Dモデルの初期化
 	Init3DModel();
 
@@ -65,10 +68,19 @@ void FighterEnemy::Init(void)
 
 	//UIの初期化
 	InitUI();
+
+	//サウンドの初期化
+	InitSound();
 }
 
 void FighterEnemy::Update(void)
 {
+	if (!isAlive_)return;
+	if (hp_ <= 0.0f && state_ != STATE::DEAD)
+	{
+		ChangeState(STATE::DEAD);
+	}
+
 	//更新ステップ
 	stateUpdate_();
 
@@ -90,12 +102,13 @@ void FighterEnemy::Update(void)
 
 void FighterEnemy::Draw(void)
 {
+	if (!isAlive_)return;
 	//モデルの描画
 	renderer_->Draw();
 
-	int col = Sphere::COLOR;
-	if (isAttack_)col = 0xFF0000;
-	sphere_->Draw(col,true);
+	//int col = Sphere::COLOR;
+	//if (isAttack_)col = 0xFF0000;
+	//sphere_->Draw(col,true);
 }
 
 void FighterEnemy::DrawUI(void)
@@ -231,6 +244,14 @@ void FighterEnemy::InitUI(void)
 	hpBar_->Init();
 }
 
+void FighterEnemy::InitSound(void)
+{
+	SoundManager& sound = SoundManager::GetInstance();
+	sound.Add(SoundManager::TYPE::SE, SoundManager::SOUND::DAMAGE,
+		ResourceManager::GetInstance().Load(ResourceManager::SRC::DAMAGE_SE).handleId_);
+	sound.AdjustVolume(SoundManager::SOUND::DAMAGE, 70);
+}
+
 void FighterEnemy::ChangeStateNone(void)
 {
 	stateUpdate_ = std::bind(&FighterEnemy::UpdateNone, this);
@@ -254,6 +275,11 @@ void FighterEnemy::ChangeStateAttack(void)
 	isAttack_ = false;
 	isHitAttack_ = false;
 	stateUpdate_ = std::bind(&FighterEnemy::UpdateAttack, this);
+}
+
+void FighterEnemy::ChangeStateDead(void)
+{
+	stateUpdate_ = std::bind(&FighterEnemy::UpdateDead, this);
 }
 
 void FighterEnemy::UpdateNone(void)
@@ -320,6 +346,8 @@ void FighterEnemy::UpdateAttack(void)
 		))
 		{
 			hp_ -= 10.0f;
+			//ダメージ音再生
+			SoundManager::GetInstance().Play(SoundManager::SOUND::DAMAGE);
 			animationController_->Play((int)ANIM_TYPE::DAMAGE,false);
 			return;
 		}
@@ -351,6 +379,11 @@ void FighterEnemy::UpdateAttack(void)
 	//回転処理
 	Rotate();
 
+}
+
+void FighterEnemy::UpdateDead(void)
+{
+	isAlive_ = false;
 }
 
 void FighterEnemy::FollowMove(void)
