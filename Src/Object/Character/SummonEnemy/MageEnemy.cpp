@@ -325,7 +325,7 @@ void MageEnemy::UpdateMove(void)
 	}
 
 	//移動
-	//Move();
+	Move();
 
 	//プレイヤーを見続ける
 	Rotate2Player();
@@ -446,10 +446,10 @@ void MageEnemy::Shoot(void)
 			player_.GetSphere().GetPos(),
 			player_.GetSphere().GetRadius()))
 	{
-		bullet_->SetStateReverse();
 		VECTOR targetPos = transform_.pos;
 		targetPos.y += 80.0f;
 		bullet_->SetTargetPos(targetPos);
+		bullet_->SetStateReverse();
 	}
 
 	//ダメージ判定（反射された弾と敵の当たり判定）

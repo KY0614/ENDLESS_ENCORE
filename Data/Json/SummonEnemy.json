@@ -12,7 +12,7 @@
       "damageAnimSpeed":30.0,
       "Idle": "Ghost_Idle.mv1",
       "Attack":"Fighter_Attack.mv1",
-      "Damage":""Damage.mv1"
+      "Damage":"Damage.mv1"
     },
     "Parameter":
     {
@@ -33,7 +33,7 @@
       "damageAnimSpeed":30.0,
       "Idle": "Ghost_Idle.mv1",
       "Attack":"Mage_Attack.mv1",
-      "Damage":""Damage.mv1"
+      "Damage":"Damage.mv1"
     },
     "Parameter":
     {

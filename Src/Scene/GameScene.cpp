@@ -648,7 +648,7 @@ void GameScene::UpdateLastBattle(void)
 
 	//ŠeƒIƒuƒWƒFƒNƒgXV
 	player_->Update();	//ƒvƒŒƒCƒ„[
-	enemy_->Update();	//“G
+	//enemy_->Update();	//“G
 	fighterEnemy_->Update();	//“G
 	mageEnemy_->Update();	//“G
 	stage_->Update();	//ƒXƒe[ƒW
@@ -661,7 +661,7 @@ void GameScene::DrawLastBattle(void)
 	//ƒvƒŒƒCƒ„[•`‰æ
 	player_->Draw();
 	//“G•`‰æ
-	enemy_->Draw();
+	//enemy_->Draw();
 	fighterEnemy_->Draw();	//‹ßÚŒ^‚Ì“G•`‰æ
 	mageEnemy_->Draw();		//‰“‹——£Œ^‚Ì“G•`‰æ
 

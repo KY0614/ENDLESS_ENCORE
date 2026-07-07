@@ -52,6 +52,9 @@ void StraightBullet::Update(void)
 	//更新ステップ
 	stateUpdate_();
 
+	//当たり判定処理
+	CollisionSphere();
+
 	transform_.Update();
 }
 
@@ -115,6 +118,8 @@ void StraightBullet::ChangeStateReverse(void)
 		effectColorB,
 		effectAlpha
 	);
+	//移動方向
+	moveDir_ = VNorm(VSub(targetPos_, transform_.pos));
 	stateUpdate_ = std::bind(&StraightBullet::UpdateReverse, this);
 }
 
@@ -154,9 +159,6 @@ void StraightBullet::UpdateShot(void)
 
 	//弾の移動処理
 	Move();
-
-	//当たり判定処理
-	CollisionSphere();
 }
 
 void StraightBullet::UpdateReverse(void)
@@ -165,7 +167,7 @@ void StraightBullet::UpdateReverse(void)
 	EffectFirePositionSync();
 
 	//弾の移動処理
-	Move();
+	ReserveMove();
 }
 
 void StraightBullet::UpdateDestroy(void)
@@ -188,21 +190,14 @@ void StraightBullet::Move(void)
 
 void StraightBullet::ReserveMove(void)
 {	
-	//前方向を取得
-	VECTOR forward = VNorm(VSub(parentTran_.pos, transform_.pos));
-
-	//下方向の取得
-	VECTOR downward = transform_.GetDown();
-	//横ベクトル
-	VECTOR widthMovePow = VScale(forward, speed_);
+	//移動方向
+	VECTOR moveDir = VNorm(VSub(parentTran_.pos,transform_.pos));
+	//移動量
+	VECTOR movePow = VScale(moveDir, speed_);
 
 	//移動
-	//前方
-	transform_.pos =
-		VAdd(transform_.pos, widthMovePow);
+	VECTOR movedPos =
+		VAdd(transform_.pos, movePow);
 
-	////重力加速度
-	//const float GRAVITY_POW = 0.0f;
-	//transform_.pos =
-	//	VAdd(transform_.pos, VScale(downward, GRAVITY_POW));
+	transform_.pos = movedPos;
 }
