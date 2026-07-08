@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Scene\ClearScene.cpp" />
     <ClCompile Include="Src\Object\Character\EventScene\ClearPlayer.cpp" />
     <ClCompile Include="Src\Object\Audience.cpp" />
     <ClCompile Include="Src\Object\Bullet\BulletBase.cpp" />
@@ -82,6 +83,7 @@
     <ClCompile Include="Src\Manager\GameSystem\UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Scene\ClearScene.h" />
     <ClInclude Include="Src\Object\Character\EventScene\ClearPlayer.h" />
     <ClInclude Include="Src\Object\Audience.h" />
     <ClInclude Include="Src\Object\Bullet\BulletBase.h" />

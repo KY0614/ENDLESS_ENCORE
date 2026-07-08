@@ -8,6 +8,7 @@
 #include "../Manager/Generic/ResourceManager.h"
 #include "../Manager/GameSystem/SoundManager.h"
 #include "EncountScene.h"
+#include "ClearScene.h"
 
 namespace
 {

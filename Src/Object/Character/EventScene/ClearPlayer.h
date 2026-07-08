@@ -85,9 +85,5 @@ private:
 //4プレイヤーが振り向く
 //５カメラが引いていくと同時にカーテン（幕）が閉じる
 //フェードアウト
-//void Init(void);
-//void Update(void);
-//void Draw(void);
-//void Release(void);
 #pragma endregion
 
